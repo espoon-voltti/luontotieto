@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: 2023-2024 City of Espoo
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+version: '3.5'
+
+services:
+  frontend:
+    image: 095341522062.dkr.ecr.eu-north-1.amazonaws.com/luontotieto/frontend:${TAG:-master}
+    build:
+      context: ../frontend/
+    ports:
+      - "8765:80"
+    environment:
+      RESOLVER: "127.0.0.11 ipv6=off"
+      API_GATEWAY_URL: http://api-gateway:8888
+      HTTP_SCHEME: http
+
+  service:
+    image: 095341522062.dkr.ecr.eu-north-1.amazonaws.com/luontotieto/service:${TAG:-master}
+    build:
+      context: ../service/
+    ports:
+      - "9000:9000"
+    environment:
+      JAVA_OPTS: -server -Djava.security.egd=file:/dev/./urandom -Xms1024m -Xss512k -Xmx1024m -XX:TieredStopAtLevel=1
+      SERVER_PORT: 9000
+      SPRING_DATASOURCE_URL: jdbc:postgresql://luontotieto-db:5432/luontotieto
+      SPRING_DATASOURCE_USERNAME: luontotieto
+      SPRING_DATASOURCE_PASSWORD: postgres
+      APP_JWT_PUBLIC_KEYS_URL: classpath:local-development/jwks.json
+
+  api-gateway:
+    image: 095341522062.dkr.ecr.eu-north-1.amazonaws.com/luontotieto/api-gateway:${TAG:-master}
+    build:
+      context: ../api-gateway/
+    ports:
+      - "8888:8888"
+    environment:
+      NODE_ENV: local
+      HTTP_PORT: 8888
+      SERVICE_URL: http://service:9000
+      JWT_KID: "luontotieto-api-gateway"
+      JWT_PRIVATE_KEY: "config/test-cert/jwt_private_key.pem"
+      AD_MOCK: "false"
+      DEV_LOGIN: "false"
+      AD_SAML_CALLBACK_URL: http://localhost:8765/api/auth/saml/login/callback
+      AD_SAML_ENTRYPOINT_URL: https://voltti-idp-azuread.staging.espoon-voltti.fi/idp/profile/SAML2/Redirect/SSO
+      AD_SAML_LOGOUT_URL: https://voltti-idp-azuread.staging.espoon-voltti.fi/idp/profile/SAML2/Redirect/SLO
+      AD_SAML_ISSUER: http://localhost:8765/api/auth/saml/
+      AD_SAML_PUBLIC_CERT: /app/config/certificates/idp.staging.espoon-voltti.fi.pem
+      AD_SAML_PRIVATE_CERT: /app/config/certificates/private-key.pem
+      AD_SAML_EXTERNAL_ID_PREFIX: espoo-ad
+      AD_NAME_ID_FORMAT: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
+      COOKIE_SECRET: cookie_secret
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DISABLE_SECURITY: "true"

@@ -1,0 +1,214 @@
+# SPDX-FileCopyrightText: 2023-2024 City of Espoo
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+# Hide version information
+server_tokens off;
+
+<% if ENV.key?("RESOLVER") %>
+resolver <%= ENV["RESOLVER"] %>;
+<% else %>
+# DNS resolver in a AWS VPC: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-dns.html
+resolver 169.254.169.253;
+<% end %>
+
+# Helper for check content-type for static file error handler.
+# Should always be ~text/html.
+map $content_type $content_type_not_ok {
+  default "0";
+  ~text/html "1";
+}
+
+# Helper for cache expiration.
+# Never cache "text/html" as it should always contains references to
+# the latest resources (that can be cached, with their hashed names).
+map $sent_http_content_type $expires {
+  default                    off;
+  text/html                  -1;
+  text/css                   max;
+  application/javascript     max;
+  application/woff2          max;
+  ~image/                    max;
+}
+
+# Extra Cache-Control header values based on response content type.
+# Enhances expires directive's functionality with "no-store" for "text/html".
+map $sent_http_content_type $cache_control {
+  default   '';
+  text/html 'no-store';
+}
+
+# Map nginx's request_time which is presented in seconds with a millisecond precision ("10.3 format")
+# to milliseconds.
+# 0.000 is a special case for static responses (e.g. health checks)
+# Strip all prefixing zeroes.
+#
+# TODO: This should be done externally from nginx but currently we feed logs directly to Elasticsearch via Functionbeat,
+# so there's nowhere to format logs before ES.
+map $request_time $request_time_ms {
+  "0.000"       0;
+  ~^0\.(0*)(.*) $2;
+  ~(.*)\.(.*)   $1$2;
+}
+
+real_ip_header X-Forwarded-For;
+set_real_ip_from 0.0.0.0/0;
+
+# Global rate limiting
+
+# Set $limit to 0 if client's IP address matches whitelisted CIDR(s).
+geo $limit {
+  default 1;
+<% (ENV["RATE_LIMIT_CIDR_WHITELIST"] || "").split(";").each do |cidr| %>
+  <%= cidr %> 0;
+<% end %>
+}
+
+# If $limit matched to a whitelisted CIDR,
+# $limit_key will be set to and empty string,
+# otherwise $limit_key key will be the client's IP address in binary format.
+map $limit $limit_key {
+  0 "";
+  1 $binary_remote_addr;
+}
+
+# When $limit_key is an empty string (whitelisted CIDR), the first limit_req_zone
+# WON'T be applied. That means all whitelisted CIDR(s) are handled by the second
+# limit_req_zone with a higher limit, as $binary_remote_addr is always defined.
+# The more restrictive limit is applied, so even though all clients will match
+# the second limit_req_zone, the first will be applied to non-whitelisted clients.
+limit_req_zone $limit_key zone=req_zone:10m rate=10r/s;
+limit_req_zone $binary_remote_addr zone=req_zone_wl:1m rate=100r/s;
+
+# Logging
+
+# As nginx does not currently have a built-in variable for outputting ISO 8601
+# timestamps with millisecond resolution, generate it manually from
+# $time_iso8601 and $msec (which is in ms resolution but as seconds).
+#
+# This is less performant than the alternative of having an external tool like
+# Functionbeat or Logstash ingest the timestamps in another format but
+# shouldn't matter in this context + has the benefit of being human-readable
+# in its raw format.
+#
+# Source: https://thatsamguy.com/nginx-iso8601-time-format/
+map $time_iso8601 $time_iso8601_p1 {
+  ~([^+]+) $1;
+}
+map $time_iso8601 $time_iso8601_p2 {
+  ~\+([0-9:]+)$ $1;
+}
+map $msec $millisec {
+  ~\.([0-9]+)$ $1;
+}
+
+# Output logs in accordance to voltti's log schema (type app-requests-received).
+# NOTE: userIdHash cannot easily be computed here, so left empty.
+log_format json_access escape=json
+  '{'
+    '"@timestamp":"$time_iso8601_p1.$millisec+$time_iso8601_p2",'
+    '"appBuild":"<%= ENV["APP_BUILD"] %>",'
+    '"appCommit":"<%= ENV["APP_COMMIT"] %>",'
+    '"appName":"luontotieto-proxy",'
+    '"clientIp":"$remote_addr",'
+    '"contentLength":$bytes_sent,'
+    '"env":"<%= ENV["NGINX_ENV"] %>",'
+    '"hostIp":"<%= ENV["HOST_IP"] %>",'
+    '"httpMethod":"$request_method",'
+    '"path":"$uri",'
+    '"queryString":"$query_string",'
+    '"responseTime":$request_time_ms,'
+    '"spanId":"$request_id",'
+    '"statusCode":"$status",'
+    '"traceId":"$request_id",'
+    '"type":"app-requests-received",'
+    '"userIdHash":"",'
+    '"version":1'
+  '}';
+
+server {
+  # Basic configs
+  root /static;
+  index index.html;
+
+  listen 80;
+  server_name _;
+  port_in_redirect off;
+
+  <% if ENV.key?("BASIC_AUTH_ENABLED") && ENV["BASIC_AUTH_ENABLED"] == "true" %>
+  auth_basic            "Log in";
+  auth_basic_user_file  "/etc/nginx/.htpasswd";
+  <% end %>
+
+  <% if ENV.key?("LIMIT_CONFIGURATION") && ENV["LIMIT_CONFIGURATION"] != "" %>
+  <%= ENV["LIMIT_CONFIGURATION"] %>
+  <% end %>
+
+  # Variables
+
+  set $apiGatewayURL "<%= ENV["API_GATEWAY_URL"] %>";
+  set $httpScheme "<%= ENV["HTTP_SCHEME"] || "https" %>";
+
+  access_log /var/log/nginx/access.log json_access;
+
+  # Security
+
+  # Add response headers. N.B. Never use add_header directive in
+  # a location bloc as it overrides the parent headers
+  add_header Strict-Transport-Security 'max-age=31536000; includeSubdomains; preload';
+  add_header X-Content-Type-Options nosniff;
+  add_header X-XSS-Protection '1; mode=block';
+  add_header X-DNS-Prefetch-Control off;
+  add_header Report-To '{"group","csp-endpoint","max_age":31536000,"endpoints":[{"url":"$httpScheme://$host/api/csp"}]}';
+
+  <% if ENV.key?("HTTP_SCHEME") && ENV["HTTP_SCHEME"] == "http" %>
+  set $contentSecurityPolicyBase "block-all-mixed-content; default-src 'self'; font-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' https://o318158.ingest.sentry.io; object-src 'none'; report-uri /api/csp; report-to csp-endpoint";
+  <% else %>
+  set $contentSecurityPolicyBase "block-all-mixed-content; upgrade-insecure-requests; default-src 'self'; font-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' https://o318158.ingest.sentry.io; object-src 'none'; report-uri /api/csp; report-to csp-endpoint";
+  <% end %>
+
+  add_header Content-Security-Policy "${contentSecurityPolicyBase}; frame-ancestors 'none'; form-action 'self';";
+
+  # Tracing
+  # Return the request ID to the client to make tracing of test requests very easy
+  add_header X-Request-ID $request_id always;
+
+  # Caching
+
+  # Sets Expires and Cache-Control headers
+  expires       $expires;
+  # Add additional Cache-Control headers
+  add_header    Cache-Control $cache_control;
+
+  gzip          on;
+  gzip_vary     on;
+  gzip_types    text/plain text/css application/javascript text/xml application/xml image/svg+xml;
+
+  limit_req         zone=req_zone burst=20 nodelay;
+  limit_req         zone=req_zone_wl burst=50 nodelay;
+  limit_req_status  429;
+
+  location /health {
+    auth_basic off;
+    access_log off;
+    return     200;
+  }
+
+  location /api {
+    include     proxy_params;
+    proxy_pass  $apiGatewayURL;
+  }
+
+  location / {
+    try_files $uri $uri/ @indexPage;
+  }
+
+  location @indexPage {
+    if ($content_type_not_ok) {
+      return 404;
+    }
+
+    rewrite     /(.*) /index.html break;
+  }
+
+}
