@@ -4,7 +4,13 @@
 
 import React, { createContext, useMemo } from 'react'
 
-import { EmployeeUser } from '../employees/api'
+export interface EmployeeUser {
+  id: string
+  externalId: string
+  firstName: string
+  lastName: string
+  email?: string | null
+}
 
 export interface UserState {
   user: EmployeeUser | null

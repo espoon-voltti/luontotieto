@@ -5,8 +5,9 @@
 import { useEffect, useState } from 'react'
 
 import { apiClient } from '../api-client'
-import { EmployeeUser } from '../employees/api'
 import { JsonOf } from '../shared/api-utils'
+
+import { EmployeeUser } from './UserContext'
 
 export interface AuthStatus {
   loggedIn: boolean

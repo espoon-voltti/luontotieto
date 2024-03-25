@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023-2024 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
-
+import { FrontPage } from 'luontotieto/FrontPage'
 import React, { Fragment } from 'react'
 import { Navigate, createBrowserRouter, Outlet } from 'react-router-dom'
 import styled from 'styled-components'
@@ -13,7 +13,6 @@ import { UserHeader } from './auth/UserHeader'
 import { useAuthStatus } from './auth/auth-status'
 import { FlexRowWithGaps } from './shared/layout'
 import { H1 } from './shared/typography'
-import { FrontPage } from 'luontotieto/FrontPage'
 
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
