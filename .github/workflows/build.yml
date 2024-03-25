@@ -1,0 +1,53 @@
+# SPDX-FileCopyrightText: 2023-2024 City of Espoo
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+name: Build
+on:
+  - push
+
+env:
+  AWS_REGION: eu-north-1
+  ECR_REGISTRY: 767398123997.dkr.ecr.eu-north-1.amazonaws.com
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  lint-shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: espoon-voltti/voltti-actions/shellcheck@v1
+
+  dockerize:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: luontotieto/etl
+            path: etl
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        uses: espoon-voltti/voltti-actions/docker-build-push@master
+        id: build
+        with:
+          path: ${{ matrix.path }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          registry: ${{ env.ECR_REGISTRY }}
+          name: ${{ matrix.name }}
+          build-args: |
+            build=${{ github.run_number }}
+            commit=${{ github.sha }}
