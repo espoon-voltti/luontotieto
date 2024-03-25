@@ -1,0 +1,6 @@
+*
+!*.kts
+!db/
+!gradle/
+!gradlew
+!migrate.sh

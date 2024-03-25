@@ -40,6 +40,8 @@ services:
 
   etl:
     build: ../etl
+    restart: on-failure
+    #command: "--wait"
     environment:
       POSTGRES_URL: jdbc:postgresql://paikkatieto-db:5432/paikkatietodb
       POSTGRES_USER: paikkatietodb

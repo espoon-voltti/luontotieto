@@ -9,4 +9,4 @@ COPY ./gradlew ./build.gradle.kts
 COPY . .
 RUN ./gradlew build
 
-ENTRYPOINT ["bash", "migrate.sh"]
+ENTRYPOINT ["./migrate.sh"]
