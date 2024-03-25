@@ -6,9 +6,7 @@ SPDX-License-Identifier: LGPL-2.1-or-later
 
 # luontotieto
 
-[![REUSE status](https://api.reuse.software/badge/github.com/espoon-voltti/luontotieto)](https://api.reuse.software/info/github.com/espoon-voltti/luontotieto)
-
-A tool for tracking the monitoring and guidance cases related to compulsory education.
+A tool for making nature knowledge reports.
 
 ## Technical overview
 
