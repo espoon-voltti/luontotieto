@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2023-2024 City of Espoo
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+version: '3.5'
+
+services:
+  paikkatieto-db:
+    image: postgis/postgis:16-3.4-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: paikkatietodb
+      POSTGRES_USER: paikkatietodb
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: "exit 0"
+
+  etl:
+    build: ../etl
+    environment:
+      POSTGRES_URL: jdbc:postgresql://paikkatieto-db:5432/paikkatietodb
+      POSTGRES_USER: paikkatietodb
+      POSTGRES_PASSWORD: postgres
+    depends_on:
+      paikkatieto-db:
+        condition: service_healthy
