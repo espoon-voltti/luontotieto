@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2023-2024 City of Espoo
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+
 plugins {
     id("org.flywaydb.flyway") version "10.8.1"
 }
