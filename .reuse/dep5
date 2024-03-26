@@ -1,0 +1,81 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: oppivelvollisuus
+Source: https://github.com/espoon-voltti/oppivelvollisuus
+
+Files: api-gateway/.yarn/*
+Copyright: 2023-present Yarn Contributors
+Comment: Directory may also include code with other licenses and other copyright holders but those are clearly identified
+  in the source code with prefixed comments. Only the not-explicitly licensed portions are licensed with information
+  described here.
+License: BSD-2-Clause
+
+Files: api-gateway/config/certificates/*
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: api-gateway/config/test-cert/*
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: frontend/.yarn/*
+Copyright: 2023-present Yarn Contributors
+Comment: Directory also includes code with other licenses and other copyright holders but those are clearly identified
+  in the source code with prefixed comments. Only the not-explicitly licensed portions are licensed with information
+  described here.
+License: BSD-2-Clause
+
+Files: **/src/main/resources/db/migration/*
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: */.nvmrc
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: *.yarnrc.yml
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: */*.cert
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: */*.pem
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: */jwks.json
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: */package.json
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: */tsconfig*.json
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: */tslint.json
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: */yarn.lock
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: */gradlew*
+Copyright: 2023-2024 The original author or authors <info@gradle.com>
+License: Apache-2.0
+
+Files: */gradle/wrapper/*
+Copyright: 2023-2024 The original author or authors <info@gradle.com>
+License: Apache-2.0
+
+Files: docs/*.drawio
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: docs/*.png
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
