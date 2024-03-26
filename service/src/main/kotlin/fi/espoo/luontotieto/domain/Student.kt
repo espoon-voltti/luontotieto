@@ -5,17 +5,12 @@
 package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.NotFound
-import fi.espoo.luontotieto.common.UserBasics
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
-import org.jdbi.v3.core.mapper.Nested
-import org.jdbi.v3.core.mapper.PropagateNull
-import org.jdbi.v3.core.statement.SqlStatements
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
-import kotlin.math.max
 
 data class StudentInput(
     val firstName: String,

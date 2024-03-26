@@ -4,30 +4,17 @@
 
 package fi.espoo.luontotieto
 
-import fi.espoo.luontotieto.common.NotFound
-import fi.espoo.luontotieto.common.UserBasics
-import fi.espoo.luontotieto.common.isUniqueConstraintViolation
 import fi.espoo.luontotieto.domain.AppController
 import fi.espoo.luontotieto.domain.Student
 import fi.espoo.luontotieto.domain.StudentInput
-
-import minimalStudentAndCaseTestInput
-import minimalStudentTestInput
-import org.jdbi.v3.core.statement.UnableToExecuteStatementException
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import testUser
-import testUserName
-import java.time.LocalDate
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class StudentTests : FullApplicationTest() {
     @Autowired
     lateinit var controller: AppController
-
 
     @Test
     fun `create student with all data and fetch`() {
@@ -53,6 +40,5 @@ class StudentTests : FullApplicationTest() {
             ),
             studentResponse.student
         )
-
     }
 }

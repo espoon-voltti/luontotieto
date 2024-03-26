@@ -4,23 +4,17 @@
 
 package fi.espoo.luontotieto.domain
 
-import fi.espoo.luontotieto.common.AppUser
-import fi.espoo.luontotieto.common.getAppUsers
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.audit
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDate
 import java.util.UUID
 
 @RestController
@@ -70,6 +64,4 @@ class AppController {
             )
         }
     }
-
-
 }
