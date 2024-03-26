@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "node16",
+    "moduleResolution": "node16",
+    "noEmit": false,
+    "noEmitOnError": true,
+    "outDir": "dist",
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2019"
+  },
+  "exclude": [
+    ".git",
+    "node_modules",
+    "dist"
+  ]
+}

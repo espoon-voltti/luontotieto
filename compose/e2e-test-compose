@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# SPDX-FileCopyrightText: 2023-2024 City of Espoo
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+set -euo pipefail
+
+COMPOSE="${COMPOSE:-docker compose}"
+
+if [ "${BUILD:-true}" = "true" ] && ( [ "$1" = "up" ] || [ "$1" = "run" ] ); then
+    $COMPOSE -f docker-compose.yml -f docker-compose.e2e-test.yml build --parallel
+fi
+
+$COMPOSE -f docker-compose.yml -f docker-compose.e2e-test.yml $@

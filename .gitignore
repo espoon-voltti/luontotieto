@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
+.DS_Store
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2023-2024 City of Espoo
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+version: '3.5'
+
+services:
+  service-tests:
+    image: 095341522062.dkr.ecr.eu-north-1.amazonaws.com/luontotieto/service-builder:${TAG:-master}
+    build:
+      context: ../service/
+      target: builder
+    ports:
+      - "8080:8080"
+    environment:
+      JAVA_OPTS: -server -Djava.security.egd=file:/dev/./urandom -Xms1024m -Xss512k -Xmx1024m -XX:TieredStopAtLevel=1
+      SPRING_DATASOURCE_URL: jdbc:postgresql://luontotieto-db:5432/luontotieto
+    entrypoint: ./gradlew test
+    depends_on:
+      - luontotieto-db

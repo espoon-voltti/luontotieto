@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: 2023-2024 City of Espoo
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+[*.{kt,kts}]
+ktlint_standard_trailing-comma-on-call-site = disabled
+ktlint_standard_trailing-comma-on-declaration-site = disabled
