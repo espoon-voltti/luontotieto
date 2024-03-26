@@ -1,0 +1,113 @@
+# SPDX-FileCopyrightText: 2023-2024 City of Espoo
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+name: Build
+on:
+  - push
+
+env:
+  AWS_REGION: eu-north-1
+  ECR_REGISTRY: 767398123997.dkr.ecr.eu-north-1.amazonaws.com
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  lint-shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: espoon-voltti/voltti-actions/shellcheck@v1
+
+  check-licenses:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reuse Compliance Check
+        uses: fsfe/reuse-action@v3
+
+  dockerize:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: luontotieto/etl
+            path: etl
+          - name: luontotieto/service
+            path: service
+          - name: luontotieto/frontend
+            path: frontend
+          - name: luontotieto/api-gateway
+            path: api-gateway
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        uses: espoon-voltti/voltti-actions/docker-build-push@master
+        id: build
+        with:
+          path: ${{ matrix.path }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          registry: ${{ env.ECR_REGISTRY }}
+          name: ${{ matrix.name }}
+          build-args: |
+            build=${{ github.run_number }}
+            commit=${{ github.sha }}
+
+  deploy:
+    # if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    needs:
+      - dockerize
+    strategy:
+      fail-fast: false
+      matrix:
+        environment:
+          - staging
+          # - prod
+    environment:
+      name: ${{ matrix.environment }}
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-duration-seconds: 1200
+
+      - name: Retag
+        run: |
+          for repository in etl service frontend api-gateway; do
+            MANIFEST=$(aws ecr batch-get-image --repository-name "luontotieto/$repository" --image-ids imageTag="${{ github.event.pull_request.head.sha || github.sha }}" --output json | jq --raw-output --join-output '.images[0].imageManifest')
+            aws ecr put-image --repository-name "luontotieto/$repository" --image-tag "env-${{ matrix.environment }}" --image-manifest "$MANIFEST"
+          done
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ENVIRONMENT }}
+          role-duration-seconds: 1200
+          unset-current-credentials: true
+
+      - name: Deploy
+        run: |
+          aws ecs update-service \
+            --cluster "luontotieto-${{ matrix.environment }}" \
+            --service "luontotieto-${{ matrix.environment }}" \
+            --force-new-deployment
+          aws ecs wait services-stable \
+            --cluster "luontotieto-${{ matrix.environment }}" \
+            --services "luontotieto-${{ matrix.environment }}"
