@@ -4,6 +4,91 @@
 
 version: 2
 updates:
+  - package-ecosystem: docker
+    directory: "/service"
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: "/etl"
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: "/api-gateway"
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: "/frontend"
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: "/frontend"
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    groups:
+      babel:
+        patterns:
+          - "@babel/*"
+      fontawesome:
+        patterns:
+          - "@fortawesome/*"
+      jest:
+        patterns:
+          - "@types/jest"
+          - "jest*"
+          - "ts-jest"
+        exclude-patterns:
+          - "jest-junit"
+      lint:
+        patterns:
+          - "@typescript-eslint/*"
+          - "eslint*"
+          - "prettier"
+      playwright:
+        patterns:
+          - "@playwright/*"
+          - "playwright"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      sentry:
+        patterns:
+          - "@sentry/*"
+      typescript:
+        patterns:
+          - "tslib"
+          - "typescript"
+  - package-ecosystem: npm
+    directory: "/api-gateway"
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    groups:
+      jest:
+        patterns:
+          - "@types/jest"
+          - "jest*"
+          - "ts-jest"
+        exclude-patterns:
+          - "jest-junit"
+      lint:
+        patterns:
+          - "@typescript-eslint/*"
+          - "eslint*"
+          - "prettier"
+      node-saml:
+        patterns:
+          - "@node-saml/*"
+      testing-library:
+        patterns:
+          - "@testing-library/*"
   - package-ecosystem: gradle
     directory: "/etl"
     schedule:
@@ -11,6 +96,14 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
+  - package-ecosystem: gradle
+    directory: "/service"
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
