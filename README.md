@@ -21,7 +21,7 @@ A tool for making nature knowledge reports.
 - Docker-Compose
 - Node.js (recommended setup using NVM)
 - yarn
-- Java JDK (17+)
+- Java JDK (21+)
 
 ### Compose
 

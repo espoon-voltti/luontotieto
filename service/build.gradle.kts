@@ -17,7 +17,7 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 repositories {
@@ -59,7 +59,7 @@ dependencies {
 
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.flywaydb:flyway-core")
-    implementation("org.postgresql:postgresql:42.7.0")
+    implementation("org.postgresql:postgresql:42.7.3")
     api(platform("org.jdbi:jdbi3-bom:3.45.0"))
     implementation("org.jdbi:jdbi3-core")
     implementation("org.jdbi:jdbi3-jackson2")
@@ -86,7 +86,7 @@ dependencies {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs += "-Xjsr305=strict"
-        jvmTarget = "17"
+        jvmTarget = "21"
     }
 }
 
