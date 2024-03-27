@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-FROM node:20.11-bookworm-slim AS base
+FROM node:21.7-bookworm-slim AS base
 
 WORKDIR /app
 
