@@ -25,7 +25,7 @@ import { userLogin } from '../../clients/service-client.js'
 export function createSamlConfig(
   config: EspooSamlConfig,
   cacheProvider?: CacheProvider
-): SamlConfig {
+): SamlConfig & { passReqToCallback: boolean } {
   const privateCert = readFileSync(config.privateCert, {
     encoding: 'utf8'
   })
@@ -44,7 +44,7 @@ export function createSamlConfig(
     audience: config.issuer,
     cacheProvider,
     callbackUrl: config.callbackUrl,
-    cert: publicCert,
+    idpCert: publicCert,
     disableRequestedAuthnContext: true,
     decryptionPvk: config.decryptAssertions ? privateCert : undefined,
     entryPoint: config.entryPoint,
