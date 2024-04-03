@@ -62,8 +62,13 @@ dependencies {
     implementation("org.jdbi:jdbi3-kotlin")
     implementation("org.jdbi:jdbi3-postgres")
 
+//    implementation("com.github.kittinunf.fuel:fuel")
+//    implementation("com.github.kittinunf.fuel:fuel-jackson")
+
     api(platform("com.fasterxml.jackson:jackson-bom:2.17.0"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
+    implementation("software.amazon.awssdk:s3")
 
     implementation("com.auth0:java-jwt:4.4.0")
 
