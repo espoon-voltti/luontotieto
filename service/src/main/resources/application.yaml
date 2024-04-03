@@ -5,6 +5,8 @@
 luontotieto:
   s3mock:
     url: "https://localhost:9876"
+  bucket:
+    data: "test"
 
 spring:
   main:

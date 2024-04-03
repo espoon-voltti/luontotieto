@@ -4,6 +4,7 @@
 
 package fi.espoo.luontotieto.s3
 
+import com.github.kittinunf.fuel.core.Response
 import fi.espoo.luontotieto.config.BucketEnv
 import fi.espoo.luontotieto.domain.NotFound
 import org.springframework.http.ContentDisposition
@@ -105,4 +106,11 @@ class S3DocumentService(
         val request = DeleteObjectRequest.builder().bucket(bucketName).key(key).build()
         s3Client.deleteObject(request)
     }
+}
+fun fuelResponseToS3URL(response: Response): String {
+    return response.headers["X-Accel-Redirect"].first().replace(INTERNAL_REDIRECT_PREFIX, "")
+}
+
+fun responseEntityToS3URL(response: ResponseEntity<Any>): String {
+    return response.headers["X-Accel-Redirect"]!!.first().replace(INTERNAL_REDIRECT_PREFIX, "")
 }
