@@ -14,6 +14,7 @@ import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -23,12 +24,13 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 /**
- * Controller for "system" endpoints intended to be only called from api-gateway
- * as the system internal user
+ * Controller for "system" endpoints intended to be only called from api-gateway as the system
+ * internal user
  */
 @RestController
 @RequestMapping("/system")
 class SystemController {
+    @Qualifier("jdbi-luontotieto")
     @Autowired
     lateinit var jdbi: Jdbi
 
@@ -38,9 +40,9 @@ class SystemController {
     fun userLogin(
         @RequestBody adUser: AdUser
     ): AppUser {
-        return jdbi.inTransactionUnchecked { it.upsertAppUserFromAd(adUser) }.also {
-            logger.audit(AuthenticatedUser(it.id), "USER_LOGIN")
-        }
+        return jdbi
+            .inTransactionUnchecked { it.upsertAppUserFromAd(adUser) }
+            .also { logger.audit(AuthenticatedUser(it.id), "USER_LOGIN") }
     }
 
     @GetMapping("/users/{id}")

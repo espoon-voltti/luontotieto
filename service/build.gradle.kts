@@ -21,6 +21,9 @@ java {
 }
 
 repositories {
+    maven {
+        url = uri("https://repo.osgeo.org/repository/release/")
+    }
     mavenCentral()
 }
 
@@ -56,6 +59,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springframework.ws:spring-ws-security")
+
+    implementation("org.geotools:gt-geopkg:30.0")
 
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.flywaydb:flyway-core")
@@ -143,4 +148,5 @@ flyway {
     user = "luontotieto"
     password = "postgres"
     cleanDisabled = false
+    locations = arrayOf("db/luontotieto/migration")
 }

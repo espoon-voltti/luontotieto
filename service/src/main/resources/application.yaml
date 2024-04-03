@@ -8,11 +8,24 @@ spring:
   application:
     name: "luontotieto-service"
   datasource:
-    driver-class-name: "org.postgresql.Driver"
-    type: "com.zaxxer.hikari.HikariDataSource"
-    hikari:
-      data-source-properties:
-        socketTimeout: 30000
+    luontotieto:
+      driver-class-name: "org.postgresql.Driver"
+      type: "com.zaxxer.hikari.HikariDataSource"
+      jdbcUrl: ${LUONTOTIETO_URL}
+      username: ${LUONTOTIETO_USERNAME}
+      password: ${LUONTOTIETO_PASSWORD}
+      hikari:
+        data-source-properties:
+          socketTimeout: 30000
+    paikkatieto:
+      driver-class-name: "org.postgresql.Driver"
+      type: "com.zaxxer.hikari.HikariDataSource"
+      jdbcUrl: ${PAIKKATIETO_URL}
+      username: ${PAIKKATIETO_USERNAME}
+      password: ${PAIKKATIETO_PASSWORD}
+      hikari:
+        data-source-properties:
+          socketTimeout: 30000
   sql:
     init:
       continue-on-error: false

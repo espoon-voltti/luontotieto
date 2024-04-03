@@ -24,7 +24,7 @@ Comment: Directory also includes code with other licenses and other copyright ho
   described here.
 License: BSD-2-Clause
 
-Files: **/src/main/resources/db/migration/*
+Files: **/src/main/resources/db/**/migration/*
 Copyright: 2023-2024 City of Espoo
 License: LGPL-2.1-or-later
 
@@ -81,6 +81,10 @@ Copyright: 2023-2024 City of Espoo
 License: LGPL-2.1-or-later
 
 Files: etl/db/migration/*
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: **/src/test/resources/test-data/*
 Copyright: 2023-2024 City of Espoo
 License: LGPL-2.1-or-later
 

@@ -8,6 +8,11 @@ app:
 
 spring:
   datasource:
-    url: "jdbc:postgresql://localhost:5432/luontotieto_it"
-    username: "luontotieto"
-    password: "postgres"
+    luontotieto:
+      jdbcUrl: "jdbc:postgresql://localhost:5432/luontotieto_it"
+      username: "luontotieto"
+      password: "postgres"
+    paikkatieto:
+      jdbcUrl: "jdbc:postgresql://localhost:5433/paikkatietodb_it"
+      username: "paikkatietodb"
+      password: "postgres"
