@@ -1,10 +1,9 @@
 package fi.espoo.luontotieto.config
 
-import java.net.URI
 import mu.KotlinLogging
 import org.springframework.core.env.Environment
+import java.net.URI
 import java.util.Locale
-
 
 data class BucketEnv(
     val s3MockUrl: URI,
@@ -16,16 +15,17 @@ data class BucketEnv(
     companion object {
         fun fromEnvironment(env: Environment) =
             BucketEnv(
-                s3MockUrl = env.lookup("luontotieto.s3mock.url", "fi.espoo.voltti.s3mock.url"),
-                proxyThroughNginx = false, //TODO: env.lookup("evaka.bucket.proxy_through_nginx") ?: true,
-                data = env.lookup("luontotieto.bucket.data", "fi.espoo.voltti.document.bucket.data"),    
+                s3MockUrl = env.lookup("luontotieto.s3mock.url"),
+                proxyThroughNginx = env.lookup("luontotieto.bucket.proxy_through_nginx") ?: true,
+                data = env.lookup("luontotieto.bucket.data"),
             )
     }
 }
 
-
-
-inline fun <reified T> Environment.lookup(key: String, vararg deprecatedKeys: String): T {
+inline fun <reified T> Environment.lookup(
+    key: String,
+    vararg deprecatedKeys: String
+): T {
     val value = lookup(key, deprecatedKeys, T::class.java)
     if (value == null && null !is T) {
         error("Missing required configuration: $key (environment variable ${key.toSystemEnvKey()})")
@@ -34,8 +34,11 @@ inline fun <reified T> Environment.lookup(key: String, vararg deprecatedKeys: St
     }
 }
 
-
-fun <T> Environment.lookup(key: String, deprecatedKeys: Array<out String>, clazz: Class<T>): T? =
+fun <T> Environment.lookup(
+    key: String,
+    deprecatedKeys: Array<out String>,
+    clazz: Class<T>
+): T? =
     deprecatedKeys
         .asSequence()
         .mapNotNull { legacyKey ->
@@ -56,14 +59,13 @@ fun <T> Environment.lookup(key: String, deprecatedKeys: Array<out String>, clazz
             throw EnvLookupException(key, e)
         }
 
-
 private val logger = KotlinLogging.logger {}
-    
+
 class EnvLookupException(key: String, cause: Throwable) :
     RuntimeException(
         "Failed to lookup configuration key $key (environment variable ${key.toSystemEnvKey()})",
         cause
     )
 
-    // Reference: Spring SystemEnvironmentPropertySource
+// Reference: Spring SystemEnvironmentPropertySource
 fun String.toSystemEnvKey() = uppercase(Locale.ENGLISH).replace('.', '_').replace('-', '_')

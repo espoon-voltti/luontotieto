@@ -4,20 +4,21 @@
 
 package fi.espoo.luontotieto.s3
 
-import com.github.kittinunf.fuel.core.Response
 import fi.espoo.luontotieto.config.BucketEnv
 import fi.espoo.luontotieto.domain.NotFound
-import java.net.URL
-import java.time.Duration
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import software.amazon.awssdk.core.sync.RequestBody
+import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
+import java.net.URL
+import java.time.Duration
 
 private const val INTERNAL_REDIRECT_PREFIX = "/internal_redirect/"
 
@@ -27,7 +28,10 @@ class S3DocumentService(
     private val s3Presigner: S3Presigner,
     private val env: BucketEnv
 ) : DocumentService {
-    override fun get(bucketName: String, key: String): Document {
+    override fun get(
+        bucketName: String,
+        key: String
+    ): Document {
         val request = GetObjectRequest.builder().bucket(bucketName).key(key).build()
         val stream = s3Client.getObject(request) ?: throw NotFound("File not found")
         return stream.use {
@@ -39,7 +43,10 @@ class S3DocumentService(
         }
     }
 
-    private fun presignedGetUrl(bucketName: String, key: String): URL {
+    private fun presignedGetUrl(
+        bucketName: String,
+        key: String
+    ): URL {
         val request = GetObjectRequest.builder().bucket(bucketName).key(key).build()
 
         val getObjectPresignRequest =
@@ -73,7 +80,10 @@ class S3DocumentService(
         }
     }
 
-    override fun upload(bucketName: String, document: Document): DocumentLocation {
+    override fun upload(
+        bucketName: String,
+        document: Document
+    ): DocumentLocation {
         val key = document.name
         val request =
             PutObjectRequest.builder()
@@ -88,17 +98,11 @@ class S3DocumentService(
         return DocumentLocation(bucket = bucketName, key = key)
     }
 
-    override fun delete(bucketName: String, key: String) {
+    override fun delete(
+        bucketName: String,
+        key: String
+    ) {
         val request = DeleteObjectRequest.builder().bucket(bucketName).key(key).build()
         s3Client.deleteObject(request)
     }
 }
-
-fun fuelResponseToS3URL(response: Response): String {
-    return response.headers["X-Accel-Redirect"].first().replace(INTERNAL_REDIRECT_PREFIX, "")
-}
-
-fun responseEntityToS3URL(response: ResponseEntity<Any>): String {
-    return response.headers["X-Accel-Redirect"]!!.first().replace(INTERNAL_REDIRECT_PREFIX, "")
-}
-

@@ -12,7 +12,10 @@ data class Document(val name: String, val bytes: ByteArray, val contentType: Str
 data class DocumentLocation(val bucket: String, val key: String)
 
 interface DocumentService {
-    fun get(bucketName: String, key: String): Document
+    fun get(
+        bucketName: String,
+        key: String
+    ): Document
 
     fun response(
         bucketName: String,
@@ -20,21 +23,33 @@ interface DocumentService {
         contentDisposition: ContentDisposition
     ): ResponseEntity<Any>
 
-    fun responseAttachment(bucketName: String, key: String, fileName: String?) =
-        response(
-            bucketName,
-            key,
-            ContentDisposition.attachment().filename(fileName, Charsets.UTF_8).build()
-        )
+    fun responseAttachment(
+        bucketName: String,
+        key: String,
+        fileName: String?
+    ) = response(
+        bucketName,
+        key,
+        ContentDisposition.attachment().filename(fileName, Charsets.UTF_8).build()
+    )
 
-    fun responseInline(bucketName: String, key: String, fileName: String?) =
-        response(
-            bucketName,
-            key,
-            ContentDisposition.inline().filename(fileName, Charsets.UTF_8).build()
-        )
+    fun responseInline(
+        bucketName: String,
+        key: String,
+        fileName: String?
+    ) = response(
+        bucketName,
+        key,
+        ContentDisposition.inline().filename(fileName, Charsets.UTF_8).build()
+    )
 
-    fun upload(bucketName: String, document: Document): DocumentLocation
+    fun upload(
+        bucketName: String,
+        document: Document
+    ): DocumentLocation
 
-    fun delete(bucketName: String, key: String)
+    fun delete(
+        bucketName: String,
+        key: String
+    )
 }
