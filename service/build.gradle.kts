@@ -16,14 +16,10 @@ plugins {
     idea
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-}
+java { sourceCompatibility = JavaVersion.VERSION_21 }
 
 repositories {
-    maven {
-        url = uri("https://repo.osgeo.org/repository/release/")
-    }
+    maven { url = uri("https://repo.osgeo.org/repository/release/") }
     mavenCentral()
 }
 
@@ -34,17 +30,12 @@ sourceSets {
     }
 }
 
-val e2eTestImplementation: Configuration by configurations.getting {
-    extendsFrom(configurations.testImplementation.get())
-}
+val e2eTestImplementation: Configuration by
+    configurations.getting { extendsFrom(configurations.testImplementation.get()) }
 
 configurations["e2eTestRuntimeOnly"].extendsFrom(configurations.testRuntimeOnly.get())
 
-idea {
-    module {
-        testSources = testSources + sourceSets["e2eTest"].kotlin.sourceDirectories
-    }
-}
+idea { module { testSources = testSources + sourceSets["e2eTest"].kotlin.sourceDirectories } }
 
 dependencies {
     api(kotlin("stdlib"))
@@ -102,13 +93,9 @@ tasks.withType<Test> {
     outputs.upToDateWhen { false }
 }
 
-tasks.getByName<Jar>("jar") {
-    archiveClassifier.set("")
-}
+tasks.getByName<Jar>("jar") { archiveClassifier.set("") }
 
-tasks.getByName<BootJar>("bootJar") {
-    archiveClassifier.set("boot")
-}
+tasks.getByName<BootJar>("bootJar") { archiveClassifier.set("boot") }
 
 tasks.register("resolveDependencies") {
     description = "Resolves all dependencies"
@@ -129,9 +116,7 @@ tasks.register("resolveDependencies") {
 }
 
 tasks {
-    bootRun {
-        systemProperty("spring.profiles.active", "local")
-    }
+    bootRun { systemProperty("spring.profiles.active", "local") }
 
     register("e2eTest", Test::class) {
         useJUnitPlatform()
@@ -141,12 +126,4 @@ tasks {
         shouldRunAfter("test")
         outputs.upToDateWhen { false }
     }
-}
-
-flyway {
-    url = "jdbc:postgresql://localhost:5432/luontotieto"
-    user = "luontotieto"
-    password = "postgres"
-    cleanDisabled = false
-    locations = arrayOf("db/luontotieto/migration")
 }

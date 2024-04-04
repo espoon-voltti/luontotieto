@@ -32,7 +32,7 @@ class DbConfig {
     @ConfigurationProperties(prefix = "spring.datasource.luontotieto")
     fun luontotietoHikariConfig() = HikariConfig()
 
-    @Bean
+    @Bean("luontotieto-datasource")
     @LuontotietoDataSource
     @Primary
     fun luontotietoDataSource(
@@ -41,8 +41,7 @@ class DbConfig {
 
     @Bean("jdbi-luontotieto")
     fun jdbiLuontotieto(
-        @LuontotietoDataSource
-        dataSource: HikariDataSource,
+        @LuontotietoDataSource dataSource: HikariDataSource,
         jsonMapper: JsonMapper
     ) = configureJdbi(Jdbi.create(dataSource), jsonMapper)
 
@@ -59,8 +58,7 @@ class DbConfig {
 
     @Bean("jdbi-paikkatieto")
     fun jdbiPaikkatieto(
-        @PaikkatietoDataSource
-        dataSource: HikariDataSource,
+        @PaikkatietoDataSource dataSource: HikariDataSource,
         jsonMapper: JsonMapper
     ) = configureJdbi(Jdbi.create(dataSource), jsonMapper)
 }
