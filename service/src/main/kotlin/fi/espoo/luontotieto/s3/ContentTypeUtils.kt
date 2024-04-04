@@ -7,7 +7,7 @@ import java.io.InputStream
 
 val tika: org.apache.tika.Tika = org.apache.tika.Tika()
 
-fun checkFileContentType(file: InputStream,): String {
+fun checkFileContentType(file: InputStream): String {
     val detectedContentType = tika.detect(file)
     return detectedContentType
 }
