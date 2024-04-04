@@ -92,9 +92,42 @@ class AppController {
         user: AuthenticatedUser,
         @RequestBody body: ReportInput
     ): Report {
+        println(user)
         return jdbi
             .inTransactionUnchecked { tx -> tx.insertReport(data = body, user = user) }
             .also { logger.audit(user, "CREATE_REPORT") }
+    }
+
+    @PostMapping(
+        "/reports/{reportId}/file",
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE]
+    )
+    fun uploadReportFile(
+        user: AuthenticatedUser,
+        @PathVariable reportId: UUID,
+        @RequestPart("file") file: MultipartFile,
+        @RequestPart("description") description: String
+    ) {
+        val dataBucket = bucketEnv.data
+
+        val fileName = getAndCheckFileName(file)
+        val contentType =
+            file.inputStream.use { stream ->
+                checkFileContentType(
+                    stream
+                )
+            }
+
+        val id =
+            jdbi.inTransactionUnchecked { tx ->
+              tx.insertReportFile(ReportFileInput(reportId,description, contentType, fileName, DocumentType.REPORT), user)
+            }
+
+        documentClient.upload(
+            dataBucket,
+            Document(name = id.toString(), bytes = file.bytes, contentType = contentType)
+        )
+
     }
 
     @GetMapping("/reports/{id}")
@@ -140,28 +173,7 @@ class AppController {
             .also { logger.audit(user, "GET_STUDENT", mapOf("studentId" to id.toString())) }
     }
 
-    @PostMapping(
-        "/upload/file",
-        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE]
-    )
-    fun uploadFile(
-        user: AuthenticatedUser,
-        @RequestPart("file") file: MultipartFile
-    ) {
-        val dataBucket = bucketEnv.data
 
-        val fileName = getAndCheckFileName(file)
-        val contentType =
-            file.inputStream.use { stream ->
-                checkFileContentType(
-                    stream
-                )
-            }
-        documentClient.upload(
-            dataBucket,
-            Document(name = fileName, bytes = file.bytes, contentType = contentType)
-        )
-    }
 
     @GetMapping("/file/{fileName}")
     fun getFile(

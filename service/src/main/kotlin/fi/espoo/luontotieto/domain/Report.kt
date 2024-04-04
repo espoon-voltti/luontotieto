@@ -59,3 +59,4 @@ fun Handle.getReport(
     .mapTo<Report>()
     .findOne()
     .getOrNull() ?: throw NotFound()
+
