@@ -125,7 +125,7 @@ class AppController {
 
         documentClient.upload(
             dataBucket,
-            Document(name = id.toString(), bytes = file.bytes, contentType = contentType)
+            Document(name = "$reportId/$id", bytes = file.bytes, contentType = contentType)
         )
     }
 
