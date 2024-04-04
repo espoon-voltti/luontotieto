@@ -162,6 +162,19 @@ class AppController {
             Document(name = fileName, bytes = file.bytes, contentType = contentType)
         )
     }
+    @GetMapping("/file/{fileName}")
+    fun getFile(
+        user: AuthenticatedUser,
+        @PathVariable fileName: String
+
+    ): Document {
+        val dataBucket = bucketEnv.data
+       val document =  documentClient.get(
+            dataBucket,
+            fileName
+        )
+        return document
+    }
 }
 
 private fun getAndCheckFileName(file: MultipartFile) =
