@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class FlywayConfig {
+class PaikkatietoFlywayConfig {
     @Qualifier("paikkatieto-datasource")
     @Autowired
     private val dataSource: HikariDataSource? = null
@@ -21,6 +21,22 @@ class FlywayConfig {
     fun migrateFlyway() {
         val dataSource = dataSource ?: return
         val config = Flyway.configure().dataSource(dataSource).locations("db/paikkatieto/migration")
+
+        val flyway = Flyway(config)
+        flyway.migrate()
+    }
+}
+
+@Configuration
+class LuontotietoFlywayConfig {
+    @Qualifier("luontotieto-datasource")
+    @Autowired
+    private val dataSource: HikariDataSource? = null
+
+    @PostConstruct
+    fun migrateFlyway() {
+        val dataSource = dataSource ?: return
+        val config = Flyway.configure().dataSource(dataSource).locations("db/luontotieto/migration")
 
         val flyway = Flyway(config)
         flyway.migrate()
