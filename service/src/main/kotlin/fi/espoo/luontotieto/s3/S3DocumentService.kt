@@ -107,6 +107,7 @@ class S3DocumentService(
         s3Client.deleteObject(request)
     }
 }
+
 fun fuelResponseToS3URL(response: Response): String {
     return response.headers["X-Accel-Redirect"].first().replace(INTERNAL_REDIRECT_PREFIX, "")
 }

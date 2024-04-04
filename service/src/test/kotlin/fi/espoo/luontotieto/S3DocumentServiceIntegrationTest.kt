@@ -4,18 +4,18 @@
 
 package fi.espoo.luontotieto.s3
 
-import fi.espoo.luontotieto.config.BucketEnv
 import fi.espoo.luontotieto.FullApplicationTest
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import fi.espoo.luontotieto.config.BucketEnv
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class S3DocumentServiceIntegrationTest : FullApplicationTest() {
     @Autowired private lateinit var s3Client: S3Client
@@ -71,5 +71,4 @@ class S3DocumentServiceIntegrationTest : FullApplicationTest() {
 
         assertContentEquals(byteArrayOf(0x11, 0x33, 0x22), document.bytes)
     }
-
 }

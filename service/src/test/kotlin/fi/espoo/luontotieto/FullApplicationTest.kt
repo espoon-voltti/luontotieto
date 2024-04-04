@@ -16,7 +16,8 @@ import testUser
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = [SharedIntegrationTestConfig::class]
 )
 abstract class FullApplicationTest {
     @Qualifier("jdbi-luontotieto")
