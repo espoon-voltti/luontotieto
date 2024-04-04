@@ -172,7 +172,6 @@ class AppController {
             }
             .also { logger.audit(user, "GET_STUDENT", mapOf("studentId" to id.toString())) }
     }
-
 }
 
 private fun getAndCheckFileName(file: MultipartFile) =
