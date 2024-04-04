@@ -74,6 +74,25 @@ class AppController {
         return "OK"
     }
 
+    @PostMapping("/reports")
+    fun createReportFromScratch(
+        user: AuthenticatedUser,
+        @RequestBody body: ReportInput
+    ): Report {
+        return jdbi
+            .inTransactionUnchecked { tx -> tx.insertReport(data = body, user = user) }
+            .also { logger.audit(user, "CREATE_REPORT") }
+    }
+
+    @GetMapping("/reports/{id}")
+    fun getReportById(
+        user: AuthenticatedUser,
+        @PathVariable id: UUID
+    ): Report {
+        return jdbi.inTransactionUnchecked { tx -> tx.getReport(id, user) }
+    }
+
+    // TODO: Remove
     data class StudentAndCaseInput(
         val student: StudentInput,
     )
