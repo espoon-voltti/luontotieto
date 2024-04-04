@@ -23,12 +23,7 @@ import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestPart
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.util.UUID
@@ -92,7 +87,6 @@ class AppController {
         user: AuthenticatedUser,
         @RequestBody body: ReportInput
     ): Report {
-        println(user)
         return jdbi
             .inTransactionUnchecked { tx -> tx.insertReport(data = body, user = user) }
             .also { logger.audit(user, "CREATE_REPORT") }
@@ -106,7 +100,8 @@ class AppController {
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
         @RequestPart("file") file: MultipartFile,
-        @RequestPart("description") description: String
+        @RequestPart("description") description: String,
+        @RequestParam("documentType") documentType: DocumentType
     ) {
         val dataBucket = bucketEnv.data
 
@@ -120,7 +115,7 @@ class AppController {
 
         val id =
             jdbi.inTransactionUnchecked { tx ->
-                tx.insertReportFile(ReportFileInput(reportId, description, contentType, fileName, DocumentType.REPORT), user)
+                tx.insertReportFile(ReportFileInput(reportId, description, contentType, fileName, documentType), user)
             }
 
         documentClient.upload(
