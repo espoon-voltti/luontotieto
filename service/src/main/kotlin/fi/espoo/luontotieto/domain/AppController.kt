@@ -120,14 +120,13 @@ class AppController {
 
         val id =
             jdbi.inTransactionUnchecked { tx ->
-              tx.insertReportFile(ReportFileInput(reportId,description, contentType, fileName, DocumentType.REPORT), user)
+                tx.insertReportFile(ReportFileInput(reportId, description, contentType, fileName, DocumentType.REPORT), user)
             }
 
         documentClient.upload(
             dataBucket,
             Document(name = id.toString(), bytes = file.bytes, contentType = contentType)
         )
-
     }
 
     @GetMapping("/reports/{id}")
@@ -172,8 +171,6 @@ class AppController {
             }
             .also { logger.audit(user, "GET_STUDENT", mapOf("studentId" to id.toString())) }
     }
-
-
 
     @GetMapping("/file/{fileName}")
     fun getFile(

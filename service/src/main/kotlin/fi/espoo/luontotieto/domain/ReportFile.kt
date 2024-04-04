@@ -10,8 +10,7 @@ import org.jdbi.v3.core.kotlin.mapTo
 import java.time.OffsetDateTime
 import java.util.UUID
 
-
-enum class DocumentType(val value: String){
+enum class DocumentType(val value: String) {
     LIITO_ORAVA_PISTEET("paikkatieto:liito_orava_pisteet"),
     LIITO_ORAVA_ALUEET("paikkatieto:liito_orava_alueet"),
     LIITO_ORAVA_VIIVAT("paikkatieto:liito_orava_yhteysviivat"),
@@ -31,7 +30,13 @@ data class ReportFile(
     val updatedBy: UUID
 )
 
-data class ReportFileInput(val reportId: UUID, val description: String, val mediaType: String, val fileName: String, val documentType: DocumentType)
+data class ReportFileInput(
+    val reportId: UUID,
+    val description: String,
+    val mediaType: String,
+    val fileName: String,
+    val documentType: DocumentType
+)
 
 fun Handle.insertReportFile(
     data: ReportFileInput,
@@ -55,5 +60,3 @@ fun Handle.insertReportFile(
         .mapTo<UUID>()
         .one()
 }
-
-
