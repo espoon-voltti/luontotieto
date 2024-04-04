@@ -12,7 +12,6 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
-import testUser
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
@@ -44,7 +43,8 @@ abstract class FullApplicationTest {
                     WHERE sequence_schema = 'public'
                   );
                 END ${'$'}${'$'} LANGUAGE plpgsql;
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
         }
     }
@@ -58,7 +58,9 @@ abstract class FullApplicationTest {
                 INSERT INTO users (id, updated, external_id, first_names, last_name, email) 
                 VALUES (:id, now(), 'test', 'Teija', 'Testaaja', NULL)
             """
-            ).bind("id", testUser.id).execute()
+            )
+                .bind("id", testUser.id)
+                .execute()
         }
     }
 }
