@@ -2,6 +2,12 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
+luontotieto:
+  s3mock:
+    url: "https://localhost:9876"
+  bucket:
+    data: "data"
+
 app:
   jwt:
     public_keys_url: classpath:local-development/jwks.json

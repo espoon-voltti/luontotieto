@@ -31,6 +31,8 @@ services:
     image: postgis/postgis:16-3.4-alpine
     ports:
       - "5433:5432"
+    volumes:
+      - ./db/test-paikkatieto-db.sh:/docker-entrypoint-initdb.d/test-paikkatieto-db.sh
     environment:
       POSTGRES_DB: paikkatietodb
       POSTGRES_USER: paikkatietodb
@@ -50,6 +52,23 @@ services:
       paikkatieto-db:
         condition: service_healthy
 
+  s3-mock:
+    image: adobe/s3mock
+    ports:
+    - "9876:9191"
+    volumes:
+    - s3-data:/data
+    environment:
+      ROOT: /data
+      initialBuckets: "static"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+
 volumes:
   luontotieto-db-data:
+    driver: local
+  s3-data:
     driver: local
