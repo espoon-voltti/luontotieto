@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: 2023-2024 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
+import { CreateReportPage } from 'luontotieto/CreateReportPage'
 import { FrontPage } from 'luontotieto/FrontPage'
+import { ReportPage } from 'luontotieto/ReportPage'
 import React, { Fragment } from 'react'
 import { Navigate, createBrowserRouter, Outlet } from 'react-router-dom'
 import styled from 'styled-components'
@@ -68,6 +70,22 @@ export const appRouter = createBrowserRouter([
         element: (
           <AuthGuard allow="AUTHENTICATED_ONLY">
             <FrontPage />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/luontotieto/selvitys/uusi',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <CreateReportPage mode="CREATE" />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/luontotieto/selvitys/:id',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <ReportPage />
           </AuthGuard>
         )
       },
