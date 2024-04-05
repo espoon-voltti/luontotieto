@@ -10,13 +10,6 @@ import fi.espoo.luontotieto.config.audit
 import fi.espoo.luontotieto.s3.Document
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
-import fi.espoo.paikkatieto.domain.LiitoOravaAlueet
-import fi.espoo.paikkatieto.domain.LiitoOravaPisteet
-import fi.espoo.paikkatieto.domain.LiitoOravaYhteysviivat
-import fi.espoo.paikkatieto.domain.insertLiitoOravaAlueet
-import fi.espoo.paikkatieto.domain.insertLiitoOravaPisteet
-import fi.espoo.paikkatieto.domain.insertLiitoOravaYhteysviivat
-import fi.espoo.paikkatieto.reader.GpkgReader
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
@@ -31,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.io.File
 import java.util.UUID
 
 @RestController
@@ -44,49 +36,11 @@ class AppController {
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired
-    lateinit var documentClient: S3DocumentService
+    @Autowired lateinit var documentClient: S3DocumentService
 
-    @Autowired
-    lateinit var bucketEnv: BucketEnv
+    @Autowired lateinit var bucketEnv: BucketEnv
 
     private val logger = KotlinLogging.logger {}
-
-    @PostMapping("/file")
-    fun uploadFile(): String {
-        val reader1 =
-            GpkgReader(
-                File("src/test/resources/test-data/liito_orava_pisteet.gpkg"),
-                LiitoOravaPisteet
-            )
-        val data1 = reader1.asSequence()
-
-        val reader2 =
-            GpkgReader(
-                File("src/test/resources/test-data/liito_orava_alueet.gpkg"),
-                LiitoOravaAlueet
-            )
-        val data2 = reader2.asSequence()
-
-        val reader3 =
-            GpkgReader(
-                File("src/test/resources/test-data/liito_orava_yhteysviivat.gpkg"),
-                LiitoOravaYhteysviivat
-            )
-        val data3 = reader3.asSequence()
-
-        paikkatietoJdbi.inTransactionUnchecked { tx ->
-            tx.insertLiitoOravaPisteet(data1)
-            tx.insertLiitoOravaAlueet(data2)
-            tx.insertLiitoOravaYhteysviivat(data3)
-        }
-
-        reader1.close()
-        reader2.close()
-        reader3.close()
-
-        return "OK"
-    }
 
     @PostMapping("/reports")
     fun createReportFromScratch(
@@ -98,10 +52,7 @@ class AppController {
             .also { logger.audit(user, "CREATE_REPORT") }
     }
 
-    @PostMapping(
-        "/reports/{reportId}/file",
-        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE]
-    )
+    @PostMapping("/reports/{reportId}/file", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun uploadReportFile(
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
@@ -112,16 +63,14 @@ class AppController {
         val dataBucket = bucketEnv.data
 
         val fileName = getAndCheckFileName(file)
-        val contentType =
-            file.inputStream.use { stream ->
-                checkFileContentType(
-                    stream
-                )
-            }
+        val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
 
         val id =
             jdbi.inTransactionUnchecked { tx ->
-                tx.insertReportFile(ReportFileInput(reportId, description, contentType, fileName, documentType), user)
+                tx.insertReportFile(
+                    ReportFileInput(reportId, description, contentType, fileName, documentType),
+                    user
+                )
             }
 
         documentClient.upload(
@@ -137,41 +86,6 @@ class AppController {
     ): Report {
         return jdbi.inTransactionUnchecked { tx -> tx.getReport(id, user) }
     }
-
-    // TODO: Remove
-    data class StudentAndCaseInput(
-        val student: StudentInput,
-    )
-
-    @PostMapping("/students")
-    fun createStudent(
-        user: AuthenticatedUser,
-        @RequestBody body: StudentAndCaseInput
-    ): UUID {
-        return jdbi
-            .inTransactionUnchecked { tx ->
-                val studentId = tx.insertStudent(data = body.student, user = user)
-                studentId
-            }
-            .also { logger.audit(user, "CREATE_STUDENT") }
-    }
-
-    data class StudentResponse(
-        val student: Student,
-    )
-
-    @GetMapping("/students/{id}")
-    fun getStudent(
-        user: AuthenticatedUser,
-        @PathVariable id: UUID
-    ): StudentResponse {
-        return jdbi
-            .inTransactionUnchecked { tx ->
-                val studentDetails = tx.getStudent(id = id)
-                StudentResponse(studentDetails)
-            }
-            .also { logger.audit(user, "GET_STUDENT", mapOf("studentId" to id.toString())) }
-    }
 }
 
 private fun getAndCheckFileName(file: MultipartFile) =
@@ -180,7 +94,5 @@ private fun getAndCheckFileName(file: MultipartFile) =
 private fun getFileExtension(name: String) =
     name
         .split(".")
-        .also {
-            if (it.size == 1) throw BadRequest("Missing file extension", "EXTENSION_MISSING")
-        }
+        .also { if (it.size == 1) throw BadRequest("Missing file extension", "EXTENSION_MISSING") }
         .last()

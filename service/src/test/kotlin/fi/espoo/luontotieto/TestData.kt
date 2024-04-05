@@ -2,21 +2,9 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+package fi.espoo.luontotieto
+
 import fi.espoo.luontotieto.config.AuthenticatedUser
-import fi.espoo.luontotieto.domain.AppController
-import fi.espoo.luontotieto.domain.StudentInput
 import java.util.UUID
 
 val testUser = AuthenticatedUser(UUID.randomUUID())
-val testUserName = "Teija Testaaja"
-
-val minimalStudentTestInput =
-    StudentInput(
-        firstName = "Testi",
-        lastName = "Testilä"
-    )
-
-val minimalStudentAndCaseTestInput =
-    AppController.StudentAndCaseInput(
-        student = minimalStudentTestInput,
-    )
