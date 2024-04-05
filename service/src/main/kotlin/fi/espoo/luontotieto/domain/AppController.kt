@@ -52,7 +52,7 @@ class AppController {
             .also { logger.audit(user, "CREATE_REPORT") }
     }
 
-    @PostMapping("/reports/{reportId}/file", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @PostMapping("/reports/{reportId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun uploadReportFile(
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
@@ -79,21 +79,19 @@ class AppController {
         )
     }
 
-    data class ReportResponse(
-        val report: Report,
-        val files: List<ReportFile>
-    )
-
     @GetMapping("/reports/{id}")
     fun getReportById(
         user: AuthenticatedUser,
         @PathVariable id: UUID
-    ): ReportResponse {
-        return jdbi.inTransactionUnchecked { tx ->
-            val report = tx.getReport(id, user)
-            val reportFiles = tx.getReportFiles(report.id)
-            ReportResponse(report, reportFiles)
-        }
+    ): Report {
+        return jdbi.inTransactionUnchecked { tx -> tx.getReport(id, user) }
+    }
+
+    @GetMapping("/reports/{reportId}/files")
+    fun getReportFiles(
+        @PathVariable reportId: UUID
+    ): List<ReportFile> {
+        return jdbi.inTransactionUnchecked { tx -> tx.getReportFiles(reportId) }
     }
 }
 
