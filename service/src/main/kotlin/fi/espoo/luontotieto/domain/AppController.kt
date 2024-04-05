@@ -91,7 +91,7 @@ class AppController {
     ): ReportResponse {
         return jdbi.inTransactionUnchecked { tx ->
             val report = tx.getReport(id, user)
-            val reportFiles = tx.getReportFiles(report.id, user)
+            val reportFiles = tx.getReportFiles(report.id)
             ReportResponse(report, reportFiles)
         }
     }
