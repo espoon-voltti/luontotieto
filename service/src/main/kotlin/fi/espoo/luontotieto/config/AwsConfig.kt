@@ -72,16 +72,21 @@ class AwsConfig {
     @Profile("production")
     fun credentialsProviderProd(): AwsCredentialsProvider = DefaultCredentialsProvider.create()
 
-//    @Bean
-//    @Profile("production")
-//    fun amazonS3Prod(env: EvakaEnv, credentialsProvider: AwsCredentialsProvider): S3Client =
-//        S3Client.builder().region(env.awsRegion).credentialsProvider(credentialsProvider).build()
-//
-//    @Bean
-//    @Profile("production")
-//    fun amazonS3PresignerProd(
-//        env: EvakaEnv,
-//        credentialsProvider: AwsCredentialsProvider
-//    ): S3Presigner =
-//        S3Presigner.builder().region(env.awsRegion).credentialsProvider(credentialsProvider).build()
+    @Bean
+    @Profile("production")
+    fun amazonS3Prod(credentialsProvider: AwsCredentialsProvider): S3Client {
+        val awsRegion = Region.of(System.getenv("AWS_REGION"))
+        return S3Client.builder().region(awsRegion).credentialsProvider(credentialsProvider).build()
+    }
+
+    @Bean
+    @Profile("production")
+    fun amazonS3PresignerProd(credentialsProvider: AwsCredentialsProvider): S3Presigner {
+        val awsRegion = Region.of(System.getenv("AWS_REGION"))
+
+        return S3Presigner.builder()
+            .region(awsRegion)
+            .credentialsProvider(credentialsProvider)
+            .build()
+    }
 }
