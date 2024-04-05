@@ -71,7 +71,7 @@ fun Handle.insertReportFile(
         .one()
 }
 
-fun Handle.getReportFiles(reportId: UUID,): List<ReportFile> =
+fun Handle.getReportFiles(reportId: UUID): List<ReportFile> =
     createQuery(
         """
                 SELECT id, description, report_id AS "reportId", media_type AS "mediaType", 
