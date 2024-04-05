@@ -79,12 +79,21 @@ class AppController {
         )
     }
 
+    data class ReportResponse(
+        val report: Report,
+        val files: List<ReportFile>
+    )
+
     @GetMapping("/reports/{id}")
     fun getReportById(
         user: AuthenticatedUser,
         @PathVariable id: UUID
-    ): Report {
-        return jdbi.inTransactionUnchecked { tx -> tx.getReport(id, user) }
+    ): ReportResponse {
+        return jdbi.inTransactionUnchecked { tx ->
+            val report = tx.getReport(id, user)
+            val reportFiles = tx.getReportFiles(report.id, user)
+            ReportResponse(report, reportFiles)
+        }
     }
 }
 

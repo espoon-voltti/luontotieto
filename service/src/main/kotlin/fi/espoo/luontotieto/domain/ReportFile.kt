@@ -6,16 +6,26 @@ package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
+import org.jdbi.v3.core.enums.DatabaseValue
 import org.jdbi.v3.core.kotlin.mapTo
 import java.time.OffsetDateTime
 import java.util.UUID
 
-enum class DocumentType(val value: String) {
-    LIITO_ORAVA_PISTEET("paikkatieto:liito_orava_pisteet"),
-    LIITO_ORAVA_ALUEET("paikkatieto:liito_orava_alueet"),
-    LIITO_ORAVA_VIIVAT("paikkatieto:liito_orava_yhteysviivat"),
-    REPORT("luontotieto:report"),
-    OTHER("luontotieto:other"),
+enum class DocumentType {
+    @DatabaseValue("paikkatieto:liito_orava_pisteet")
+    LIITO_ORAVA_PISTEET,
+
+    @DatabaseValue("paikkatieto:liito_orava_alueet")
+    LIITO_ORAVA_ALUEET,
+
+    @DatabaseValue("paikkatieto:liito_orava_yhteysviivat")
+    LIITO_ORAVA_VIIVAT,
+
+    @DatabaseValue("luontotieto:report")
+    REPORT,
+
+    @DatabaseValue("luontotieto:other")
+    OTHER,
 }
 
 data class ReportFile(
@@ -53,10 +63,28 @@ fun Handle.insertReportFile(
         .bind("description", data.description)
         .bind("mediaType", data.mediaType)
         .bind("fileName", data.fileName)
-        .bind("documentType", data.documentType.value)
+        .bind("documentType", data.documentType)
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
         .executeAndReturnGeneratedKeys()
         .mapTo<UUID>()
         .one()
 }
+
+fun Handle.getReportFiles(
+    reportId: UUID,
+    user: AuthenticatedUser
+): List<ReportFile> =
+    createQuery(
+        """
+                SELECT id, description, report_id AS "reportId", media_type AS "mediaType", 
+                file_name AS "fileName", document_type AS "documentType",
+                created, updated,  created_by AS "createdBy", updated_by AS "updatedBy"
+                FROM report_file
+                WHERE report_id = :reportId
+            """
+    )
+        .bind("reportId", reportId)
+        .bind("userId", user.id)
+        .mapTo<ReportFile>()
+        .list()
