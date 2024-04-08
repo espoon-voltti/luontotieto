@@ -16,6 +16,7 @@ import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -72,11 +73,17 @@ class AppController {
                     user
                 )
             }
-
-        documentClient.upload(
-            dataBucket,
-            Document(name = "$reportId/$id", bytes = file.bytes, contentType = contentType)
-        )
+        try {
+            documentClient.upload(
+                dataBucket,
+                Document(name = "$reportId/$id", bytes = file.bytes, contentType = contentType)
+            )
+        } catch (e: Exception) {
+            logger.error("Error uploading file: ", e)
+            jdbi.inTransactionUnchecked { tx ->
+                tx.deleteReportFile(reportId, id)
+            }
+        }
     }
 
     @GetMapping("/reports/{id}")
@@ -92,6 +99,23 @@ class AppController {
         @PathVariable reportId: UUID
     ): List<ReportFile> {
         return jdbi.inTransactionUnchecked { tx -> tx.getReportFiles(reportId) }
+    }
+
+    @DeleteMapping("/reports/{reportId}/files/{fileId}")
+    fun deleteReportFile(
+        @PathVariable reportId: UUID,
+        @PathVariable fileId: UUID
+    ) {
+        val dataBucket = bucketEnv.data
+
+        documentClient.delete(
+            dataBucket,
+            "$reportId/$fileId"
+        )
+
+        jdbi.inTransactionUnchecked { tx ->
+            tx.deleteReportFile(reportId, fileId)
+        }
     }
 }
 

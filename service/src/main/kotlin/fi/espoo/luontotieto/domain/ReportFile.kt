@@ -87,3 +87,14 @@ fun Handle.getReportFiles(reportId: UUID): List<ReportFile> =
         .bind("reportId", reportId)
         .mapTo<ReportFile>()
         .list()
+
+fun Handle.deleteReportFile(
+    reportId: UUID,
+    fileId: UUID
+) {
+    createUpdate("DELETE FROM report_file WHERE id = :fileId AND report_id = :reportId")
+        .bind("fileId", fileId)
+        .bind("reportId", reportId)
+        .execute()
+        .also { if (it != 1) throw NotFound() }
+}
