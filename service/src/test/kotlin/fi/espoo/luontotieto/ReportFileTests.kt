@@ -7,7 +7,6 @@ package fi.espoo.luontotieto
 import fi.espoo.luontotieto.domain.AppController
 import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.ReportInput
-import fi.espoo.luontotieto.s3.checkFileContentType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.web.multipart.MultipartFile
@@ -16,7 +15,6 @@ import java.io.FileInputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-
 
 class ReportFileTests : FullApplicationTest() {
     @Autowired lateinit var controller: AppController
@@ -29,22 +27,23 @@ class ReportFileTests : FullApplicationTest() {
                 body = ReportInput("Test report", "Test description")
             )
         val file = File("src/test/resources/test-data/liito_orava_pisteet.gpkg")
-//        val multipartFile: MultipartFile =
-//            MockMultipartFile("liito_orava_pisteet.gpkg", FileInputStream(file))
-        val fileStream = FileInputStream(file)
-        val contentType = checkFileContentType(fileStream)
-        val multipartFile: MultipartFile = MockMultipartFile("liito_orava_pisteet.gpkg", "liito_orava_pisteet.gpkg", contentType ,fileStream )
+        val multipartFile: MultipartFile =
+            MockMultipartFile("liito_orava_pisteet.gpkg", "liito_orava_pisteet.gpkg", "application/x-sqlite3", FileInputStream(file))
 
-         controller.uploadReportFile(user = testUser,
-            reportId = createdReport.id, file = multipartFile,
-            documentType = DocumentType.LIITO_ORAVA_PISTEET, description = "Test Description" )
+        controller.uploadReportFile(
+            user = testUser,
+            reportId = createdReport.id,
+            file = multipartFile,
+            documentType = DocumentType.LIITO_ORAVA_PISTEET,
+            description = "Test Description"
+        )
 
         val reportFileResponse = controller.getReportFiles(createdReport.id)
 
         assertNotNull(reportFileResponse)
         assertEquals(reportFileResponse.count(), 1)
         val fileResponse = reportFileResponse.first()
-        assertEquals("Test description", fileResponse.description)
+        assertEquals("Test Description", fileResponse.description)
         assertEquals("liito_orava_pisteet.gpkg", fileResponse.fileName)
         assertEquals(DocumentType.LIITO_ORAVA_PISTEET, fileResponse.documentType)
         assertEquals("application/x-sqlite3", fileResponse.mediaType)
@@ -55,7 +54,5 @@ class ReportFileTests : FullApplicationTest() {
 
         val reportFileResponseAfterDelete = controller.getReportFiles(createdReport.id)
         assertEquals(reportFileResponseAfterDelete.count(), 0)
-
     }
-
 }
