@@ -13,6 +13,7 @@ luontotieto:
     url: "https://localhost:9876"
   bucket:
     data: "data"
+    proxy_through_nginx: false
 
 spring:
   datasource:
