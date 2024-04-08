@@ -73,11 +73,17 @@ class AppController {
                     user
                 )
             }
-
-        documentClient.upload(
-            dataBucket,
-            Document(name = "$reportId/$id", bytes = file.bytes, contentType = contentType)
-        )
+        try {
+            documentClient.upload(
+                dataBucket,
+                Document(name = "$reportId/$id", bytes = file.bytes, contentType = contentType)
+            )
+        } catch (e: Exception) {
+            logger.error("Error uploading file: ", e)
+            jdbi.inTransactionUnchecked { tx ->
+                tx.deleteReportFile(reportId, id)
+            }
+        }
     }
 
     @GetMapping("/reports/{id}")
@@ -100,16 +106,16 @@ class AppController {
         @PathVariable reportId: UUID,
         @PathVariable fileId: UUID
     ) {
-        jdbi.inTransactionUnchecked { tx ->
-            tx.deleteReportFile(reportId, fileId)
-        }
-
         val dataBucket = bucketEnv.data
 
         documentClient.delete(
             dataBucket,
             "$reportId/$fileId"
         )
+
+        jdbi.inTransactionUnchecked { tx ->
+            tx.deleteReportFile(reportId, fileId)
+        }
     }
 }
 
