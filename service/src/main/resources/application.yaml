@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
 luontotieto:
-  s3mock:
-    url: "https://localhost:9876"
+  aws:
+    region: ${AWS_REGION}
   bucket:
-    data: "luontotieto-staging-data"
+    data: ${DATA_BUCKET}
 
 spring:
   main:

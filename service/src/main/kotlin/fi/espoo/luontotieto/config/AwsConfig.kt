@@ -62,7 +62,7 @@ class AwsConfig {
         credentialsProvider: AwsCredentialsProvider
     ): S3Presigner =
         S3Presigner.builder()
-            .region(Region.US_EAST_1)
+            .region(env.region)
             .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
             .endpointOverride(env.s3MockUrl)
             .credentialsProvider(credentialsProvider)
@@ -74,18 +74,24 @@ class AwsConfig {
 
     @Bean
     @Profile("production")
-    fun amazonS3Prod(credentialsProvider: AwsCredentialsProvider): S3Client {
-        val awsRegion = Region.of(System.getenv("AWS_REGION"))
-        return S3Client.builder().region(awsRegion).credentialsProvider(credentialsProvider).build()
+    fun amazonS3Prod(
+        env: BucketEnv,
+        credentialsProvider: AwsCredentialsProvider
+    ): S3Client {
+        return S3Client.builder()
+            .region(env.region)
+            .credentialsProvider(credentialsProvider)
+            .build()
     }
 
     @Bean
     @Profile("production")
-    fun amazonS3PresignerProd(credentialsProvider: AwsCredentialsProvider): S3Presigner {
-        val awsRegion = Region.of(System.getenv("AWS_REGION"))
-
+    fun amazonS3PresignerProd(
+        env: BucketEnv,
+        credentialsProvider: AwsCredentialsProvider
+    ): S3Presigner {
         return S3Presigner.builder()
-            .region(awsRegion)
+            .region(env.region)
             .credentialsProvider(credentialsProvider)
             .build()
     }

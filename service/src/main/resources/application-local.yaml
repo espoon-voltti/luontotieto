@@ -6,6 +6,14 @@ app:
   jwt:
     public_keys_url: classpath:local-development/jwks.json
 
+luontotieto:
+  aws:
+    region: "eu-north-1"
+  s3mock:
+    url: "https://localhost:9876"
+  bucket:
+    data: "data"
+
 spring:
   datasource:
     luontotieto:
