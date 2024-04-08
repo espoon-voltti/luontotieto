@@ -4,6 +4,7 @@
 
 package fi.espoo.luontotieto.domain
 
+import fi.espoo.luontotieto.common.DatabaseEnum
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.enums.DatabaseValue
@@ -11,7 +12,7 @@ import org.jdbi.v3.core.kotlin.mapTo
 import java.time.OffsetDateTime
 import java.util.UUID
 
-enum class DocumentType {
+enum class DocumentType : DatabaseEnum {
     @DatabaseValue("paikkatieto:liito_orava_pisteet")
     LIITO_ORAVA_PISTEET,
 
@@ -25,7 +26,9 @@ enum class DocumentType {
     REPORT,
 
     @DatabaseValue("luontotieto:other")
-    OTHER,
+    OTHER;
+
+    override val sqlType = "document_type"
 }
 
 data class ReportFile(
@@ -55,7 +58,7 @@ fun Handle.insertReportFile(
     return createUpdate(
         """
             INSERT INTO report_file (report_id, description, media_type, file_name, document_type, created_by, updated_by) 
-            VALUES (:reportId, :description, :mediaType, :fileName, :documentType::document_type, :createdBy, :updatedBy)
+            VALUES (:reportId, :description, :mediaType, :fileName, :documentType, :createdBy, :updatedBy)
             RETURNING id
             """
     )

@@ -5,13 +5,15 @@ package fi.espoo.luontotieto.config
 
 import mu.KotlinLogging
 import org.springframework.core.env.Environment
+import software.amazon.awssdk.regions.Region
 import java.net.URI
 import java.util.Locale
 
 data class BucketEnv(
-    val s3MockUrl: URI,
+    val s3MockUrl: URI?,
     val proxyThroughNginx: Boolean,
     val data: String,
+    val region: Region
 ) {
     fun allBuckets() = listOf(data)
 
@@ -19,8 +21,9 @@ data class BucketEnv(
         fun fromEnvironment(env: Environment) =
             BucketEnv(
                 s3MockUrl = env.lookup("luontotieto.s3mock.url"),
-                proxyThroughNginx = env.lookup("luontotieto.bucket.proxy_through_nginx") ?: true,
+                proxyThroughNginx = env.lookup("luontotieto.bucket.proxy_through_nginx"),
                 data = env.lookup("luontotieto.bucket.data"),
+                region = Region.of(env.lookup("luontotieto.aws.region"))
             )
     }
 }

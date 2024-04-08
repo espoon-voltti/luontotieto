@@ -7,6 +7,7 @@ package fi.espoo.luontotieto.s3
 import com.github.kittinunf.fuel.core.Response
 import fi.espoo.luontotieto.config.BucketEnv
 import fi.espoo.luontotieto.domain.NotFound
+import mu.KotlinLogging
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -22,6 +23,7 @@ import java.net.URL
 import java.time.Duration
 
 private const val INTERNAL_REDIRECT_PREFIX = "/internal_redirect/"
+private val logger = KotlinLogging.logger {}
 
 @Service
 class S3DocumentService(
@@ -94,6 +96,8 @@ class S3DocumentService(
                 .build()
 
         val body = RequestBody.fromBytes(document.bytes)
+
+        logger.info("Upload file to S3. bucketName=$bucketName key=$key")
 
         s3Client.putObject(request, body)
         return DocumentLocation(bucket = bucketName, key = key)
