@@ -97,7 +97,7 @@ class S3DocumentService(
 
         val body = RequestBody.fromBytes(document.bytes)
 
-        logger.info("Upload file to S3. bucketName=$bucketName document=$document key=$key")
+        logger.info("Upload file to S3. bucketName=$bucketName key=$key")
 
         s3Client.putObject(request, body)
         return DocumentLocation(bucket = bucketName, key = key)
