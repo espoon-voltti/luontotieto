@@ -103,7 +103,6 @@ fun Handle.getPaikkaTietoReportFiles(reportId: UUID): List<ReportFile> =
         .mapTo<ReportFile>()
         .list()
 
-
 fun Handle.deleteReportFile(
     reportId: UUID,
     fileId: UUID

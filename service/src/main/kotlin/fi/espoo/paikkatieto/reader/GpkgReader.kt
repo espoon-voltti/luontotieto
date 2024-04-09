@@ -16,7 +16,7 @@ private val logger = KotlinLogging.logger {}
 
 class GpkgReaderException(msg: String) : IOException(msg)
 
-class GpkgReader(file: File, private val tableDefinition: TableDefinition) :
+class GpkgReader(file: File, val tableDefinition: TableDefinition) :
     Iterator<Map<String, Any?>>, Closeable {
     private val gpkg: GeoPackage = GeoPackage(file)
     private val reader: SimpleFeatureReader

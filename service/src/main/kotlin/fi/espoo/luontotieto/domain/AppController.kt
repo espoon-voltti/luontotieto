@@ -41,7 +41,6 @@ class AppController {
     @Autowired
     lateinit var jdbi: Jdbi
 
-
     @Qualifier("jdbi-paikkatieto")
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
@@ -117,21 +116,18 @@ class AppController {
                 )
             }
 
-        val data = reportFiles.mapNotNull ({rf -> getPaikkaTietoData(dataBucket, "${reportId}/${rf.id}", rf)})
-
+        val readers = reportFiles.mapNotNull({ rf -> getPaikkaTietoReader(dataBucket, "$reportId/${rf.id}", rf) })
 
         paikkatietoJdbi.inTransactionUnchecked { tx ->
-            data.forEach { data ->
-                    if (data.documentType === DocumentType.LIITO_ORAVA_PISTEET) {
-                        tx.insertLiitoOravaPisteet(data.data)
-                    }
-                    if (data.documentType === DocumentType.LIITO_ORAVA_ALUEET) {
-                        tx.insertLiitoOravaAlueet(data.data)
-                    }
-                    if (data.documentType === DocumentType.LIITO_ORAVA_VIIVAT) {
-                        tx.insertLiitoOravaYhteysviivat(data.data)
+            readers.forEach {
+                it.use { reader ->
+                    when (reader.tableDefinition) {
+                        LiitoOravaPisteet -> tx.insertLiitoOravaPisteet(reader.asSequence())
+                        LiitoOravaAlueet -> tx.insertLiitoOravaAlueet(reader.asSequence())
+                        LiitoOravaYhteysviivat -> tx.insertLiitoOravaYhteysviivat(reader.asSequence())
                     }
                 }
+            }
         }
 
         jdbi.inTransactionUnchecked { tx ->
@@ -166,39 +162,33 @@ class AppController {
         }
     }
 
-    data class DataWithDocumentType(val data: Sequence<Map<String, Any?>>, val documentType: DocumentType)
+//    data class DataWithDocumentType(val data: Sequence<Map<String, Any?>>, val documentType: DocumentType)
 
-    private fun getPaikkaTietoData(bucketName: String, fileName: String, reportFile: ReportFile) :DataWithDocumentType? {
-        val tableDefinitions = getTableDefitinionsByDocumentType(reportFile.documentType)
-        if(tableDefinitions == null){
-            return null
-        }
+    private fun getPaikkaTietoReader(
+        bucketName: String,
+        fileName: String,
+        reportFile: ReportFile
+    ): GpkgReader? {
+        val tableDefinition = getTableDefitinionByDocumentType(reportFile.documentType) ?: return null
 
         val document = documentClient.get(bucketName, fileName)
 
         val file = File.createTempFile(reportFile.fileName, "gpkg")
         file.writeBytes(document.bytes)
 
-        val reader = GpkgReader(file, tableDefinitions)
+        val reader = GpkgReader(file, tableDefinition)
 
-        val data = reader.asSequence()
-        val response = DataWithDocumentType(data, reportFile.documentType)
-
-        return response
+        return reader
     }
-
 }
 
-
-
-private fun getTableDefitinionsByDocumentType(documentType: DocumentType) =
+private fun getTableDefitinionByDocumentType(documentType: DocumentType) =
     when (documentType) {
         DocumentType.LIITO_ORAVA_PISTEET -> LiitoOravaPisteet
         DocumentType.LIITO_ORAVA_ALUEET -> LiitoOravaAlueet
         DocumentType.LIITO_ORAVA_VIIVAT -> LiitoOravaYhteysviivat
-        else ->  null
-        }
-
+        else -> null
+    }
 
 private fun getAndCheckFileName(file: MultipartFile) =
     (file.originalFilename?.takeIf { it.isNotBlank() } ?: throw BadRequest("Filename missing"))

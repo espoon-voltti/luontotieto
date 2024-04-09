@@ -7,7 +7,6 @@ package fi.espoo.luontotieto.domain
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -57,7 +56,8 @@ fun Handle.approveReport(
                 approved = TRUE,
                 updated_by = :updatedBy
             WHERE id = :reportId
-            """)
+            """
+    )
         .bind("reportId", reportId)
         .bind("updatedBy", user.id)
         .executeAndReturnGeneratedKeys()
