@@ -122,7 +122,6 @@ class AppController {
 
         paikkatietoJdbi.inTransactionUnchecked { tx ->
             data.forEach { data ->
-                run {
                     if (data.documentType === DocumentType.LIITO_ORAVA_PISTEET) {
                         tx.insertLiitoOravaPisteet(data.data)
                     }
@@ -133,7 +132,6 @@ class AppController {
                         tx.insertLiitoOravaYhteysviivat(data.data)
                     }
                 }
-            }
         }
 
         jdbi.inTransactionUnchecked { tx ->
