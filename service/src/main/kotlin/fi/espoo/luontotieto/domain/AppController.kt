@@ -10,6 +10,13 @@ import fi.espoo.luontotieto.config.audit
 import fi.espoo.luontotieto.s3.Document
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
+import fi.espoo.paikkatieto.domain.LiitoOravaAlueet
+import fi.espoo.paikkatieto.domain.LiitoOravaPisteet
+import fi.espoo.paikkatieto.domain.LiitoOravaYhteysviivat
+import fi.espoo.paikkatieto.domain.insertLiitoOravaAlueet
+import fi.espoo.paikkatieto.domain.insertLiitoOravaPisteet
+import fi.espoo.paikkatieto.domain.insertLiitoOravaYhteysviivat
+import fi.espoo.paikkatieto.reader.GpkgReader
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
@@ -25,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import java.io.File
 import java.util.UUID
 
 @RestController
@@ -32,6 +40,7 @@ class AppController {
     @Qualifier("jdbi-luontotieto")
     @Autowired
     lateinit var jdbi: Jdbi
+
 
     @Qualifier("jdbi-paikkatieto")
     @Autowired
@@ -94,6 +103,47 @@ class AppController {
         return jdbi.inTransactionUnchecked { tx -> tx.getReport(id, user) }
     }
 
+    @PostMapping("/reports/{reportId}/approve")
+    fun approveReport(
+        user: AuthenticatedUser,
+        @PathVariable reportId: UUID,
+    ) {
+        val dataBucket = bucketEnv.data
+
+        val reportFiles =
+            jdbi.inTransactionUnchecked { tx ->
+                tx.getReportFiles(
+                    reportId,
+                )
+            }
+
+        val data = reportFiles.map({rf -> getDataFromFile(dataBucket, "${reportId}/${rf.id}", rf)}).filterNotNull()
+
+
+        paikkatietoJdbi.inTransactionUnchecked { tx ->
+            data.forEach { data ->
+                run {
+                    if (data.documentType === DocumentType.LIITO_ORAVA_PISTEET) {
+                        tx.insertLiitoOravaPisteet(data.data)
+                    }
+                    if (data.documentType === DocumentType.LIITO_ORAVA_ALUEET) {
+                        tx.insertLiitoOravaAlueet(data.data)
+                    }
+                    if (data.documentType === DocumentType.LIITO_ORAVA_VIIVAT) {
+                        tx.insertLiitoOravaYhteysviivat(data.data)
+                    }
+                }
+            }
+        }
+
+        jdbi.inTransactionUnchecked { tx ->
+            tx.approveReport(
+                reportId,
+                user
+            )
+        }
+    }
+
     @GetMapping("/reports/{reportId}/files")
     fun getReportFiles(
         @PathVariable reportId: UUID
@@ -117,7 +167,40 @@ class AppController {
             tx.deleteReportFile(reportId, fileId)
         }
     }
+
+    data class DataWithDocumentType(val data: Sequence<Map<String, Any?>>, val documentType: DocumentType)
+
+    private fun getDataFromFile(bucketName: String, fileName: String, reportFile: ReportFile) :DataWithDocumentType? {
+        val tableDefinitions = getTableDefitinionsByDocumentType(reportFile.documentType)
+        if(tableDefinitions == null){
+            return null
+        }
+
+        val document = documentClient.get(bucketName, fileName)
+
+        val file = File.createTempFile(reportFile.fileName, "gpkg")
+        file.writeBytes(document.bytes)
+
+        val reader = GpkgReader(file, tableDefinitions)
+
+        val data = reader.asSequence()
+        val response = DataWithDocumentType(data, reportFile.documentType)
+
+        return response
+    }
+
 }
+
+
+
+private fun getTableDefitinionsByDocumentType(documentType: DocumentType) =
+    when (documentType) {
+        DocumentType.LIITO_ORAVA_PISTEET -> LiitoOravaPisteet
+        DocumentType.LIITO_ORAVA_ALUEET -> LiitoOravaAlueet
+        DocumentType.LIITO_ORAVA_VIIVAT -> LiitoOravaYhteysviivat
+        else ->  null
+        }
+
 
 private fun getAndCheckFileName(file: MultipartFile) =
     (file.originalFilename?.takeIf { it.isNotBlank() } ?: throw BadRequest("Filename missing"))

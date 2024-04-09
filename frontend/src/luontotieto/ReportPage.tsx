@@ -5,14 +5,16 @@
 import {
   ReportDetails,
   ReportFileDetails,
+  apiApproveReport,
   apiGetReport,
   apiGetReportFiles
 } from 'api'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-import { PageContainer, SectionContainer, VerticalGap } from '../shared/layout'
+import { FlexRight, PageContainer, SectionContainer, VerticalGap } from '../shared/layout'
 import { H1, Label } from '../shared/typography'
+import { Button } from 'shared/buttons/Button'
 
 export const ReportPage = React.memo(function ReportPage() {
   const { id } = useParams()
@@ -20,15 +22,17 @@ export const ReportPage = React.memo(function ReportPage() {
   const [report, setReport] = useState<ReportDetails | null>(null)
   const [reportFiles, setReportFiles] = useState<ReportFileDetails[]>([])
 
+  const [approving, setApproving] = useState<boolean>(false)
+
+
   useEffect(() => {
     void apiGetReport(id).then(setReport)
     void apiGetReportFiles(id).then(setReportFiles)
   }, [id])
-
   return (
     <PageContainer>
       <SectionContainer>
-        <H1>Selvitys</H1>
+        <H1>Selvitys</H1> {report?.approved  && (<>Approved</>)}
         <VerticalGap $size="L" />
         <Label>Nimi:</Label> {report?.name}
         <VerticalGap />
@@ -42,8 +46,28 @@ export const ReportPage = React.memo(function ReportPage() {
             </li>
           ))}
         </ul>
-      </SectionContainer>
+        <VerticalGap />
+        <FlexRight>
+          <Button
+            text="Hyväksy"
+            data-qa="approve-button"
+            primary
+            disabled={!report || approving || report.approved}
+            onClick={() => {
+              if (!report) return
+
+              setApproving(true)
+              apiApproveReport(report.id)
+                .then(() =>
+                  alert("Approved?")
+                )
+                .catch(() => setApproving(false))
+            }}
+          />
+        </FlexRight>
       <VerticalGap $size="m" />
+      </SectionContainer>
+
     </PageContainer>
   )
 })

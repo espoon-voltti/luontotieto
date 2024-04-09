@@ -28,6 +28,7 @@ export interface ReportDetails extends ReportInput {
   updated: Date
   createdBy: string
   updatedBy: string
+  approved: boolean
 }
 
 export interface ReportFileDetails extends ReportFileInput {
@@ -53,6 +54,13 @@ export const apiPostReport = async (
   await apiPostReportFile(report.id, data.files[0])
 
   return report
+}
+
+
+export const apiApproveReport = async (reportId: string
+): Promise<void> => {
+   await apiClient
+    .post(`/reports/${reportId}/approve`, {})
 }
 
 const apiPostReportFile = (
