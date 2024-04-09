@@ -162,8 +162,6 @@ class AppController {
         }
     }
 
-//    data class DataWithDocumentType(val data: Sequence<Map<String, Any?>>, val documentType: DocumentType)
-
     private fun getPaikkaTietoReader(
         bucketName: String,
         fileName: String,
