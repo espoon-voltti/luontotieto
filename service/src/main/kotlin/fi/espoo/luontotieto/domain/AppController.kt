@@ -112,12 +112,12 @@ class AppController {
 
         val reportFiles =
             jdbi.inTransactionUnchecked { tx ->
-                tx.getReportFiles(
+                tx.getPaikkaTietoReportFiles(
                     reportId,
                 )
             }
 
-        val data = reportFiles.map({rf -> getDataFromFile(dataBucket, "${reportId}/${rf.id}", rf)}).filterNotNull()
+        val data = reportFiles.mapNotNull ({rf -> getPaikkaTietoData(dataBucket, "${reportId}/${rf.id}", rf)})
 
 
         paikkatietoJdbi.inTransactionUnchecked { tx ->
@@ -168,7 +168,7 @@ class AppController {
 
     data class DataWithDocumentType(val data: Sequence<Map<String, Any?>>, val documentType: DocumentType)
 
-    private fun getDataFromFile(bucketName: String, fileName: String, reportFile: ReportFile) :DataWithDocumentType? {
+    private fun getPaikkaTietoData(bucketName: String, fileName: String, reportFile: ReportFile) :DataWithDocumentType? {
         val tableDefinitions = getTableDefitinionsByDocumentType(reportFile.documentType)
         if(tableDefinitions == null){
             return null
