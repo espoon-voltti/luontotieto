@@ -193,20 +193,6 @@ class AppController {
             .also { logger.audit(user, "CREATE_ORDER") }
     }
 
-//    @PostMapping("/orders/{orderId}")
-//    fun updateOrder(
-//        user: AuthenticatedUser,
-//        @PathVariable orderId: UUID,
-//        @RequestBody body: OrderAndReportDocumentInput
-//    ): UUID {
-//        return jdbi
-//            .inTransactionUnchecked { tx ->
-//                val orderId = tx.insertOrder(data = body.order, user = user)
-//                tx.insertOrderReportDocument(orderId, body.order)
-//                orderId
-//            }
-//            .also { logger.audit(user, "CREATE_ORDER") }
-//    }
 
     @GetMapping("/orders/{id}")
     fun getOrderById(
@@ -220,7 +206,7 @@ class AppController {
         }
     }
 
-    private fun getPaikkaTietoReader(
+    private fun getPaikkatietoReader(
         bucketName: String,
         fileName: String,
         reportFile: ReportFile
