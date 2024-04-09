@@ -88,6 +88,21 @@ fun Handle.getReportFiles(reportId: UUID): List<ReportFile> =
         .mapTo<ReportFile>()
         .list()
 
+fun Handle.getPaikkaTietoReportFiles(reportId: UUID): List<ReportFile> =
+    createQuery(
+        """
+                SELECT id, description, report_id AS "reportId", media_type AS "mediaType", 
+                file_name AS "fileName", document_type AS "documentType",
+                created, updated,  created_by AS "createdBy", updated_by AS "updatedBy"
+                FROM report_file
+                WHERE report_id = :reportId
+                AND document_type::text ILIKE 'paikkatieto:%'
+            """
+    )
+        .bind("reportId", reportId)
+        .mapTo<ReportFile>()
+        .list()
+
 fun Handle.deleteReportFile(
     reportId: UUID,
     fileId: UUID

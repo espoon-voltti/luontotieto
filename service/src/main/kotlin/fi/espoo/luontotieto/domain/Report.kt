@@ -16,10 +16,11 @@ data class Report(
     val id: UUID,
     val name: String,
     val description: String,
+    val approved: Boolean,
     val created: OffsetDateTime,
     val updated: OffsetDateTime,
     val createdBy: UUID,
-    val updatedBy: UUID
+    val updatedBy: UUID,
 )
 
 data class ReportInput(val name: String, val description: String)
@@ -32,7 +33,7 @@ fun Handle.insertReport(
         """
             INSERT INTO report (name, description, created_by, updated_by) 
             VALUES (:name, :description, :createdBy, :updatedBy)
-            RETURNING id, name, description, created, updated, created_by AS "createdBy", updated_by AS "updatedBy"
+            RETURNING id, name, description, created, updated, approved, created_by AS "createdBy", updated_by AS "updatedBy"
             """
     )
         .bind("name", data.name)
@@ -44,12 +45,32 @@ fun Handle.insertReport(
         .one()
 }
 
+fun Handle.approveReport(
+    reportId: UUID,
+    user: AuthenticatedUser
+): Report {
+    return createUpdate(
+        """
+            UPDATE report 
+              SET
+                approved = TRUE,
+                updated_by = :updatedBy
+            WHERE id = :reportId
+            """
+    )
+        .bind("reportId", reportId)
+        .bind("updatedBy", user.id)
+        .executeAndReturnGeneratedKeys()
+        .mapTo<Report>()
+        .one()
+}
+
 fun Handle.getReport(
     id: UUID,
     user: AuthenticatedUser
 ) = createQuery(
     """
-                SELECT id, name, description, created, updated, created_by AS "createdBy", updated_by AS "updatedBy"
+                SELECT id, name, description, created, updated, approved, created_by AS "createdBy", updated_by AS "updatedBy"
                 FROM report
                 WHERE id = :id AND (created_by = :userId OR updated_by = :userId)
             """

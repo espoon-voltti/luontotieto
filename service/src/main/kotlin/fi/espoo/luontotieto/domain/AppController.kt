@@ -10,6 +10,13 @@ import fi.espoo.luontotieto.config.audit
 import fi.espoo.luontotieto.s3.Document
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
+import fi.espoo.paikkatieto.domain.LiitoOravaAlueet
+import fi.espoo.paikkatieto.domain.LiitoOravaPisteet
+import fi.espoo.paikkatieto.domain.LiitoOravaYhteysviivat
+import fi.espoo.paikkatieto.domain.insertLiitoOravaAlueet
+import fi.espoo.paikkatieto.domain.insertLiitoOravaPisteet
+import fi.espoo.paikkatieto.domain.insertLiitoOravaYhteysviivat
+import fi.espoo.paikkatieto.reader.GpkgReader
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
@@ -25,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import java.io.File
 import java.util.UUID
 
 @RestController
@@ -94,6 +102,42 @@ class AppController {
         return jdbi.inTransactionUnchecked { tx -> tx.getReport(id, user) }
     }
 
+    @PostMapping("/reports/{reportId}/approve")
+    fun approveReport(
+        user: AuthenticatedUser,
+        @PathVariable reportId: UUID,
+    ) {
+        val dataBucket = bucketEnv.data
+
+        val reportFiles =
+            jdbi.inTransactionUnchecked { tx ->
+                tx.getPaikkaTietoReportFiles(
+                    reportId,
+                )
+            }
+
+        val readers = reportFiles.mapNotNull({ rf -> getPaikkaTietoReader(dataBucket, "$reportId/${rf.id}", rf) })
+
+        paikkatietoJdbi.inTransactionUnchecked { tx ->
+            readers.forEach {
+                it.use { reader ->
+                    when (reader.tableDefinition) {
+                        LiitoOravaPisteet -> tx.insertLiitoOravaPisteet(reader.asSequence())
+                        LiitoOravaAlueet -> tx.insertLiitoOravaAlueet(reader.asSequence())
+                        LiitoOravaYhteysviivat -> tx.insertLiitoOravaYhteysviivat(reader.asSequence())
+                    }
+                }
+            }
+        }
+
+        jdbi.inTransactionUnchecked { tx ->
+            tx.approveReport(
+                reportId,
+                user
+            )
+        }
+    }
+
     @GetMapping("/reports/{reportId}/files")
     fun getReportFiles(
         @PathVariable reportId: UUID
@@ -117,7 +161,32 @@ class AppController {
             tx.deleteReportFile(reportId, fileId)
         }
     }
+
+    private fun getPaikkaTietoReader(
+        bucketName: String,
+        fileName: String,
+        reportFile: ReportFile
+    ): GpkgReader? {
+        val tableDefinition = getTableDefitinionByDocumentType(reportFile.documentType) ?: return null
+
+        val document = documentClient.get(bucketName, fileName)
+
+        val file = File.createTempFile(reportFile.fileName, "gpkg")
+        file.writeBytes(document.bytes)
+
+        val reader = GpkgReader(file, tableDefinition)
+
+        return reader
+    }
 }
+
+private fun getTableDefitinionByDocumentType(documentType: DocumentType) =
+    when (documentType) {
+        DocumentType.LIITO_ORAVA_PISTEET -> LiitoOravaPisteet
+        DocumentType.LIITO_ORAVA_ALUEET -> LiitoOravaAlueet
+        DocumentType.LIITO_ORAVA_VIIVAT -> LiitoOravaYhteysviivat
+        else -> null
+    }
 
 private fun getAndCheckFileName(file: MultipartFile) =
     (file.originalFilename?.takeIf { it.isNotBlank() } ?: throw BadRequest("Filename missing"))
