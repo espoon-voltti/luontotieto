@@ -42,7 +42,7 @@ function App() {
         <Header>
           <FlexRowWithGaps>
             <img src={EspooLogo} width="100px" alt="Espoon kaupunki" />
-            <H1>Luontotieto portaali</H1>
+            <H1>Luontotietoportaali</H1>
           </FlexRowWithGaps>
           <UserHeader />
         </Header>

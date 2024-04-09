@@ -32,7 +32,7 @@ export const ReportPage = React.memo(function ReportPage() {
   return (
     <PageContainer>
       <SectionContainer>
-        <H1>Selvitys</H1> {report?.approved  && (<>Approved</>)}
+        <H1>Selvitys</H1> {report?.approved  && (<>Hyväksytty</>)}
         <VerticalGap $size="L" />
         <Label>Nimi:</Label> {report?.name}
         <VerticalGap />
@@ -59,7 +59,7 @@ export const ReportPage = React.memo(function ReportPage() {
               setApproving(true)
               apiApproveReport(report.id)
                 .then(() =>
-                  alert("Approved?")
+                  alert("Hyväksytty ja tiedostot lähetetty PostGIS kantaan.")
                 )
                 .catch(() => setApproving(false))
             }}
