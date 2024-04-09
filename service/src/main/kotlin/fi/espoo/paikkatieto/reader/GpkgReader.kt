@@ -16,8 +16,23 @@ private val logger = KotlinLogging.logger {}
 
 class GpkgReaderException(msg: String) : IOException(msg)
 
+enum class GpkgValidationErrorReason {
+    IS_NULL,
+    WRONG_TYPE
+}
+
+data class GpkgValidationError(
+    val column: String,
+    val value: Any?,
+    val reason: GpkgValidationErrorReason
+)
+
+data class GpkgFeature(val columns: Map<String, Any>, val errors: List<GpkgValidationError>) {
+    fun isValid() = errors.isEmpty()
+}
+
 class GpkgReader(file: File, val tableDefinition: TableDefinition) :
-    Iterator<Map<String, Any?>>, Closeable {
+    Iterator<GpkgFeature>, Closeable {
     private val gpkg: GeoPackage = GeoPackage(file)
     private val reader: SimpleFeatureReader
 
@@ -28,13 +43,28 @@ class GpkgReader(file: File, val tableDefinition: TableDefinition) :
         reader = gpkg.reader(featureEntry, null, null)
     }
 
+    fun isValid(): Boolean {
+        return this.asSequence().all { it.isValid() }
+    }
+
     override fun hasNext(): Boolean {
         return reader.hasNext()
     }
 
-    override fun next(): Map<String, Any> {
-        val feature = reader.next()
-        return tableDefinition.columns.associateWith { feature.getAttribute(it) }
+    override fun next(): GpkgFeature {
+        val gpkgFeature = reader.next()
+
+        val columns =
+            tableDefinition.columns.associate { column ->
+                Pair(column.name, gpkgFeature.getAttribute(column.name))
+            }
+
+        val errors =
+            tableDefinition.columns.mapNotNull { column ->
+                column.validate(gpkgFeature.getAttribute(column.name))
+            }
+
+        return GpkgFeature(columns = columns, errors = errors)
     }
 
     override fun close() {

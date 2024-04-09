@@ -17,12 +17,15 @@ import fi.espoo.paikkatieto.domain.insertLiitoOravaAlueet
 import fi.espoo.paikkatieto.domain.insertLiitoOravaPisteet
 import fi.espoo.paikkatieto.domain.insertLiitoOravaYhteysviivat
 import fi.espoo.paikkatieto.reader.GpkgReader
+import fi.espoo.paikkatieto.reader.GpkgValidationError
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -30,10 +33,12 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.util.UUID
+import kotlin.io.path.createTempFile
 
 @RestController
 class AppController {
@@ -52,6 +57,7 @@ class AppController {
     private val logger = KotlinLogging.logger {}
 
     @PostMapping("/reports")
+    @ResponseStatus(HttpStatus.CREATED)
     fun createReportFromScratch(
         user: AuthenticatedUser,
         @RequestBody body: ReportInput
@@ -62,36 +68,52 @@ class AppController {
     }
 
     @PostMapping("/reports/{reportId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @ResponseStatus(HttpStatus.CREATED)
     fun uploadReportFile(
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
         @RequestPart("file") file: MultipartFile,
         @RequestPart("description") description: String,
         @RequestParam("documentType") documentType: DocumentType
-    ) {
+    ): ResponseEntity<List<GpkgValidationError>> {
         val dataBucket = bucketEnv.data
 
         val fileName = getAndCheckFileName(file)
         val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
 
-        val id =
-            jdbi.inTransactionUnchecked { tx ->
-                tx.insertReportFile(
-                    ReportFileInput(reportId, description, contentType, fileName, documentType),
-                    user
+        val tableDefinition = getTableDefinitionByDocumentType(documentType)
+
+        val errors =
+            tableDefinition?.let { td ->
+                val tmpGpkgFile = createTempFile(fileName)
+                file.transferTo(tmpGpkgFile)
+                GpkgReader(File(tmpGpkgFile.toUri()), td).use { reader ->
+                    reader.asSequence().flatMap { it.errors }.toList()
+                }
+            } ?: emptyList()
+
+        if (errors.isEmpty()) {
+            val id =
+                jdbi.inTransactionUnchecked { tx ->
+                    tx.insertReportFile(
+                        ReportFileInput(reportId, description, contentType, fileName, documentType),
+                        user
+                    )
+                }
+
+            try {
+                documentClient.upload(
+                    dataBucket,
+                    Document(name = "$reportId/$id", bytes = file.bytes, contentType = contentType)
                 )
-            }
-        try {
-            documentClient.upload(
-                dataBucket,
-                Document(name = "$reportId/$id", bytes = file.bytes, contentType = contentType)
-            )
-        } catch (e: Exception) {
-            logger.error("Error uploading file: ", e)
-            jdbi.inTransactionUnchecked { tx ->
-                tx.deleteReportFile(reportId, id)
+                return ResponseEntity.status(HttpStatus.CREATED).body(errors)
+            } catch (e: Exception) {
+                logger.error("Error uploading file: ", e)
+                jdbi.inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, id) }
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors)
             }
         }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors)
     }
 
     @GetMapping("/reports/{id}")
@@ -103,6 +125,7 @@ class AppController {
     }
 
     @PostMapping("/reports/{reportId}/approve")
+    @ResponseStatus(HttpStatus.CREATED)
     fun approveReport(
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
@@ -116,7 +139,10 @@ class AppController {
                 )
             }
 
-        val readers = reportFiles.mapNotNull({ rf -> getPaikkaTietoReader(dataBucket, "$reportId/${rf.id}", rf) })
+        val readers =
+            reportFiles.mapNotNull { rf ->
+                getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf)
+            }
 
         paikkatietoJdbi.inTransactionUnchecked { tx ->
             readers.forEach {
@@ -124,18 +150,14 @@ class AppController {
                     when (reader.tableDefinition) {
                         LiitoOravaPisteet -> tx.insertLiitoOravaPisteet(reader.asSequence())
                         LiitoOravaAlueet -> tx.insertLiitoOravaAlueet(reader.asSequence())
-                        LiitoOravaYhteysviivat -> tx.insertLiitoOravaYhteysviivat(reader.asSequence())
+                        LiitoOravaYhteysviivat ->
+                            tx.insertLiitoOravaYhteysviivat(reader.asSequence())
                     }
                 }
             }
         }
 
-        jdbi.inTransactionUnchecked { tx ->
-            tx.approveReport(
-                reportId,
-                user
-            )
-        }
+        jdbi.inTransactionUnchecked { tx -> tx.approveReport(reportId, user) }
     }
 
     @GetMapping("/reports/{reportId}/files")
@@ -152,22 +174,18 @@ class AppController {
     ) {
         val dataBucket = bucketEnv.data
 
-        documentClient.delete(
-            dataBucket,
-            "$reportId/$fileId"
-        )
+        documentClient.delete(dataBucket, "$reportId/$fileId")
 
-        jdbi.inTransactionUnchecked { tx ->
-            tx.deleteReportFile(reportId, fileId)
-        }
+        jdbi.inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }
     }
 
-    private fun getPaikkaTietoReader(
+    private fun getPaikkatietoReader(
         bucketName: String,
         fileName: String,
         reportFile: ReportFile
     ): GpkgReader? {
-        val tableDefinition = getTableDefitinionByDocumentType(reportFile.documentType) ?: return null
+        val tableDefinition =
+            getTableDefinitionByDocumentType(reportFile.documentType) ?: return null
 
         val document = documentClient.get(bucketName, fileName)
 
@@ -180,7 +198,7 @@ class AppController {
     }
 }
 
-private fun getTableDefitinionByDocumentType(documentType: DocumentType) =
+private fun getTableDefinitionByDocumentType(documentType: DocumentType) =
     when (documentType) {
         DocumentType.LIITO_ORAVA_PISTEET -> LiitoOravaPisteet
         DocumentType.LIITO_ORAVA_ALUEET -> LiitoOravaAlueet
