@@ -4,7 +4,7 @@
 
 import {
   Order,
-  apiGetOrder
+  apiGetOrder,
 } from 'api'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -32,7 +32,15 @@ export const OrderPage = React.memo(function OrderPage() {
         <Label>Kuvaus:</Label> {order?.description}
         <VerticalGap />
         <Label>Kaavanumero:</Label> {order?.planNumber}
-
+        <VerticalGap />
+        <Label>Pyydetyt dokumentit:</Label>
+        <ul>
+          {order?.reportDocuments.map((rf) => (
+            <li key={rf.documentType}>
+              <code>{`${rf.documentType} :: ${rf.description}`}</code>
+            </li>
+          ))}
+        </ul>
         <VerticalGap />
       <VerticalGap $size="m" />
       </SectionContainer>

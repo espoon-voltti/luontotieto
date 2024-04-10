@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { Order, OrderInput } from 'api'
-import React, { useEffect, useMemo } from 'react'
+import { Order, OrderInput,  OrderReportDocumentInput, ReportFileDocumentType, getDocumentTypeTitle } from 'api'
+import React, { useEffect, useMemo, useState } from 'react'
 import { InputField } from 'shared/form/InputField'
 import { TextArea } from 'shared/form/TextArea'
 import { useDebouncedState } from 'shared/useDebouncedState'
@@ -16,6 +16,7 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { Label } from '../../shared/typography'
+import { Checkbox } from 'shared/form/Checkbox'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -32,8 +33,14 @@ interface EditProps {
 }
 type Props = CreateProps | ViewProps | EditProps
 
+
+
 export const OrderForm = React.memo(function OrderForm(props: Props) {
   const debounceDelay = 1500
+  const defaultReportDocuments = [
+    {checked: false, description: "", documentType: ReportFileDocumentType.LIITO_ORAVA_PISTEET },
+    {checked: false, description: "", documentType: ReportFileDocumentType.LIITO_ORAVA_ALUEET}
+  ]
 
   const [name, setName] = useDebouncedState(
     props.mode === 'CREATE' ? '' : props.order.name,
@@ -49,6 +56,26 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     props.mode === 'CREATE' ? '' : props.order.description,
     debounceDelay  )
 
+  
+  const [reportDocuments, setReportDocuments] = useState(props.mode === 'CREATE' ? defaultReportDocuments : 
+  defaultReportDocuments.map((rd) => {
+    const orderReportDocument = props.order.reportDocuments.find((row) => row.documentType === rd.documentType)
+    if(!orderReportDocument){
+      return rd
+    }else {
+      return {...orderReportDocument, checked: true}
+    }
+  })
+  )
+
+  const updateArray = (item: OrderCheckBoxComponentInput) => {
+    const newArray = reportDocuments.map((row) => {
+      return row.documentType === item.documentType ? item : row
+    })
+    setReportDocuments(newArray)
+  }
+  
+
 
 
   const validInput: OrderInput | null = useMemo(() => {
@@ -58,10 +85,9 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       name: name.trim(),
       description: description.trim(),
       planNumber: planNumber,
-      reportDocuments: [
-      ]
+      reportDocuments: reportDocuments.filter((rd) => rd.checked).map((rd) => ({description: rd.description, documentType: rd.documentType}))
     }
-  }, [name, description, planNumber])
+  }, [name, description, planNumber, reportDocuments])
 
   useEffect(() => {
     if (props.mode !== 'VIEW') {
@@ -112,7 +138,58 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
         </RowOfInputs>
       </GroupOfInputRows>
       <VerticalGap $size="m" />
+      <GroupOfInputRows>
+        <RowOfInputs>
+        <LabeledInput $cols={8}>
+        <Label>Kerättävät dokumentit</Label>
+        <OrderReportDocumentInput data={{checked: false, description: "", documentType: ReportFileDocumentType.LIITO_ORAVA_PISTEET}}
+          onChange={updateArray}/>
+          <OrderReportDocumentInput data={{checked: false, description: "", documentType: ReportFileDocumentType.LIITO_ORAVA_ALUEET}}
+          onChange={updateArray}/>
+      </LabeledInput>
+
+        </RowOfInputs>
+      </GroupOfInputRows>
+      <VerticalGap $size="m" />
       <VerticalGap $size="XL" />
     </FlexCol>
+  )
+})
+
+
+interface OrderCheckBoxComponentInput extends OrderReportDocumentInput {
+  checked: boolean
+}
+
+interface OrderReportDocumentInputProps {
+  data: OrderCheckBoxComponentInput
+  onChange: (data: OrderCheckBoxComponentInput) => void
+}
+
+
+const OrderReportDocumentInput = React.memo(function OrderReportDocumentInput({
+  data, onChange
+}: OrderReportDocumentInputProps) {
+  const debounceDelay = 1500
+
+  const [checked, setChecked] = useState(data.checked ?? false)
+  const [description, setDescription] = useDebouncedState(
+     data.description,
+    debounceDelay)
+
+    useEffect(() => {
+        onChange({checked, description, documentType: data.documentType})
+    }, [checked, description])
+
+  return (
+    <RowOfInputs>
+          <Checkbox label={getDocumentTypeTitle(data.documentType)} checked={checked} onChange={setChecked}></Checkbox>
+            <InputField
+              onChange={(value) => {
+                setDescription(value)
+              }}
+              value={description}
+            />
+    </RowOfInputs>
   )
 })

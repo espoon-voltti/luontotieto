@@ -11,6 +11,17 @@ export interface ReportInput {
   files: ReportFileInput[]
 }
 
+export function getDocumentTypeTitle(dt: ReportFileDocumentType){
+  switch (dt) {
+    case ReportFileDocumentType.LIITO_ORAVA_ALUEET:
+      return 'Liito-orava alueet'
+    case ReportFileDocumentType.LIITO_ORAVA_PISTEET:
+      return 'Liito-orava pisteet'
+    default:
+      return 'Puuttuu'
+  }
+
+}
 export enum ReportFileDocumentType {
   LIITO_ORAVA_PISTEET,
   LIITO_ORAVA_ALUEET
@@ -96,7 +107,7 @@ export interface OrderInput {
       name: string
       description: string
       planNumber?: string
-      reportDocuments: OrderReportDocument[]
+      reportDocuments: OrderReportDocumentInput[]
 }
 
 export interface OrderReportDocument {
@@ -104,6 +115,8 @@ export interface OrderReportDocument {
   documentType: ReportFileDocumentType
   description: string
 }
+
+export interface OrderReportDocumentInput extends Pick<OrderReportDocument, "description" | "documentType">{}
 
 export const apiPostOrder = async (
   data: OrderInput
