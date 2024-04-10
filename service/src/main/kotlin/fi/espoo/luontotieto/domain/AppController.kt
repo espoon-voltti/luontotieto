@@ -193,7 +193,6 @@ class AppController {
             .also { logger.audit(user, "CREATE_ORDER") }
     }
 
-
     @GetMapping("/orders/{id}")
     fun getOrderById(
         user: AuthenticatedUser,
