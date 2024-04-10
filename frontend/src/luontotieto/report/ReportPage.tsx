@@ -12,8 +12,8 @@ import {
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-import { FlexRight, PageContainer, SectionContainer, VerticalGap } from '../shared/layout'
-import { H1, Label } from '../shared/typography'
+import { FlexRight, PageContainer, SectionContainer, VerticalGap } from '../../shared/layout'
+import { H1, Label } from '../../shared/typography'
 import { Button } from 'shared/buttons/Button'
 
 export const ReportPage = React.memo(function ReportPage() {

@@ -82,3 +82,44 @@ export const apiGetReportFiles = (id: string): Promise<ReportFileDetails[]> =>
   apiClient
     .get<ReportFileDetails[]>(`/reports/${id}/files`)
     .then((res) => res.data)
+
+
+export interface Order extends OrderInput {
+  id: string
+  created: Date
+  updated: Date
+  createdBy: string
+  updatedBy: string
+}
+
+export interface OrderInput {
+      name: string
+      description: string
+      planNumber?: string
+      reportDocuments: OrderReportDocument[]
+}
+
+export interface OrderReportDocument {
+  orderId: string,
+  documentType: ReportFileDocumentType
+  description: string
+}
+
+export const apiPostOrder = async (
+  data: OrderInput
+): Promise<string> => {
+  const body: JsonOf<OrderInput> = {
+    ...data
+  }
+
+  const orderId = await apiClient
+    .post<string>('/orders', body)
+    .then((r) => r.data)
+
+  return orderId
+}
+
+export const apiGetOrder = (id: string): Promise<Order> =>
+  apiClient.get<Order>(`/orders/${id}`).then((res) => res.data)
+
+    
