@@ -33,7 +33,6 @@ export const CreateOrderPage = React.memo(function CreateOrderPage(
   const navigate = useNavigate()
   const [orderInput, setOrder] = useState<OrderInput | null>(null)
   const [submitting, setSubmitting] = useState<boolean>(false)
-  console.log("orderInput: ", orderInput)
   return (
     <PageContainer>
       <SectionContainer>
