@@ -179,7 +179,48 @@ class AppController {
         jdbi.inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }
     }
 
-    private fun getPaikkatietoReader(
+    @PostMapping("/orders")
+    fun createOrderFromScratch(
+        user: AuthenticatedUser,
+        @RequestBody body: OrderInput
+    ): UUID {
+        return jdbi
+            .inTransactionUnchecked { tx ->
+                val orderId = tx.insertOrder(data = body, user = user)
+                tx.insertOrderReportDocuments(orderId, body.reportDocuments)
+                orderId
+            }
+            .also { logger.audit(user, "CREATE_ORDER") }
+    }
+
+//    @PostMapping("/orders/{orderId}")
+//    fun updateOrder(
+//        user: AuthenticatedUser,
+//        @PathVariable orderId: UUID,
+//        @RequestBody body: OrderAndReportDocumentInput
+//    ): UUID {
+//        return jdbi
+//            .inTransactionUnchecked { tx ->
+//                val orderId = tx.insertOrder(data = body.order, user = user)
+//                tx.insertOrderReportDocument(orderId, body.order)
+//                orderId
+//            }
+//            .also { logger.audit(user, "CREATE_ORDER") }
+//    }
+
+    @GetMapping("/orders/{id}")
+    fun getOrderById(
+        user: AuthenticatedUser,
+        @PathVariable id: UUID
+    ): Order {
+        return jdbi.inTransactionUnchecked { tx ->
+            val order = tx.getOrder(id, user)
+            val reportDocuments = tx.getOrderReportDocuments(order.id)
+            Order(order.id, order.name, order.description, order.planNumber, order.created, order.updated, order.createdBy, order.updatedBy, reportDocuments)
+        }
+    }
+
+    private fun getPaikkaTietoReader(
         bucketName: String,
         fileName: String,
         reportFile: ReportFile
