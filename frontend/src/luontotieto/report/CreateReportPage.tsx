@@ -33,7 +33,6 @@ export const CreateReportPage = React.memo(function CreateReportPage(
   const navigate = useNavigate()
   const [reportInput, setReportInput] = useState<ReportInput | null>(null)
   const [submitting, setSubmitting] = useState<boolean>(false)
-  console.log(reportInput)
 
   return (
     <PageContainer>
