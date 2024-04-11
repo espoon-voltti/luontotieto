@@ -4,6 +4,7 @@ CREATE TABLE "order"
     name        TEXT                     NOT NULL,
     description TEXT                     NOT NULL,
     plan_number TEXT,
+    report_documents jsonb               NOT NULL DEFAULT '{}'::jsonb,
     created     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     updated     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     created_by  UUID                     NOT NULL REFERENCES users (id),
@@ -45,12 +46,5 @@ CREATE TRIGGER set_order_file_timestamp
     FOR EACH ROW
 EXECUTE PROCEDURE trigger_refresh_updated();
 
-CREATE TABLE order_report_document
-(
-    order_id      UUID                     NOT NULL REFERENCES "order" (id),
-    description   TEXT,
-    document_type document_type            NOT NULL,
-    PRIMARY KEY (order_id, document_type)
-);
 
 

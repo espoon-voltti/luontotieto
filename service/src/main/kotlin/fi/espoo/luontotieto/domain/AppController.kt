@@ -180,15 +180,14 @@ class AppController {
     }
 
     @PostMapping("/orders")
+    @ResponseStatus(HttpStatus.CREATED)
     fun createOrderFromScratch(
         user: AuthenticatedUser,
         @RequestBody body: OrderInput
     ): UUID {
         return jdbi
             .inTransactionUnchecked { tx ->
-                val orderId = tx.insertOrder(data = body, user = user)
-                tx.insertOrderReportDocuments(orderId, body.reportDocuments)
-                orderId
+               tx.insertOrder(data = body, user = user)
             }
             .also { logger.audit(user, "CREATE_ORDER") }
     }
@@ -199,13 +198,7 @@ class AppController {
         @PathVariable id: UUID
     ): Order {
         return jdbi.inTransactionUnchecked { tx ->
-            val order = tx.getOrder(id, user)
-            val reportDocuments = tx.getOrderReportDocuments(order.id)
-            Order(
-                order.id, order.name, order.description,
-                order.planNumber, order.created, order.updated,
-                order.createdBy, order.updatedBy, reportDocuments
-            )
+             tx.getOrder(id, user)
         }
     }
 

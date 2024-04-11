@@ -7,10 +7,21 @@ package fi.espoo.luontotieto.domain
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
+import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
+import org.jdbi.v3.core.qualifier.QualifiedType
+import org.jdbi.v3.json.Json
 import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
+
+
+var qualifiedType: QualifiedType<OrderReportDocument> = QualifiedType.of(OrderReportDocument::class.java).with(Json::class.java)
+
+data class OrderReportDocument(
+    val description: String,
+    val documentType: DocumentType
+)
 
 data class Order(
     val id: UUID,
@@ -21,14 +32,14 @@ data class Order(
     val updated: OffsetDateTime,
     val createdBy: UUID,
     val updatedBy: UUID,
-    val reportDocuments: List<OrderReportDocument>? = listOf()
+    @Json val reportDocuments: List<OrderReportDocument>
 )
 
 data class OrderInput(
     val name: String,
     val description: String,
     val planNumber: String? = null,
-    val reportDocuments: List<OrderReportDocumentInput>
+    @Json val reportDocuments: List<OrderReportDocument>
 )
 
 fun Handle.insertOrder(
@@ -37,14 +48,12 @@ fun Handle.insertOrder(
 ): UUID {
     return createUpdate(
         """
-            INSERT INTO "order" (name, description, plan_number, created_by, updated_by) 
-            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy)
+            INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents) 
+            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments)
             RETURNING id
             """
     )
-        .bind("name", data.name)
-        .bind("description", data.description)
-        .bind("planNumber", data.planNumber)
+        .bindKotlin(data)
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
         .executeAndReturnGeneratedKeys()
@@ -59,7 +68,8 @@ fun Handle.getOrder(
     createQuery(
         """
             SELECT id, name, description, created, updated,
-             plan_number as "planNumber", created_by AS "createdBy", updated_by AS "updatedBy"
+             plan_number as "planNumber", report_documents as "reportDocuments",
+             created_by AS "createdBy", updated_by AS "updatedBy"
             FROM "order"
             WHERE id = :id AND (created_by = :userId OR updated_by = :userId)
             """
