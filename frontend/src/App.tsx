@@ -1,8 +1,13 @@
 // SPDX-FileCopyrightText: 2023-2024 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
+import { FrontPage } from 'luontotieto/FrontPage'
+import { CreateOrderPage } from 'luontotieto/order/CreateOrderPage'
+import { OrderPage } from 'luontotieto/order/OrderPage'
+import { CreateReportPage } from 'luontotieto/report/CreateReportPage'
+import { ReportPage } from 'luontotieto/report/ReportPage'
 import React, { Fragment } from 'react'
-import { Navigate, createBrowserRouter, Outlet } from 'react-router-dom'
+import { Navigate, createBrowserRouter, Outlet, Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { AuthGuard } from './auth/AuthGuard'
@@ -12,11 +17,6 @@ import { UserHeader } from './auth/UserHeader'
 import { useAuthStatus } from './auth/auth-status'
 import { FlexRowWithGaps } from './shared/layout'
 import { H1 } from './shared/typography'
-import { CreateOrderPage } from 'luontotieto/order/CreateOrderPage'
-import { OrderPage } from 'luontotieto/order/OrderPage'
-import { FrontPage } from 'luontotieto/FrontPage'
-import { CreateReportPage } from 'luontotieto/report/CreateReportPage'
-import { ReportPage } from 'luontotieto/report/ReportPage'
 
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
@@ -44,7 +44,9 @@ function App() {
         <Header>
           <FlexRowWithGaps>
             <img src={EspooLogo} width="100px" alt="Espoon kaupunki" />
-            <H1>Luontotietoportaali</H1>
+            <Link to="/luontoselvitys">
+              <H1>Luontotietoportaali</H1>
+            </Link>
           </FlexRowWithGaps>
           <UserHeader />
         </Header>

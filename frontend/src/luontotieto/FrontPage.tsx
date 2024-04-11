@@ -3,34 +3,21 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Button } from 'shared/buttons/Button'
 
 import { PageContainer, SectionContainer, VerticalGap } from '../shared/layout'
-import { Label } from '../shared/typography'
+
+import { OrderList } from './order/OrderList'
+import { ReportList } from './report/ReportList'
 
 export const FrontPage = React.memo(function FrontPage() {
-  const navigate = useNavigate()
-
   return (
     <PageContainer>
-      <SectionContainer $minHeight="600px">
-        <Label>Etusivu</Label>
-        <Button
-          onClick={() => {
-            navigate('/luontotieto/tilaus/uusi')
-          }}
-          text="Luo uusi tilaus"
-        />
-
-        <Button
-          onClick={() => {
-            navigate('/luontotieto/selvitys/uusi')
-          }}
-          text="Luo uusi selvitys"
-        />
-
-        <VerticalGap />
+      <SectionContainer>
+        <ReportList />
+      </SectionContainer>
+      <VerticalGap $size="L" />
+      <SectionContainer>
+        <OrderList />
       </SectionContainer>
     </PageContainer>
   )

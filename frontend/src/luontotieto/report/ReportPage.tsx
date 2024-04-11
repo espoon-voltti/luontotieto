@@ -11,10 +11,15 @@ import {
 } from 'api'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-
-import { FlexRight, PageContainer, SectionContainer, VerticalGap } from '../../shared/layout'
-import { H1, Label } from '../../shared/typography'
 import { Button } from 'shared/buttons/Button'
+
+import {
+  FlexRight,
+  PageContainer,
+  SectionContainer,
+  VerticalGap
+} from '../../shared/layout'
+import { H1, Label } from '../../shared/typography'
 
 export const ReportPage = React.memo(function ReportPage() {
   const { id } = useParams()
@@ -24,7 +29,6 @@ export const ReportPage = React.memo(function ReportPage() {
 
   const [approving, setApproving] = useState<boolean>(false)
 
-
   useEffect(() => {
     void apiGetReport(id).then(setReport)
     void apiGetReportFiles(id).then(setReportFiles)
@@ -32,7 +36,7 @@ export const ReportPage = React.memo(function ReportPage() {
   return (
     <PageContainer>
       <SectionContainer>
-        <H1>Selvitys</H1> {report?.approved  && (<>Hyväksytty</>)}
+        <H1>Selvitys</H1> {report?.approved && <>Hyväksytty</>}
         <VerticalGap $size="L" />
         <Label>Nimi:</Label> {report?.name}
         <VerticalGap />
@@ -59,15 +63,14 @@ export const ReportPage = React.memo(function ReportPage() {
               setApproving(true)
               apiApproveReport(report.id)
                 .then(() =>
-                  alert("Hyväksytty ja tiedostot lähetetty PostGIS kantaan.")
+                  alert('Hyväksytty ja tiedostot lähetetty PostGIS kantaan.')
                 )
                 .catch(() => setApproving(false))
             }}
           />
         </FlexRight>
-      <VerticalGap $size="m" />
+        <VerticalGap $size="m" />
       </SectionContainer>
-
     </PageContainer>
   )
 })
