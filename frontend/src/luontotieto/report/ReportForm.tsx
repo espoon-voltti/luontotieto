@@ -15,8 +15,8 @@ import {
   LabeledInput,
   RowOfInputs,
   VerticalGap
-} from '../shared/layout'
-import { Label } from '../shared/typography'
+} from '../../shared/layout'
+import { Label } from '../../shared/typography'
 
 interface CreateProps {
   mode: 'CREATE'

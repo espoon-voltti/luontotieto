@@ -16,6 +16,12 @@ export const FrontPage = React.memo(function FrontPage() {
     <PageContainer>
       <SectionContainer $minHeight="600px">
         <Label>Etusivu</Label>
+        <Button
+          onClick={() => {
+            navigate('/luontotieto/tilaus/uusi')
+          }}
+          text="Luo uusi tilaus"
+        />
 
         <Button
           onClick={() => {

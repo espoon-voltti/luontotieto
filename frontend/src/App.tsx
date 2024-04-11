@@ -1,9 +1,6 @@
 // SPDX-FileCopyrightText: 2023-2024 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
-import { CreateReportPage } from 'luontotieto/CreateReportPage'
-import { FrontPage } from 'luontotieto/FrontPage'
-import { ReportPage } from 'luontotieto/ReportPage'
 import React, { Fragment } from 'react'
 import { Navigate, createBrowserRouter, Outlet } from 'react-router-dom'
 import styled from 'styled-components'
@@ -15,6 +12,11 @@ import { UserHeader } from './auth/UserHeader'
 import { useAuthStatus } from './auth/auth-status'
 import { FlexRowWithGaps } from './shared/layout'
 import { H1 } from './shared/typography'
+import { CreateOrderPage } from 'luontotieto/order/CreateOrderPage'
+import { OrderPage } from 'luontotieto/order/OrderPage'
+import { FrontPage } from 'luontotieto/FrontPage'
+import { CreateReportPage } from 'luontotieto/report/CreateReportPage'
+import { ReportPage } from 'luontotieto/report/ReportPage'
 
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
@@ -70,6 +72,22 @@ export const appRouter = createBrowserRouter([
         element: (
           <AuthGuard allow="AUTHENTICATED_ONLY">
             <FrontPage />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/luontotieto/tilaus/uusi',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <CreateOrderPage mode="CREATE" />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/luontotieto/tilaus/:id',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <OrderPage />
           </AuthGuard>
         )
       },

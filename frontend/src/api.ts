@@ -11,6 +11,17 @@ export interface ReportInput {
   files: ReportFileInput[]
 }
 
+export function getDocumentTypeTitle(dt: ReportFileDocumentType){
+  switch (dt) {
+    case ReportFileDocumentType.LIITO_ORAVA_ALUEET:
+      return 'Liito-orava alueet'
+    case ReportFileDocumentType.LIITO_ORAVA_PISTEET:
+      return 'Liito-orava pisteet'
+    default:
+      return 'Puuttuu'
+  }
+
+}
 export enum ReportFileDocumentType {
   LIITO_ORAVA_PISTEET,
   LIITO_ORAVA_ALUEET
@@ -82,3 +93,46 @@ export const apiGetReportFiles = (id: string): Promise<ReportFileDetails[]> =>
   apiClient
     .get<ReportFileDetails[]>(`/reports/${id}/files`)
     .then((res) => res.data)
+
+
+export interface Order extends OrderInput {
+  id: string
+  created: Date
+  updated: Date
+  createdBy: string
+  updatedBy: string
+}
+
+export interface OrderInput {
+      name: string
+      description: string
+      planNumber?: string
+      reportDocuments: OrderReportDocumentInput[]
+}
+
+export interface OrderReportDocument {
+  orderId: string,
+  documentType: ReportFileDocumentType
+  description: string
+}
+
+export interface OrderReportDocumentInput extends Pick<OrderReportDocument, "description" | "documentType">{}
+
+export const apiPostOrder = async (
+  data: OrderInput
+): Promise<string> => {
+  const body: JsonOf<OrderInput> = {
+    ...data
+  }
+
+  const orderId = await apiClient
+    .post<string>('/orders', body)
+    .then((r) => r.data)
+
+  return orderId
+}
+
+export const apiGetOrder = (id: string): Promise<Order> =>
+  apiClient.get<Order>(`/orders/${id}`).then((res) => res.data)
+
+    

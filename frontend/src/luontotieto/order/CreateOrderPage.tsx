@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { ReportInput, apiPostReport } from 'api'
+import { OrderInput, apiPostOrder } from 'api'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from 'shared/buttons/Button'
@@ -12,10 +12,10 @@ import {
   PageContainer,
   SectionContainer,
   VerticalGap
-} from '../shared/layout'
-import { H1 } from '../shared/typography'
+} from '../../shared/layout'
+import { H1 } from '../../shared/typography'
 
-import { ReportForm } from './ReportForm'
+import { OrderForm } from './OrderForm'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -23,24 +23,23 @@ interface CreateProps {
 
 interface EditProps {
   mode: 'EDIT'
-  reportId: string
+  orderId: string
 }
 type Props = CreateProps | EditProps
 
-export const CreateReportPage = React.memo(function CreateReportPage(
+export const CreateOrderPage = React.memo(function CreateOrderPage(
   props: Props
 ) {
   const navigate = useNavigate()
-  const [reportInput, setReportInput] = useState<ReportInput | null>(null)
+  const [orderInput, setOrder] = useState<OrderInput | null>(null)
   const [submitting, setSubmitting] = useState<boolean>(false)
-
   return (
     <PageContainer>
       <SectionContainer>
-        <H1>Selvitys</H1>
+        <H1>Tilaus</H1>
         <VerticalGap $size="m" />
         {props.mode == 'CREATE' && (
-          <ReportForm mode="CREATE" onChange={setReportInput} />
+          <OrderForm mode="CREATE" onChange={setOrder} />
         )}
         <VerticalGap />
         <FlexRight>
@@ -48,14 +47,14 @@ export const CreateReportPage = React.memo(function CreateReportPage(
             text="Tallenna"
             data-qa="save-button"
             primary
-            disabled={!reportInput || submitting}
+            disabled={!orderInput || submitting}
             onClick={() => {
-              if (!reportInput) return
+              if (!orderInput) return
 
               setSubmitting(true)
-              apiPostReport(reportInput)
-                .then((report) =>
-                  navigate(`/luontotieto/selvitys/${report.id}`)
+              apiPostOrder(orderInput)
+                .then((orderId) =>
+                  navigate(`/luontotieto/tilaus/${orderId}`)
                 )
                 .catch(() => setSubmitting(false))
             }}

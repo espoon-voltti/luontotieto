@@ -179,6 +179,29 @@ class AppController {
         jdbi.inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }
     }
 
+    @PostMapping("/orders")
+    @ResponseStatus(HttpStatus.CREATED)
+    fun createOrderFromScratch(
+        user: AuthenticatedUser,
+        @RequestBody body: OrderInput
+    ): UUID {
+        return jdbi
+            .inTransactionUnchecked { tx ->
+                tx.insertOrder(data = body, user = user)
+            }
+            .also { logger.audit(user, "CREATE_ORDER") }
+    }
+
+    @GetMapping("/orders/{id}")
+    fun getOrderById(
+        user: AuthenticatedUser,
+        @PathVariable id: UUID
+    ): Order {
+        return jdbi.inTransactionUnchecked { tx ->
+            tx.getOrder(id, user)
+        }
+    }
+
     private fun getPaikkatietoReader(
         bucketName: String,
         fileName: String,
