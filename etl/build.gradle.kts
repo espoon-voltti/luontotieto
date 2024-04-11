@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 plugins {
-    id("org.flywaydb.flyway") version "10.10.0"
+    id("org.flywaydb.flyway") version "10.11.0"
 }
 
 repositories {
