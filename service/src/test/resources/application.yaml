@@ -25,9 +25,3 @@ spring:
       jdbcUrl: "jdbc:postgresql://${PAIKKATIETO_DB_HOST:localhost}:${PAIKKATIETO_DB_PORT:5433}/paikkatietodb_it"
       username: "paikkatietodb"
       password: "postgres"
-
-logging:
-  level:
-    com:
-      zaxxer:
-        hikari: "TRACE"

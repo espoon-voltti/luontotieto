@@ -4,15 +4,12 @@
 
 package fi.espoo.paikkatieto
 
-import fi.espoo.paikkatieto.domain.Column
 import fi.espoo.paikkatieto.domain.LiitoOravaAlueet
 import fi.espoo.paikkatieto.domain.LiitoOravaPisteet
-import fi.espoo.paikkatieto.domain.TableDefinition
 import fi.espoo.paikkatieto.reader.GpkgFeature
 import fi.espoo.paikkatieto.reader.GpkgReader
 import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.reader.GpkgValidationErrorReason
-import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
 import java.io.File
 import java.sql.Date
@@ -115,7 +112,7 @@ class GpkgReaderTest {
 
     @Test
     fun `reads liito_orava_alueet GeoPackage file with errors`() {
-        val file = File("src/test/resources/test-data/liito_orava_alueet.gpkg")
+        val file = File("src/test/resources/test-data/liito_orava_alueet_broken.gpkg")
         val polygon =
             WKTReader()
                 .read(
@@ -136,56 +133,28 @@ class GpkgReaderTest {
                             "havaitsija" to "Harri Havaitsija",
                             "aluetyyppi" to "Elinalue",
                             "aluekuvaus" to "Alue oravalle",
-                            "koko" to 1234.0,
+                            "koko" to "123",
                             "lisatieto" to null,
                             "viite" to "Espoo 4/2024",
                             "kunta" to 79,
-                            "tarkkuus" to "Muu",
-                            "extra_column" to null
+                            "tarkkuus" to null
                         ),
                     errors =
                         listOf(
                             GpkgValidationError(
-                                column = "havaitsija",
-                                value = "Harri Havaitsija",
+                                column = "koko",
+                                value = "123",
                                 reason = GpkgValidationErrorReason.WRONG_TYPE
                             ),
                             GpkgValidationError(
-                                column = "extra_column",
+                                column = "tarkkuus",
                                 value = null,
                                 reason = GpkgValidationErrorReason.IS_NULL
                             )
                         )
                 )
             )
-
-        val tableDefinition =
-            object : TableDefinition {
-                override val columns =
-                    listOf(
-                        Column(name = "geom", kClass = Geometry::class),
-                        Column(name = "pvm", kClass = Date::class),
-                        Column(name = "havaitsija", kClass = Int::class),
-                        Column(
-                            name = "aluetyyppi",
-                            kClass = String::class,
-                            sqlType = "liito_orava_aluetyyppi"
-                        ),
-                        Column(name = "aluekuvaus", kClass = String::class, isNullable = true),
-                        Column(name = "koko", kClass = Double::class),
-                        Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                        Column(name = "viite", kClass = String::class),
-                        Column(name = "kunta", kClass = Int::class, isNullable = true),
-                        Column(
-                            name = "tarkkuus",
-                            kClass = String::class,
-                            sqlType = "luontotieto_mittaustyyppi"
-                        ),
-                        Column(name = "extra_column", kClass = Int::class)
-                    )
-            }
-
-        GpkgReader(file, tableDefinition).use { reader ->
+        GpkgReader(file, LiitoOravaAlueet).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
         }
