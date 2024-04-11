@@ -9,14 +9,10 @@ import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
-import org.jdbi.v3.core.qualifier.QualifiedType
 import org.jdbi.v3.json.Json
 import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
-
-
-var qualifiedType: QualifiedType<OrderReportDocument> = QualifiedType.of(OrderReportDocument::class.java).with(Json::class.java)
 
 data class OrderReportDocument(
     val description: String,
