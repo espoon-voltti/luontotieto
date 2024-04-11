@@ -38,7 +38,7 @@ fun Handle.insertOrderReportDocuments(
     batchInsert.execute()
 }
 
-fun Handle.getOrderReportDocuments(orderId: UUID,): List<OrderReportDocument> =
+fun Handle.getOrderReportDocuments(orderId: UUID): List<OrderReportDocument> =
     createQuery(
         """
             SELECT order_id, description, document_type as "documentType"
