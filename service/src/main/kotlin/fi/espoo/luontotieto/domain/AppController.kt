@@ -179,6 +179,16 @@ class AppController {
         jdbi.inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }
     }
 
+    @GetMapping("/orders/{id}")
+    fun getOrderById(
+        user: AuthenticatedUser,
+        @PathVariable id: UUID
+    ): Order {
+        return jdbi.inTransactionUnchecked { tx ->
+            tx.getOrder(id, user)
+        }
+    }
+
     @PostMapping("/orders")
     @ResponseStatus(HttpStatus.CREATED)
     fun createOrderFromScratch(
@@ -192,14 +202,57 @@ class AppController {
             .also { logger.audit(user, "CREATE_ORDER") }
     }
 
-    @GetMapping("/orders/{id}")
-    fun getOrderById(
+    @PostMapping("/orders/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @ResponseStatus(HttpStatus.CREATED)
+    fun uploadOrderFile(
         user: AuthenticatedUser,
-        @PathVariable id: UUID
-    ): Order {
-        return jdbi.inTransactionUnchecked { tx ->
-            tx.getOrder(id, user)
+        @PathVariable orderId: UUID,
+        @RequestPart("file") file: MultipartFile,
+        @RequestPart("description") description: String,
+        @RequestParam("documentType") documentType: OrderDocumentType
+    ) {
+        val dataBucket = bucketEnv.data
+
+        val fileName = getAndCheckFileName(file)
+        val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
+
+        val id =
+            jdbi.inTransactionUnchecked { tx ->
+                tx.insertOrderFile(
+                    OrderFileInput(orderId, description, contentType, fileName, documentType),
+                    user
+                )
+            }
+
+        try {
+            documentClient.upload(
+                dataBucket,
+                Document(name = "$orderId/$id", bytes = file.bytes, contentType = contentType)
+            )
+        } catch (e: Exception) {
+            logger.error("Error uploading file: ", e)
+            jdbi.inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, id) }
+            throw BadRequest("Error uploading file")
         }
+    }
+
+    @GetMapping("/orders/{orderId}/files")
+    fun getOrderFiles(
+        @PathVariable orderId: UUID
+    ): List<OrderFile> {
+        return jdbi.inTransactionUnchecked { tx -> tx.getOrderFiles(orderId) }
+    }
+
+    @DeleteMapping("/orders/{orderId}/files/{fileId}")
+    fun deleteOrderFile(
+        @PathVariable orderId: UUID,
+        @PathVariable fileId: UUID
+    ) {
+        val dataBucket = bucketEnv.data
+
+        documentClient.delete(dataBucket, "$orderId/$fileId")
+
+        jdbi.inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, fileId) }
     }
 
     private fun getPaikkatietoReader(
