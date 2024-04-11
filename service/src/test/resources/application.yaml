@@ -6,7 +6,7 @@ luontotieto:
   aws:
     region: "eu-north-1"
   s3mock:
-    url: "https://localhost:9876"
+    url: "https://${S3_HOST:localhost}:${S3_PORT:9876}"
   bucket:
     data: "data"
     proxy_through_nginx: false
@@ -18,10 +18,10 @@ app:
 spring:
   datasource:
     luontotieto:
-      jdbcUrl: "jdbc:postgresql://localhost:5432/luontotieto_it"
+      jdbcUrl: "jdbc:postgresql://${LUONTOTIETO_DB_HOST:localhost}:${LUONTOTIETO_DB_PORT:5432}/luontotieto_it"
       username: "luontotieto"
       password: "postgres"
     paikkatieto:
-      jdbcUrl: "jdbc:postgresql://localhost:5433/paikkatietodb_it"
+      jdbcUrl: "jdbc:postgresql://${PAIKKATIETO_DB_HOST:localhost}:${PAIKKATIETO_DB_PORT:5433}/paikkatietodb_it"
       username: "paikkatietodb"
       password: "postgres"

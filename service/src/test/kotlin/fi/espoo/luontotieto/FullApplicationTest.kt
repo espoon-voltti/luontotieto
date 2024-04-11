@@ -12,12 +12,14 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = [SharedIntegrationTestConfig::class]
 )
+@ActiveProfiles("test")
 abstract class FullApplicationTest {
     @Qualifier("jdbi-luontotieto")
     @Autowired

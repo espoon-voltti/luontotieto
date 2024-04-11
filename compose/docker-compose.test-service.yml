@@ -6,7 +6,7 @@ version: '3.5'
 
 services:
   service-tests:
-    image: 095341522062.dkr.ecr.eu-north-1.amazonaws.com/luontotieto/service-builder:${TAG:-master}
+    image: 767398123997.dkr.ecr.eu-north-1.amazonaws.com/luontotieto/service-builder:${TAG:-master}
     build:
       context: ../service/
       target: builder
@@ -14,7 +14,15 @@ services:
       - "8080:8080"
     environment:
       JAVA_OPTS: -server -Djava.security.egd=file:/dev/./urandom -Xms1024m -Xss512k -Xmx1024m -XX:TieredStopAtLevel=1
-      SPRING_DATASOURCE_URL: jdbc:postgresql://luontotieto-db:5432/luontotieto
+      LUONTOTIETO_DB_HOST: luontotieto-db
+      LUONTOTIETO_DB_PORT: 5432
+      PAIKKATIETO_DB_HOST: paikkatieto-db
+      PAIKKATIETO_DB_PORT: 5432
+      S3_HOST: s3-mock
+      S3_PORT: 9191
     entrypoint: ./gradlew test
     depends_on:
       - luontotieto-db
+      - paikkatieto-db
+      - s3-mock
+      - redis

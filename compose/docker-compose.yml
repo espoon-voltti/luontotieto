@@ -40,18 +40,6 @@ services:
     healthcheck:
       test: "exit 0"
 
-  etl:
-    build: ../etl
-    restart: on-failure
-    #command: "--wait"
-    environment:
-      POSTGRES_URL: jdbc:postgresql://paikkatieto-db:5432/paikkatietodb
-      POSTGRES_USER: paikkatietodb
-      POSTGRES_PASSWORD: postgres
-    depends_on:
-      paikkatieto-db:
-        condition: service_healthy
-
   s3-mock:
     image: adobe/s3mock
     ports:

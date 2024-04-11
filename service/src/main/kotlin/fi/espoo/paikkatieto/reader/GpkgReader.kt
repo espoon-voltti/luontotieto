@@ -27,7 +27,7 @@ data class GpkgValidationError(
     val reason: GpkgValidationErrorReason
 )
 
-data class GpkgFeature(val columns: Map<String, Any>, val errors: List<GpkgValidationError>) {
+data class GpkgFeature(val columns: Map<String, Any?>, val errors: List<GpkgValidationError>) {
     fun isValid() = errors.isEmpty()
 }
 
