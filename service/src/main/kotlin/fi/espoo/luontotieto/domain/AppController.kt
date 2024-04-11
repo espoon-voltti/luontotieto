@@ -187,7 +187,7 @@ class AppController {
     ): UUID {
         return jdbi
             .inTransactionUnchecked { tx ->
-               tx.insertOrder(data = body, user = user)
+                tx.insertOrder(data = body, user = user)
             }
             .also { logger.audit(user, "CREATE_ORDER") }
     }
@@ -198,7 +198,7 @@ class AppController {
         @PathVariable id: UUID
     ): Order {
         return jdbi.inTransactionUnchecked { tx ->
-             tx.getOrder(id, user)
+            tx.getOrder(id, user)
         }
     }
 
