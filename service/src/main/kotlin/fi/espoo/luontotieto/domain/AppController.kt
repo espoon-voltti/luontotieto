@@ -205,6 +205,21 @@ class AppController {
             .also { logger.audit(user, "CREATE_ORDER") }
     }
 
+    @PostMapping("/orders/{orderId}/reports")
+    @ResponseStatus(HttpStatus.CREATED)
+    fun createOrderReport(
+        user: AuthenticatedUser,
+        @PathVariable orderId: UUID
+    ): Report {
+        return jdbi
+            .inTransactionUnchecked { tx ->
+                val order = tx.getOrder(orderId, user)
+                val reportInput = ReportInput(order.name, order.description, order.id)
+                tx.insertReport(reportInput, user)
+            }
+            .also { logger.audit(user, "CREATE_ORDER_FOR_ID") }
+    }
+
     @PostMapping("/orders/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @ResponseStatus(HttpStatus.CREATED)
     fun uploadOrderFile(
