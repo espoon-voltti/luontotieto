@@ -2,16 +2,15 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import {
-  Order,
-  OrderFile,
-  apiGetOrder,
-  apiGetOrderFiles,
-} from 'api'
+import { Order, OrderFile, apiGetOrder, apiGetOrderFiles } from 'api'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-import { PageContainer, SectionContainer, VerticalGap } from '../../shared/layout'
+import {
+  PageContainer,
+  SectionContainer,
+  VerticalGap
+} from '../../shared/layout'
 import { H1, Label } from '../../shared/typography'
 
 export const OrderPage = React.memo(function OrderPage() {
@@ -19,9 +18,6 @@ export const OrderPage = React.memo(function OrderPage() {
   if (!id) throw Error('Id not found in path')
   const [order, setOrder] = useState<Order | null>(null)
   const [orderFiles, setOrderFiles] = useState<OrderFile[]>([])
-
-
-
 
   useEffect(() => {
     void apiGetOrder(id).then(setOrder)
@@ -56,9 +52,8 @@ export const OrderPage = React.memo(function OrderPage() {
           ))}
         </ul>
         <VerticalGap />
-      <VerticalGap $size="m" />
+        <VerticalGap $size="m" />
       </SectionContainer>
-
     </PageContainer>
   )
 })

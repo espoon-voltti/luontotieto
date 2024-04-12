@@ -2,7 +2,14 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { Order, OrderFileDocumentType, OrderInput,  OrderReportDocumentInput, ReportFileDocumentType, getDocumentTypeTitle } from 'api'
+import {
+  Order,
+  OrderFileDocumentType,
+  OrderInput,
+  OrderReportDocumentInput,
+  ReportFileDocumentType,
+  getDocumentTypeTitle
+} from 'api'
 import React, { useEffect, useMemo, useState } from 'react'
 import { InputField } from 'shared/form/InputField'
 import { TextArea } from 'shared/form/TextArea'
@@ -34,13 +41,19 @@ interface EditProps {
 }
 type Props = CreateProps | ViewProps | EditProps
 
-
-
 export const OrderForm = React.memo(function OrderForm(props: Props) {
   const debounceDelay = 1500
   const defaultReportDocuments = [
-    {checked: false, description: "", documentType: ReportFileDocumentType.LIITO_ORAVA_PISTEET },
-    {checked: false, description: "", documentType: ReportFileDocumentType.LIITO_ORAVA_ALUEET}
+    {
+      checked: false,
+      description: '',
+      documentType: ReportFileDocumentType.LIITO_ORAVA_PISTEET
+    },
+    {
+      checked: false,
+      description: '',
+      documentType: ReportFileDocumentType.LIITO_ORAVA_ALUEET
+    }
   ]
 
   const [name, setName] = useDebouncedState(
@@ -55,22 +68,37 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
 
   const [description, setDescription] = useDebouncedState(
     props.mode === 'CREATE' ? '' : props.order.description,
-    debounceDelay  )
+    debounceDelay
+  )
 
-    const [orderInfoFile, setOrderInfoFile] = useState<FileInputData<OrderFileDocumentType>>({file: null, description: "", documentType: OrderFileDocumentType.ORDER_INFO})
-    const [orderAreaFile, sertOrderAreaFile] = useState<FileInputData<OrderFileDocumentType>>({file: null, description: "", documentType: OrderFileDocumentType.ORDER_AREA})
-
-
-  
-  const [reportDocuments, setReportDocuments] = useState(props.mode === 'CREATE' ? defaultReportDocuments : 
-  defaultReportDocuments.map((rd) => {
-    const orderReportDocument = props.order.reportDocuments.find((row) => row.documentType === rd.documentType)
-    if(!orderReportDocument){
-      return rd
-    }else {
-      return {...orderReportDocument, checked: true}
-    }
+  const [orderInfoFile, setOrderInfoFile] = useState<
+    FileInputData<OrderFileDocumentType>
+  >({
+    file: null,
+    description: '',
+    documentType: OrderFileDocumentType.ORDER_INFO
   })
+  const [orderAreaFile, sertOrderAreaFile] = useState<
+    FileInputData<OrderFileDocumentType>
+  >({
+    file: null,
+    description: '',
+    documentType: OrderFileDocumentType.ORDER_AREA
+  })
+
+  const [reportDocuments, setReportDocuments] = useState(
+    props.mode === 'CREATE'
+      ? defaultReportDocuments
+      : defaultReportDocuments.map((rd) => {
+          const orderReportDocument = props.order.reportDocuments.find(
+            (row) => row.documentType === rd.documentType
+          )
+          if (!orderReportDocument) {
+            return rd
+          } else {
+            return { ...orderReportDocument, checked: true }
+          }
+        })
   )
 
   const updateArray = (item: OrderCheckBoxComponentInput) => {
@@ -79,26 +107,38 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     })
     setReportDocuments(newArray)
   }
-  
+
   const validInput: OrderInput | null = useMemo(() => {
     if (name.trim() === '') return null
     if (description.trim() === '') return null
-    const {file: orderInfoFileCheck} = orderInfoFile
-    if(orderInfoFileCheck === null) return null
-    const {file: orderAreaFileFileCheck} = orderAreaFile
-    if(orderAreaFileFileCheck === null) return null
+    const { file: orderInfoFileCheck } = orderInfoFile
+    if (orderInfoFileCheck === null) return null
+    const { file: orderAreaFileFileCheck } = orderAreaFile
+    if (orderAreaFileFileCheck === null) return null
 
     return {
       name: name.trim(),
       description: description.trim(),
       planNumber: planNumber,
-      reportDocuments: reportDocuments.filter((rd) => rd.checked).map((rd) => ({description: rd.description, documentType: rd.documentType})),
+      reportDocuments: reportDocuments
+        .filter((rd) => rd.checked)
+        .map((rd) => ({
+          description: rd.description,
+          documentType: rd.documentType
+        })),
       files: [
-        {...orderInfoFile, file: orderInfoFileCheck},
-        {...orderAreaFile, file: orderAreaFileFileCheck},
+        { ...orderInfoFile, file: orderInfoFileCheck },
+        { ...orderAreaFile, file: orderAreaFileFileCheck }
       ]
     }
-  }, [name, description, planNumber, reportDocuments, orderInfoFile, orderAreaFile])
+  }, [
+    name,
+    description,
+    planNumber,
+    reportDocuments,
+    orderInfoFile,
+    orderAreaFile
+  ])
 
   useEffect(() => {
     if (props.mode !== 'VIEW') {
@@ -139,30 +179,30 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
             {props.mode === 'VIEW' ? (
               <span>{props.order.planNumber || '-'}</span>
             ) : (
-              <TextArea
-                onChange={setPlanNumber}
-                value={planNumber}
-                rows={2}
-              />
+              <TextArea onChange={setPlanNumber} value={planNumber} rows={2} />
             )}
           </LabeledInput>
         </RowOfInputs>
       </GroupOfInputRows>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
-
-      <FileInput data={orderInfoFile} onChange={(data) => setOrderInfoFile(data)}/>
-      <FileInput data={orderAreaFile} onChange={(data) => sertOrderAreaFile(data)}/>
-
+        <FileInput
+          data={orderInfoFile}
+          onChange={(data) => setOrderInfoFile(data)}
+        />
+        <FileInput
+          data={orderAreaFile}
+          onChange={(data) => sertOrderAreaFile(data)}
+        />
       </GroupOfInputRows>
       <GroupOfInputRows>
         <RowOfInputs>
-        <LabeledInput $cols={8}>
-        <Label>Kerättävät dokumentit</Label>
-        {reportDocuments.map((rd)=> <OrderReportDocumentInput data={rd}
-          onChange={updateArray}/>)}
-      </LabeledInput>
-
+          <LabeledInput $cols={8}>
+            <Label>Kerättävät dokumentit</Label>
+            {reportDocuments.map((rd) => (
+              <OrderReportDocumentInput data={rd} onChange={updateArray} />
+            ))}
+          </LabeledInput>
         </RowOfInputs>
       </GroupOfInputRows>
       <VerticalGap $size="m" />
@@ -170,7 +210,6 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     </FlexCol>
   )
 })
-
 
 interface OrderCheckBoxComponentInput extends OrderReportDocumentInput {
   checked: boolean
@@ -181,30 +220,35 @@ interface OrderReportDocumentInputProps {
   onChange: (data: OrderCheckBoxComponentInput) => void
 }
 
-
 const OrderReportDocumentInput = React.memo(function OrderReportDocumentInput({
-  data, onChange
+  data,
+  onChange
 }: OrderReportDocumentInputProps) {
   const debounceDelay = 1500
 
   const [checked, setChecked] = useState(data.checked ?? false)
   const [description, setDescription] = useDebouncedState(
-     data.description,
-    debounceDelay)
+    data.description,
+    debounceDelay
+  )
 
-    useEffect(() => {
-        onChange({checked, description, documentType: data.documentType})
-    }, [checked, description])
+  useEffect(() => {
+    onChange({ checked, description, documentType: data.documentType })
+  }, [checked, description])
 
   return (
     <RowOfInputs>
-          <Checkbox label={getDocumentTypeTitle(data.documentType)} checked={checked} onChange={setChecked}></Checkbox>
-            <InputField
-              onChange={(value) => {
-                setDescription(value)
-              }}
-              value={description}
-            />
+      <Checkbox
+        label={getDocumentTypeTitle(data.documentType)}
+        checked={checked}
+        onChange={setChecked}
+      ></Checkbox>
+      <InputField
+        onChange={(value) => {
+          setDescription(value)
+        }}
+        value={description}
+      />
     </RowOfInputs>
   )
 })

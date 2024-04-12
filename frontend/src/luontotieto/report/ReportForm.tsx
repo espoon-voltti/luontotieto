@@ -46,15 +46,20 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
     debounceDelay
   )
 
-  const [oravaPisteetFile, setOravaPisteetFile] = useState<FileInputData<ReportFileDocumentType>>({file: null, description: "", documentType: ReportFileDocumentType.LIITO_ORAVA_PISTEET})
-
+  const [oravaPisteetFile, setOravaPisteetFile] = useState<
+    FileInputData<ReportFileDocumentType>
+  >({
+    file: null,
+    description: '',
+    documentType: ReportFileDocumentType.LIITO_ORAVA_PISTEET
+  })
 
   const validInput: ReportInput | null = useMemo(() => {
     if (name.trim() === '') return null
     if (description.trim() === '') return null
 
-    const {file, description: fileDescription} = oravaPisteetFile
-    if(file === null) return null
+    const { file, description: fileDescription } = oravaPisteetFile
+    if (file === null) return null
     if (fileDescription.trim() === '') return null
 
     return {
@@ -106,28 +111,10 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
       </GroupOfInputRows>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
-      <FileInput data={oravaPisteetFile} onChange={(data) => setOravaPisteetFile(data)}/>
-{/* 
-        <RowOfInputs>
-          <LabeledInput $cols={4}>
-            <Label>Liito-orava pisteet.gpkg</Label>
-            <FileInputField
-              onChange={(fileList) => {
-                const file = fileList?.[0]
-                file && setFile(file)
-              }}
-            />
-          </LabeledInput>
-          <LabeledInput $cols={4}>
-            <Label>Tiedoston kuvaus</Label>
-            <InputField
-              onChange={(value) => {
-                setFileDescription(value)
-              }}
-              value={fileDescription}
-            />
-          </LabeledInput>
-        </RowOfInputs> */}
+        <FileInput
+          data={oravaPisteetFile}
+          onChange={(data) => setOravaPisteetFile(data)}
+        />
       </GroupOfInputRows>
 
       <VerticalGap $size="XL" />
