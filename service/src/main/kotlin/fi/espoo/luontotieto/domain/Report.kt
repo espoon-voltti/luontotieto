@@ -19,8 +19,8 @@ data class Report(
     val approved: Boolean,
     val created: OffsetDateTime,
     val updated: OffsetDateTime,
-    val createdBy: UUID,
-    val updatedBy: UUID,
+    val createdBy: String,
+    val updatedBy: String,
 )
 
 data class ReportInput(val name: String, val description: String)
@@ -29,18 +29,23 @@ fun Handle.insertReport(
     data: ReportInput,
     user: AuthenticatedUser
 ): Report {
-    return createUpdate(
+    return createQuery(
         """
-            INSERT INTO report (name, description, created_by, updated_by) 
-            VALUES (:name, :description, :createdBy, :updatedBy)
-            RETURNING id, name, description, created, updated, approved, created_by AS "createdBy", updated_by AS "updatedBy"
+            WITH inserted_report AS (
+                INSERT INTO report (name, description, created_by, updated_by) 
+                VALUES (:name, :description, :createdBy, :updatedBy)
+                RETURNING *
+            ) 
+            SELECT r.id, r.name, r.description, r.created, r.updated, r.approved, CONCAT(uc.first_name, ' ', uc.last_name) AS "createdBy", CONCAT(uu.first_name, ' ', uu.last_name) AS "updatedBy"
+            FROM inserted_report r 
+            LEFT JOIN users uc ON r.created_by = uc.id 
+            LEFT JOIN users uu ON r.updated_by = uu.id
             """
     )
         .bind("name", data.name)
         .bind("description", data.description)
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
-        .executeAndReturnGeneratedKeys()
         .mapTo<Report>()
         .one()
 }
@@ -70,9 +75,11 @@ fun Handle.getReport(
     user: AuthenticatedUser
 ) = createQuery(
     """
-                SELECT id, name, description, created, updated, approved, created_by AS "createdBy", updated_by AS "updatedBy"
-                FROM report
-                WHERE id = :id AND (created_by = :userId OR updated_by = :userId)
+                SELECT r.id, r.name, r.description, r.created, r.updated, r.approved, CONCAT(uc.first_name, ' ', uc.last_name) AS "createdBy", CONCAT(uu.first_name, ' ', uu.last_name) AS "updatedBy"
+                FROM report r 
+                LEFT JOIN users uc ON r.created_by = uc.id 
+                LEFT JOIN users uu ON r.updated_by = uu.id
+                WHERE r.id = :id AND (r.created_by = :userId OR r.updated_by = :userId)
             """
 )
     .bind("id", id)
@@ -80,3 +87,18 @@ fun Handle.getReport(
     .mapTo<Report>()
     .findOne()
     .getOrNull() ?: throw NotFound()
+
+fun Handle.getReports(user: AuthenticatedUser) =
+    createQuery(
+        """
+                SELECT r.id, r.name, r.description, r.created, r.updated, r.approved, CONCAT(uc.first_name, ' ', uc.last_name) AS "createdBy", CONCAT(uu.first_name, ' ', uu.last_name) AS "updatedBy"
+                FROM report r 
+                LEFT JOIN users uc ON r.created_by = uc.id 
+                LEFT JOIN users uu ON r.updated_by = uu.id
+                WHERE created_by = :userId OR updated_by = :userId
+                ORDER BY created DESC
+            """
+    )
+        .bind("userId", user.id)
+        .mapTo<Report>()
+        .list() ?: emptyList()

@@ -11,7 +11,7 @@ export interface ReportInput {
   files: ReportFileInput[]
 }
 
-export function getDocumentTypeTitle(dt: ReportFileDocumentType){
+export function getDocumentTypeTitle(dt: ReportFileDocumentType) {
   switch (dt) {
     case ReportFileDocumentType.LIITO_ORAVA_ALUEET:
       return 'Liito-orava alueet'
@@ -20,7 +20,6 @@ export function getDocumentTypeTitle(dt: ReportFileDocumentType){
     default:
       return 'Puuttuu'
   }
-
 }
 export enum ReportFileDocumentType {
   LIITO_ORAVA_PISTEET,
@@ -67,11 +66,8 @@ export const apiPostReport = async (
   return report
 }
 
-
-export const apiApproveReport = async (reportId: string
-): Promise<void> => {
-   await apiClient
-    .post(`/reports/${reportId}/approve`, {})
+export const apiApproveReport = async (reportId: string): Promise<void> => {
+  await apiClient.post(`/reports/${reportId}/approve`, {})
 }
 
 const apiPostReportFile = (
@@ -89,11 +85,13 @@ const apiPostReportFile = (
 export const apiGetReport = (id: string): Promise<ReportDetails> =>
   apiClient.get<ReportDetails>(`/reports/${id}`).then((res) => res.data)
 
+export const apiGetReports = (): Promise<ReportDetails[]> =>
+  apiClient.get<ReportDetails[]>(`/reports`).then((res) => res.data)
+
 export const apiGetReportFiles = (id: string): Promise<ReportFileDetails[]> =>
   apiClient
     .get<ReportFileDetails[]>(`/reports/${id}/files`)
     .then((res) => res.data)
-
 
 export interface Order extends OrderInput {
   id: string
@@ -104,23 +102,24 @@ export interface Order extends OrderInput {
 }
 
 export interface OrderInput {
-      name: string
-      description: string
-      planNumber?: string
-      reportDocuments: OrderReportDocumentInput[]
+  name: string
+  description: string
+  planNumber?: string
+  reportDocuments: OrderReportDocumentInput[]
 }
 
 export interface OrderReportDocument {
-  orderId: string,
+  orderId: string
   documentType: ReportFileDocumentType
   description: string
 }
 
-export interface OrderReportDocumentInput extends Pick<OrderReportDocument, "description" | "documentType">{}
+export type OrderReportDocumentInput = Pick<
+  OrderReportDocument,
+  'description' | 'documentType'
+>
 
-export const apiPostOrder = async (
-  data: OrderInput
-): Promise<string> => {
+export const apiPostOrder = async (data: OrderInput): Promise<string> => {
   const body: JsonOf<OrderInput> = {
     ...data
   }
@@ -134,5 +133,3 @@ export const apiPostOrder = async (
 
 export const apiGetOrder = (id: string): Promise<Order> =>
   apiClient.get<Order>(`/orders/${id}`).then((res) => res.data)
-
-    

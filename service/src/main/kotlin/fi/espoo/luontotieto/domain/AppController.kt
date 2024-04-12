@@ -124,6 +124,11 @@ class AppController {
         return jdbi.inTransactionUnchecked { tx -> tx.getReport(id, user) }
     }
 
+    @GetMapping("/reports")
+    fun getReports(user: AuthenticatedUser): List<Report> {
+        return jdbi.inTransactionUnchecked { tx -> tx.getReports(user) }
+    }
+
     @PostMapping("/reports/{reportId}/approve")
     @ResponseStatus(HttpStatus.CREATED)
     fun approveReport(
@@ -196,9 +201,7 @@ class AppController {
         @RequestBody body: OrderInput
     ): UUID {
         return jdbi
-            .inTransactionUnchecked { tx ->
-                tx.insertOrder(data = body, user = user)
-            }
+            .inTransactionUnchecked { tx -> tx.insertOrder(data = body, user = user) }
             .also { logger.audit(user, "CREATE_ORDER") }
     }
 
