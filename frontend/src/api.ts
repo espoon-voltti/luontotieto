@@ -127,10 +127,8 @@ export enum OrderFileDocumentType {
   ORDER_AREA = 'ORDER_AREA'
 }
 
-export type OrderReportDocumentInput = Pick<
-  OrderReportDocument,
-  'description' | 'documentType'
->
+export interface OrderReportDocumentInput
+  extends Pick<OrderReportDocument, 'description' | 'documentType'> {}
 
 export const apiPostOrder = async (data: OrderInput): Promise<string> => {
   const body: JsonOf<OrderInput> = {
