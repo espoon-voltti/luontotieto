@@ -4,7 +4,7 @@
 
 import { Order } from 'api'
 import { StatusChip } from 'luontotieto/cases/StatusChip'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AddButton } from 'shared/buttons/AddButton'
 import { FilterButton } from 'shared/buttons/FilterButton'
@@ -23,11 +23,8 @@ import { H3 } from '../../shared/typography'
 
 export const OrderList = React.memo(function OrderList() {
   const navigate = useNavigate()
-  const [orders, setOrders] = useState<Order[]>([])
+  const [orders, _] = useState<Order[]>([])
   const [showAll, setShowAll] = useState(false)
-  useEffect(() => {
-    // null
-  }, [])
 
   return (
     <PageContainer>

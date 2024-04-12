@@ -24,9 +24,9 @@ import { H3 } from '../../shared/typography'
 export const ReportList = React.memo(function ReportList() {
   const navigate = useNavigate()
   const [reports, setReports] = useState<ReportDetails[]>([])
-  const [showAll, setShowAll] = useState(false)
+  const [showAll, setShowAll] = useState(true)
 
-  const reportsToDisplay = reports.filter((r) => (showAll ? true : r.approved))
+  const reportsToDisplay = reports.filter((r) => (showAll ? true : !r.approved))
 
   useEffect(() => {
     void apiGetReports().then(setReports)

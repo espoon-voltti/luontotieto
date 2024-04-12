@@ -15,21 +15,49 @@ import { defaultButtonTextStyle } from './Button'
 
 const StyledButton = styled.button<{ $selected: boolean }>`
   ${defaultButtonTextStyle};
+
   width: fit-content;
-  height: 40px !important;
 
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 4px 12px;
+  padding: 0;
 
-  background: ${(props) => (props.$selected ? colors.main.m2 : 'none')};
-  color: ${(props) => (props.$selected ? 'white' : colors.main.m2)};
-  border: 1px solid ${colors.main.m2};
-  border-radius: 40px;
+  background: none;
+  border: none;
   outline: none;
   cursor: pointer;
+
+  .outer-wrapper {
+    outline: none;
+    border: 2px solid transparent;
+    border-radius: 40px;
+    padding: 2px;
+  }
+
+  &:focus .outer-wrapper {
+    border: 2px solid ${colors.main.m2Focus};
+  }
+
+  .inner-wrapper {
+    outline: none;
+    width: fit-content;
+    height: 40px !important;
+    background: ${(props) => (props.$selected ? colors.main.m2 : 'none')};
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 12px;
+
+    color: ${(props) => (props.$selected ? 'white' : colors.main.m2)};
+    border: 1px solid ${colors.main.m2};
+    border-radius: 40px;
+    outline: none;
+    cursor: pointer;
+  }
 
   &.disabled {
     color: ${colors.grayscale.g70};
@@ -56,7 +84,7 @@ const StyledButton = styled.button<{ $selected: boolean }>`
 
 export interface FilterButtonProps extends BaseProps {
   text: string
-  onClick: (selected: boolean) => undefined
+  onClick: (selected: boolean) => void
   disabled?: boolean
   selected: boolean
   iconLeft?: boolean
@@ -79,15 +107,19 @@ export const FilterButton = React.memo(function FilterButton({
       disabled={disabled}
       $selected={selected}
     >
-      <FlexRowWithGaps>
-        {selected && (
-          <div className="icon-wrapper">
-            <FontAwesomeIcon icon={faCheck} />
-          </div>
-        )}
+      <div className="outer-wrapper">
+        <div className="inner-wrapper">
+          <FlexRowWithGaps>
+            {selected && (
+              <div className="icon-wrapper">
+                <FontAwesomeIcon icon={faCheck} />
+              </div>
+            )}
 
-        <span>{text}</span>
-      </FlexRowWithGaps>
+            <span>{text}</span>
+          </FlexRowWithGaps>
+        </div>
+      </div>
     </StyledButton>
   )
 })
