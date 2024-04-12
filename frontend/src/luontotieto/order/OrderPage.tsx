@@ -4,7 +4,9 @@
 
 import {
   Order,
+  OrderFile,
   apiGetOrder,
+  apiGetOrderFiles,
 } from 'api'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -16,11 +18,14 @@ export const OrderPage = React.memo(function OrderPage() {
   const { id } = useParams()
   if (!id) throw Error('Id not found in path')
   const [order, setOrder] = useState<Order | null>(null)
+  const [orderFiles, setOrderFiles] = useState<OrderFile[]>([])
+
 
 
 
   useEffect(() => {
     void apiGetOrder(id).then(setOrder)
+    void apiGetOrderFiles(id).then(setOrderFiles)
   }, [id])
   return (
     <PageContainer>
@@ -38,6 +43,15 @@ export const OrderPage = React.memo(function OrderPage() {
           {order?.reportDocuments.map((rf) => (
             <li key={rf.documentType}>
               <code>{`${rf.documentType} :: ${rf.description}`}</code>
+            </li>
+          ))}
+        </ul>
+        <VerticalGap />
+        <Label>Tiedostot:</Label>
+        <ul>
+          {orderFiles.map((rf) => (
+            <li key={rf.id}>
+              <code>{`${rf.fileName} :: ${rf.mediaType} :: ${rf.documentType}`}</code>
             </li>
           ))}
         </ul>

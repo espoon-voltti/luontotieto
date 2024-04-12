@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { Order, OrderInput,  OrderReportDocumentInput, ReportFileDocumentType, getDocumentTypeTitle } from 'api'
+import { Order, OrderFileDocumentType, OrderInput,  OrderReportDocumentInput, ReportFileDocumentType, getDocumentTypeTitle } from 'api'
 import React, { useEffect, useMemo, useState } from 'react'
 import { InputField } from 'shared/form/InputField'
 import { TextArea } from 'shared/form/TextArea'
@@ -17,6 +17,7 @@ import {
 } from '../../shared/layout'
 import { Label } from '../../shared/typography'
 import { Checkbox } from 'shared/form/Checkbox'
+import { FileInput, FileInputData } from 'shared/FileInput'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -56,6 +57,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     props.mode === 'CREATE' ? '' : props.order.description,
     debounceDelay  )
 
+    const [orderInfoFile, setOrderInfoFile] = useState<FileInputData<OrderFileDocumentType>>({file: null, description: "", documentType: OrderFileDocumentType.ORDER_INFO})
+    const [orderAreaFile, sertOrderAreaFile] = useState<FileInputData<OrderFileDocumentType>>({file: null, description: "", documentType: OrderFileDocumentType.ORDER_AREA})
+
+
   
   const [reportDocuments, setReportDocuments] = useState(props.mode === 'CREATE' ? defaultReportDocuments : 
   defaultReportDocuments.map((rd) => {
@@ -75,19 +80,25 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     setReportDocuments(newArray)
   }
   
-
-
-
   const validInput: OrderInput | null = useMemo(() => {
     if (name.trim() === '') return null
     if (description.trim() === '') return null
+    const {file: orderInfoFileCheck} = orderInfoFile
+    if(orderInfoFileCheck === null) return null
+    const {file: orderAreaFileFileCheck} = orderAreaFile
+    if(orderAreaFileFileCheck === null) return null
+
     return {
       name: name.trim(),
       description: description.trim(),
       planNumber: planNumber,
-      reportDocuments: reportDocuments.filter((rd) => rd.checked).map((rd) => ({description: rd.description, documentType: rd.documentType}))
+      reportDocuments: reportDocuments.filter((rd) => rd.checked).map((rd) => ({description: rd.description, documentType: rd.documentType})),
+      files: [
+        {...orderInfoFile, file: orderInfoFileCheck},
+        {...orderAreaFile, file: orderAreaFileFileCheck},
+      ]
     }
-  }, [name, description, planNumber, reportDocuments])
+  }, [name, description, planNumber, reportDocuments, orderInfoFile, orderAreaFile])
 
   useEffect(() => {
     if (props.mode !== 'VIEW') {
@@ -139,13 +150,17 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       </GroupOfInputRows>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
+
+      <FileInput data={orderInfoFile} onChange={(data) => setOrderInfoFile(data)}/>
+      <FileInput data={orderAreaFile} onChange={(data) => sertOrderAreaFile(data)}/>
+
+      </GroupOfInputRows>
+      <GroupOfInputRows>
         <RowOfInputs>
         <LabeledInput $cols={8}>
         <Label>Kerättävät dokumentit</Label>
-        <OrderReportDocumentInput data={{checked: false, description: "", documentType: ReportFileDocumentType.LIITO_ORAVA_PISTEET}}
-          onChange={updateArray}/>
-          <OrderReportDocumentInput data={{checked: false, description: "", documentType: ReportFileDocumentType.LIITO_ORAVA_ALUEET}}
-          onChange={updateArray}/>
+        {reportDocuments.map((rd)=> <OrderReportDocumentInput data={rd}
+          onChange={updateArray}/>)}
       </LabeledInput>
 
         </RowOfInputs>

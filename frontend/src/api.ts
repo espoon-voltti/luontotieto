@@ -11,19 +11,26 @@ export interface ReportInput {
   files: ReportFileInput[]
 }
 
-export function getDocumentTypeTitle(dt: ReportFileDocumentType) {
+export function getDocumentTypeTitle<
+  T extends ReportFileDocumentType | OrderFileDocumentType
+>(dt: T) {
   switch (dt) {
     case ReportFileDocumentType.LIITO_ORAVA_ALUEET:
       return 'Liito-orava alueet'
     case ReportFileDocumentType.LIITO_ORAVA_PISTEET:
       return 'Liito-orava pisteet'
+    case OrderFileDocumentType.ORDER_INFO:
+      return 'Tilaus info pdf'
+    case OrderFileDocumentType.ORDER_AREA:
+      return 'Tilaus alueet'
     default:
       return 'Puuttuu'
   }
 }
+
 export enum ReportFileDocumentType {
-  LIITO_ORAVA_PISTEET,
-  LIITO_ORAVA_ALUEET
+  LIITO_ORAVA_PISTEET = 'LIITO_ORAVA_PISTEET',
+  LIITO_ORAVA_ALUEET = 'LIITO_ORAVA_ALUEET'
 }
 
 export interface ReportFileInput {
@@ -106,12 +113,18 @@ export interface OrderInput {
   description: string
   planNumber?: string
   reportDocuments: OrderReportDocumentInput[]
+  files: OrderFileInput[]
 }
 
 export interface OrderReportDocument {
   orderId: string
   documentType: ReportFileDocumentType
   description: string
+}
+
+export enum OrderFileDocumentType {
+  ORDER_INFO = 'ORDER_INFO',
+  ORDER_AREA = 'ORDER_AREA'
 }
 
 export type OrderReportDocumentInput = Pick<
@@ -128,8 +141,39 @@ export const apiPostOrder = async (data: OrderInput): Promise<string> => {
     .post<string>('/orders', body)
     .then((r) => r.data)
 
+  for (const file of data.files) {
+    await apiPostOrdertFile(orderId, file)
+  }
   return orderId
+}
+
+interface OrderFileInput {
+  description: string
+  documentType: OrderFileDocumentType
+  file: File
+}
+
+export interface OrderFile extends OrderFileInput {
+  id: string
+  mediaType: string
+  fileName: string
+  created: Date
+  updated: Date
+  createdBy: string
+  updatedBy: string
+}
+
+const apiPostOrdertFile = (id: string, file: OrderFileInput): Promise<void> => {
+  const formData = new FormData()
+  formData.append('file', file.file)
+  formData.append('description', file.description)
+  formData.append('documentType', OrderFileDocumentType[file.documentType])
+
+  return apiClient.postForm(`/orders/${id}/files`, formData)
 }
 
 export const apiGetOrder = (id: string): Promise<Order> =>
   apiClient.get<Order>(`/orders/${id}`).then((res) => res.data)
+
+export const apiGetOrderFiles = (id: string): Promise<OrderFile[]> =>
+  apiClient.get<OrderFile[]>(`/orders/${id}/files`).then((res) => res.data)
