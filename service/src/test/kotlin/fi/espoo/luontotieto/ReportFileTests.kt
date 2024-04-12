@@ -57,7 +57,11 @@ class ReportFileTests : FullApplicationTest() {
         assertEquals(testUser.id, fileResponse.createdBy)
         assertEquals(testUser.id, fileResponse.updatedBy)
 
-        controller.deleteReportFile(reportId = createdReport.id, fileId = fileResponse.id)
+        controller.deleteReportFile(
+            user = testUser,
+            reportId = createdReport.id,
+            fileId = fileResponse.id
+        )
 
         val reportFileResponseAfterDelete = controller.getReportFiles(createdReport.id)
         assertEquals(0, reportFileResponseAfterDelete.count())

@@ -4,6 +4,7 @@
 
 package fi.espoo.luontotieto.domain
 
+import fi.espoo.luontotieto.config.AuditEvents
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.BucketEnv
 import fi.espoo.luontotieto.config.audit
@@ -64,7 +65,7 @@ class AppController {
     ): Report {
         return jdbi
             .inTransactionUnchecked { tx -> tx.insertReport(data = body, user = user) }
-            .also { logger.audit(user, "CREATE_REPORT") }
+            .also { logger.audit(user, AuditEvents.CREATE_REPORT, mapOf("id" to "$it")) }
     }
 
     @PostMapping("/reports/{reportId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -105,6 +106,11 @@ class AppController {
                 documentClient.upload(
                     dataBucket,
                     Document(name = "$reportId/$id", bytes = file.bytes, contentType = contentType)
+                )
+                logger.audit(
+                    user,
+                    AuditEvents.ADD_REPORT_FILE,
+                    mapOf("id" to "$reportId", "file" to "$id")
                 )
                 return ResponseEntity.status(HttpStatus.CREATED).body(errors)
             } catch (e: Exception) {
@@ -162,7 +168,9 @@ class AppController {
             }
         }
 
-        jdbi.inTransactionUnchecked { tx -> tx.approveReport(reportId, user) }
+        jdbi
+            .inTransactionUnchecked { tx -> tx.approveReport(reportId, user) }
+            .also { logger.audit(user, AuditEvents.APPROVE_REPORT, mapOf("id" to "$reportId")) }
     }
 
     @GetMapping("/reports/{reportId}/files")
@@ -174,6 +182,7 @@ class AppController {
 
     @DeleteMapping("/reports/{reportId}/files/{fileId}")
     fun deleteReportFile(
+        user: AuthenticatedUser,
         @PathVariable reportId: UUID,
         @PathVariable fileId: UUID
     ) {
@@ -181,7 +190,15 @@ class AppController {
 
         documentClient.delete(dataBucket, "$reportId/$fileId")
 
-        jdbi.inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }
+        jdbi
+            .inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }
+            .also {
+                logger.audit(
+                    user,
+                    AuditEvents.DELETE_REPORT_FILE,
+                    mapOf("id" to "$reportId", "file" to "$fileId")
+                )
+            }
     }
 
     @GetMapping("/orders/{id}")
@@ -189,9 +206,7 @@ class AppController {
         user: AuthenticatedUser,
         @PathVariable id: UUID
     ): Order {
-        return jdbi.inTransactionUnchecked { tx ->
-            tx.getOrder(id, user)
-        }
+        return jdbi.inTransactionUnchecked { tx -> tx.getOrder(id, user) }
     }
 
     @PostMapping("/orders")
@@ -202,7 +217,7 @@ class AppController {
     ): UUID {
         return jdbi
             .inTransactionUnchecked { tx -> tx.insertOrder(data = body, user = user) }
-            .also { logger.audit(user, "CREATE_ORDER") }
+            .also { logger.audit(user, AuditEvents.CREATE_ORDER, mapOf("id" to "$it")) }
     }
 
     @PostMapping("/orders/{orderId}/reports")
@@ -247,6 +262,11 @@ class AppController {
                 dataBucket,
                 Document(name = "$orderId/$id", bytes = file.bytes, contentType = contentType)
             )
+            logger.audit(
+                user,
+                AuditEvents.ADD_ORDER_FILE,
+                mapOf("id" to "$orderId", "file" to "$id")
+            )
         } catch (e: Exception) {
             logger.error("Error uploading file: ", e)
             jdbi.inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, id) }
@@ -263,6 +283,7 @@ class AppController {
 
     @DeleteMapping("/orders/{orderId}/files/{fileId}")
     fun deleteOrderFile(
+        user: AuthenticatedUser,
         @PathVariable orderId: UUID,
         @PathVariable fileId: UUID
     ) {
@@ -270,7 +291,15 @@ class AppController {
 
         documentClient.delete(dataBucket, "$orderId/$fileId")
 
-        jdbi.inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, fileId) }
+        jdbi
+            .inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, fileId) }
+            .also {
+                logger.audit(
+                    user,
+                    AuditEvents.DELETE_ORDER_FILE,
+                    mapOf("id" to "$orderId", "file" to "$fileId")
+                )
+            }
     }
 
     private fun getPaikkatietoReader(

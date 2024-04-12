@@ -8,6 +8,7 @@ import fi.espoo.luontotieto.common.AdUser
 import fi.espoo.luontotieto.common.AppUser
 import fi.espoo.luontotieto.common.getAppUser
 import fi.espoo.luontotieto.common.upsertAppUserFromAd
+import fi.espoo.luontotieto.config.AuditEvents
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.audit
 import mu.KotlinLogging
@@ -42,7 +43,7 @@ class SystemController {
     ): AppUser {
         return jdbi
             .inTransactionUnchecked { it.upsertAppUserFromAd(adUser) }
-            .also { logger.audit(AuthenticatedUser(it.id), "USER_LOGIN") }
+            .also { logger.audit(AuthenticatedUser(it.id), AuditEvents.USER_LOGIN) }
     }
 
     @GetMapping("/users/{id}")
