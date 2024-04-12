@@ -79,6 +79,34 @@ fun Handle.approveReport(
         .one()
 }
 
+fun Handle.putReport(
+    id: UUID,
+    report: ReportInput,
+    user: AuthenticatedUser
+): Report {
+    return createQuery(
+        """
+            WITH updated_report AS (
+                UPDATE report 
+                 SET name = :name, description = :description, updated_by = :updatedBy
+                 WHERE id = :id AND (created_by = :updatedBy OR updated_by = :updatedBy)
+                RETURNING *
+            ) 
+            SELECT r.id, r.name, r.description, r.created, r.updated, r.approved, CONCAT(uc.first_name, ' ', uc.last_name) AS "createdBy", CONCAT(uu.first_name, ' ', uu.last_name) AS "updatedBy"
+            FROM updated_report r 
+            LEFT JOIN users uc ON r.created_by = uc.id 
+            LEFT JOIN users uu ON r.updated_by = uu.id
+            """
+    )
+        .bind("id", id)
+        .bind("name", report.name)
+        .bind("description", report.description)
+        .bind("updatedBy", user.id)
+        .mapTo<Report>()
+        .findOne()
+        .getOrNull() ?: throw NotFound()
+}
+
 fun Handle.getReport(
     id: UUID,
     user: AuthenticatedUser
