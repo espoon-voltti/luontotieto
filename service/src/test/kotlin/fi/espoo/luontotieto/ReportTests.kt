@@ -6,7 +6,7 @@ package fi.espoo.luontotieto
 
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.domain.AppController
-import fi.espoo.luontotieto.domain.ReportInput
+import fi.espoo.luontotieto.domain.Report
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 import kotlin.test.Test
@@ -21,7 +21,7 @@ class ReportTests : FullApplicationTest() {
         val createdReport =
             controller.createReportFromScratch(
                 user = testUser,
-                body = ReportInput("Test report", "Test description")
+                body = Report.Companion.ReportInput("Test report", "Test description")
             )
 
         val reportResponse = controller.getReportById(testUser, createdReport.id)
@@ -39,7 +39,7 @@ class ReportTests : FullApplicationTest() {
         for (i in 0..2) {
             controller.createReportFromScratch(
                 user = testUser,
-                body = ReportInput("Test report $i", "Test description")
+                body = Report.Companion.ReportInput("Test report $i", "Test description")
             )
         }
 
@@ -54,7 +54,7 @@ class ReportTests : FullApplicationTest() {
         for (i in 0..2) {
             controller.createReportFromScratch(
                 user = testUser,
-                body = ReportInput("Test report $i", "Test description")
+                body = Report.Companion.ReportInput("Test report $i", "Test description")
             )
         }
 

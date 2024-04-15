@@ -21,13 +21,19 @@ data class Report(
     val updated: OffsetDateTime,
     val createdBy: String,
     val updatedBy: String,
-)
-
-data class ReportInput(val name: String, val description: String, val orderId: UUID? = null)
+) {
+    companion object {
+        data class ReportInput(
+            val name: String,
+            val description: String,
+        )
+    }
+}
 
 fun Handle.insertReport(
-    data: ReportInput,
-    user: AuthenticatedUser
+    data: Report.Companion.ReportInput,
+    user: AuthenticatedUser,
+    orderI: UUID? = null
 ): Report {
     return createQuery(
         """
@@ -46,7 +52,7 @@ fun Handle.insertReport(
     )
         .bind("name", data.name)
         .bind("description", data.description)
-        .bind("orderId", data.orderId)
+        .bind("orderId", orderI)
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
         .mapTo<Report>()

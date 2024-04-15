@@ -60,7 +60,7 @@ class AppController {
     @ResponseStatus(HttpStatus.CREATED)
     fun createReportFromScratch(
         user: AuthenticatedUser,
-        @RequestBody body: ReportInput
+        @RequestBody body: Report.Companion.ReportInput
     ): Report {
         return jdbi
             .inTransactionUnchecked { tx -> tx.insertReport(data = body, user = user) }
@@ -214,8 +214,8 @@ class AppController {
         return jdbi
             .inTransactionUnchecked { tx ->
                 val order = tx.getOrder(orderId, user)
-                val reportInput = ReportInput(order.name, order.description, order.id)
-                tx.insertReport(reportInput, user)
+                val reportInput = Report.Companion.ReportInput(order.name, order.description)
+                tx.insertReport(reportInput, user, order.id)
             }
             .also { logger.audit(user, "CREATE_REPORT_FOR_ORDER_ID", mapOf("id" to "$orderId") }
     }
