@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 
 class ReportTests : FullApplicationTest() {
@@ -60,5 +61,24 @@ class ReportTests : FullApplicationTest() {
 
         val reportsResponse = controller.getReports(AuthenticatedUser(UUID.randomUUID()))
         assertEquals(0, reportsResponse.size)
+    }
+
+    @Test
+    fun `update existing report`() {
+        val report =
+            controller.createReportFromScratch(
+                testUser,
+                Report.Companion.ReportInput("Original name", "Original description")
+            )
+        val updatedReport =
+            controller.updateReport(
+                testUser,
+                report.id,
+                Report.Companion.ReportInput("New name", "New description")
+            )
+        assertEquals("New name", updatedReport.name)
+        assertEquals("New description", updatedReport.description)
+        assertNotEquals(report.updated, updatedReport.updated)
+        assertEquals(report.created, updatedReport.created)
     }
 }

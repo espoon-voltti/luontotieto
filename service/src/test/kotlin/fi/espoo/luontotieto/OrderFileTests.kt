@@ -66,7 +66,11 @@ class OrderFileTests : FullApplicationTest() {
 
         assertEquals("ORDER INFO CONTENT", String(s3Doc.bytes))
 
-        controller.deleteOrderFile(orderId = createdOrderId, fileId = fileResponse.id)
+        controller.deleteOrderFile(
+            user = testUser,
+            orderId = createdOrderId,
+            fileId = fileResponse.id
+        )
 
         val orderFilesAfterDelete = controller.getOrderFiles(createdOrderId)
         assertEquals(0, orderFilesAfterDelete.count())
