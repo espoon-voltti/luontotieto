@@ -217,7 +217,7 @@ class AppController {
                 val reportInput = ReportInput(order.name, order.description, order.id)
                 tx.insertReport(reportInput, user)
             }
-            .also { logger.audit(user, "CREATE_REPORT_FOR_ORDER_ID_$orderId") }
+            .also { logger.audit(user, "CREATE_REPORT_FOR_ORDER_ID", mapOf("id" to "$orderId") }
     }
 
     @PostMapping("/orders/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
