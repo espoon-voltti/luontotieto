@@ -53,9 +53,7 @@ export const CreateOrderPage = React.memo(function CreateOrderPage(
 
               setSubmitting(true)
               apiPostOrder(orderInput)
-                .then((orderId) =>
-                  navigate(`/luontotieto/tilaus/${orderId}`)
-                )
+                .then((orderId) => navigate(`/luontotieto/tilaus/${orderId}`))
                 .catch(() => setSubmitting(false))
             }}
           />

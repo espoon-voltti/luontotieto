@@ -4,7 +4,6 @@
 
 import { ReportDetails, ReportFileDocumentType, ReportInput } from 'api'
 import React, { useEffect, useMemo, useState } from 'react'
-import { FileInputField } from 'shared/form/FileInputField'
 import { InputField } from 'shared/form/InputField'
 import { TextArea } from 'shared/form/TextArea'
 import { useDebouncedState } from 'shared/useDebouncedState'
@@ -17,6 +16,7 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { Label } from '../../shared/typography'
+import { FileInput, FileInputData } from 'shared/FileInput'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -46,18 +46,22 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
     debounceDelay
   )
 
-  const [fileDescription, setFileDescription] = useDebouncedState(
-    '',
-    debounceDelay
-  )
-
-  const [file, setFile] = useState<File | null>(null)
+  const [oravaPisteetFile, setOravaPisteetFile] = useState<
+    FileInputData<ReportFileDocumentType>
+  >({
+    file: null,
+    description: '',
+    documentType: ReportFileDocumentType.LIITO_ORAVA_PISTEET
+  })
 
   const validInput: ReportInput | null = useMemo(() => {
     if (name.trim() === '') return null
     if (description.trim() === '') return null
-    if (file == null) return null
+
+    const { file, description: fileDescription } = oravaPisteetFile
+    if (file === null) return null
     if (fileDescription.trim() === '') return null
+
     return {
       name: name.trim(),
       description: description.trim(),
@@ -69,7 +73,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
         }
       ]
     }
-  }, [name, description, file, fileDescription])
+  }, [name, description, oravaPisteetFile])
 
   useEffect(() => {
     if (props.mode !== 'VIEW') {
@@ -107,26 +111,10 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
       </GroupOfInputRows>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
-        <RowOfInputs>
-          <LabeledInput $cols={4}>
-            <Label>Liito-orava pisteet.gpkg</Label>
-            <FileInputField
-              onChange={(fileList) => {
-                const file = fileList?.[0]
-                file && setFile(file)
-              }}
-            />
-          </LabeledInput>
-          <LabeledInput $cols={4}>
-            <Label>Tiedoston kuvaus</Label>
-            <InputField
-              onChange={(value) => {
-                setFileDescription(value)
-              }}
-              value={fileDescription}
-            />
-          </LabeledInput>
-        </RowOfInputs>
+        <FileInput
+          data={oravaPisteetFile}
+          onChange={(data) => setOravaPisteetFile(data)}
+        />
       </GroupOfInputRows>
 
       <VerticalGap $size="XL" />
