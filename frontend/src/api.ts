@@ -140,7 +140,7 @@ export const apiPostOrder = async (data: OrderInput): Promise<string> => {
     .then((r) => r.data)
 
   for (const file of data.files) {
-    await apiPostOrdertFile(orderId, file)
+    await apiPostOrderFile(orderId, file)
   }
   return orderId
 }
