@@ -111,10 +111,16 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   const validInput: OrderInput | null = useMemo(() => {
     if (name.trim() === '') return null
     if (description.trim() === '') return null
-    const { file: orderInfoFileCheck } = orderInfoFile
+    const { file: orderInfoFileCheck, description: orderInfoFileDescription } =
+      orderInfoFile
     if (orderInfoFileCheck === null) return null
-    const { file: orderAreaFileFileCheck } = orderAreaFile
+    if (orderInfoFileDescription.trim() === '') return null
+    const {
+      file: orderAreaFileFileCheck,
+      description: orderAreaFileDescription
+    } = orderAreaFile
     if (orderAreaFileFileCheck === null) return null
+    if (orderAreaFileDescription.trim() === '') return null
 
     return {
       name: name.trim(),
