@@ -9,10 +9,6 @@ updates:
     schedule:
       interval: weekly
   - package-ecosystem: docker
-    directory: "/etl"
-    schedule:
-      interval: weekly
-  - package-ecosystem: docker
     directory: "/api-gateway"
     schedule:
       interval: weekly
@@ -89,13 +85,6 @@ updates:
       testing-library:
         patterns:
           - "@testing-library/*"
-  - package-ecosystem: gradle
-    directory: "/etl"
-    schedule:
-      interval: weekly
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-patch"]
   - package-ecosystem: gradle
     directory: "/service"
     schedule:

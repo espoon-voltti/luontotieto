@@ -171,10 +171,10 @@ class AppController {
             readers.forEach {
                 it.use { reader ->
                     when (reader.tableDefinition) {
-                        LiitoOravaPisteet -> tx.insertLiitoOravaPisteet(reader.asSequence())
-                        LiitoOravaAlueet -> tx.insertLiitoOravaAlueet(reader.asSequence())
+                        LiitoOravaPisteet -> tx.insertLiitoOravaPisteet(reportId, reader.asSequence())
+                        LiitoOravaAlueet -> tx.insertLiitoOravaAlueet(reportId, reader.asSequence())
                         LiitoOravaYhteysviivat ->
-                            tx.insertLiitoOravaYhteysviivat(reader.asSequence())
+                            tx.insertLiitoOravaYhteysviivat(reportId, reader.asSequence())
                     }
                 }
             }

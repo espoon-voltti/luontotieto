@@ -11,6 +11,7 @@ import org.jdbi.v3.core.Handle
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKBWriter
 import java.sql.Date
+import java.util.UUID
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 
@@ -92,7 +93,10 @@ object LiitoOravaYhteysviivat : TableDefinition {
         )
 }
 
-fun Handle.insertLiitoOravaPisteet(data: Sequence<GpkgFeature>): Array<Int> {
+fun Handle.insertLiitoOravaPisteet(
+    reportId: UUID,
+    data: Sequence<GpkgFeature>
+): Array<Int> {
     val batchInsert =
         prepareBatch(
             """
@@ -109,7 +113,8 @@ fun Handle.insertLiitoOravaPisteet(data: Sequence<GpkgFeature>): Array<Int> {
         viite,
         kunta,
         tarkkuus,
-        geom
+        geom,
+        selvitys_id
     ) 
     VALUES (
         :pvm,
@@ -124,18 +129,24 @@ fun Handle.insertLiitoOravaPisteet(data: Sequence<GpkgFeature>): Array<Int> {
         :viite,
         :kunta,
         :tarkkuus::luontotieto_mittaustyyppi,
-        ST_GeomFromWKB(:geom, 3879)
+        ST_GeomFromWKB(:geom, 3879),
+        :reportId
     )
     RETURNING id
     """
         )
 
-    data.forEach { batchInsert.add(convertColumnsWithGeometry(it.columns)) }
+    data.forEach {
+        batchInsert.add(convertColumnsWithGeometry(it.columns).plus(Pair("reportId", reportId)))
+    }
 
     return batchInsert.execute().toTypedArray()
 }
 
-fun Handle.insertLiitoOravaAlueet(data: Sequence<GpkgFeature>): Array<Int> {
+fun Handle.insertLiitoOravaAlueet(
+    reportId: UUID,
+    data: Sequence<GpkgFeature>
+): Array<Int> {
     val batchInsert =
         prepareBatch(
             """
@@ -149,7 +160,8 @@ fun Handle.insertLiitoOravaAlueet(data: Sequence<GpkgFeature>): Array<Int> {
         viite,
         kunta,
         tarkkuus,
-        geom
+        geom,
+        selvitys_id
     ) 
     VALUES (
         :pvm,
@@ -161,18 +173,22 @@ fun Handle.insertLiitoOravaAlueet(data: Sequence<GpkgFeature>): Array<Int> {
         :viite,
         :kunta,
         :tarkkuus::luontotieto_mittaustyyppi,
-        ST_GeomFromWKB(:geom, 3879)
+        ST_GeomFromWKB(:geom, 3879),
+        :reportId
     )
     RETURNING id
     """
         )
 
-    data.forEach { batchInsert.add(convertColumnsWithGeometry(it.columns)) }
+    data.forEach { batchInsert.add(convertColumnsWithGeometry(it.columns).plus(Pair("reportId", reportId))) }
 
     return batchInsert.execute().toTypedArray()
 }
 
-fun Handle.insertLiitoOravaYhteysviivat(data: Sequence<GpkgFeature>): Array<Int> {
+fun Handle.insertLiitoOravaYhteysviivat(
+    reportId: UUID,
+    data: Sequence<GpkgFeature>
+): Array<Int> {
     val batchInsert =
         prepareBatch(
             """
@@ -185,7 +201,8 @@ fun Handle.insertLiitoOravaYhteysviivat(data: Sequence<GpkgFeature>): Array<Int>
         viite,
         kunta,
         tarkkuus,
-        geom
+        geom,
+        selvitys_id
     ) 
     VALUES (
         :vuosi,
@@ -196,13 +213,14 @@ fun Handle.insertLiitoOravaYhteysviivat(data: Sequence<GpkgFeature>): Array<Int>
         :viite,
         :kunta,
         :tarkkuus::luontotieto_mittaustyyppi,
-        ST_GeomFromWKB(:geom, 3879)
+        ST_GeomFromWKB(:geom, 3879),
+        :reportId
     )
     RETURNING id
     """
         )
 
-    data.forEach { batchInsert.add(convertColumnsWithGeometry(it.columns)) }
+    data.forEach { batchInsert.add(convertColumnsWithGeometry(it.columns).plus(Pair("reportId", reportId))) }
 
     return batchInsert.execute().toTypedArray()
 }
