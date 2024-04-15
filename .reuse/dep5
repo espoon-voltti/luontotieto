@@ -80,10 +80,6 @@ Files: docs/*.png
 Copyright: 2023-2024 City of Espoo
 License: LGPL-2.1-or-later
 
-Files: etl/db/migration/*
-Copyright: 2023-2024 City of Espoo
-License: LGPL-2.1-or-later
-
 Files: **/src/test/resources/test-data/*
 Copyright: 2023-2024 City of Espoo
 License: LGPL-2.1-or-later

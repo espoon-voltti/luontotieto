@@ -38,8 +38,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: luontotieto/etl
-            path: etl
           - name: luontotieto/service
             path: service
           - name: luontotieto/frontend
@@ -90,7 +88,6 @@ jobs:
             build=${{ github.run_number }}
             commit=${{ github.sha }}
           target: ${{ env.builder }}
-
 
   test:
     runs-on: ubuntu-latest
@@ -173,7 +170,7 @@ jobs:
 
       - name: Retag
         run: |
-          for repository in etl service frontend api-gateway; do
+          for repository in service frontend api-gateway; do
             MANIFEST=$(aws ecr batch-get-image --repository-name "luontotieto/$repository" --image-ids imageTag="${{ github.event.pull_request.head.sha || github.sha }}" --output json | jq --raw-output --join-output '.images[0].imageManifest')
             aws ecr put-image --repository-name "luontotieto/$repository" --image-tag "env-${{ matrix.environment }}" --image-manifest "$MANIFEST"
           done
