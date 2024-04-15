@@ -4,7 +4,7 @@
 
 package fi.espoo.luontotieto.domain
 
-import fi.espoo.luontotieto.config.AuditEvents
+import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.BucketEnv
 import fi.espoo.luontotieto.config.audit
@@ -66,7 +66,7 @@ class AppController {
     ): Report {
         return jdbi
             .inTransactionUnchecked { tx -> tx.insertReport(data = body, user = user) }
-            .also { logger.audit(user, AuditEvents.CREATE_REPORT, mapOf("id" to "$it")) }
+            .also { logger.audit(user, AuditEvent.CREATE_REPORT, mapOf("id" to "$it")) }
     }
 
     @PostMapping("/reports/{reportId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -110,7 +110,7 @@ class AppController {
                 )
                 logger.audit(
                     user,
-                    AuditEvents.ADD_REPORT_FILE,
+                    AuditEvent.ADD_REPORT_FILE,
                     mapOf("id" to "$reportId", "file" to "$id")
                 )
                 return ResponseEntity.status(HttpStatus.CREATED).body(errors)
@@ -140,11 +140,11 @@ class AppController {
     fun updateReport(
         user: AuthenticatedUser,
         @PathVariable id: UUID,
-        @RequestBody report: ReportInput
+        @RequestBody report: Report.Companion.ReportInput
     ): Report {
         return jdbi
             .inTransactionUnchecked { tx -> tx.putReport(id, report, user) }
-            .also { logger.audit(user, "UPDATE_REPORT", mapOf("id" to "$id")) }
+            .also { logger.audit(user, AuditEvent.UPDATE_REPORT, mapOf("id" to "$id")) }
     }
 
     @PostMapping("/reports/{reportId}/approve")
@@ -182,7 +182,7 @@ class AppController {
 
         jdbi
             .inTransactionUnchecked { tx -> tx.approveReport(reportId, user) }
-            .also { logger.audit(user, AuditEvents.APPROVE_REPORT, mapOf("id" to "$reportId")) }
+            .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
     }
 
     @GetMapping("/reports/{reportId}/files")
@@ -207,7 +207,7 @@ class AppController {
             .also {
                 logger.audit(
                     user,
-                    AuditEvents.DELETE_REPORT_FILE,
+                    AuditEvent.DELETE_REPORT_FILE,
                     mapOf("id" to "$reportId", "file" to "$fileId")
                 )
             }
@@ -229,7 +229,7 @@ class AppController {
     ): UUID {
         return jdbi
             .inTransactionUnchecked { tx -> tx.insertOrder(data = body, user = user) }
-            .also { logger.audit(user, AuditEvents.CREATE_ORDER, mapOf("id" to "$it")) }
+            .also { logger.audit(user, AuditEvent.CREATE_ORDER, mapOf("id" to "$it")) }
     }
 
     @PostMapping("/orders/{orderId}/reports")
@@ -244,7 +244,9 @@ class AppController {
                 val reportInput = Report.Companion.ReportInput(order.name, order.description)
                 tx.insertReport(reportInput, user, order.id)
             }
-            .also { logger.audit(user, "CREATE_REPORT_FOR_ORDER_ID", mapOf("id" to "$orderId")) }
+            .also {
+                logger.audit(user, AuditEvent.CREATE_REPORT_FOR_ORDER_ID, mapOf("id" to "$orderId"))
+            }
     }
 
     @PostMapping("/orders/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -276,7 +278,7 @@ class AppController {
             )
             logger.audit(
                 user,
-                AuditEvents.ADD_ORDER_FILE,
+                AuditEvent.ADD_ORDER_FILE,
                 mapOf("id" to "$orderId", "file" to "$id")
             )
         } catch (e: Exception) {
@@ -308,7 +310,7 @@ class AppController {
             .also {
                 logger.audit(
                     user,
-                    AuditEvents.DELETE_ORDER_FILE,
+                    AuditEvent.DELETE_ORDER_FILE,
                     mapOf("id" to "$orderId", "file" to "$fileId")
                 )
             }

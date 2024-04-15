@@ -68,10 +68,14 @@ class ReportTests : FullApplicationTest() {
         val report =
             controller.createReportFromScratch(
                 testUser,
-                ReportInput("Original name", "Original description")
+                Report.Companion.ReportInput("Original name", "Original description")
             )
         val updatedReport =
-            controller.updateReport(testUser, report.id, ReportInput("New name", "New description"))
+            controller.updateReport(
+                testUser,
+                report.id,
+                Report.Companion.ReportInput("New name", "New description")
+            )
         assertEquals("New name", updatedReport.name)
         assertEquals("New description", updatedReport.description)
         assertNotEquals(report.updated, updatedReport.updated)

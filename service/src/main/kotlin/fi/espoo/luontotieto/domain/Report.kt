@@ -81,7 +81,7 @@ fun Handle.approveReport(
 
 fun Handle.putReport(
     id: UUID,
-    report: ReportInput,
+    report: Report.Companion.ReportInput,
     user: AuthenticatedUser
 ): Report {
     return createQuery(
@@ -123,8 +123,7 @@ fun Handle.getReport(
     .bind("userId", user.id)
     .mapTo<Report>()
     .findOne()
-    .getOrNull()
-    ?: throw NotFound()
+    .getOrNull() ?: throw NotFound()
 
 fun Handle.getReports(user: AuthenticatedUser) =
     createQuery(
@@ -139,5 +138,4 @@ fun Handle.getReports(user: AuthenticatedUser) =
     )
         .bind("userId", user.id)
         .mapTo<Report>()
-        .list()
-        ?: emptyList()
+        .list() ?: emptyList()
