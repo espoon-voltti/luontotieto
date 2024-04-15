@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { OrderInput, apiPostOrder } from 'api'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from 'shared/buttons/Button'
@@ -16,6 +15,7 @@ import {
 import { H1 } from '../../shared/typography'
 
 import { OrderForm } from './OrderForm'
+import { OrderInput, apiPostOrder } from 'api/order-api'
 
 interface CreateProps {
   mode: 'CREATE'

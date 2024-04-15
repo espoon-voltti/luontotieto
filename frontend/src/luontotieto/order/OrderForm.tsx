@@ -2,14 +2,6 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import {
-  Order,
-  OrderFileDocumentType,
-  OrderInput,
-  OrderReportDocumentInput,
-  ReportFileDocumentType,
-  getDocumentTypeTitle
-} from 'api'
 import React, { useEffect, useMemo, useState } from 'react'
 import { InputField } from 'shared/form/InputField'
 import { TextArea } from 'shared/form/TextArea'
@@ -25,6 +17,13 @@ import {
 import { Label } from '../../shared/typography'
 import { Checkbox } from 'shared/form/Checkbox'
 import { FileInput, FileInputData } from 'shared/FileInput'
+import {
+  Order,
+  OrderFileDocumentType,
+  OrderInput,
+  OrderReportDocumentInput
+} from 'api/order-api'
+import { ReportFileDocumentType, getDocumentTypeTitle } from 'api/report-api'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -111,10 +110,16 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   const validInput: OrderInput | null = useMemo(() => {
     if (name.trim() === '') return null
     if (description.trim() === '') return null
-    const { file: orderInfoFileCheck } = orderInfoFile
+    const { file: orderInfoFileCheck, description: orderInfoFileDescription } =
+      orderInfoFile
     if (orderInfoFileCheck === null) return null
-    const { file: orderAreaFileFileCheck } = orderAreaFile
+    if (orderInfoFileDescription.trim() === '') return null
+    const {
+      file: orderAreaFileFileCheck,
+      description: orderAreaFileDescription
+    } = orderAreaFile
     if (orderAreaFileFileCheck === null) return null
+    if (orderAreaFileDescription.trim() === '') return null
 
     return {
       name: name.trim(),
@@ -200,7 +205,11 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           <LabeledInput $cols={8}>
             <Label>Kerättävät dokumentit</Label>
             {reportDocuments.map((rd) => (
-              <OrderReportDocumentInput data={rd} onChange={updateArray} />
+              <OrderReportDocumentInput
+                key={rd.documentType}
+                data={rd}
+                onChange={updateArray}
+              />
             ))}
           </LabeledInput>
         </RowOfInputs>
