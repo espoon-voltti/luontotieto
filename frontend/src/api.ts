@@ -161,7 +161,7 @@ export interface OrderFile extends OrderFileInput {
   updatedBy: string
 }
 
-const apiPostOrdertFile = (id: string, file: OrderFileInput): Promise<void> => {
+const apiPostOrderFile = (id: string, file: OrderFileInput): Promise<void> => {
   const formData = new FormData()
   formData.append('file', file.file)
   formData.append('description', file.description)
