@@ -205,7 +205,11 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           <LabeledInput $cols={8}>
             <Label>Kerättävät dokumentit</Label>
             {reportDocuments.map((rd) => (
-              <OrderReportDocumentInput data={rd} onChange={updateArray} />
+              <OrderReportDocumentInput
+                key={rd.documentType}
+                data={rd}
+                onChange={updateArray}
+              />
             ))}
           </LabeledInput>
         </RowOfInputs>
