@@ -30,6 +30,22 @@ data class Report(
     }
 }
 
+private const val SELECT_REPORT_SQL =
+    """
+    SELECT r.id,
+           r.name,
+           r.description,
+           r.created,
+           r.updated,
+           r.approved,
+           CONCAT(uc.first_name, ' ', uc.last_name) AS "createdBy",
+           CONCAT(uu.first_name, ' ', uu.last_name) AS "updatedBy",
+           r.order_id                               AS "orderId"
+    FROM report r
+        LEFT JOIN users uc ON r.created_by = uc.id
+        LEFT JOIN users uu ON r.updated_by = uu.id
+"""
+
 fun Handle.insertReport(
     data: Report.Companion.ReportInput,
     user: AuthenticatedUser,
@@ -37,17 +53,12 @@ fun Handle.insertReport(
 ): Report {
     return createQuery(
         """
-            WITH inserted_report AS (
+            WITH report AS (
                 INSERT INTO report (name, description, created_by, updated_by, order_id) 
                 VALUES (:name, :description, :createdBy, :updatedBy, :orderId)
                 RETURNING *
             ) 
-            SELECT r.id, r.name, r.description, r.created, r.updated, r.approved,
-             CONCAT(uc.first_name, ' ', uc.last_name) AS "createdBy",
-             CONCAT(uu.first_name, ' ', uu.last_name) AS "updatedBy", r.order_id as "orderId"
-            FROM inserted_report r 
-            LEFT JOIN users uc ON r.created_by = uc.id 
-            LEFT JOIN users uu ON r.updated_by = uu.id
+            $SELECT_REPORT_SQL
             """
     )
         .bind("name", data.name)
@@ -86,16 +97,13 @@ fun Handle.putReport(
 ): Report {
     return createQuery(
         """
-            WITH updated_report AS (
+            WITH report AS (
                 UPDATE report 
                  SET name = :name, description = :description, updated_by = :updatedBy
                  WHERE id = :id AND (created_by = :updatedBy OR updated_by = :updatedBy)
                 RETURNING *
             ) 
-            SELECT r.id, r.name, r.description, r.created, r.updated, r.approved, CONCAT(uc.first_name, ' ', uc.last_name) AS "createdBy", CONCAT(uu.first_name, ' ', uu.last_name) AS "updatedBy"
-            FROM updated_report r 
-            LEFT JOIN users uc ON r.created_by = uc.id 
-            LEFT JOIN users uu ON r.updated_by = uu.id
+            $SELECT_REPORT_SQL
             """
     )
         .bind("id", id)
@@ -112,10 +120,7 @@ fun Handle.getReport(
     user: AuthenticatedUser
 ) = createQuery(
     """
-                SELECT r.id, r.name, r.description, r.created, r.updated, r.approved, r.order_id as "orderId", CONCAT(uc.first_name, ' ', uc.last_name) AS "createdBy", CONCAT(uu.first_name, ' ', uu.last_name) AS "updatedBy"
-                FROM report r 
-                LEFT JOIN users uc ON r.created_by = uc.id 
-                LEFT JOIN users uu ON r.updated_by = uu.id
+                $SELECT_REPORT_SQL
                 WHERE r.id = :id AND (r.created_by = :userId OR r.updated_by = :userId)
             """
 )
@@ -128,10 +133,7 @@ fun Handle.getReport(
 fun Handle.getReports(user: AuthenticatedUser) =
     createQuery(
         """
-                SELECT r.id, r.name, r.description, r.created, r.updated, r.approved, r.order_id as "orderId", CONCAT(uc.first_name, ' ', uc.last_name) AS "createdBy", CONCAT(uu.first_name, ' ', uu.last_name) AS "updatedBy"
-                FROM report r 
-                LEFT JOIN users uc ON r.created_by = uc.id 
-                LEFT JOIN users uu ON r.updated_by = uu.id
+                $SELECT_REPORT_SQL
                 WHERE created_by = :userId OR updated_by = :userId
                 ORDER BY created DESC
             """
