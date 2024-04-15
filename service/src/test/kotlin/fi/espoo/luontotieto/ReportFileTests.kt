@@ -6,7 +6,7 @@ package fi.espoo.luontotieto
 
 import fi.espoo.luontotieto.domain.AppController
 import fi.espoo.luontotieto.domain.DocumentType
-import fi.espoo.luontotieto.domain.ReportInput
+import fi.espoo.luontotieto.domain.Report
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.mock.web.MockMultipartFile
@@ -26,7 +26,7 @@ class ReportFileTests : FullApplicationTest() {
         val createdReport =
             controller.createReportFromScratch(
                 user = testUser,
-                body = ReportInput("Test report", "Test description")
+                body = Report.Companion.ReportInput("Test report", "Test description")
             )
         val file = File("src/test/resources/test-data/liito_orava_pisteet.gpkg")
         val multipartFile: MultipartFile =
@@ -68,7 +68,7 @@ class ReportFileTests : FullApplicationTest() {
         val createdReport =
             controller.createReportFromScratch(
                 user = testUser,
-                body = ReportInput("Test report", "Test description")
+                body = Report.Companion.ReportInput("Test report", "Test description")
             )
         val file = File("src/test/resources/test-data/liito_orava_alueet.gpkg")
         val multipartFile: MultipartFile =
@@ -103,7 +103,7 @@ class ReportFileTests : FullApplicationTest() {
         val createdReport =
             controller.createReportFromScratch(
                 user = testUser,
-                body = ReportInput("Test report", "Test description")
+                body = Report.Companion.ReportInput("Test report", "Test description")
             )
         val response =
             controller.uploadReportFile(

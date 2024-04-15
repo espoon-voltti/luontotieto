@@ -44,4 +44,27 @@ class OrderTests : FullApplicationTest() {
             )
         )
     }
+
+    @Test
+    fun `create order report and populate it with order fields`() {
+        val orderReportDocuments =
+            listOf(
+                OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_PISTEET),
+            )
+        val createdOrderId =
+            controller.createOrderFromScratch(
+                user = testUser,
+                body = OrderInput("Test order", "Test description", "12345", orderReportDocuments),
+            )
+
+        val createdOrderReport = controller.createOrderReport(testUser, createdOrderId)
+
+        val orderReportResponse = controller.getReportById(testUser, createdOrderReport.id)
+
+        assertNotNull(orderReportResponse)
+        assertEquals("Test order", orderReportResponse.name)
+        assertEquals("Test description", orderReportResponse.description)
+        assertEquals("Teija Testaaja", orderReportResponse.createdBy)
+        assertEquals("Teija Testaaja", orderReportResponse.updatedBy)
+    }
 }
