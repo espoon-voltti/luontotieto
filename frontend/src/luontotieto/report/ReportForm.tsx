@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { ReportDetails, ReportFileDocumentType, ReportInput } from 'api'
 import React, { useEffect, useMemo, useState } from 'react'
 import { InputField } from 'shared/form/InputField'
 import { TextArea } from 'shared/form/TextArea'
@@ -17,6 +16,11 @@ import {
 } from '../../shared/layout'
 import { Label } from '../../shared/typography'
 import { FileInput, FileInputData } from 'shared/FileInput'
+import {
+  ReportDetails,
+  ReportFileDocumentType,
+  ReportInput
+} from 'api/report-api'
 
 interface CreateProps {
   mode: 'CREATE'

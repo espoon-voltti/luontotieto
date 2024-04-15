@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { ReportDetails, apiGetReports } from 'api'
 import { StatusChip } from 'luontotieto/cases/StatusChip'
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -20,6 +19,7 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H3 } from '../../shared/typography'
+import { ReportDetails, apiGetReports } from 'api/report-api'
 
 export const ReportList = React.memo(function ReportList() {
   const navigate = useNavigate()

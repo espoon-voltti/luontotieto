@@ -2,13 +2,6 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import {
-  ReportDetails,
-  ReportFileDetails,
-  apiApproveReport,
-  apiGetReport,
-  apiGetReportFiles
-} from 'api'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -21,6 +14,13 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H1, Label } from '../../shared/typography'
+import {
+  ReportDetails,
+  ReportFileDetails,
+  apiApproveReport,
+  apiGetReport,
+  apiGetReportFiles
+} from 'api/report-api'
 
 export const ReportPage = React.memo(function ReportPage() {
   const { id } = useParams()

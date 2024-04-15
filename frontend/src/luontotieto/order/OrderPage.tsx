@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { Order, OrderFile, apiGetOrder, apiGetOrderFiles } from 'api'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -12,6 +11,7 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H1, Label } from '../../shared/typography'
+import { Order, OrderFile, apiGetOrder, apiGetOrderFiles } from 'api/order-api'
 
 export const OrderPage = React.memo(function OrderPage() {
   const { id } = useParams()
