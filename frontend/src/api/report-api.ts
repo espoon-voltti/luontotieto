@@ -4,12 +4,19 @@
 
 import { apiClient } from 'api-client'
 import { JsonOf } from 'shared/api-utils'
-import { OrderFileDocumentType } from './order-api'
+
+import { Order, OrderFileDocumentType } from './order-api'
+
+export interface ReportFormInput {
+  name: string
+  description: string
+  filesToAdd: ReportFileInput[]
+  filesToRemove: string[]
+}
 
 export interface ReportInput {
   name: string
   description: string
-  files: ReportFileInput[]
 }
 
 export function getDocumentTypeTitle<
@@ -34,6 +41,11 @@ export enum ReportFileDocumentType {
   LIITO_ORAVA_ALUEET = 'LIITO_ORAVA_ALUEET'
 }
 
+export const reportFileDocumentTypes = [
+  ReportFileDocumentType.LIITO_ORAVA_ALUEET,
+  ReportFileDocumentType.LIITO_ORAVA_PISTEET
+]
+
 export interface ReportFileInput {
   description: string
   documentType: ReportFileDocumentType
@@ -47,6 +59,7 @@ export interface ReportDetails extends ReportInput {
   createdBy: string
   updatedBy: string
   approved: boolean
+  order?: Order
 }
 
 export interface ReportFileDetails extends ReportFileInput {
@@ -60,16 +73,46 @@ export interface ReportFileDetails extends ReportFileInput {
 }
 
 export const apiPostReport = async (
-  data: ReportInput
+  reportInput: ReportFormInput
 ): Promise<ReportDetails> => {
   const body: JsonOf<ReportInput> = {
-    ...data
+    ...reportInput
   }
 
   const report = await apiClient
     .post<ReportDetails>('/reports', body)
     .then((r) => r.data)
-  await apiPostReportFile(report.id, data.files[0])
+
+  for (const id of reportInput.filesToRemove) {
+    await apiClient.delete(`/reports/${report.id}/files/${id}`)
+  }
+
+  for (const file of reportInput.filesToAdd) {
+    await apiPostReportFile(report.id, file)
+  }
+
+  return report
+}
+
+export const apiPutReport = async (
+  reportId: string,
+  reportInput: ReportFormInput
+): Promise<ReportDetails> => {
+  const body: JsonOf<ReportInput> = {
+    ...reportInput
+  }
+
+  const report = await apiClient
+    .put<ReportDetails>(`/reports/${reportId}`, body)
+    .then((r) => r.data)
+
+  for (const id of reportInput.filesToRemove) {
+    await apiClient.delete(`/reports/${report.id}/files/${id}`)
+  }
+
+  for (const file of reportInput.filesToAdd) {
+    await apiPostReportFile(report.id, file)
+  }
 
   return report
 }

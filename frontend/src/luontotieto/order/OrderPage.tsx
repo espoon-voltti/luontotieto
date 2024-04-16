@@ -2,8 +2,16 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import {
+  Order,
+  OrderFile,
+  apiGetOrder,
+  apiGetOrderFiles,
+  apiPostOrderReport
+} from 'api/order-api'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { AddButton } from 'shared/buttons/AddButton'
 
 import {
   FlexLeftRight,
@@ -12,14 +20,6 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H1, Label } from '../../shared/typography'
-import {
-  Order,
-  OrderFile,
-  apiGetOrder,
-  apiGetOrderFiles,
-  apiPostOrderReport
-} from 'api/order-api'
-import { AddButton } from 'shared/buttons/AddButton'
 
 export const OrderPage = React.memo(function OrderPage() {
   const { id } = useParams()
@@ -31,7 +31,7 @@ export const OrderPage = React.memo(function OrderPage() {
   const createOrderReport = async (orderId: string) => {
     const report = await apiPostOrderReport(orderId)
     if (report.id) {
-      navigate(`/luontotieto/selvitys/${report.id}`)
+      navigate(`/luontotieto/selvitys/${report.id}/muokkaa`)
     }
   }
 

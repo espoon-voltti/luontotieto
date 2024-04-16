@@ -4,7 +4,7 @@
 import { FrontPage } from 'luontotieto/FrontPage'
 import { CreateOrderPage } from 'luontotieto/order/CreateOrderPage'
 import { OrderPage } from 'luontotieto/order/OrderPage'
-import { CreateReportPage } from 'luontotieto/report/CreateReportPage'
+import { ReportFormPage } from 'luontotieto/report/ReportFormPage'
 import { ReportPage } from 'luontotieto/report/ReportPage'
 import React, { Fragment } from 'react'
 import { Navigate, createBrowserRouter, Outlet, Link } from 'react-router-dom'
@@ -97,7 +97,7 @@ export const appRouter = createBrowserRouter([
         path: '/luontotieto/selvitys/uusi',
         element: (
           <AuthGuard allow="AUTHENTICATED_ONLY">
-            <CreateReportPage mode="CREATE" />
+            <ReportFormPage mode="CREATE" />
           </AuthGuard>
         )
       },
@@ -106,6 +106,14 @@ export const appRouter = createBrowserRouter([
         element: (
           <AuthGuard allow="AUTHENTICATED_ONLY">
             <ReportPage />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/luontotieto/selvitys/:id/muokkaa',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <ReportFormPage mode="EDIT" />
           </AuthGuard>
         )
       },
