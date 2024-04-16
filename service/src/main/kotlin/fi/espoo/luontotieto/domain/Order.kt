@@ -26,8 +26,8 @@ data class Order(
     val planNumber: String?,
     val created: OffsetDateTime,
     val updated: OffsetDateTime,
-    val createdBy: UUID,
-    val updatedBy: UUID,
+    val createdBy: String,
+    val updatedBy: String,
     @Json val reportDocuments: List<OrderReportDocument>
 )
 
@@ -37,6 +37,22 @@ data class OrderInput(
     val planNumber: String? = null,
     @Json val reportDocuments: List<OrderReportDocument>
 )
+
+private const val SELECT_ORDER_SQL =
+    """
+    SELECT o.id,
+           o.name,
+           o.description,
+           o.plan_number as "planNumber",
+           o.report_documents as "reportDocuments",
+           o.created,
+           o.updated,
+           CONCAT(uc.first_name, ' ', uc.last_name) AS "createdBy",
+           CONCAT(uu.first_name, ' ', uu.last_name) AS "updatedBy"
+    FROM "order" o
+        LEFT JOIN users uc ON o.created_by = uc.id
+        LEFT JOIN users uu ON o.updated_by = uu.id
+"""
 
 fun Handle.insertOrder(
     data: OrderInput,
@@ -63,11 +79,8 @@ fun Handle.getOrder(
 ): Order =
     createQuery(
         """
-            SELECT id, name, description, created, updated,
-             plan_number as "planNumber", report_documents as "reportDocuments",
-             created_by AS "createdBy", updated_by AS "updatedBy"
-            FROM "order"
-            WHERE id = :id AND (created_by = :userId OR updated_by = :userId)
+            $SELECT_ORDER_SQL
+            WHERE o.id = :id AND (o.created_by = :userId OR o.updated_by = :userId)
             """
     )
         .bind("id", id)
@@ -75,3 +88,15 @@ fun Handle.getOrder(
         .mapTo<Order>()
         .findOne()
         .getOrNull() ?: throw NotFound()
+
+fun Handle.getOrders(user: AuthenticatedUser) =
+    createQuery(
+        """
+             $SELECT_ORDER_SQL
+              WHERE o.created_by = :userId OR o.updated_by = :userId
+              ORDER BY o.created DESC
+            """
+    )
+        .bind("userId", user.id)
+        .mapTo<Order>()
+        .list() ?: emptyList()

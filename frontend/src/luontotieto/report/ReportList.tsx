@@ -35,7 +35,7 @@ export const ReportList = React.memo(function ReportList() {
   return (
     <PageContainer>
       <SectionContainer>
-        <H3>Näytetttävät selvitykset</H3>
+        <H3>Näytettävät selvitykset</H3>
         <VerticalGap $size="m" />
         <FlexLeftRight>
           <FlexRowWithGaps $gapSize="s">

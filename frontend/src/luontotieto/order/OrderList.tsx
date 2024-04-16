@@ -2,46 +2,35 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { StatusChip } from 'luontotieto/cases/StatusChip'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AddButton } from 'shared/buttons/AddButton'
-import { FilterButton } from 'shared/buttons/FilterButton'
 import { formatDate } from 'shared/dates'
 import styled from 'styled-components'
 
 import {
   FlexLeftRight,
-  FlexRowWithGaps,
   PageContainer,
   SectionContainer,
   Table,
   VerticalGap
 } from '../../shared/layout'
 import { H3 } from '../../shared/typography'
-import { Order } from 'api/order-api'
+import { Order, apiGetOrders } from 'api/order-api'
 
 export const OrderList = React.memo(function OrderList() {
   const navigate = useNavigate()
-  const [orders, _] = useState<Order[]>([])
-  const [showAll, setShowAll] = useState(false)
+  const [orders, setOrders] = useState<Order[]>([])
+
+  useEffect(() => {
+    void apiGetOrders().then(setOrders)
+  }, [])
 
   return (
     <PageContainer>
       <SectionContainer>
-        <H3>Näytetttävät tilaukset</H3>
-        <VerticalGap $size="m" />
         <FlexLeftRight>
-          <FlexRowWithGaps $gapSize="s">
-            <FilterButton
-              text="Näytä avoimet"
-              selected={!showAll}
-              onClick={(selected) => {
-                setShowAll(selected)
-              }}
-            />
-          </FlexRowWithGaps>
-
+          <H3>Näytettävät tilaukset</H3>
           <AddButton
             text="Luo uusi tilaus"
             onClick={() => navigate('/luontotieto/tilaus/uusi')}
@@ -58,7 +47,6 @@ export const OrderList = React.memo(function OrderList() {
               <Th>Nimi</Th>
               <Th>Luoja</Th>
               <Th style={{ width: '160px' }}>Päivitetty</Th>
-              <Th style={{ width: '80px' }}>Tila</Th>
             </tr>
           </thead>
           <tbody>
@@ -73,9 +61,6 @@ export const OrderList = React.memo(function OrderList() {
                 <td>{order.createdBy}</td>
 
                 <td>{formatDate(order.updated)}</td>
-                <td>
-                  <StatusChip approved={true} />
-                </td>
               </tr>
             ))}
             {orders.length == 0 && (
