@@ -4,11 +4,13 @@
 
 package fi.espoo.luontotieto
 
+import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.domain.AppController
 import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.OrderInput
 import fi.espoo.luontotieto.domain.OrderReportDocument
 import org.springframework.beans.factory.annotation.Autowired
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -66,5 +68,31 @@ class OrderTests : FullApplicationTest() {
         assertEquals("Test description", orderReportResponse.description)
         assertEquals("Teija Testaaja", orderReportResponse.createdBy)
         assertEquals("Teija Testaaja", orderReportResponse.updatedBy)
+    }
+
+    @Test
+    fun `get all orders for user`() {
+        for (i in 0..2) {
+            controller.createOrderFromScratch(
+                user = testUser,
+                body = OrderInput("Test order $i", "Test description $i", "12345", listOf()),
+            )
+        }
+
+        val expected = setOf("Test order 1", "Test order 2", "Test order 0")
+        val ordersResponse = controller.getOrders(testUser).map { it.name }.toSet()
+
+        assertEquals(expected, ordersResponse)
+    }
+
+    @Test
+    fun `get all reports for user - no reports`() {
+        controller.createOrderFromScratch(
+            user = testUser,
+            body = OrderInput("Test order", "Test description", "12345", listOf()),
+        )
+
+        val ordersResponse = controller.getReports(AuthenticatedUser(UUID.randomUUID()))
+        assertEquals(0, ordersResponse.size)
     }
 }

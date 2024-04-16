@@ -75,3 +75,18 @@ fun Handle.getOrder(
         .mapTo<Order>()
         .findOne()
         .getOrNull() ?: throw NotFound()
+
+fun Handle.getOrders(user: AuthenticatedUser) =
+    createQuery(
+        """
+              SELECT id, name, description, created, updated,
+                plan_number as "planNumber", report_documents as "reportDocuments",
+                created_by AS "createdBy", updated_by AS "updatedBy"
+              FROM "order"
+              WHERE created_by = :userId OR updated_by = :userId
+              ORDER BY created DESC
+            """
+    )
+        .bind("userId", user.id)
+        .mapTo<Order>()
+        .list() ?: emptyList()

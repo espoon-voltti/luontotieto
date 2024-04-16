@@ -213,6 +213,11 @@ class AppController {
             }
     }
 
+    @GetMapping("/orders")
+    fun getOrders(user: AuthenticatedUser): List<Order> {
+        return jdbi.inTransactionUnchecked { tx -> tx.getOrders(user) }
+    }
+
     @GetMapping("/orders/{id}")
     fun getOrderById(
         user: AuthenticatedUser,
