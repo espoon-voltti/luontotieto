@@ -12,6 +12,12 @@ import { FileInputField } from 'shared/form/FileInputField'
 import { ReportFileDocumentType, getDocumentTypeTitle } from 'api/report-api'
 import { OrderFileDocumentType } from 'api/order-api'
 
+export interface ValidFileInputData<T> {
+  description: string
+  file: File
+  documentType: T
+}
+
 export interface FileInputData<T> {
   description: string
   file: File | null
@@ -29,13 +35,8 @@ export const FileInput = <
   data,
   onChange
 }: FileInputProps<T>) => {
-  const debounceDelay = 1500
-
   const [file, setFile] = useState(data.file ?? null)
-  const [description, setDescription] = useDebouncedState(
-    data.description,
-    debounceDelay
-  )
+  const [description, setDescription] = useDebouncedState(data.description)
 
   useEffect(() => {
     onChange({ file, description, documentType: data.documentType })

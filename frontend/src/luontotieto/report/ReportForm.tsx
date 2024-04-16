@@ -127,8 +127,6 @@ function filesAreValid(
 }
 
 export const ReportForm = React.memo(function ReportForm(props: Props) {
-  const debounceDelay = 1500
-
   const requiredFiles = useMemo(
     () =>
       props.mode === 'EDIT' ? props.report.order?.reportDocuments ?? [] : [],
@@ -141,13 +139,11 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
   }, [requiredFiles, props])
 
   const [name, setName] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.report.name,
-    debounceDelay
+    props.mode === 'CREATE' ? '' : props.report.name
   )
 
   const [description, setDescription] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.report.description,
-    debounceDelay
+    props.mode === 'CREATE' ? '' : props.report.description
   )
 
   const [fileInputs, setFileInputs] = useState(originalFileInputs)

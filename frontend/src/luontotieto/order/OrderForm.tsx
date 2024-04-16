@@ -41,7 +41,6 @@ interface EditProps {
 type Props = CreateProps | ViewProps | EditProps
 
 export const OrderForm = React.memo(function OrderForm(props: Props) {
-  const debounceDelay = 1500
   const defaultReportDocuments = [
     {
       checked: false,
@@ -56,18 +55,15 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   ]
 
   const [name, setName] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.name,
-    debounceDelay
+    props.mode === 'CREATE' ? '' : props.order.name
   )
 
   const [planNumber, setPlanNumber] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.name,
-    debounceDelay
+    props.mode === 'CREATE' ? '' : props.order.name
   )
 
   const [description, setDescription] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.description,
-    debounceDelay
+    props.mode === 'CREATE' ? '' : props.order.description
   )
 
   const [orderInfoFile, setOrderInfoFile] = useState<
@@ -107,19 +103,19 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     setReportDocuments(newArray)
   }
 
+  const validOrderFile = (file: FileInputData<OrderFileDocumentType>) => {
+    if (file.file === null) return null
+    if (file.description.trim() === '') return null
+    return { ...file, file: file.file }
+  }
+
   const validInput: OrderInput | null = useMemo(() => {
     if (name.trim() === '') return null
     if (description.trim() === '') return null
-    const { file: orderInfoFileCheck, description: orderInfoFileDescription } =
-      orderInfoFile
-    if (orderInfoFileCheck === null) return null
-    if (orderInfoFileDescription.trim() === '') return null
-    const {
-      file: orderAreaFileFileCheck,
-      description: orderAreaFileDescription
-    } = orderAreaFile
-    if (orderAreaFileFileCheck === null) return null
-    if (orderAreaFileDescription.trim() === '') return null
+    const orderFile = validOrderFile(orderInfoFile)
+    const areaFile = validOrderFile(orderAreaFile)
+    if (!orderFile) return null
+    if (!areaFile) return null
 
     return {
       name: name.trim(),
@@ -131,10 +127,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           description: rd.description,
           documentType: rd.documentType
         })),
-      files: [
-        { ...orderInfoFile, file: orderInfoFileCheck },
-        { ...orderAreaFile, file: orderAreaFileFileCheck }
-      ]
+      files: [orderFile, areaFile]
     }
   }, [
     name,
@@ -233,13 +226,8 @@ const OrderReportDocumentInput = React.memo(function OrderReportDocumentInput({
   data,
   onChange
 }: OrderReportDocumentInputProps) {
-  const debounceDelay = 1500
-
   const [checked, setChecked] = useState(data.checked ?? false)
-  const [description, setDescription] = useDebouncedState(
-    data.description,
-    debounceDelay
-  )
+  const [description, setDescription] = useDebouncedState(data.description)
 
   useEffect(() => {
     onChange({ checked, description, documentType: data.documentType })
