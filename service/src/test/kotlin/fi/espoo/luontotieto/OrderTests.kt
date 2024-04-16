@@ -9,10 +9,12 @@ import fi.espoo.luontotieto.domain.AppController
 import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.OrderInput
 import fi.espoo.luontotieto.domain.OrderReportDocument
+import fi.espoo.luontotieto.domain.Report
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 
 class OrderTests : FullApplicationTest() {
@@ -96,5 +98,26 @@ class OrderTests : FullApplicationTest() {
 
         val ordersResponse = controller.getReports(AuthenticatedUser(UUID.randomUUID()))
         assertEquals(0, ordersResponse.size)
+    }
+
+    @Test
+    fun `update existing order`() {
+        val orderId =
+            controller.createOrderFromScratch(
+                user = testUser,
+                body = OrderInput("Test order", "Test description", "12345", listOf(                OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_PISTEET)
+                )),
+            )
+        val updatedReportDocuments = listOf(OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_ALUEET))
+        val updatedOrder =
+            controller.updateOrder(
+                testUser,
+                orderId,
+                OrderInput("New name", "New description", "123", updatedReportDocuments
+            ))
+
+        assertEquals("New name", updatedOrder.name)
+        assertEquals("New description", updatedOrder.description)
+        assertEquals(updatedReportDocuments, updatedOrder.reportDocuments)
     }
 }

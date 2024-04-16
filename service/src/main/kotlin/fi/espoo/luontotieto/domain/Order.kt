@@ -71,6 +71,30 @@ fun Handle.insertOrder(
         .one()
 }
 
+fun Handle.purOrder(
+    id: UUID,
+    order: OrderInput,
+    user: AuthenticatedUser
+): Order {
+    return createQuery(
+        """
+            WITH "order" AS (
+                UPDATE "order" 
+                 SET name = :name, description = :description, updated_by = :updatedBy,
+                  plan_number = :planNumber, report_documents = :reportDocuments
+                 WHERE id = :id AND (created_by = :updatedBy OR updated_by = :updatedBy)
+                RETURNING *
+            ) 
+            $SELECT_ORDER_SQL
+            """
+    ).bindKotlin(order)
+        .bind("id", id)
+        .bind("updatedBy", user.id)
+        .mapTo<Order>()
+        .findOne()
+        .getOrNull() ?: throw NotFound()
+}
+
 fun Handle.getOrder(
     id: UUID,
     user: AuthenticatedUser
