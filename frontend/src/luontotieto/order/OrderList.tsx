@@ -10,7 +10,6 @@ import styled from 'styled-components'
 
 import {
   FlexLeftRight,
-  FlexRight,
   PageContainer,
   SectionContainer,
   Table,
@@ -31,7 +30,7 @@ export const OrderList = React.memo(function OrderList() {
     <PageContainer>
       <SectionContainer>
         <FlexLeftRight>
-          <H3>Näytetttävät tilaukset</H3>
+          <H3>Näytettävät tilaukset</H3>
           <AddButton
             text="Luo uusi tilaus"
             onClick={() => navigate('/luontotieto/tilaus/uusi')}
