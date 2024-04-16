@@ -54,7 +54,6 @@ private const val SELECT_ORDER_SQL =
         LEFT JOIN users uu ON o.updated_by = uu.id
 """
 
-
 fun Handle.insertOrder(
     data: OrderInput,
     user: AuthenticatedUser
