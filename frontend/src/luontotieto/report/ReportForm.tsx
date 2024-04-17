@@ -7,7 +7,6 @@ import {
   ReportDetails,
   ReportFileDetails,
   ReportFileDocumentType,
-  ReportFileInput,
   ReportFormInput,
   reportFileDocumentTypes
 } from 'api/report-api'
@@ -49,8 +48,8 @@ interface ReportFileInputElementNew {
   file: File | null
 }
 
-interface ReportFileInputElementCreated {
-  type: 'CREATED'
+interface ReportFileInputElementExisting {
+  type: 'EXISTING'
   userDescription: string
   documentType: ReportFileDocumentType
   documentDescription: string | null
@@ -59,14 +58,12 @@ interface ReportFileInputElementCreated {
 
 type ReportFileInputElement =
   | ReportFileInputElementNew
-  | ReportFileInputElementCreated
+  | ReportFileInputElementExisting
 
 function createFileInputs(
-  props: Props,
+  reportFiles: ReportFileDetails[],
   requiredFiles: OrderReportDocumentInput[]
 ): ReportFileInputElement[] {
-  const reportFiles = props.mode === 'EDIT' ? props.reportFiles : []
-
   if (requiredFiles.length === 0) {
     // Display inputs for all possible file types
     return reportFileDocumentTypes.map((type) => {
@@ -75,7 +72,7 @@ function createFileInputs(
       )
       return reportFile
         ? {
-            type: 'CREATED',
+            type: 'EXISTING',
             userDescription: reportFile.description,
             documentType: type,
             documentDescription: null,
@@ -96,7 +93,7 @@ function createFileInputs(
       )
       return reportFile
         ? {
-            type: 'CREATED',
+            type: 'EXISTING',
             userDescription: reportFile.description,
             documentType: required.documentType,
             documentDescription: required.description,
@@ -123,7 +120,7 @@ function filesAreValid(
     )
 
     return (
-      fileInput?.type === 'CREATED' ||
+      fileInput?.type === 'EXISTING' ||
       (fileInput?.file && fileInput.userDescription.trim() !== '')
     )
   })
@@ -132,19 +129,16 @@ function filesAreValid(
 export const ReportForm = React.memo(function ReportForm(props: Props) {
   const debounceDelay = 1500
 
-  const requiredFiles = useMemo(() => {
-    switch (props.mode) {
-      case 'CREATE':
-        return []
-      case 'EDIT':
-        return props.report.order?.reportDocuments ?? []
-    }
-  }, [props])
-
-  const originalFileInputs: ReportFileInputElement[] = useMemo(
-    () => createFileInputs(props, requiredFiles),
-    [requiredFiles, props]
+  const requiredFiles = useMemo(
+    () =>
+      props.mode === 'EDIT' ? props.report.order?.reportDocuments ?? [] : [],
+    [props]
   )
+
+  const originalFileInputs = useMemo(() => {
+    const reportFiles = props.mode === 'EDIT' ? props.reportFiles : []
+    return createFileInputs(reportFiles, requiredFiles)
+  }, [requiredFiles, props])
 
   const [name, setName] = useDebouncedState(
     props.mode === 'CREATE' ? '' : props.report.name,
@@ -156,28 +150,27 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
     debounceDelay
   )
 
-  const [fileInputsS, setFileInputs] = useState(originalFileInputs)
+  const [fileInputs, setFileInputs] = useState(originalFileInputs)
 
   const updateFileInput = (modified: FileInputData<ReportFileDocumentType>) => {
     setFileInputs(
-      fileInputsS.map((fi) => {
+      fileInputs.map((fi) => {
         if (fi.documentType === modified.documentType) {
           return {
             ...fi,
             userDescription: modified.description,
             file: modified.file
           }
-        } else {
-          return { ...fi }
         }
+        return fi
       })
     )
   }
 
   const removeCreatedFileInput = (id: string) => {
     setFileInputs(
-      fileInputsS.map((fi) => {
-        if (fi.type === 'CREATED' && fi.details.id === id) {
+      fileInputs.map((fi) => {
+        if (fi.type === 'EXISTING' && fi.details.id === id) {
           return {
             type: 'NEW',
             file: null,
@@ -195,43 +188,32 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
     if (name.trim() === '') return null
     if (description.trim() === '') return null
 
-    if (!filesAreValid(requiredFiles, fileInputsS)) return null
+    if (!filesAreValid(requiredFiles, fileInputs)) return null
 
     return {
       name: name.trim(),
       description: description.trim(),
-      filesToAdd: fileInputsS.reduce(
-        (acc: ReportFileInput[], cur: ReportFileInputElement) => {
-          if (cur.type === 'CREATED' || cur.file === null) {
-            return acc
-          }
-          return [
-            ...acc,
-            {
-              description: cur.userDescription,
-              documentType: cur.documentType,
-              file: cur.file
-            }
-          ]
-        },
-        []
+      filesToAdd: fileInputs.flatMap((e) =>
+        e.type === 'NEW' && e.file !== null
+          ? [
+              {
+                description: e.userDescription,
+                documentType: e.documentType,
+                file: e.file
+              }
+            ]
+          : []
       ),
-      filesToRemove: originalFileInputs.reduce(
-        (acc: string[], cur: ReportFileInputElement) => {
-          if (
-            cur.type === 'CREATED' &&
-            fileInputsS.find(
-              (fi) => fi.type === 'NEW' && fi.documentType == cur.documentType
-            )
-          ) {
-            return [cur.details.id, ...acc]
-          }
-          return acc
-        },
-        []
+      filesToRemove: originalFileInputs.flatMap((e) =>
+        e.type === 'EXISTING' &&
+        !fileInputs.find(
+          (fi) => fi.type === 'EXISTING' && fi.details.id === e.details.id
+        )
+          ? [e.details.id]
+          : []
       )
     }
-  }, [name, description, fileInputsS, requiredFiles, originalFileInputs])
+  }, [name, description, fileInputs, requiredFiles, originalFileInputs])
 
   useEffect(() => {
     props.onChange(validInput)
@@ -257,7 +239,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
       <H2>Tiedostot</H2>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
-        {fileInputsS.map((fInput) => {
+        {fileInputs.map((fInput) => {
           switch (fInput.type) {
             case 'NEW':
               return (
@@ -273,7 +255,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
                   }}
                 />
               )
-            case 'CREATED':
+            case 'EXISTING':
               return (
                 <ReportFormFile
                   details={fInput.details}
@@ -285,7 +267,6 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
           }
         })}
       </GroupOfInputRows>
-
       <VerticalGap $size="XL" />
     </FlexCol>
   )
