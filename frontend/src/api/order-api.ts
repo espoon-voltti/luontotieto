@@ -4,6 +4,7 @@
 
 import { apiClient } from 'api-client'
 import { JsonOf } from 'shared/api-utils'
+
 import { ReportDetails, ReportFileDocumentType } from './report-api'
 
 export interface Order extends OrderInput {
@@ -33,8 +34,10 @@ export enum OrderFileDocumentType {
   ORDER_AREA = 'ORDER_AREA'
 }
 
-export interface OrderReportDocumentInput
-  extends Pick<OrderReportDocument, 'description' | 'documentType'> {}
+export type OrderReportDocumentInput = Pick<
+  OrderReportDocument,
+  'description' | 'documentType'
+>
 
 export const apiPostOrder = async (data: OrderInput): Promise<string> => {
   const body: JsonOf<OrderInput> = {
@@ -87,8 +90,7 @@ export const apiGetOrderFiles = (id: string): Promise<OrderFile[]> =>
 
 export const apiPostOrderReport = async (
   orderId: string
-): Promise<ReportDetails> => {
-  return await apiClient
+): Promise<ReportDetails> =>
+  await apiClient
     .post<ReportDetails>(`/orders/${orderId}/reports`, {})
     .then((r) => r.data)
-}

@@ -9,18 +9,16 @@ import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
+import org.jdbi.v3.core.mapper.PropagateNull
 import org.jdbi.v3.json.Json
 import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
-data class OrderReportDocument(
-    val description: String,
-    val documentType: DocumentType
-)
+data class OrderReportDocument(val description: String, val documentType: DocumentType)
 
 data class Order(
-    val id: UUID,
+    @PropagateNull val id: UUID,
     val name: String,
     val description: String,
     val planNumber: String?,

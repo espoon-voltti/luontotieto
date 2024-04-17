@@ -68,6 +68,8 @@ class OrderTests : FullApplicationTest() {
         assertEquals("Test description", orderReportResponse.description)
         assertEquals("Teija Testaaja", orderReportResponse.createdBy)
         assertEquals("Teija Testaaja", orderReportResponse.updatedBy)
+        assertEquals("Test order", orderReportResponse.order?.name)
+        assertEquals("Test description", orderReportResponse.order?.description)
     }
 
     @Test

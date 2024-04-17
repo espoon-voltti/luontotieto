@@ -2,18 +2,6 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-
-import { Button } from 'shared/buttons/Button'
-
-import {
-  FlexRight,
-  PageContainer,
-  SectionContainer,
-  VerticalGap
-} from '../../shared/layout'
-import { H1, Label } from '../../shared/typography'
 import {
   ReportDetails,
   ReportFileDetails,
@@ -21,9 +9,22 @@ import {
   apiGetReport,
   apiGetReportFiles
 } from 'api/report-api'
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Button } from 'shared/buttons/Button'
+
+import {
+  FlexRight,
+  PageContainer,
+  RowOfInputs,
+  SectionContainer,
+  VerticalGap
+} from '../../shared/layout'
+import { H1, Label } from '../../shared/typography'
 
 export const ReportPage = React.memo(function ReportPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
   if (!id) throw Error('Id not found in path')
   const [report, setReport] = useState<ReportDetails | null>(null)
   const [reportFiles, setReportFiles] = useState<ReportFileDetails[]>([])
@@ -52,7 +53,16 @@ export const ReportPage = React.memo(function ReportPage() {
           ))}
         </ul>
         <VerticalGap />
-        <FlexRight>
+        <RowOfInputs>
+          <Button
+            text="Muokkaa"
+            data-qa="approve-button"
+            disabled={!report || approving || report.approved}
+            onClick={() => {
+              if (!report) return
+              navigate(`/luontotieto/selvitys/${report.id}/muokkaa`)
+            }}
+          />
           <Button
             text="Hyväksy"
             data-qa="approve-button"
@@ -69,7 +79,7 @@ export const ReportPage = React.memo(function ReportPage() {
                 .catch(() => setApproving(false))
             }}
           />
-        </FlexRight>
+        </RowOfInputs>
         <VerticalGap $size="m" />
       </SectionContainer>
     </PageContainer>
