@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { OrderFile } from 'api/order-api'
 import { ReportFileDetails } from 'api/report-api'
 import React from 'react'
 import { Button } from 'shared/buttons/Button'
@@ -10,7 +11,7 @@ import { FlexRowWithGaps, FlexCol } from 'shared/layout'
 import styled from 'styled-components'
 
 interface Props {
-  details: ReportFileDetails
+  file: OrderFile | ReportFileDetails
   onRemove: (id: string) => void
 }
 
@@ -20,33 +21,30 @@ const CreatedFile = styled.div`
   border: 1px solid black;
 `
 
-export const ReportFormFile = React.memo(function ReportFormFile(props: Props) {
+export const ExistingFile = React.memo(function ExistingFile(props: Props) {
   return (
     <CreatedFile>
       <FlexRowWithGaps>
         <FlexCol>
           <div>
             <strong>Nimi:&nbsp;</strong>
-            <code>{props.details.fileName}</code>
+            <code>{props.file.fileName}</code>
           </div>
         </FlexCol>
         <FlexCol>
           <div>
             <strong>Luotu:&nbsp;</strong>
-            <code>{formatDate(props.details.created)}</code>
+            <code>{formatDate(props.file.created)}</code>
           </div>
         </FlexCol>
         <FlexCol>
           <div>
             <strong>Tyyppi:&nbsp;</strong>
-            <code>{props.details.documentType}</code>
+            <code>{props.file.documentType}</code>
           </div>
         </FlexCol>
         <FlexCol>
-          <Button
-            text="Poista"
-            onClick={() => props.onRemove(props.details.id)}
-          />
+          <Button text="Poista" onClick={() => props.onRemove(props.file.id)} />
         </FlexCol>
       </FlexRowWithGaps>
     </CreatedFile>

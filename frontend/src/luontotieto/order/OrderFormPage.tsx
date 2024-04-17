@@ -17,8 +17,10 @@ import { H1 } from '../../shared/typography'
 import { OrderForm } from './OrderForm'
 import {
   Order,
-  OrderInput,
+  OrderFile,
+  OrderFormInput,
   apiGetOrder,
+  apiGetOrderFiles,
   apiPostOrder,
   apiPutOrder
 } from 'api/order-api'
@@ -37,14 +39,16 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   const { id } = useParams()
   if (!id && props.mode === 'EDIT') throw Error('Id not found in path')
 
-  const [orderInput, setOrderInput] = useState<OrderInput | null>(null)
+  const [orderInput, setOrderInput] = useState<OrderFormInput | null>(null)
   const [order, setOrder] = useState<Order | null>(null)
+  const [orderFiles, setOrderFiles] = useState<OrderFile[] | null>(null)
 
   const [submitting, setSubmitting] = useState<boolean>(false)
 
   useEffect(() => {
     if (props.mode === 'EDIT' && id) {
       void apiGetOrder(id).then(setOrder)
+      void apiGetOrderFiles(id).then(setOrderFiles)
     }
   }, [props, id])
 
@@ -57,8 +61,13 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
           <OrderForm mode="CREATE" onChange={setOrderInput} />
         )}
 
-        {props.mode == 'EDIT' && order && (
-          <OrderForm mode="EDIT" order={order} onChange={setOrderInput} />
+        {props.mode == 'EDIT' && order && orderFiles && (
+          <OrderForm
+            mode="EDIT"
+            order={order}
+            orderFiles={orderFiles}
+            onChange={setOrderInput}
+          />
         )}
 
         <VerticalGap />
@@ -74,11 +83,11 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
 
               if (props.mode === 'CREATE') {
                 apiPostOrder(orderInput)
-                  .then((orderId) => navigate(`/luontotieto/tilaus/${orderId}`))
+                  .then((order) => navigate(`/luontotieto/tilaus/${order.id}`))
                   .catch(() => setSubmitting(false))
               } else {
                 apiPutOrder(id!, orderInput)
-                  .then((orderId) => navigate(`/luontotieto/tilaus/${orderId}`))
+                  .then((order) => navigate(`/luontotieto/tilaus/${order.id}`))
                   .catch(() => setSubmitting(false))
               }
             }}
