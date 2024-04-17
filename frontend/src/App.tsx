@@ -17,6 +17,7 @@ import { UserHeader } from './auth/UserHeader'
 import { useAuthStatus } from './auth/auth-status'
 import { FlexRowWithGaps } from './shared/layout'
 import { H1 } from './shared/typography'
+import { OrderFormPage } from 'luontotieto/order/OrderFormPage'
 
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
@@ -81,7 +82,15 @@ export const appRouter = createBrowserRouter([
         path: '/luontotieto/tilaus/uusi',
         element: (
           <AuthGuard allow="AUTHENTICATED_ONLY">
-            <CreateOrderPage mode="CREATE" />
+            <OrderFormPage mode="CREATE" />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/luontotieto/tilaus/:id/muokkaa',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <OrderFormPage mode="EDIT" />
           </AuthGuard>
         )
       },

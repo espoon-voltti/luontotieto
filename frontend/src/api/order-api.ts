@@ -54,6 +54,21 @@ export const apiPostOrder = async (data: OrderInput): Promise<string> => {
   return orderId
 }
 
+export const apiPutOrder = async (
+  orderId: string,
+  orderInput: OrderInput
+): Promise<Order> => {
+  const body: JsonOf<OrderInput> = {
+    ...orderInput
+  }
+
+  const order = await apiClient
+    .put<Order>(`/orders/${orderId}`, body)
+    .then((r) => r.data)
+
+  return order
+}
+
 interface OrderFileInput {
   description: string
   documentType: OrderFileDocumentType
