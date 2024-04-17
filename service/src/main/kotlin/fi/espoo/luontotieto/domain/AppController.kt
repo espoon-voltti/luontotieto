@@ -237,6 +237,17 @@ class AppController {
             .also { logger.audit(user, AuditEvent.CREATE_ORDER, mapOf("id" to "$it")) }
     }
 
+    @PutMapping("/orders/{id}")
+    fun updateOrder(
+        user: AuthenticatedUser,
+        @PathVariable id: UUID,
+        @RequestBody order: OrderInput
+    ): Order {
+        return jdbi
+            .inTransactionUnchecked { tx -> tx.purOrder(id, order, user) }
+            .also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
+    }
+
     @PostMapping("/orders/{orderId}/reports")
     @ResponseStatus(HttpStatus.CREATED)
     fun createOrderReport(

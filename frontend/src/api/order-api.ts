@@ -15,12 +15,20 @@ export interface Order extends OrderInput {
   updatedBy: string
 }
 
+export interface OrderFormInput {
+  name: string
+  description: string
+  planNumber?: string
+  reportDocuments: OrderReportDocumentInput[]
+  filesToAdd: OrderFileInput[]
+  filesToRemove: string[]
+}
+
 export interface OrderInput {
   name: string
   description: string
   planNumber?: string
   reportDocuments: OrderReportDocumentInput[]
-  files: OrderFileInput[]
 }
 
 export interface OrderReportDocument {
@@ -39,19 +47,46 @@ export type OrderReportDocumentInput = Pick<
   'description' | 'documentType'
 >
 
-export const apiPostOrder = async (data: OrderInput): Promise<string> => {
+export const apiPostOrder = async (data: OrderFormInput): Promise<Order> => {
   const body: JsonOf<OrderInput> = {
     ...data
   }
 
-  const orderId = await apiClient
-    .post<string>('/orders', body)
-    .then((r) => r.data)
+  const order = await apiClient.post<Order>('/orders', body).then((r) => r.data)
 
-  for (const file of data.files) {
+  await handleFiles(order.id, data.filesToAdd, data.filesToRemove)
+
+  return order
+}
+
+const handleFiles = async (
+  orderId: string,
+  addFiles: OrderFileInput[],
+  deleteFiles: string[]
+) => {
+  for (const id of deleteFiles) {
+    await apiDeleteOrderFile(orderId, id)
+  }
+  for (const file of addFiles) {
     await apiPostOrderFile(orderId, file)
   }
-  return orderId
+}
+
+export const apiPutOrder = async (
+  orderId: string,
+  orderInput: OrderFormInput
+): Promise<Order> => {
+  const body: JsonOf<OrderInput> = {
+    ...orderInput
+  }
+
+  const order = await apiClient
+    .put<Order>(`/orders/${orderId}`, body)
+    .then((r) => r.data)
+
+  await handleFiles(orderId, orderInput.filesToAdd, orderInput.filesToRemove)
+
+  return order
 }
 
 interface OrderFileInput {
@@ -77,6 +112,10 @@ const apiPostOrderFile = (id: string, file: OrderFileInput): Promise<void> => {
   formData.append('documentType', OrderFileDocumentType[file.documentType])
 
   return apiClient.postForm(`/orders/${id}/files`, formData)
+}
+
+const apiDeleteOrderFile = (orderId: string, fileId: string): Promise<void> => {
+  return apiClient.delete(`/orders/${orderId}/files/${fileId}`)
 }
 
 export const apiGetOrder = (id: string): Promise<Order> =>

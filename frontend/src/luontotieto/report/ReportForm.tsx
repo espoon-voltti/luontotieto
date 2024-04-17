@@ -25,7 +25,7 @@ import {
 } from '../../shared/layout'
 import { H2, Label } from '../../shared/typography'
 
-import { ReportFormFile } from './ReportFormFile'
+import { ExistingFile } from 'shared/form/ExistingFile'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -118,7 +118,6 @@ function filesAreValid(
     const fileInput = fileInputs.find(
       (fi) => fi.documentType === required.documentType
     )
-
     return (
       fileInput?.type === 'EXISTING' ||
       (fileInput?.file && fileInput.userDescription.trim() !== '')
@@ -127,8 +126,6 @@ function filesAreValid(
 }
 
 export const ReportForm = React.memo(function ReportForm(props: Props) {
-  const debounceDelay = 1500
-
   const requiredFiles = useMemo(
     () =>
       props.mode === 'EDIT' ? props.report.order?.reportDocuments ?? [] : [],
@@ -141,13 +138,11 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
   }, [requiredFiles, props])
 
   const [name, setName] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.report.name,
-    debounceDelay
+    props.mode === 'CREATE' ? '' : props.report.name
   )
 
   const [description, setDescription] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.report.description,
-    debounceDelay
+    props.mode === 'CREATE' ? '' : props.report.description
   )
 
   const [fileInputs, setFileInputs] = useState(originalFileInputs)
@@ -257,8 +252,9 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
               )
             case 'EXISTING':
               return (
-                <ReportFormFile
-                  details={fInput.details}
+                <ExistingFile
+                  key={fInput.documentType}
+                  file={fInput.details}
                   onRemove={(id) => {
                     removeCreatedFileInput(id)
                   }}

@@ -19,29 +19,76 @@ import { Checkbox } from 'shared/form/Checkbox'
 import { FileInput, FileInputData } from 'shared/FileInput'
 import {
   Order,
+  OrderFile,
   OrderFileDocumentType,
-  OrderInput,
+  OrderFormInput,
   OrderReportDocumentInput
 } from 'api/order-api'
 import { ReportFileDocumentType, getDocumentTypeTitle } from 'api/report-api'
+import { ExistingFile } from 'shared/form/ExistingFile'
 
 interface CreateProps {
   mode: 'CREATE'
-  onChange: (validInput: OrderInput | null) => void
+  onChange: (validInput: OrderFormInput | null) => void
 }
-interface ViewProps {
-  mode: 'VIEW'
-  order: Order
-}
+
 interface EditProps {
   mode: 'EDIT'
   order: Order
-  onChange: (validInput: OrderInput | null) => void
+  orderFiles: OrderFile[]
+  onChange: (validInput: OrderFormInput | null) => void
 }
-type Props = CreateProps | ViewProps | EditProps
+type Props = CreateProps | EditProps
+
+const orderFileTypes = [
+  OrderFileDocumentType.ORDER_INFO,
+  OrderFileDocumentType.ORDER_AREA
+]
+
+interface OrderFileInputElementNew {
+  type: 'NEW'
+  description: string
+  documentType: OrderFileDocumentType
+  file: File | null
+}
+
+interface OrderFileInputElementExisting {
+  type: 'EXISTING'
+  documentType: OrderFileDocumentType
+  orderFile: OrderFile
+}
+
+type OrderFileInputElement =
+  | OrderFileInputElementNew
+  | OrderFileInputElementExisting
+
+function createFileInputs(orderFiles: OrderFile[]): OrderFileInputElement[] {
+  return orderFileTypes.map((documentType) => {
+    const orderFile = orderFiles.find(
+      (file) => file.documentType === documentType
+    )
+    return orderFile
+      ? { documentType, type: 'EXISTING', orderFile }
+      : { documentType, type: 'NEW', description: '', file: null }
+  })
+}
+
+function filesAreValid(fileInputs: OrderFileInputElement[]): boolean {
+  return orderFileTypes.every((documentType) => {
+    const fileInput = fileInputs.find((fi) => fi.documentType === documentType)
+    return (
+      fileInput?.type === 'EXISTING' ||
+      (fileInput?.file && fileInput.description.trim() !== '')
+    )
+  })
+}
 
 export const OrderForm = React.memo(function OrderForm(props: Props) {
-  const debounceDelay = 1500
+  const originalFileInputs = useMemo(
+    () => createFileInputs(props.mode === 'EDIT' ? props.orderFiles : []),
+    [props]
+  )
+
   const defaultReportDocuments = [
     {
       checked: false,
@@ -56,34 +103,20 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   ]
 
   const [name, setName] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.name,
-    debounceDelay
+    props.mode === 'CREATE' ? '' : props.order.name
   )
 
   const [planNumber, setPlanNumber] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.name,
-    debounceDelay
+    props.mode === 'CREATE' ? '' : props.order.name
   )
 
   const [description, setDescription] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.description,
-    debounceDelay
+    props.mode === 'CREATE' ? '' : props.order.description
   )
 
-  const [orderInfoFile, setOrderInfoFile] = useState<
-    FileInputData<OrderFileDocumentType>
-  >({
-    file: null,
-    description: '',
-    documentType: OrderFileDocumentType.ORDER_INFO
-  })
-  const [orderAreaFile, sertOrderAreaFile] = useState<
-    FileInputData<OrderFileDocumentType>
-  >({
-    file: null,
-    description: '',
-    documentType: OrderFileDocumentType.ORDER_AREA
-  })
+  const [orderFiles, setOrderFiles] = useState<OrderFileInputElement[]>(
+    createFileInputs(props.mode === 'EDIT' ? props.orderFiles : [])
+  )
 
   const [reportDocuments, setReportDocuments] = useState(
     props.mode === 'CREATE'
@@ -100,26 +133,48 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
         })
   )
 
-  const updateArray = (item: OrderCheckBoxComponentInput) => {
+  const updateReportDocuments = (item: OrderCheckBoxComponentInput) => {
     const newArray = reportDocuments.map((row) => {
       return row.documentType === item.documentType ? item : row
     })
     setReportDocuments(newArray)
   }
 
-  const validInput: OrderInput | null = useMemo(() => {
+  const updateOrderFiles = (modified: FileInputData<OrderFileDocumentType>) => {
+    setOrderFiles(
+      orderFiles.map((fi) => {
+        if (fi.documentType === modified.documentType) {
+          return {
+            ...fi,
+            description: modified.description,
+            file: modified.file
+          }
+        }
+        return fi
+      })
+    )
+  }
+
+  const removeCreatedFileInput = (id: string) => {
+    setOrderFiles(
+      orderFiles.map((fi) => {
+        if (fi.type === 'EXISTING' && fi.orderFile.id === id) {
+          return {
+            type: 'NEW',
+            file: null,
+            description: '',
+            documentType: fi.documentType
+          }
+        }
+        return fi
+      })
+    )
+  }
+
+  const validInput: OrderFormInput | null = useMemo(() => {
     if (name.trim() === '') return null
     if (description.trim() === '') return null
-    const { file: orderInfoFileCheck, description: orderInfoFileDescription } =
-      orderInfoFile
-    if (orderInfoFileCheck === null) return null
-    if (orderInfoFileDescription.trim() === '') return null
-    const {
-      file: orderAreaFileFileCheck,
-      description: orderAreaFileDescription
-    } = orderAreaFile
-    if (orderAreaFileFileCheck === null) return null
-    if (orderAreaFileDescription.trim() === '') return null
+    if (!filesAreValid(orderFiles)) return null
 
     return {
       name: name.trim(),
@@ -131,25 +186,31 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           description: rd.description,
           documentType: rd.documentType
         })),
-      files: [
-        { ...orderInfoFile, file: orderInfoFileCheck },
-        { ...orderAreaFile, file: orderAreaFileFileCheck }
-      ]
+      filesToAdd: orderFiles.flatMap((e) =>
+        e.type === 'NEW' && e.file !== null
+          ? [
+              {
+                description: e.description,
+                documentType: e.documentType,
+                file: e.file
+              }
+            ]
+          : []
+      ),
+      filesToRemove: originalFileInputs.flatMap((e) =>
+        e.type === 'EXISTING' &&
+        !orderFiles.find(
+          (fi) => fi.type === 'EXISTING' && fi.orderFile.id === e.orderFile.id
+        )
+          ? [e.orderFile.id]
+          : []
+      )
     }
-  }, [
-    name,
-    description,
-    planNumber,
-    reportDocuments,
-    orderInfoFile,
-    orderAreaFile
-  ])
+  }, [name, description, planNumber, reportDocuments, orderFiles])
 
   useEffect(() => {
-    if (props.mode !== 'VIEW') {
-      props.onChange(validInput)
-    }
-  }, [validInput, props])
+    props.onChange(validInput)
+  }, [validInput, props, orderFiles])
 
   return (
     <FlexCol>
@@ -157,48 +218,49 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
         <RowOfInputs>
           <LabeledInput $cols={4}>
             <Label>Tilauksen nimi</Label>
-            {props.mode === 'VIEW' ? (
-              <span>{props.order.name || '-'}</span>
-            ) : (
-              <InputField onChange={setName} value={name} />
-            )}
+            <InputField onChange={setName} value={name} />
           </LabeledInput>
         </RowOfInputs>
         <RowOfInputs>
           <LabeledInput $cols={4}>
             <Label>Tilauksen kuvaus</Label>
-            {props.mode === 'VIEW' ? (
-              <span>{props.order.description || '-'}</span>
-            ) : (
-              <TextArea
-                onChange={setDescription}
-                value={description}
-                rows={2}
-              />
-            )}
+            <TextArea onChange={setDescription} value={description} rows={2} />
           </LabeledInput>
         </RowOfInputs>
         <RowOfInputs>
           <LabeledInput $cols={4}>
             <Label>Tilauksen kaavanumero</Label>
-            {props.mode === 'VIEW' ? (
-              <span>{props.order.planNumber || '-'}</span>
-            ) : (
-              <TextArea onChange={setPlanNumber} value={planNumber} rows={2} />
-            )}
+
+            <TextArea onChange={setPlanNumber} value={planNumber} rows={2} />
           </LabeledInput>
         </RowOfInputs>
       </GroupOfInputRows>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
-        <FileInput
-          data={orderInfoFile}
-          onChange={(data) => setOrderInfoFile(data)}
-        />
-        <FileInput
-          data={orderAreaFile}
-          onChange={(data) => sertOrderAreaFile(data)}
-        />
+        {orderFiles.map((fInput) => {
+          switch (fInput.type) {
+            case 'NEW':
+              return (
+                <FileInput
+                  key={fInput.documentType}
+                  data={fInput}
+                  onChange={(data) => {
+                    updateOrderFiles(data)
+                  }}
+                />
+              )
+            case 'EXISTING':
+              return (
+                <ExistingFile
+                  key={fInput.documentType}
+                  file={fInput.orderFile}
+                  onRemove={(id) => {
+                    removeCreatedFileInput(id)
+                  }}
+                />
+              )
+          }
+        })}
       </GroupOfInputRows>
       <GroupOfInputRows>
         <RowOfInputs>
@@ -208,7 +270,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               <OrderReportDocumentInput
                 key={rd.documentType}
                 data={rd}
-                onChange={updateArray}
+                onChange={updateReportDocuments}
               />
             ))}
           </LabeledInput>
@@ -233,13 +295,8 @@ const OrderReportDocumentInput = React.memo(function OrderReportDocumentInput({
   data,
   onChange
 }: OrderReportDocumentInputProps) {
-  const debounceDelay = 1500
-
   const [checked, setChecked] = useState(data.checked ?? false)
-  const [description, setDescription] = useDebouncedState(
-    data.description,
-    debounceDelay
-  )
+  const [description, setDescription] = useDebouncedState(data.description)
 
   useEffect(() => {
     onChange({ checked, description, documentType: data.documentType })
