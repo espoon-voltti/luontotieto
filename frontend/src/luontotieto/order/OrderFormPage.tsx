@@ -83,7 +83,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
 
               if (props.mode === 'CREATE') {
                 apiPostOrder(orderInput)
-                  .then((order) => navigate(`/luontotieto/tilaus/${order.id}`))
+                  .then((orderId) => navigate(`/luontotieto/tilaus/${orderId}`))
                   .catch(() => setSubmitting(false))
               } else {
                 apiPutOrder(id!, orderInput)
