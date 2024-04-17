@@ -47,16 +47,18 @@ export type OrderReportDocumentInput = Pick<
   'description' | 'documentType'
 >
 
-export const apiPostOrder = async (data: OrderFormInput): Promise<Order> => {
+export const apiPostOrder = async (data: OrderFormInput): Promise<string> => {
   const body: JsonOf<OrderInput> = {
     ...data
   }
 
-  const order = await apiClient.post<Order>('/orders', body).then((r) => r.data)
+  const orderId = await apiClient
+    .post<string>('/orders', body)
+    .then((r) => r.data)
 
-  await handleFiles(order.id, data.filesToAdd, data.filesToRemove)
+  await handleFiles(orderId, data.filesToAdd, data.filesToRemove)
 
-  return order
+  return orderId
 }
 
 const handleFiles = async (
