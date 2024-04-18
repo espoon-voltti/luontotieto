@@ -92,10 +92,9 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
           {props.mode === 'CREATE' && (
             <ReportForm mode={props.mode} onChange={setReportInput} />
           )}
-
-          <VerticalGap />
         </SectionContainer>
       </PageContainer>
+      <VerticalGap $size="XL" />
       <Footer>
         <FlexRight style={{ height: '100%' }}>
           <Button

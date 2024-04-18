@@ -72,8 +72,8 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             />
           )}
         </SectionContainer>
-        <VerticalGap />
       </PageContainer>
+      <VerticalGap $size="XL" />
       <Footer>
         <FlexRight style={{ height: '100%' }}>
           <Button
