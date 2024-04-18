@@ -24,6 +24,7 @@ import {
   apiPostOrder,
   apiPutOrder
 } from 'api/order-api'
+import { Footer } from 'shared/Footer'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -53,25 +54,28 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   }, [props, id])
 
   return (
-    <PageContainer>
-      <SectionContainer>
-        <H1>Tilaus</H1>
-        <VerticalGap $size="m" />
-        {props.mode == 'CREATE' && (
-          <OrderForm mode="CREATE" onChange={setOrderInput} />
-        )}
+    <>
+      <PageContainer>
+        <SectionContainer>
+          <H1>Tilaus</H1>
+          <VerticalGap $size="m" />
+          {props.mode == 'CREATE' && (
+            <OrderForm mode="CREATE" onChange={setOrderInput} />
+          )}
 
-        {props.mode == 'EDIT' && order && orderFiles && (
-          <OrderForm
-            mode="EDIT"
-            order={order}
-            orderFiles={orderFiles}
-            onChange={setOrderInput}
-          />
-        )}
-
+          {props.mode == 'EDIT' && order && orderFiles && (
+            <OrderForm
+              mode="EDIT"
+              order={order}
+              orderFiles={orderFiles}
+              onChange={setOrderInput}
+            />
+          )}
+        </SectionContainer>
         <VerticalGap />
-        <FlexRight>
+      </PageContainer>
+      <Footer>
+        <FlexRight style={{ height: '100%' }}>
           <Button
             text="Tallenna"
             data-qa="save-button"
@@ -93,7 +97,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             }}
           />
         </FlexRight>
-      </SectionContainer>
-    </PageContainer>
+      </Footer>
+    </>
   )
 })

@@ -26,6 +26,7 @@ import {
 import { H1 } from '../../shared/typography'
 
 import { ReportForm } from './ReportForm'
+import { Footer } from 'shared/Footer'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -73,26 +74,30 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
     props.mode === 'CREATE' ? 'Uusi luontoselvitys' : report?.name ?? ''
 
   return (
-    <PageContainer>
-      <BackNavigation text={title} />
-      <SectionContainer>
-        <H1>Selvitys</H1>
-        <VerticalGap $size="m" />
-        {props.mode === 'EDIT' && report && reportFiles && (
-          <ReportForm
-            mode={props.mode}
-            onChange={setReportInput}
-            report={report}
-            reportFiles={reportFiles}
-          />
-        )}
+    <>
+      <PageContainer>
+        <BackNavigation text={title} />
+        <SectionContainer>
+          <H1>Selvitys</H1>
+          <VerticalGap $size="m" />
+          {props.mode === 'EDIT' && report && reportFiles && (
+            <ReportForm
+              mode={props.mode}
+              onChange={setReportInput}
+              report={report}
+              reportFiles={reportFiles}
+            />
+          )}
 
-        {props.mode === 'CREATE' && (
-          <ReportForm mode={props.mode} onChange={setReportInput} />
-        )}
+          {props.mode === 'CREATE' && (
+            <ReportForm mode={props.mode} onChange={setReportInput} />
+          )}
 
-        <VerticalGap />
-        <FlexRight>
+          <VerticalGap />
+        </SectionContainer>
+      </PageContainer>
+      <Footer>
+        <FlexRight style={{ height: '100%' }}>
           <Button
             text="Tallenna"
             data-qa="save-button"
@@ -105,7 +110,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
             }}
           />
         </FlexRight>
-      </SectionContainer>
-    </PageContainer>
+      </Footer>
+    </>
   )
 })
