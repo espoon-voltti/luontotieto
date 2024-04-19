@@ -1,0 +1,16 @@
+<layer>
+  <name>liito_orava_pisteet</name>
+  <id>LayerInfoImpl--7325d2b5:18ef54b707c:-7ffa</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl-1ce6a5f8:18ef4cf334c:-8000</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--7325d2b5:18ef54b707c:-7ffb</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-04-19 07:41:42.335 UTC</dateCreated>
+</layer>
