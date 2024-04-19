@@ -28,9 +28,9 @@ export function getDocumentTypeTitle<
     case ReportFileDocumentType.LIITO_ORAVA_PISTEET:
       return 'Liito-orava pisteet'
     case OrderFileDocumentType.ORDER_INFO:
-      return 'Tilaus info pdf'
+      return 'Tilauksen esitiedot'
     case OrderFileDocumentType.ORDER_AREA:
-      return 'Tilaus alueet'
+      return 'Aluerajaus'
     default:
       return 'Puuttuu'
   }
@@ -70,6 +70,7 @@ export interface ReportFileDetails extends ReportFileInput {
   updated: Date
   createdBy: string
   updatedBy: string
+  reportId: string
 }
 
 export const apiPostReport = async (
@@ -142,4 +143,12 @@ export const apiGetReports = (): Promise<ReportDetails[]> =>
 export const apiGetReportFiles = (id: string): Promise<ReportFileDetails[]> =>
   apiClient
     .get<ReportFileDetails[]>(`/reports/${id}/files`)
+    .then((res) => res.data)
+
+export const apiGetReportFileUrl = (
+  reportId: string,
+  fileId: string
+): Promise<string> =>
+  apiClient
+    .get<string>(`/reports/${reportId}/files/${fileId}`)
     .then((res) => res.data)

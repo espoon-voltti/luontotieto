@@ -11,6 +11,7 @@ import org.jdbi.v3.core.enums.DatabaseValue
 import org.jdbi.v3.core.kotlin.mapTo
 import java.time.OffsetDateTime
 import java.util.UUID
+import kotlin.jvm.optionals.getOrNull
 
 enum class OrderDocumentType : DatabaseEnum {
     @DatabaseValue("order:info")
@@ -31,7 +32,8 @@ data class OrderFile(
     val created: OffsetDateTime,
     val updated: OffsetDateTime,
     val createdBy: UUID,
-    val updatedBy: UUID
+    val updatedBy: UUID,
+    val orderId: UUID
 )
 
 data class OrderFileInput(
@@ -78,6 +80,26 @@ fun Handle.getOrderFiles(orderId: UUID): List<OrderFile> =
         .bind("orderId", orderId)
         .mapTo<OrderFile>()
         .list()
+
+fun Handle.getOrderFileById(
+    orderId: UUID,
+    fileId: UUID
+): OrderFile =
+    createQuery(
+        """
+                SELECT id, description, order_id AS "orderId", media_type AS "mediaType", 
+                file_name AS "fileName", document_type AS "documentType",
+                created, updated,  created_by AS "createdBy", updated_by AS "updatedBy"
+                FROM order_file
+                WHERE order_id = :orderId
+                AND id = :fileId
+            """
+    )
+        .bind("orderId", orderId)
+        .bind("fileId", fileId)
+        .mapTo<OrderFile>()
+        .findOne()
+        .getOrNull() ?: throw fi.espoo.luontotieto.common.NotFound()
 
 fun Handle.deleteOrderFile(
     orderId: UUID,

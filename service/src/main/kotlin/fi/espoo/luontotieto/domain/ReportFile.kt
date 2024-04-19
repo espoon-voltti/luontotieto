@@ -11,6 +11,7 @@ import org.jdbi.v3.core.enums.DatabaseValue
 import org.jdbi.v3.core.kotlin.mapTo
 import java.time.OffsetDateTime
 import java.util.UUID
+import kotlin.jvm.optionals.getOrNull
 
 enum class DocumentType : DatabaseEnum {
     @DatabaseValue("paikkatieto:liito_orava_pisteet")
@@ -40,7 +41,8 @@ data class ReportFile(
     val created: OffsetDateTime,
     val updated: OffsetDateTime,
     val createdBy: UUID,
-    val updatedBy: UUID
+    val updatedBy: UUID,
+    val reportId: UUID
 )
 
 data class ReportFileInput(
@@ -73,6 +75,26 @@ fun Handle.insertReportFile(
         .mapTo<UUID>()
         .one()
 }
+
+fun Handle.getReportFileById(
+    reportId: UUID,
+    fileId: UUID
+): ReportFile =
+    createQuery(
+        """
+                SELECT id, description, report_id AS "reportId", media_type AS "mediaType", 
+                file_name AS "fileName", document_type AS "documentType",
+                created, updated,  created_by AS "createdBy", updated_by AS "updatedBy"
+                FROM report_file
+                WHERE report_id = :reportId
+                AND id = :fileId
+            """
+    )
+        .bind("reportId", reportId)
+        .bind("fileId", fileId)
+        .mapTo<ReportFile>()
+        .findOne()
+        .getOrNull() ?: throw fi.espoo.luontotieto.common.NotFound()
 
 fun Handle.getReportFiles(reportId: UUID): List<ReportFile> =
     createQuery(

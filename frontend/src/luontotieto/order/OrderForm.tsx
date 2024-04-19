@@ -237,6 +237,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       </GroupOfInputRows>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
+        <Label>Tilauksen liitteet:</Label>
         {orderFiles.map((fInput) => {
           switch (fInput.type) {
             case 'NEW':
@@ -253,7 +254,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               return (
                 <ExistingFile
                   key={fInput.documentType}
-                  file={fInput.orderFile}
+                  data={{ type: 'ORDER', file: fInput.orderFile }}
                   onRemove={(id) => {
                     removeCreatedFileInput(id)
                   }}

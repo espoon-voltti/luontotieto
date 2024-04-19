@@ -105,6 +105,7 @@ export interface OrderFile extends OrderFileInput {
   updated: Date
   createdBy: string
   updatedBy: string
+  orderId: string
 }
 
 const apiPostOrderFile = (id: string, file: OrderFileInput): Promise<void> => {
@@ -135,3 +136,11 @@ export const apiPostOrderReport = async (
   await apiClient
     .post<ReportDetails>(`/orders/${orderId}/reports`, {})
     .then((r) => r.data)
+
+export const apiGetOrderFileUrl = (
+  orderId: string,
+  fileId: string
+): Promise<string> =>
+  apiClient
+    .get<string>(`/orders/${orderId}/files/${fileId}`)
+    .then((res) => res.data)
