@@ -12,7 +12,7 @@ import {
   SectionContainer,
   VerticalGap
 } from '../../shared/layout'
-import { H1 } from '../../shared/typography'
+import { H1, H2, H3 } from '../../shared/typography'
 
 import { OrderForm } from './OrderForm'
 import {
@@ -56,22 +56,20 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   return (
     <>
       <PageContainer>
-        <SectionContainer>
-          <H1>Tilaus</H1>
-          <VerticalGap $size="m" />
-          {props.mode == 'CREATE' && (
-            <OrderForm mode="CREATE" onChange={setOrderInput} />
-          )}
+        <H2>Tilauksen tiedot</H2>
+        <VerticalGap $size="m" />
+        {props.mode == 'CREATE' && (
+          <OrderForm mode="CREATE" onChange={setOrderInput} />
+        )}
 
-          {props.mode == 'EDIT' && order && orderFiles && (
-            <OrderForm
-              mode="EDIT"
-              order={order}
-              orderFiles={orderFiles}
-              onChange={setOrderInput}
-            />
-          )}
-        </SectionContainer>
+        {props.mode == 'EDIT' && order && orderFiles && (
+          <OrderForm
+            mode="EDIT"
+            order={order}
+            orderFiles={orderFiles}
+            onChange={setOrderInput}
+          />
+        )}
       </PageContainer>
       <VerticalGap $size="XL" />
       <Footer>

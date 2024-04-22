@@ -12,6 +12,7 @@ import {
   GroupOfInputRows,
   LabeledInput,
   RowOfInputs,
+  SectionContainer,
   VerticalGap
 } from '../../shared/layout'
 import { Label } from '../../shared/typography'
@@ -214,70 +215,79 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
 
   return (
     <FlexCol>
-      <GroupOfInputRows>
-        <RowOfInputs>
-          <LabeledInput $cols={4}>
-            <Label>Tilauksen nimi</Label>
-            <InputField onChange={setName} value={name} />
-          </LabeledInput>
-        </RowOfInputs>
-        <RowOfInputs>
-          <LabeledInput $cols={4}>
-            <Label>Tilauksen kuvaus</Label>
-            <TextArea onChange={setDescription} value={description} rows={2} />
-          </LabeledInput>
-        </RowOfInputs>
-        <RowOfInputs>
-          <LabeledInput $cols={4}>
-            <Label>Tilauksen kaavanumero</Label>
-
-            <TextArea onChange={setPlanNumber} value={planNumber} rows={2} />
-          </LabeledInput>
-        </RowOfInputs>
-      </GroupOfInputRows>
-      <VerticalGap $size="m" />
-      <GroupOfInputRows>
-        <Label>Tilauksen liitteet:</Label>
-        {orderFiles.map((fInput) => {
-          switch (fInput.type) {
-            case 'NEW':
-              return (
-                <FileInput
-                  key={fInput.documentType}
-                  data={fInput}
-                  onChange={(data) => {
-                    updateOrderFiles(data)
-                  }}
-                />
-              )
-            case 'EXISTING':
-              return (
-                <ExistingFile
-                  key={fInput.documentType}
-                  data={{ type: 'ORDER', file: fInput.orderFile }}
-                  onRemove={(id) => {
-                    removeCreatedFileInput(id)
-                  }}
-                />
-              )
-          }
-        })}
-      </GroupOfInputRows>
-      <GroupOfInputRows>
-        <RowOfInputs>
-          <LabeledInput $cols={8}>
-            <Label>Kerättävät dokumentit</Label>
-            {reportDocuments.map((rd) => (
-              <OrderReportDocumentInput
-                key={rd.documentType}
-                data={rd}
-                onChange={updateReportDocuments}
+      <SectionContainer>
+        <GroupOfInputRows>
+          <RowOfInputs>
+            <LabeledInput $cols={4}>
+              <Label>Tilauksen nimi</Label>
+              <InputField onChange={setName} value={name} />
+            </LabeledInput>
+          </RowOfInputs>
+          <RowOfInputs>
+            <LabeledInput $cols={4}>
+              <Label>Tilauksen kuvaus</Label>
+              <TextArea
+                onChange={setDescription}
+                value={description}
+                rows={2}
               />
-            ))}
-          </LabeledInput>
-        </RowOfInputs>
-      </GroupOfInputRows>
+            </LabeledInput>
+          </RowOfInputs>
+          <RowOfInputs>
+            <LabeledInput $cols={4}>
+              <Label>Tilauksen kaavanumero</Label>
+
+              <TextArea onChange={setPlanNumber} value={planNumber} rows={2} />
+            </LabeledInput>
+          </RowOfInputs>
+        </GroupOfInputRows>
+        <VerticalGap $size="m" />
+        <GroupOfInputRows>
+          <Label>Tilauksen liitteet:</Label>
+          {orderFiles.map((fInput) => {
+            switch (fInput.type) {
+              case 'NEW':
+                return (
+                  <FileInput
+                    key={fInput.documentType}
+                    data={fInput}
+                    onChange={(data) => {
+                      updateOrderFiles(data)
+                    }}
+                  />
+                )
+              case 'EXISTING':
+                return (
+                  <ExistingFile
+                    key={fInput.documentType}
+                    data={{ type: 'ORDER', file: fInput.orderFile }}
+                    onRemove={(id) => {
+                      removeCreatedFileInput(id)
+                    }}
+                  />
+                )
+            }
+          })}
+        </GroupOfInputRows>
+      </SectionContainer>
       <VerticalGap $size="m" />
+
+      <SectionContainer>
+        <GroupOfInputRows>
+          <RowOfInputs>
+            <LabeledInput $cols={8}>
+              <Label>Kerättävät dokumentit</Label>
+              {reportDocuments.map((rd) => (
+                <OrderReportDocumentInput
+                  key={rd.documentType}
+                  data={rd}
+                  onChange={updateReportDocuments}
+                />
+              ))}
+            </LabeledInput>
+          </RowOfInputs>
+        </GroupOfInputRows>
+      </SectionContainer>
       <VerticalGap $size="XL" />
     </FlexCol>
   )

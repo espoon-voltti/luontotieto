@@ -97,10 +97,10 @@ export const PageContainer = styled.div`
   margin: 0 auto;
 `
 
-export const sectionPadding = '16px'
+export const sectionPadding = '32px'
 
 export const SectionContainer = styled.div<{ $minHeight?: string }>`
-  padding: ${sectionPadding};
+  padding: 32px 60px;
   background-color: #fff;
   ${(p) => (p.$minHeight ? `min-height: ${p.$minHeight};` : '')}
 `
