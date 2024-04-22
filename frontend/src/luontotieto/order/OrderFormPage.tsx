@@ -6,13 +6,8 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from 'shared/buttons/Button'
 
-import {
-  FlexRight,
-  PageContainer,
-  SectionContainer,
-  VerticalGap
-} from '../../shared/layout'
-import { H1, H2, H3 } from '../../shared/typography'
+import { FlexRight, PageContainer, VerticalGap } from '../../shared/layout'
+import { H2 } from '../../shared/typography'
 
 import { OrderForm } from './OrderForm'
 import {

@@ -4,7 +4,6 @@
 
 import {
   ReportDetails,
-  ReportInput,
   apiPostReport,
   apiGetReport,
   ReportFileDetails,
