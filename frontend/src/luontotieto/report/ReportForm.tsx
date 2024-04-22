@@ -254,7 +254,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
               return (
                 <ExistingFile
                   key={fInput.documentType}
-                  file={fInput.details}
+                  data={{ type: 'REPORT', file: fInput.details }}
                   onRemove={(id) => {
                     removeCreatedFileInput(id)
                   }}

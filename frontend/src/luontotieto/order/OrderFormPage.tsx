@@ -6,13 +6,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from 'shared/buttons/Button'
 
-import {
-  FlexRight,
-  PageContainer,
-  SectionContainer,
-  VerticalGap
-} from '../../shared/layout'
-import { H1 } from '../../shared/typography'
+import { FlexRight, PageContainer, VerticalGap } from '../../shared/layout'
 
 import { OrderForm } from './OrderForm'
 import {
@@ -24,6 +18,7 @@ import {
   apiPostOrder,
   apiPutOrder
 } from 'api/order-api'
+import { Footer } from 'shared/Footer'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -53,9 +48,8 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   }, [props, id])
 
   return (
-    <PageContainer>
-      <SectionContainer>
-        <H1>Tilaus</H1>
+    <>
+      <PageContainer>
         <VerticalGap $size="m" />
         {props.mode == 'CREATE' && (
           <OrderForm mode="CREATE" onChange={setOrderInput} />
@@ -69,9 +63,10 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             onChange={setOrderInput}
           />
         )}
-
-        <VerticalGap />
-        <FlexRight>
+      </PageContainer>
+      <VerticalGap $size="XL" />
+      <Footer>
+        <FlexRight style={{ height: '100%' }}>
           <Button
             text="Tallenna"
             data-qa="save-button"
@@ -93,7 +88,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             }}
           />
         </FlexRight>
-      </SectionContainer>
-    </PageContainer>
+      </Footer>
+    </>
   )
 })

@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 import { FrontPage } from 'luontotieto/FrontPage'
-import { CreateOrderPage } from 'luontotieto/order/CreateOrderPage'
 import { OrderPage } from 'luontotieto/order/OrderPage'
 import { ReportFormPage } from 'luontotieto/report/ReportFormPage'
 import { ReportPage } from 'luontotieto/report/ReportPage'

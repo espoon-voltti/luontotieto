@@ -24,6 +24,7 @@ import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
+import java.net.URL
 import java.util.UUID
 import kotlin.io.path.createTempFile
 
@@ -330,6 +332,47 @@ class AppController {
                     mapOf("id" to "$orderId", "file" to "$fileId")
                 )
             }
+    }
+
+    @GetMapping("/orders/{orderId}/files/{fileId}")
+    fun getOrderFileById(
+        user: AuthenticatedUser,
+        @PathVariable orderId: UUID,
+        @PathVariable fileId: UUID
+    ): URL {
+        val dataBucket = bucketEnv.data
+
+        val orderFile =
+            jdbi.inTransactionUnchecked { tx ->
+                tx.getOrderFileById(
+                    orderId,
+                    fileId
+                )
+            }
+        val contentDisposition = ContentDisposition.attachment().filename(orderFile.fileName).build()
+
+        val fileUrl = documentClient.presignedGetUrl(dataBucket, "$orderId/$fileId", contentDisposition)
+        return fileUrl
+    }
+
+    @GetMapping("/reports/{reportId}/files/{fileId}")
+    fun getReportFileById(
+        user: AuthenticatedUser,
+        @PathVariable reportId: UUID,
+        @PathVariable fileId: UUID
+    ): URL {
+        val dataBucket = bucketEnv.data
+
+        val reportFile =
+            jdbi.inTransactionUnchecked { tx ->
+                tx.getReportFileById(
+                    reportId,
+                    fileId
+                )
+            }
+        val contentDisposition = ContentDisposition.attachment().filename(reportFile.fileName).build()
+        val fileUrl = documentClient.presignedGetUrl(dataBucket, "$reportId/$fileId", contentDisposition)
+        return fileUrl
     }
 
     private fun getPaikkatietoReader(

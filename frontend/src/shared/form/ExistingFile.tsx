@@ -2,51 +2,54 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { OrderFile } from 'api/order-api'
-import { ReportFileDetails } from 'api/report-api'
+import { OrderFile, apiGetOrderFileUrl } from 'api/order-api'
 import React from 'react'
-import { Button } from 'shared/buttons/Button'
-import { formatDate } from 'shared/dates'
-import { FlexRowWithGaps, FlexCol } from 'shared/layout'
-import styled from 'styled-components'
+import { FlexRowWithGaps, FlexCol, LabeledInput } from 'shared/layout'
+import FileDownloadButton from './FileDownloadButton'
+import { faX } from '@fortawesome/free-solid-svg-icons'
+import { InlineButton } from 'shared/buttons/InlineButton'
+import { Label } from 'shared/typography'
+import { InputField } from './InputField'
+import { ReportFileDetails, apiGetReportFileUrl } from 'api/report-api'
 
 interface Props {
-  file: OrderFile | ReportFileDetails
+  data:
+    | { type: 'ORDER'; file: OrderFile }
+    | { type: 'REPORT'; file: ReportFileDetails }
   onRemove: (id: string) => void
 }
 
-const CreatedFile = styled.div`
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid black;
-`
-
 export const ExistingFile = React.memo(function ExistingFile(props: Props) {
+  const handleClick = async (fileId: string) => {
+    let url = ''
+    if (props.data.type === 'ORDER') {
+      url = await apiGetOrderFileUrl(props.data.file.orderId, fileId)
+    } else {
+      url = await apiGetReportFileUrl(props.data.file.reportId, fileId)
+    }
+
+    if (url) {
+      window.open(url)
+    }
+  }
   return (
-    <CreatedFile>
-      <FlexRowWithGaps>
-        <FlexCol>
-          <div>
-            <strong>Nimi:&nbsp;</strong>
-            <code>{props.file.fileName}</code>
-          </div>
-        </FlexCol>
-        <FlexCol>
-          <div>
-            <strong>Luotu:&nbsp;</strong>
-            <code>{formatDate(props.file.created)}</code>
-          </div>
-        </FlexCol>
-        <FlexCol>
-          <div>
-            <strong>Tyyppi:&nbsp;</strong>
-            <code>{props.file.documentType}</code>
-          </div>
-        </FlexCol>
-        <FlexCol>
-          <Button text="Poista" onClick={() => props.onRemove(props.file.id)} />
-        </FlexCol>
-      </FlexRowWithGaps>
-    </CreatedFile>
+    <FlexRowWithGaps>
+      <FlexCol>
+        <FileDownloadButton file={props.data.file} onClick={handleClick} />
+      </FlexCol>
+      <FlexCol style={{ marginRight: 60 }}>
+        <InlineButton
+          icon={faX}
+          text={'Poista'}
+          onClick={() => props.onRemove(props.data.file.id)}
+        />
+      </FlexCol>
+      <FlexCol>
+        <LabeledInput>
+          <Label>Liitteen kuvaus</Label>
+          <InputField readonly={true} value={props.data.file.description} />
+        </LabeledInput>
+      </FlexCol>
+    </FlexRowWithGaps>
   )
 })

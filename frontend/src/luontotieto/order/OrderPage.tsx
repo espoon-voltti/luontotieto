@@ -42,7 +42,7 @@ export const OrderPage = React.memo(function OrderPage() {
 
   return (
     <PageContainer>
-      <SectionContainer>
+      <SectionContainer $sidePadding="62px">
         <FlexLeftRight>
           <H1>Tilaus</H1>
           <AddButton

@@ -92,6 +92,11 @@ export const StyledInput = styled.input<StyledInputProps>`
     color: ${colors.grayscale.g70};
     background: none;
   }
+  &.fileInput {
+    border: none;
+    background-color: #f7f7f7;
+    padding: 20px;
+  }
 `
 
 const IconContainer = styled.div<{ $clickable: boolean }>`

@@ -46,11 +46,14 @@ class S3DocumentService(
         }
     }
 
-    private fun presignedGetUrl(
+    fun presignedGetUrl(
         bucketName: String,
-        key: String
+        key: String,
+        contentDisposition: ContentDisposition
     ): URL {
-        val request = GetObjectRequest.builder().bucket(bucketName).key(key).build()
+        val request =
+            GetObjectRequest.builder().bucket(bucketName).key(key).responseContentDisposition(contentDisposition.toString())
+                .build()
 
         val getObjectPresignRequest =
             GetObjectPresignRequest.builder()
@@ -66,7 +69,7 @@ class S3DocumentService(
         key: String,
         contentDisposition: ContentDisposition
     ): ResponseEntity<Any> {
-        val presignedUrl = presignedGetUrl(bucketName, key)
+        val presignedUrl = presignedGetUrl(bucketName, key, contentDisposition)
 
         return if (env.proxyThroughNginx) {
             val url = "$INTERNAL_REDIRECT_PREFIX$presignedUrl"
