@@ -64,6 +64,10 @@ To start frontend in http://localhost:9000
 To lint and format code
 - `yarn lint --fix`
 
+### GeoServer
+
+See [GeoServer README](geoserver/README.md)
+
 ## License
 
 luontotieto is published under **LGPL-2.1-or-later** license. Please refer to

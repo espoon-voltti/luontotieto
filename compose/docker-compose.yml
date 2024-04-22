@@ -54,6 +54,26 @@ services:
       interval: 1s
       timeout: 5s
       retries: 5
+  geoserver:
+    image: docker.osgeo.org/geoserver:2.25.x
+    ports:
+      - "8000:8080"
+    volumes:
+      - ../geoserver/data_dir:/opt/geoserver_data/
+    depends_on:
+      - paikkatieto-db
+    environment:
+      SKIP_DEMO_DATA: true
+      POSTGRES_JNDI_ENABLED: true
+      POSTGRES_HOST: paikkatieto-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: paikkatietodb
+      POSTGRES_USERNAME: paikkatietodb
+      POSTGRES_PASSWORD: postgres
+      EXTRA_JAVA_OPTS: -DALLOW_ENV_PARAMETRIZATION=true -DGEOSERVER_CONSOLE_DISABLED=false -Xms256m -Xmx512m
+      GEOSERVER_ADMIN_PASSWORD: plain:password
+      GEOSERVER_WFS_PASSWORD: plain:wfs_password
+
 
 volumes:
   luontotieto-db-data:

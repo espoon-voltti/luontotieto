@@ -1,0 +1,16 @@
+<layer>
+  <name>liito_orava_alueet</name>
+  <id>LayerInfoImpl-1ce6a5f8:18ef4cf334c:-7fdf</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl-1ce6a5f8:18ef4cf334c:-7ffe</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl-1ce6a5f8:18ef4cf334c:-7fe0</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-04-19 05:26:15.761 UTC</dateCreated>
+</layer>

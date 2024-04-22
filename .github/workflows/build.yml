@@ -44,6 +44,8 @@ jobs:
             path: frontend
           - name: luontotieto/api-gateway
             path: api-gateway
+          - name: luontotieto/geoserver
+            path: geoserver
 
     steps:
       - uses: actions/checkout@v4
