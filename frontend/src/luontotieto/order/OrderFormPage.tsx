@@ -7,7 +7,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from 'shared/buttons/Button'
 
 import { FlexRight, PageContainer, VerticalGap } from '../../shared/layout'
-import { H2 } from '../../shared/typography'
 
 import { OrderForm } from './OrderForm'
 import {
@@ -51,7 +50,6 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   return (
     <>
       <PageContainer>
-        <H2>Tilauksen tiedot</H2>
         <VerticalGap $size="m" />
         {props.mode == 'CREATE' && (
           <OrderForm mode="CREATE" onChange={setOrderInput} />

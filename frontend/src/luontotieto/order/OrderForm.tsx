@@ -15,7 +15,7 @@ import {
   SectionContainer,
   VerticalGap
 } from '../../shared/layout'
-import { Label } from '../../shared/typography'
+import { H3, Label } from '../../shared/typography'
 import { Checkbox } from 'shared/form/Checkbox'
 import { FileInput, FileInputData } from 'shared/FileInput'
 import {
@@ -215,7 +215,9 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
 
   return (
     <FlexCol>
-      <SectionContainer>
+      <SectionContainer $sidePadding="62px">
+        <H3>Tilauksen tiedot</H3>
+        <VerticalGap $size="L" />
         <GroupOfInputRows>
           <RowOfInputs>
             <LabeledInput $cols={4}>
@@ -271,7 +273,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       </SectionContainer>
       <VerticalGap $size="m" />
 
-      <SectionContainer>
+      <SectionContainer $sidePadding="62px">
         <GroupOfInputRows>
           <RowOfInputs>
             <LabeledInput $cols={8}>
