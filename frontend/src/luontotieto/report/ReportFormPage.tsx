@@ -14,6 +14,7 @@ import {
 } from 'api/report-api'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
 
 import {
@@ -68,8 +69,12 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
     }
   }, [props, id])
 
+  const title =
+    props.mode === 'CREATE' ? 'Uusi luontoselvitys' : report?.name ?? ''
+
   return (
     <PageContainer>
+      <BackNavigation text={title} />
       <SectionContainer>
         <H1>Selvitys</H1>
         <VerticalGap $size="m" />
