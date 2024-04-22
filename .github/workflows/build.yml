@@ -172,7 +172,7 @@ jobs:
 
       - name: Retag
         run: |
-          for repository in service frontend api-gateway; do
+          for repository in service frontend api-gateway geoserver; do
             MANIFEST=$(aws ecr batch-get-image --repository-name "luontotieto/$repository" --image-ids imageTag="${{ github.event.pull_request.head.sha || github.sha }}" --output json | jq --raw-output --join-output '.images[0].imageManifest')
             aws ecr put-image --repository-name "luontotieto/$repository" --image-tag "env-${{ matrix.environment }}" --image-manifest "$MANIFEST"
           done
@@ -191,6 +191,10 @@ jobs:
             --cluster "luontotieto-${{ matrix.environment }}" \
             --service "luontotieto-${{ matrix.environment }}" \
             --force-new-deployment
+          aws ecs update-service \
+            --cluster "luontotieto-${{ matrix.environment }}" \
+            --service "geoserver-${{ matrix.environment }}" \
+            --force-new-deployment
           aws ecs wait services-stable \
             --cluster "luontotieto-${{ matrix.environment }}" \
-            --services "luontotieto-${{ matrix.environment }}"
+            --services "luontotieto-${{ matrix.environment }}" "geoserver-${{ matrix.environment }}"
