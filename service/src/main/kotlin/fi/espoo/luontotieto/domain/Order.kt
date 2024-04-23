@@ -129,5 +129,4 @@ fun Handle.getPlanNumbers(): List<String> =
             SELECT DISTINCT (unnest(plan_number)) FROM "order"
             """
     )
-        .mapTo<String>()
-        .list() ?: emptyList()
+        .mapTo<String>().sorted()
