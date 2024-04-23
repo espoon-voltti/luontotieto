@@ -18,7 +18,7 @@ export interface Order extends OrderInput {
 export interface OrderFormInput {
   name: string
   description: string
-  planNumber?: string
+  planNumber?: string[]
   reportDocuments: OrderReportDocumentInput[]
   filesToAdd: OrderFileInput[]
   filesToRemove: string[]
@@ -27,7 +27,7 @@ export interface OrderFormInput {
 export interface OrderInput {
   name: string
   description: string
-  planNumber?: string
+  planNumber?: string[]
   reportDocuments: OrderReportDocumentInput[]
 }
 
@@ -144,3 +144,6 @@ export const apiGetOrderFileUrl = (
   apiClient
     .get<string>(`/orders/${orderId}/files/${fileId}`)
     .then((res) => res.data)
+
+export const apiGetPlanNumbers = (): Promise<string[]> =>
+  apiClient.get<string[]>(`/plan-numbers`).then((res) => res.data)

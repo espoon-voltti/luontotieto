@@ -15,6 +15,7 @@ import {
   OrderFormInput,
   apiGetOrder,
   apiGetOrderFiles,
+  apiGetPlanNumbers,
   apiPostOrder,
   apiPutOrder
 } from 'api/order-api'
@@ -37,10 +38,13 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   const [orderInput, setOrderInput] = useState<OrderFormInput | null>(null)
   const [order, setOrder] = useState<Order | null>(null)
   const [orderFiles, setOrderFiles] = useState<OrderFile[] | null>(null)
+  const [planNumbers, setPlanNumbers] = useState<string[]>([])
 
   const [submitting, setSubmitting] = useState<boolean>(false)
 
   useEffect(() => {
+    void apiGetPlanNumbers().then(setPlanNumbers)
+
     if (props.mode === 'EDIT' && id) {
       void apiGetOrder(id).then(setOrder)
       void apiGetOrderFiles(id).then(setOrderFiles)
@@ -52,7 +56,11 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
       <PageContainer>
         <VerticalGap $size="m" />
         {props.mode == 'CREATE' && (
-          <OrderForm mode="CREATE" onChange={setOrderInput} />
+          <OrderForm
+            mode="CREATE"
+            onChange={setOrderInput}
+            planNumbers={planNumbers}
+          />
         )}
 
         {props.mode == 'EDIT' && order && orderFiles && (
@@ -61,6 +69,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             order={order}
             orderFiles={orderFiles}
             onChange={setOrderInput}
+            planNumbers={planNumbers}
           />
         )}
       </PageContainer>

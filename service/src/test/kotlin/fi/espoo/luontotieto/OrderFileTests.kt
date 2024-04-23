@@ -27,7 +27,7 @@ class OrderFileTests : FullApplicationTest() {
                     OrderInput(
                         "Test order",
                         "Test description",
-                        "12345",
+                        listOf("12345"),
                         listOf(OrderReportDocument("Description", DocumentType.LIITO_ORAVA_PISTEET))
                     )
             )
