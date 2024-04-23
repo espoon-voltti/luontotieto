@@ -48,7 +48,6 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
     if (props.mode === 'EDIT' && id) {
       void apiGetOrder(id).then(setOrder)
       void apiGetOrderFiles(id).then(setOrderFiles)
-      console.log('ARE WE HERE')
     }
   }, [props, id])
 
