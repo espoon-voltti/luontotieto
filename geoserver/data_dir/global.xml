@@ -7,6 +7,7 @@
     </contact>
     <charset>UTF-8</charset>
     <numDecimals>4</numDecimals>
+    <proxyBaseUrl>${X-Forwarded-Proto}://${Host}/geoserver</proxyBaseUrl>
     <verbose>true</verbose>
     <verboseExceptions>false</verboseExceptions>
     <metadata>
@@ -20,7 +21,7 @@
     <localWorkspaceIncludesPrefix>false</localWorkspaceIncludesPrefix>
     <showCreatedTimeColumnsInAdminList>false</showCreatedTimeColumnsInAdminList>
     <showModifiedTimeColumnsInAdminList>false</showModifiedTimeColumnsInAdminList>
-    <useHeadersProxyURL>false</useHeadersProxyURL>
+    <useHeadersProxyURL>true</useHeadersProxyURL>
   </settings>
   <jai>
     <allowInterpolation>false</allowInterpolation>
@@ -72,7 +73,7 @@
   <metadata>
     <entry key="logRequestsEnabled">false</entry>
   </metadata>
-  <updateSequence>31</updateSequence>
+  <updateSequence>46</updateSequence>
   <featureTypeCacheSize>0</featureTypeCacheSize>
   <globalServices>true</globalServices>
   <xmlPostRequestLogBufferSize>1024</xmlPostRequestLogBufferSize>
