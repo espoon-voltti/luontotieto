@@ -9,6 +9,9 @@ import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.reader.GpkgValidationErrorReason
 import org.jdbi.v3.core.Handle
 import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.LineString
+import org.locationtech.jts.geom.Point
+import org.locationtech.jts.geom.Polygon
 import org.locationtech.jts.io.WKBWriter
 import java.sql.Date
 import java.util.UUID
@@ -40,58 +43,93 @@ data class Column(
         }
 }
 
-interface TableDefinition {
-    val columns: List<Column>
-}
+sealed class TableDefinition(val layerName: String, val columns: List<Column>) {
+    data object LiitoOravaPisteet :
+        TableDefinition(
+            layerName = "liito_orava_pisteet",
+            columns =
+                listOf(
+                    Column(name = "geom", kClass = Point::class),
+                    Column(name = "pvm", kClass = Date::class),
+                    Column(name = "havaitsija", kClass = String::class),
+                    Column(name = "puulaji", kClass = String::class),
+                    Column(name = "halkaisija", kClass = Int::class),
+                    Column(name = "papanamaara", kClass = Int::class),
+                    Column(name = "pesa", kClass = Boolean::class),
+                    Column(
+                        name = "pesatyyppi",
+                        kClass = String::class,
+                        sqlType = "liito_orava_pesatyyppi"
+                    ),
+                    Column(name = "pesankorkeus", kClass = Int::class),
+                    Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                    Column(name = "viite", kClass = String::class),
+                    Column(name = "kunta", kClass = Int::class, isNullable = true),
+                    Column(
+                        name = "tarkkuus",
+                        kClass = String::class,
+                        sqlType = "luontotieto_mittaustyyppi"
+                    )
+                )
+        )
 
-object LiitoOravaPisteet : TableDefinition {
-    override val columns =
-        listOf(
-            Column(name = "geom", kClass = Geometry::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(name = "puulaji", kClass = String::class),
-            Column(name = "halkaisija", kClass = Int::class),
-            Column(name = "papanamaara", kClass = Int::class),
-            Column(name = "pesa", kClass = Boolean::class),
-            Column(name = "pesatyyppi", kClass = String::class, sqlType = "liito_orava_pesatyyppi"),
-            Column(name = "pesankorkeus", kClass = Int::class),
-            Column(name = "lisatieto", kClass = String::class, isNullable = true),
-            Column(name = "viite", kClass = String::class),
-            Column(name = "kunta", kClass = Int::class, isNullable = true),
-            Column(name = "tarkkuus", kClass = String::class, sqlType = "luontotieto_mittaustyyppi")
+    data object LiitoOravaAlueet :
+        TableDefinition(
+            layerName = "liito_orava_alueet",
+            columns =
+                listOf(
+                    Column(name = "geom", kClass = Polygon::class),
+                    Column(name = "pvm", kClass = Date::class),
+                    Column(name = "havaitsija", kClass = String::class),
+                    Column(
+                        name = "aluetyyppi",
+                        kClass = String::class,
+                        sqlType = "liito_orava_aluetyyppi"
+                    ),
+                    Column(name = "aluekuvaus", kClass = String::class, isNullable = true),
+                    Column(name = "koko", kClass = Double::class),
+                    Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                    Column(name = "viite", kClass = String::class),
+                    Column(name = "kunta", kClass = Int::class, isNullable = true),
+                    Column(
+                        name = "tarkkuus",
+                        kClass = String::class,
+                        sqlType = "luontotieto_mittaustyyppi"
+                    )
+                )
+        )
+
+    data object LiitoOravaYhteysviivat :
+        TableDefinition(
+            layerName = "liito_orava_yhteysviivat",
+            columns =
+                listOf(
+                    Column(name = "geom", kClass = LineString::class),
+                    Column(name = "vuosi", kClass = Int::class),
+                    Column(name = "havaitsija", kClass = String::class),
+                    Column(
+                        name = "laatu",
+                        kClass = String::class,
+                        sqlType = "liito_orava_aluetyyppi"
+                    ),
+                    Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                    Column(name = "viite", kClass = String::class),
+                    Column(name = "kunta", kClass = Int::class, isNullable = true),
+                    Column(
+                        name = "tarkkuus",
+                        kClass = String::class,
+                        sqlType = "luontotieto_mittaustyyppi"
+                    )
+                )
         )
 }
 
-object LiitoOravaAlueet : TableDefinition {
-    override val columns =
-        listOf(
-            Column(name = "geom", kClass = Geometry::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(name = "aluetyyppi", kClass = String::class, sqlType = "liito_orava_aluetyyppi"),
-            Column(name = "aluekuvaus", kClass = String::class, isNullable = true),
-            Column(name = "koko", kClass = Double::class),
-            Column(name = "lisatieto", kClass = String::class, isNullable = true),
-            Column(name = "viite", kClass = String::class),
-            Column(name = "kunta", kClass = Int::class, isNullable = true),
-            Column(name = "tarkkuus", kClass = String::class, sqlType = "luontotieto_mittaustyyppi")
-        )
-}
-
-object LiitoOravaYhteysviivat : TableDefinition {
-    override val columns =
-        listOf(
-            Column(name = "geom", kClass = Geometry::class),
-            Column(name = "vuosi", kClass = Int::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(name = "laatu", kClass = String::class, sqlType = "liito_orava_aluetyyppi"),
-            Column(name = "lisatieto", kClass = String::class, isNullable = true),
-            Column(name = "viite", kClass = String::class),
-            Column(name = "kunta", kClass = Int::class, isNullable = true),
-            Column(name = "tarkkuus", kClass = String::class, sqlType = "luontotieto_mittaustyyppi")
-        )
-}
+val tableDefinitions =
+    setOf(
+        TableDefinition.LiitoOravaPisteet,
+        TableDefinition.LiitoOravaAlueet,
+        TableDefinition.LiitoOravaYhteysviivat
+    )
 
 fun Handle.insertLiitoOravaPisteet(
     reportId: UUID,
@@ -180,7 +218,9 @@ fun Handle.insertLiitoOravaAlueet(
     """
         )
 
-    data.forEach { batchInsert.add(convertColumnsWithGeometry(it.columns).plus(Pair("reportId", reportId))) }
+    data.forEach {
+        batchInsert.add(convertColumnsWithGeometry(it.columns).plus(Pair("reportId", reportId)))
+    }
 
     return batchInsert.execute().toTypedArray()
 }
@@ -220,7 +260,9 @@ fun Handle.insertLiitoOravaYhteysviivat(
     """
         )
 
-    data.forEach { batchInsert.add(convertColumnsWithGeometry(it.columns).plus(Pair("reportId", reportId))) }
+    data.forEach {
+        batchInsert.add(convertColumnsWithGeometry(it.columns).plus(Pair("reportId", reportId)))
+    }
 
     return batchInsert.execute().toTypedArray()
 }
