@@ -123,8 +123,7 @@ fun Handle.getOrders(user: AuthenticatedUser) =
         .mapTo<Order>()
         .list() ?: emptyList()
 
-fun Handle.getPlanNumbers(
-): List<String> =
+fun Handle.getPlanNumbers(): List<String> =
     createQuery(
         """
             SELECT DISTINCT (unnest(plan_number)) FROM "order"
@@ -132,4 +131,3 @@ fun Handle.getPlanNumbers(
     )
         .mapTo<String>()
         .list() ?: emptyList()
-

@@ -60,7 +60,6 @@ class AppController {
 
     private val logger = KotlinLogging.logger {}
 
-
     @GetMapping("/plan-numbers")
     fun getPlanNumbers(user: AuthenticatedUser): List<String> {
         return jdbi.inTransactionUnchecked { tx -> tx.getPlanNumbers() }
