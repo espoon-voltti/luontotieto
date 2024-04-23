@@ -28,7 +28,7 @@ class OrderTests : FullApplicationTest() {
         val createdOrderId =
             controller.createOrderFromScratch(
                 user = testUser,
-                body = OrderInput("Test order", "Test description", "12345", orderReportDocuments),
+                body = OrderInput("Test order", "Test description", listOf("12345"), orderReportDocuments),
             )
 
         val orderResponse = controller.getOrderById(testUser, createdOrderId)
@@ -56,7 +56,7 @@ class OrderTests : FullApplicationTest() {
         val createdOrderId =
             controller.createOrderFromScratch(
                 user = testUser,
-                body = OrderInput("Test order", "Test description", "12345", orderReportDocuments),
+                body = OrderInput("Test order", "Test description", listOf("12345"), orderReportDocuments),
             )
 
         val createdOrderReport = controller.createOrderReport(testUser, createdOrderId)
@@ -77,7 +77,7 @@ class OrderTests : FullApplicationTest() {
         for (i in 0..2) {
             controller.createOrderFromScratch(
                 user = testUser,
-                body = OrderInput("Test order $i", "Test description $i", "12345", listOf()),
+                body = OrderInput("Test order $i", "Test description $i", listOf("12345"), listOf()),
             )
         }
 
@@ -91,7 +91,7 @@ class OrderTests : FullApplicationTest() {
     fun `get all reports for user - no reports`() {
         controller.createOrderFromScratch(
             user = testUser,
-            body = OrderInput("Test order", "Test description", "12345", listOf()),
+            body = OrderInput("Test order", "Test description", listOf("12345"), listOf()),
         )
 
         val ordersResponse = controller.getReports(AuthenticatedUser(UUID.randomUUID()))
@@ -107,7 +107,7 @@ class OrderTests : FullApplicationTest() {
                     OrderInput(
                         "Test order",
                         "Test description",
-                        "12345",
+                        listOf("12345"),
                         listOf(
                             OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_PISTEET)
                         )
@@ -121,7 +121,7 @@ class OrderTests : FullApplicationTest() {
                 OrderInput(
                     "New name",
                     "New description",
-                    "123",
+                    listOf("12345"),
                     updatedReportDocuments
                 )
             )
