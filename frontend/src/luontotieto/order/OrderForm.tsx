@@ -27,10 +27,13 @@ import {
 } from 'api/order-api'
 import { ReportFileDocumentType, getDocumentTypeTitle } from 'api/report-api'
 import { ExistingFile } from 'shared/form/ExistingFile'
+import { TagAutoComplete } from 'shared/form/TagAutoComplete/TagAutoComplete'
+import { Tag } from 'react-tag-autocomplete'
 
 interface CreateProps {
   mode: 'CREATE'
   onChange: (validInput: OrderFormInput | null) => void
+  planNumbers: string[]
 }
 
 interface EditProps {
@@ -38,6 +41,7 @@ interface EditProps {
   order: Order
   orderFiles: OrderFile[]
   onChange: (validInput: OrderFormInput | null) => void
+  planNumbers: string[]
 }
 type Props = CreateProps | EditProps
 
@@ -107,8 +111,8 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     props.mode === 'CREATE' ? '' : props.order.name
   )
 
-  const [planNumber, setPlanNumber] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.name
+  const [planNumbers, setPlanNumbers] = useDebouncedState(
+    props.mode === 'CREATE' ? [] : props.order.planNumber ?? []
   )
 
   const [description, setDescription] = useDebouncedState(
@@ -172,6 +176,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     )
   }
 
+  const updatePlanNumbers = (selected: Tag[]) => {
+    setPlanNumbers(selected.map((s) => s.label))
+  }
+
   const validInput: OrderFormInput | null = useMemo(() => {
     if (name.trim() === '') return null
     if (description.trim() === '') return null
@@ -180,7 +188,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     return {
       name: name.trim(),
       description: description.trim(),
-      planNumber: planNumber,
+      planNumber: planNumbers,
       reportDocuments: reportDocuments
         .filter((rd) => rd.checked)
         .map((rd) => ({
@@ -207,11 +215,17 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           : []
       )
     }
-  }, [name, description, planNumber, reportDocuments, orderFiles])
+  }, [name, description, planNumbers, reportDocuments, orderFiles])
 
   useEffect(() => {
     props.onChange(validInput)
   }, [validInput, props, orderFiles])
+
+  const uniquePlanNumbers = [...new Set([...planNumbers, ...props.planNumbers])]
+  const suggestions = uniquePlanNumbers.map((pn) => ({
+    value: pn,
+    label: pn
+  }))
 
   return (
     <FlexCol>
@@ -238,8 +252,16 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           <RowOfInputs>
             <LabeledInput $cols={4}>
               <Label>Tilauksen kaavanumero</Label>
-
-              <TextArea onChange={setPlanNumber} value={planNumber} rows={2} />
+              <TagAutoComplete
+                suggestions={suggestions}
+                data={
+                  planNumbers?.map((pn) => ({
+                    value: pn,
+                    label: pn
+                  })) ?? []
+                }
+                onChange={updatePlanNumbers}
+              />
             </LabeledInput>
           </RowOfInputs>
         </GroupOfInputRows>

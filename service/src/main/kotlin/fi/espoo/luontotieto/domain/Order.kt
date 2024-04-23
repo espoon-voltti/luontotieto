@@ -21,7 +21,7 @@ data class Order(
     @PropagateNull val id: UUID,
     val name: String,
     val description: String,
-    val planNumber: String?,
+    val planNumber: List<String>?,
     val created: OffsetDateTime,
     val updated: OffsetDateTime,
     val createdBy: String,
@@ -32,7 +32,7 @@ data class Order(
 data class OrderInput(
     val name: String,
     val description: String,
-    val planNumber: String? = null,
+    val planNumber: List<String>? = null,
     @Json val reportDocuments: List<OrderReportDocument>
 )
 
@@ -122,3 +122,14 @@ fun Handle.getOrders(user: AuthenticatedUser) =
         .bind("userId", user.id)
         .mapTo<Order>()
         .list() ?: emptyList()
+
+fun Handle.getPlanNumbers(
+): List<String> =
+    createQuery(
+        """
+            SELECT DISTINCT (unnest(plan_number)) FROM "order"
+            """
+    )
+        .mapTo<String>()
+        .list() ?: emptyList()
+

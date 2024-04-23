@@ -5635,6 +5635,7 @@ __metadata:
     react-csv: "npm:^2.2.2"
     react-dom: "npm:^18.2.0"
     react-router-dom: "npm:^6.22.2"
+    react-tag-autocomplete: "npm:7.2.0"
     style-loader: "npm:^4.0.0"
     styled-components: "npm:6.1.0"
     ts-loader: "npm:^9.5.0"
@@ -6756,6 +6757,15 @@ __metadata:
   peerDependencies:
     react: ">=16.8"
   checksum: 744c9c3d3b6f3d031ef8c34d86f16075f96d4487584f2a526f722bc5b05c5879fc5056236b824472530fc5aad0ecf6eef88d2848d5b1a32aab9849bda3a5c839
+  languageName: node
+  linkType: hard
+
+"react-tag-autocomplete@npm:7.2.0":
+  version: 7.2.0
+  resolution: "react-tag-autocomplete@npm:7.2.0"
+  peerDependencies:
+    react: ^18.0.0
+  checksum: fbf13fde0c9230b77269e98283fba9a46caf8615815ea3467936ad28363f4fd1ad38c8e281e2c1995e4d221860e5905cec417c7ac16419428408ced77e5c157b
   languageName: node
   linkType: hard
 
