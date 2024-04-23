@@ -94,7 +94,6 @@ class GpkgReaderTest {
                             "havaitsija" to "Harri Havaitsija",
                             "aluetyyppi" to "Elinalue",
                             "aluekuvaus" to "Alue oravalle",
-                            "koko" to 1234.0,
                             "lisatieto" to null,
                             "viite" to "Espoo 4/2024",
                             "kunta" to 79,
@@ -132,17 +131,16 @@ class GpkgReaderTest {
                             "havaitsija" to "Harri Havaitsija",
                             "aluetyyppi" to "Elinalue",
                             "aluekuvaus" to "Alue oravalle",
-                            "koko" to "123",
                             "lisatieto" to null,
                             "viite" to "Espoo 4/2024",
-                            "kunta" to 79,
+                            "kunta" to "79",
                             "tarkkuus" to null
                         ),
                     errors =
                         listOf(
                             GpkgValidationError(
-                                column = "koko",
-                                value = "123",
+                                column = "kunta",
+                                value = "79",
                                 reason = GpkgValidationErrorReason.WRONG_TYPE
                             ),
                             GpkgValidationError(
