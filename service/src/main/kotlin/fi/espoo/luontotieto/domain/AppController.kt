@@ -12,6 +12,7 @@ import fi.espoo.luontotieto.s3.Document
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
 import fi.espoo.paikkatieto.domain.TableDefinition
+import fi.espoo.paikkatieto.domain.getEnumRange
 import fi.espoo.paikkatieto.domain.insertLiitoOravaAlueet
 import fi.espoo.paikkatieto.domain.insertLiitoOravaPisteet
 import fi.espoo.paikkatieto.domain.insertLiitoOravaYhteysviivat
@@ -382,7 +383,10 @@ class AppController {
         @PathVariable documentType: DocumentType
     ): ResponseEntity<Resource> {
         val tableDefinition = getTableDefinitionByDocumentType(documentType) ?: throw NotFound()
-        val file = GpkgWriter.write(tableDefinition) ?: throw NotFound()
+        val file =
+            GpkgWriter.write(tableDefinition) { column ->
+                paikkatietoJdbi.inTransactionUnchecked { tx -> tx.getEnumRange(column) }
+            } ?: throw NotFound()
 
         val resource = UrlResource(file.toUri())
 

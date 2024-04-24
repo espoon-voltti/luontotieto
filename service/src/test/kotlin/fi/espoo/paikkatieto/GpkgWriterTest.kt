@@ -38,7 +38,7 @@ class GpkgWriterTest {
     @Test
     fun testAndValidateFiles() {
         for (tableDefinition in tableDefinitions) {
-            val file = GpkgWriter.write(tableDefinition)
+            val file = GpkgWriter.write(tableDefinition) { listOf("OPTION 1", "OPTION 2") }
             assertNotNull(file)
             assertTrue(file.exists())
             assertTrue(Files.size(file) > 0)

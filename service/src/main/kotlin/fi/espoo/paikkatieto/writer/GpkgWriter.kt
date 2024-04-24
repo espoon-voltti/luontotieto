@@ -4,6 +4,7 @@
 
 package fi.espoo.paikkatieto.writer
 
+import fi.espoo.paikkatieto.domain.Column
 import fi.espoo.paikkatieto.domain.TableDefinition
 import mu.KotlinLogging
 import org.geotools.api.data.DataStore
@@ -16,7 +17,10 @@ import kotlin.io.path.createTempFile
 private val logger = KotlinLogging.logger {}
 
 object GpkgWriter {
-    fun write(tableDefinition: TableDefinition): Path? {
+    fun write(
+        tableDefinition: TableDefinition,
+        getColumnRange: ((column: Column) -> List<String>?)
+    ): Path? {
         var dataStore: DataStore? = null
         var path: Path? = null
         try {
@@ -36,10 +40,15 @@ object GpkgWriter {
                 }
 
             for (column in tableDefinition.columns) {
+                if (column.sqlType != null) {
+                    getColumnRange(column)?.let { builder.options(it) }
+                }
+                builder.nillable(column.isNullable)
                 builder.add(column.name, column.kClass.java)
             }
 
             val featureType = builder.buildFeatureType()
+
             dataStore.createSchema(featureType)
         } catch (e: Exception) {
             logger.error("Unable to write .gkpg template", e)

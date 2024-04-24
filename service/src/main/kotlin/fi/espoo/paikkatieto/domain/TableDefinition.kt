@@ -8,6 +8,7 @@ import fi.espoo.paikkatieto.reader.GpkgFeature
 import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.reader.GpkgValidationErrorReason
 import org.jdbi.v3.core.Handle
+import org.jdbi.v3.core.kotlin.mapTo
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.LineString
 import org.locationtech.jts.geom.Point
@@ -265,6 +266,12 @@ fun Handle.insertLiitoOravaYhteysviivat(
     }
 
     return batchInsert.execute().toTypedArray()
+}
+
+fun Handle.getEnumRange(column: Column): List<String>? {
+    return column.sqlType?.let { sqlType ->
+        createQuery("SELECT unnest(enum_range(NULL::$sqlType))::text").mapTo(String::class).list()
+    }
 }
 
 private fun convertColumnsWithGeometry(map: Map<String, Any?>): Map<String, Any?> {
