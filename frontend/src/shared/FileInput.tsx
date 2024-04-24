@@ -6,11 +6,18 @@ import React, { useEffect, useState } from 'react'
 import { InputField } from 'shared/form/InputField'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
-import { LabeledInput, RowOfInputs } from '../shared/layout'
+import {
+  FlexCol,
+  FlexColWithGaps,
+  FlexRow,
+  LabeledInput,
+  RowOfInputs
+} from '../shared/layout'
 import { Label } from '../shared/typography'
 import { FileInputField } from 'shared/form/FileInputField'
 import { ReportFileDocumentType, getDocumentTypeTitle } from 'api/report-api'
 import { OrderFileDocumentType } from 'api/order-api'
+import styled from 'styled-components'
 
 export interface ValidFileInputData<T> {
   description: string
@@ -43,29 +50,32 @@ export const FileInput = <
   }, [file, description])
 
   return (
-    <RowOfInputs>
-      <LabeledInput $cols={4}>
+    <RowOfInputs style={{ height: '100px' }}>
+      <LabeledInput $cols={5}>
         <Label>
-          {getDocumentTypeTitle<ReportFileDocumentType | OrderFileDocumentType>(
-            data.documentType
-          )}
+          {`${getDocumentTypeTitle<
+            ReportFileDocumentType | OrderFileDocumentType
+          >(data.documentType)} *`}
         </Label>
         <FileInputField
+          width="L"
           onChange={(fileList) => {
             const file = fileList?.[0]
             file && setFile(file)
           }}
         />
       </LabeledInput>
-      <LabeledInput $cols={4}>
-        <Label>Tiedoston kuvaus</Label>
-        <InputField
-          onChange={(value) => {
-            setDescription(value)
-          }}
-          value={description}
-        />
-      </LabeledInput>
+      <FlexRow style={{ height: '100%' }}>
+        <LabeledInput $cols={4}>
+          <Label>Liitteen kuvaus</Label>
+          <InputField
+            onChange={(value) => {
+              setDescription(value)
+            }}
+            value={description}
+          />
+        </LabeledInput>
+      </FlexRow>
     </RowOfInputs>
   )
 }

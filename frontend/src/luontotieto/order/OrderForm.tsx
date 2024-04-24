@@ -265,8 +265,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
             </LabeledInput>
           </RowOfInputs>
         </GroupOfInputRows>
-        <VerticalGap $size="m" />
+        <VerticalGap $size="L" />
         <GroupOfInputRows>
+          <Label>Tilauksen liitteet</Label>
+
           {orderFiles.map((fInput) => {
             switch (fInput.type) {
               case 'NEW':

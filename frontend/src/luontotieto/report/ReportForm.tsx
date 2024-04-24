@@ -12,7 +12,6 @@ import {
 } from 'api/report-api'
 import React, { useEffect, useMemo, useState } from 'react'
 import { FileInput, FileInputData } from 'shared/FileInput'
-import { InputField } from 'shared/form/InputField'
 import { TextArea } from 'shared/form/TextArea'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
@@ -20,10 +19,9 @@ import {
   FlexCol,
   GroupOfInputRows,
   LabeledInput,
-  RowOfInputs,
   VerticalGap
 } from '../../shared/layout'
-import { H2, Label } from '../../shared/typography'
+import { H3, Label } from '../../shared/typography'
 
 import { ExistingFile } from 'shared/form/ExistingFile'
 
@@ -216,22 +214,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
 
   return (
     <FlexCol>
-      <GroupOfInputRows>
-        <RowOfInputs>
-          <LabeledInput $cols={4}>
-            <Label>Selvityksen nimi</Label>
-            <InputField onChange={setName} value={name} />
-          </LabeledInput>
-        </RowOfInputs>
-        <RowOfInputs>
-          <LabeledInput $cols={4}>
-            <Label>Selvityksen kuvaus</Label>
-            <TextArea onChange={setDescription} value={description} rows={2} />
-          </LabeledInput>
-        </RowOfInputs>
-      </GroupOfInputRows>
-      <VerticalGap $size="XL" />
-      <H2>Tiedostot</H2>
+      <H3>Selvitettävät asiat</H3>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
         {fileInputs.map((fInput) => {
@@ -263,6 +246,11 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
           }
         })}
       </GroupOfInputRows>
+      <VerticalGap $size="m" />
+      <LabeledInput $cols={4}>
+        <Label>Yhteenveto</Label>
+        <TextArea onChange={setDescription} value={description} rows={2} />
+      </LabeledInput>
       <VerticalGap $size="XL" />
     </FlexCol>
   )

@@ -6,7 +6,6 @@ import { StatusChip } from 'luontotieto/cases/StatusChip'
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AddButton } from 'shared/buttons/AddButton'
-import { FilterButton } from 'shared/buttons/FilterButton'
 import { formatDate } from 'shared/dates'
 import styled from 'styled-components'
 
@@ -18,15 +17,12 @@ import {
   Table,
   VerticalGap
 } from '../../shared/layout'
-import { H3 } from '../../shared/typography'
 import { ReportDetails, apiGetReports } from 'api/report-api'
+import { InputField } from 'shared/form/InputField'
 
 export const ReportList = React.memo(function ReportList() {
   const navigate = useNavigate()
   const [reports, setReports] = useState<ReportDetails[]>([])
-  const [showAll, setShowAll] = useState(true)
-
-  const reportsToDisplay = reports.filter((r) => (showAll ? true : !r.approved))
 
   useEffect(() => {
     void apiGetReports().then(setReports)
@@ -35,22 +31,15 @@ export const ReportList = React.memo(function ReportList() {
   return (
     <PageContainer>
       <SectionContainer>
-        <H3>Näytettävät selvitykset</H3>
         <VerticalGap $size="m" />
         <FlexLeftRight>
           <FlexRowWithGaps $gapSize="s">
-            <FilterButton
-              text="Näytä avoimet"
-              selected={!showAll}
-              onClick={(selected) => {
-                setShowAll(selected)
-              }}
-            />
+            <InputField onChange={() => console.log('value')} value={'Hae'} />
           </FlexRowWithGaps>
 
           <AddButton
             text="Lisää selvitys"
-            onClick={() => navigate('/luontotieto/selvitys/uusi')}
+            onClick={() => navigate('/luontotieto/tilaus/uusi')}
             data-qa="create-report-button"
           />
         </FlexLeftRight>
@@ -68,7 +57,7 @@ export const ReportList = React.memo(function ReportList() {
             </tr>
           </thead>
           <tbody>
-            {reportsToDisplay.map((report) => (
+            {reports.map((report) => (
               <tr key={report.id}>
                 <td>{report.created ? formatDate(report.created) : '-'}</td>
                 <td>
@@ -84,7 +73,7 @@ export const ReportList = React.memo(function ReportList() {
                 </td>
               </tr>
             ))}
-            {reportsToDisplay.length == 0 && (
+            {reports.length == 0 && (
               <tr>
                 <td colSpan={4}>Ei näytettäviä selvityksiä</td>
               </tr>

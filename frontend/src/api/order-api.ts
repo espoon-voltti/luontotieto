@@ -52,13 +52,12 @@ export const apiPostOrder = async (data: OrderFormInput): Promise<string> => {
     ...data
   }
 
-  const orderId = await apiClient
-    .post<string>('/orders', body)
+  const response = await apiClient
+    .post<{ orderId: string; reportId: string }>('/orders', body)
     .then((r) => r.data)
+  await handleFiles(response.orderId, data.filesToAdd, data.filesToRemove)
 
-  await handleFiles(orderId, data.filesToAdd, data.filesToRemove)
-
-  return orderId
+  return response.reportId
 }
 
 const handleFiles = async (

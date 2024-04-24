@@ -22,10 +22,10 @@ import {
   SectionContainer,
   VerticalGap
 } from '../../shared/layout'
-import { H1 } from '../../shared/typography'
 
 import { ReportForm } from './ReportForm'
 import { Footer } from 'shared/Footer'
+import { OrderDetails } from './OrderDetails'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -76,9 +76,12 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
     <>
       <PageContainer>
         <BackNavigation text={title} />
+        {report?.order && (
+          <OrderDetails order={report?.order} reportId={report.id} />
+        )}
+        <VerticalGap $size="m" />
+
         <SectionContainer>
-          <H1>Selvitys</H1>
-          <VerticalGap $size="m" />
           {props.mode === 'EDIT' && report && reportFiles && (
             <ReportForm
               mode={props.mode}
