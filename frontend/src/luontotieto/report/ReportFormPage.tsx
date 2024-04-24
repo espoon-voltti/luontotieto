@@ -97,6 +97,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
         </SectionContainer>
       </PageContainer>
       <VerticalGap $size="XL" />
+      <VerticalGap $size="XL" />
       <Footer>
         <FlexRight style={{ height: '100%' }}>
           <Button

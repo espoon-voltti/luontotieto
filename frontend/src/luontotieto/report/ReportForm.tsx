@@ -251,7 +251,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
         <Label>Yhteenveto</Label>
         <TextArea onChange={setDescription} value={description} rows={2} />
       </LabeledInput>
-      <VerticalGap $size="XL" />
+      <VerticalGap $size="m" />
     </FlexCol>
   )
 })
