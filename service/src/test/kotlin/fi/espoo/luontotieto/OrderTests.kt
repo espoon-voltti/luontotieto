@@ -58,7 +58,7 @@ class OrderTests : FullApplicationTest() {
                 user = testUser,
                 body = OrderInput("Test order", "Test description", listOf("12345"), orderReportDocuments),
             )
-        
+
         val orderReportResponse = controller.getReportById(testUser, createdOrder.reportId)
 
         assertNotNull(orderReportResponse)
