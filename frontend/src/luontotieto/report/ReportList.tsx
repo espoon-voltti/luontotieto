@@ -57,7 +57,6 @@ export const ReportList = React.memo(function ReportList() {
         filterBySearchQuery,
         filterByReportAssignee
       )
-      console.log('filtered:', filtered)
 
       return sortBy === null
         ? filtered
@@ -159,8 +158,7 @@ const filterReports = (
   assignee: string | null
 ) => {
   const searchQueryToLower = searchQuery ? searchQuery.toLowerCase() : null
-  console.log(reports)
-  console.log(searchQueryToLower)
+
   //TODO: we do not yet support assignee at the report data schema level so mock the filtering to return true
   return reports.filter((report) => {
     if (searchQueryToLower === null && assignee === null) {
