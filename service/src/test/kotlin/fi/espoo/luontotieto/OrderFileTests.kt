@@ -61,7 +61,7 @@ class OrderFileTests : FullApplicationTest() {
         val s3Doc =
             controller.documentClient.get(
                 controller.bucketEnv.data,
-                "$createdOrder.orderId/${orderFileResponse.first { it.fileName == "tilaus_ohje.txt" }.id}"
+                "${createdOrder.orderId}/${orderFileResponse.first { it.fileName == "tilaus_ohje.txt" }.id}"
             )
 
         assertEquals("ORDER INFO CONTENT", String(s3Doc.bytes))
