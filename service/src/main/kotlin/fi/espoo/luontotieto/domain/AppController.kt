@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.net.URL
+import java.nio.file.Files
 import java.util.UUID
 import kotlin.io.path.createTempFile
 
@@ -386,7 +387,8 @@ class AppController {
         val file =
             GpkgWriter.write(tableDefinition) { column ->
                 paikkatietoJdbi.inTransactionUnchecked { tx -> tx.getEnumRange(column) }
-            } ?: throw NotFound()
+            }
+                ?.takeIf { Files.size(it) > 0 } ?: throw NotFound()
 
         val resource = UrlResource(file.toUri())
 
