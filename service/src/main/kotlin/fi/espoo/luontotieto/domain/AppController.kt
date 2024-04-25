@@ -11,20 +11,23 @@ import fi.espoo.luontotieto.config.audit
 import fi.espoo.luontotieto.s3.Document
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
-import fi.espoo.paikkatieto.domain.LiitoOravaAlueet
-import fi.espoo.paikkatieto.domain.LiitoOravaPisteet
-import fi.espoo.paikkatieto.domain.LiitoOravaYhteysviivat
+import fi.espoo.paikkatieto.domain.TableDefinition
+import fi.espoo.paikkatieto.domain.getEnumRange
 import fi.espoo.paikkatieto.domain.insertLiitoOravaAlueet
 import fi.espoo.paikkatieto.domain.insertLiitoOravaPisteet
 import fi.espoo.paikkatieto.domain.insertLiitoOravaYhteysviivat
 import fi.espoo.paikkatieto.reader.GpkgReader
 import fi.espoo.paikkatieto.reader.GpkgValidationError
+import fi.espoo.paikkatieto.writer.GpkgWriter
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.core.io.Resource
+import org.springframework.core.io.UrlResource
 import org.springframework.http.ContentDisposition
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -41,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.net.URL
+import java.nio.file.Files
 import java.util.UUID
 import kotlin.io.path.createTempFile
 
@@ -178,9 +182,11 @@ class AppController {
             readers.forEach {
                 it.use { reader ->
                     when (reader.tableDefinition) {
-                        LiitoOravaPisteet -> tx.insertLiitoOravaPisteet(reportId, reader.asSequence())
-                        LiitoOravaAlueet -> tx.insertLiitoOravaAlueet(reportId, reader.asSequence())
-                        LiitoOravaYhteysviivat ->
+                        TableDefinition.LiitoOravaPisteet ->
+                            tx.insertLiitoOravaPisteet(reportId, reader.asSequence())
+                        TableDefinition.LiitoOravaAlueet ->
+                            tx.insertLiitoOravaAlueet(reportId, reader.asSequence())
+                        TableDefinition.LiitoOravaYhteysviivat ->
                             tx.insertLiitoOravaYhteysviivat(reportId, reader.asSequence())
                     }
                 }
@@ -347,16 +353,12 @@ class AppController {
     ): URL {
         val dataBucket = bucketEnv.data
 
-        val orderFile =
-            jdbi.inTransactionUnchecked { tx ->
-                tx.getOrderFileById(
-                    orderId,
-                    fileId
-                )
-            }
-        val contentDisposition = ContentDisposition.attachment().filename(orderFile.fileName).build()
+        val orderFile = jdbi.inTransactionUnchecked { tx -> tx.getOrderFileById(orderId, fileId) }
+        val contentDisposition =
+            ContentDisposition.attachment().filename(orderFile.fileName).build()
 
-        val fileUrl = documentClient.presignedGetUrl(dataBucket, "$orderId/$fileId", contentDisposition)
+        val fileUrl =
+            documentClient.presignedGetUrl(dataBucket, "$orderId/$fileId", contentDisposition)
         return fileUrl
     }
 
@@ -369,15 +371,34 @@ class AppController {
         val dataBucket = bucketEnv.data
 
         val reportFile =
-            jdbi.inTransactionUnchecked { tx ->
-                tx.getReportFileById(
-                    reportId,
-                    fileId
-                )
-            }
-        val contentDisposition = ContentDisposition.attachment().filename(reportFile.fileName).build()
-        val fileUrl = documentClient.presignedGetUrl(dataBucket, "$reportId/$fileId", contentDisposition)
+            jdbi.inTransactionUnchecked { tx -> tx.getReportFileById(reportId, fileId) }
+        val contentDisposition =
+            ContentDisposition.attachment().filename(reportFile.fileName).build()
+        val fileUrl =
+            documentClient.presignedGetUrl(dataBucket, "$reportId/$fileId", contentDisposition)
         return fileUrl
+    }
+
+    @GetMapping("/template/{documentType}.gpkg")
+    fun getGpkgTemplate(
+        @PathVariable documentType: DocumentType
+    ): ResponseEntity<Resource> {
+        val tableDefinition = getTableDefinitionByDocumentType(documentType) ?: throw NotFound()
+        val file =
+            GpkgWriter.write(tableDefinition) { column ->
+                paikkatietoJdbi.inTransactionUnchecked { tx -> tx.getEnumRange(column) }
+            }
+                ?.takeIf { Files.size(it) > 0 } ?: throw NotFound()
+
+        val resource = UrlResource(file.toUri())
+
+        return ResponseEntity.ok()
+            .header(
+                HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"${tableDefinition.layerName}.gpkg\""
+            )
+            .header(HttpHeaders.CONTENT_TYPE, "application/geopackage+sqlite3")
+            .body(resource)
     }
 
     private fun getPaikkatietoReader(
@@ -401,9 +422,9 @@ class AppController {
 
 private fun getTableDefinitionByDocumentType(documentType: DocumentType) =
     when (documentType) {
-        DocumentType.LIITO_ORAVA_PISTEET -> LiitoOravaPisteet
-        DocumentType.LIITO_ORAVA_ALUEET -> LiitoOravaAlueet
-        DocumentType.LIITO_ORAVA_VIIVAT -> LiitoOravaYhteysviivat
+        DocumentType.LIITO_ORAVA_PISTEET -> TableDefinition.LiitoOravaPisteet
+        DocumentType.LIITO_ORAVA_ALUEET -> TableDefinition.LiitoOravaAlueet
+        DocumentType.LIITO_ORAVA_VIIVAT -> TableDefinition.LiitoOravaYhteysviivat
         else -> null
     }
 

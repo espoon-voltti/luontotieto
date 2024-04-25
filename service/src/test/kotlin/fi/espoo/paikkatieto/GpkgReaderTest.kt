@@ -4,8 +4,7 @@
 
 package fi.espoo.paikkatieto
 
-import fi.espoo.paikkatieto.domain.LiitoOravaAlueet
-import fi.espoo.paikkatieto.domain.LiitoOravaPisteet
+import fi.espoo.paikkatieto.domain.TableDefinition
 import fi.espoo.paikkatieto.reader.GpkgFeature
 import fi.espoo.paikkatieto.reader.GpkgReader
 import fi.espoo.paikkatieto.reader.GpkgValidationError
@@ -66,7 +65,7 @@ class GpkgReaderTest {
                     errors = emptyList()
                 )
             )
-        GpkgReader(file, LiitoOravaPisteet).use { reader ->
+        GpkgReader(file, TableDefinition.LiitoOravaPisteet).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
         }
@@ -104,7 +103,7 @@ class GpkgReaderTest {
                     errors = emptyList()
                 )
             )
-        GpkgReader(file, LiitoOravaAlueet).use { reader ->
+        GpkgReader(file, TableDefinition.LiitoOravaAlueet).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
         }
@@ -154,7 +153,7 @@ class GpkgReaderTest {
                         )
                 )
             )
-        GpkgReader(file, LiitoOravaAlueet).use { reader ->
+        GpkgReader(file, TableDefinition.LiitoOravaAlueet).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
         }
