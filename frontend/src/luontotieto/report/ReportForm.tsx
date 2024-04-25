@@ -132,7 +132,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
     return createFileInputs(reportFiles, requiredFiles)
   }, [requiredFiles, props])
 
-  const [name, setName] = useDebouncedState(
+  const [name, _] = useDebouncedState(
     props.mode === 'CREATE' ? '' : props.report.name
   )
 

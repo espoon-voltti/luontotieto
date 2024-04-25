@@ -6,18 +6,11 @@ import React, { useEffect, useState } from 'react'
 import { InputField } from 'shared/form/InputField'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
-import {
-  FlexCol,
-  FlexColWithGaps,
-  FlexRow,
-  LabeledInput,
-  RowOfInputs
-} from '../shared/layout'
+import { FlexRow, LabeledInput, RowOfInputs } from '../shared/layout'
 import { Label } from '../shared/typography'
 import { FileInputField } from 'shared/form/FileInputField'
 import { ReportFileDocumentType, getDocumentTypeTitle } from 'api/report-api'
 import { OrderFileDocumentType } from 'api/order-api'
-import styled from 'styled-components'
 
 export interface ValidFileInputData<T> {
   description: string
