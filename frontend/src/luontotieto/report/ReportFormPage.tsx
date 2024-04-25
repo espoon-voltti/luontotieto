@@ -9,7 +9,8 @@ import {
   ReportFileDetails,
   apiGetReportFiles,
   ReportFormInput,
-  apiPutReport
+  apiPutReport,
+  apiApproveReport
 } from 'api/report-api'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -26,6 +27,7 @@ import {
 import { ReportForm } from './ReportForm'
 import { Footer } from 'shared/Footer'
 import { OrderDetails } from './OrderDetails'
+import styled from 'styled-components'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -35,6 +37,10 @@ interface EditProps {
   mode: 'EDIT'
 }
 type Props = CreateProps | EditProps
+
+const StyledButton = styled(Button)`
+  margin-right: 20px;
+`
 
 export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const navigate = useNavigate()
@@ -47,6 +53,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const [reportFiles, setReportFiles] = useState<ReportFileDetails[] | null>(
     null
   )
+  const [approving, setApproving] = useState<boolean>(false)
 
   const onSubmit = (reportInput: ReportFormInput) => {
     if (props.mode === 'CREATE') {
@@ -68,9 +75,12 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
       void apiGetReportFiles(id).then(setReportFiles)
     }
   }, [props, id])
-
   const title =
-    props.mode === 'CREATE' ? 'Uusi luontoselvitys' : report?.name ?? ''
+    props.mode === 'CREATE'
+      ? 'Uusi luontoselvitys'
+      : report?.approved
+        ? `${report?.name} (Hyväksytty)`
+        : report?.name ?? ''
 
   return (
     <>
@@ -100,15 +110,32 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
       <VerticalGap $size="XL" />
       <Footer>
         <FlexRight style={{ height: '100%' }}>
-          <Button
+          <StyledButton
             text="Tallenna"
             data-qa="save-button"
             primary
-            disabled={!reportInput || submitting}
+            disabled={!reportInput || submitting || report?.approved}
             onClick={() => {
               if (!reportInput) return
 
               onSubmit(reportInput)
+            }}
+          />
+
+          <Button
+            text="Hyväksy"
+            data-qa="approve-button"
+            primary
+            disabled={!report || !reportInput || approving || report.approved}
+            onClick={() => {
+              if (!report) return
+
+              setApproving(true)
+              apiApproveReport(report.id)
+                .then(() =>
+                  alert('Hyväksytty ja tiedostot lähetetty PostGIS kantaan.')
+                )
+                .catch(() => setApproving(false))
             }}
           />
         </FlexRight>

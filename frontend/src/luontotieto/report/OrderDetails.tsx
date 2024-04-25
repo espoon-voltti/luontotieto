@@ -91,7 +91,7 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
             </LabeledInput>
             <LabeledInput>
               <Label>Tilauksen kuvaus</Label>
-              {order.planNumber}
+              {order.description}
             </LabeledInput>
             <LabeledInput>
               <Label>Selvityksen tekijä</Label>

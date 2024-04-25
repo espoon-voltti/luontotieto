@@ -65,7 +65,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
               ? `Muokkaa tilausta: ${order?.name}`
               : 'Uusi luontoselvitys'
           }
-          destination={state.referer}
+          destination={state?.referer ?? undefined}
         />
         <VerticalGap $size="s" />
         {props.mode == 'CREATE' && (

@@ -66,3 +66,5 @@ export const inputWidthCss = (width: InputWidth) => css`
       : ''}
   }
 `
+
+export const theme = { colors }

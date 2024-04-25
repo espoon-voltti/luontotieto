@@ -42,7 +42,6 @@ interface ReportFileInputElementNew {
   type: 'NEW'
   userDescription: string
   documentType: ReportFileDocumentType
-  documentDescription: string | null
   file: File | null
 }
 
@@ -50,7 +49,6 @@ interface ReportFileInputElementExisting {
   type: 'EXISTING'
   userDescription: string
   documentType: ReportFileDocumentType
-  documentDescription: string | null
   details: ReportFileDetails
 }
 
@@ -94,14 +92,12 @@ function createFileInputs(
             type: 'EXISTING',
             userDescription: reportFile.description,
             documentType: required.documentType,
-            documentDescription: required.description,
             details: reportFile
           }
         : {
             type: 'NEW',
             userDescription: '',
             documentType: required.documentType,
-            documentDescription: required.description,
             file: null
           }
     })
@@ -124,6 +120,7 @@ function filesAreValid(
 }
 
 export const ReportForm = React.memo(function ReportForm(props: Props) {
+  const reportIsAlreadyApproved = props.mode === 'EDIT' && props.report.approved
   const requiredFiles = useMemo(
     () =>
       props.mode === 'EDIT' ? props.report.order?.reportDocuments ?? [] : [],
@@ -168,8 +165,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
             type: 'NEW',
             file: null,
             userDescription: '',
-            documentType: fi.documentType,
-            documentDescription: fi.documentDescription
+            documentType: fi.documentType
           }
         }
         return fi
@@ -237,7 +233,11 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
               return (
                 <ExistingFile
                   key={fInput.documentType}
-                  data={{ type: 'REPORT', file: fInput.details }}
+                  data={{
+                    type: 'REPORT',
+                    file: fInput.details,
+                    readonly: reportIsAlreadyApproved
+                  }}
                   onRemove={(id) => {
                     removeCreatedFileInput(id)
                   }}
@@ -249,7 +249,12 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
       <VerticalGap $size="m" />
       <LabeledInput $cols={4}>
         <Label>Yhteenveto</Label>
-        <TextArea onChange={setDescription} value={description} rows={2} />
+        <TextArea
+          onChange={setDescription}
+          value={description}
+          rows={2}
+          readonly={reportIsAlreadyApproved}
+        />
       </LabeledInput>
       <VerticalGap $size="m" />
     </FlexCol>
