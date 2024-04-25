@@ -20,7 +20,7 @@ class OrderFileTests : FullApplicationTest() {
 
     @Test
     fun `create order files and fetch and delete`() {
-        val createdOrderId =
+        val createdOrder =
             controller.createOrderFromScratch(
                 user = testUser,
                 body =
@@ -34,7 +34,7 @@ class OrderFileTests : FullApplicationTest() {
 
         controller.uploadOrderFile(
             user = testUser,
-            orderId = createdOrderId,
+            orderId = createdOrder.orderId,
             file =
                 MockMultipartFile(
                     "tilaus_ohje.txt",
@@ -46,7 +46,7 @@ class OrderFileTests : FullApplicationTest() {
             description = "Test Description"
         )
 
-        val orderFileResponse = controller.getOrderFiles(createdOrderId)
+        val orderFileResponse = controller.getOrderFiles(createdOrder.orderId)
 
         assertNotNull(orderFileResponse)
         assertEquals(orderFileResponse.count(), 1)
@@ -61,18 +61,18 @@ class OrderFileTests : FullApplicationTest() {
         val s3Doc =
             controller.documentClient.get(
                 controller.bucketEnv.data,
-                "$createdOrderId/${orderFileResponse.first { it.fileName == "tilaus_ohje.txt" }.id}"
+                "$createdOrder.orderId/${orderFileResponse.first { it.fileName == "tilaus_ohje.txt" }.id}"
             )
 
         assertEquals("ORDER INFO CONTENT", String(s3Doc.bytes))
 
         controller.deleteOrderFile(
             user = testUser,
-            orderId = createdOrderId,
+            orderId = createdOrder.orderId,
             fileId = fileResponse.id
         )
 
-        val orderFilesAfterDelete = controller.getOrderFiles(createdOrderId)
+        val orderFilesAfterDelete = controller.getOrderFiles(createdOrder.orderId)
         assertEquals(0, orderFilesAfterDelete.count())
     }
 }
