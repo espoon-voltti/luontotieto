@@ -42,23 +42,24 @@ export enum OrderFileDocumentType {
   ORDER_AREA = 'ORDER_AREA'
 }
 
-export type OrderReportDocumentInput = Pick<
-  OrderReportDocument,
-  'description' | 'documentType'
->
+export type OrderReportDocumentInput = Pick<OrderReportDocument, 'documentType'>
 
 export const apiPostOrder = async (data: OrderFormInput): Promise<string> => {
   const body: JsonOf<OrderInput> = {
-    ...data
+    ...data,
+    //TODO: The description is to be removed (but for the moment a bit hesitant to remove it, lets clean it up later)
+    reportDocuments: data.reportDocuments.map((rd) => ({
+      ...rd,
+      description: ''
+    }))
   }
 
-  const orderId = await apiClient
-    .post<string>('/orders', body)
+  const response = await apiClient
+    .post<{ orderId: string; reportId: string }>('/orders', body)
     .then((r) => r.data)
+  await handleFiles(response.orderId, data.filesToAdd, data.filesToRemove)
 
-  await handleFiles(orderId, data.filesToAdd, data.filesToRemove)
-
-  return orderId
+  return response.reportId
 }
 
 const handleFiles = async (

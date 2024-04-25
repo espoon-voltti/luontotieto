@@ -14,8 +14,8 @@ import { ReportFileDetails, apiGetReportFileUrl } from 'api/report-api'
 
 interface Props {
   data:
-    | { type: 'ORDER'; file: OrderFile }
-    | { type: 'REPORT'; file: ReportFileDetails }
+    | { type: 'ORDER'; file: OrderFile; readonly: boolean }
+    | { type: 'REPORT'; file: ReportFileDetails; readonly: boolean }
   onRemove: (id: string) => void
 }
 
@@ -42,6 +42,7 @@ export const ExistingFile = React.memo(function ExistingFile(props: Props) {
           icon={faX}
           text={'Poista'}
           onClick={() => props.onRemove(props.data.file.id)}
+          disabled={props.data.readonly}
         />
       </FlexCol>
       <FlexCol>

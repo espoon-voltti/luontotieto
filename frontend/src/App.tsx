@@ -2,12 +2,10 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 import { FrontPage } from 'luontotieto/FrontPage'
-import { OrderPage } from 'luontotieto/order/OrderPage'
 import { ReportFormPage } from 'luontotieto/report/ReportFormPage'
-import { ReportPage } from 'luontotieto/report/ReportPage'
 import React, { Fragment } from 'react'
 import { Navigate, createBrowserRouter, Outlet, Link } from 'react-router-dom'
-import styled from 'styled-components'
+import styled, { ThemeProvider } from 'styled-components'
 
 import { AuthGuard } from './auth/AuthGuard'
 import { LoginPage } from './auth/LoginPage'
@@ -17,6 +15,7 @@ import { useAuthStatus } from './auth/auth-status'
 import { FlexRowWithGaps } from './shared/layout'
 import { H1 } from './shared/typography'
 import { OrderFormPage } from 'luontotieto/order/OrderFormPage'
+import { theme } from 'shared/theme'
 
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
@@ -39,20 +38,22 @@ function App() {
   const user = authStatus.loggedIn && authStatus.user ? authStatus.user : null
 
   return (
-    <UserContextProvider user={user}>
-      <Fragment>
-        <Header>
-          <FlexRowWithGaps>
-            <img src={EspooLogo} width="100px" alt="Espoon kaupunki" />
-            <Link to="/luontoselvitys">
-              <H1>Luontotietoportaali</H1>
-            </Link>
-          </FlexRowWithGaps>
-          <UserHeader />
-        </Header>
-        <Outlet />
-      </Fragment>
-    </UserContextProvider>
+    <ThemeProvider theme={theme}>
+      <UserContextProvider user={user}>
+        <Fragment>
+          <Header>
+            <FlexRowWithGaps>
+              <img src={EspooLogo} width="100px" alt="Espoon kaupunki" />
+              <Link to="/luontoselvitys">
+                <H1>Luontotietoportaali</H1>
+              </Link>
+            </FlexRowWithGaps>
+            <UserHeader />
+          </Header>
+          <Outlet />
+        </Fragment>
+      </UserContextProvider>
+    </ThemeProvider>
   )
 }
 
@@ -94,26 +95,10 @@ export const appRouter = createBrowserRouter([
         )
       },
       {
-        path: '/luontotieto/tilaus/:id',
-        element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
-            <OrderPage />
-          </AuthGuard>
-        )
-      },
-      {
         path: '/luontotieto/selvitys/uusi',
         element: (
           <AuthGuard allow="AUTHENTICATED_ONLY">
             <ReportFormPage mode="CREATE" />
-          </AuthGuard>
-        )
-      },
-      {
-        path: '/luontotieto/selvitys/:id',
-        element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
-            <ReportPage />
           </AuthGuard>
         )
       },

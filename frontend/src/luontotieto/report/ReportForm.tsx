@@ -12,7 +12,6 @@ import {
 } from 'api/report-api'
 import React, { useEffect, useMemo, useState } from 'react'
 import { FileInput, FileInputData } from 'shared/FileInput'
-import { InputField } from 'shared/form/InputField'
 import { TextArea } from 'shared/form/TextArea'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
@@ -20,10 +19,9 @@ import {
   FlexCol,
   GroupOfInputRows,
   LabeledInput,
-  RowOfInputs,
   VerticalGap
 } from '../../shared/layout'
-import { H2, Label } from '../../shared/typography'
+import { H3, Label } from '../../shared/typography'
 
 import { ExistingFile } from 'shared/form/ExistingFile'
 
@@ -44,7 +42,6 @@ interface ReportFileInputElementNew {
   type: 'NEW'
   userDescription: string
   documentType: ReportFileDocumentType
-  documentDescription: string | null
   file: File | null
 }
 
@@ -52,7 +49,6 @@ interface ReportFileInputElementExisting {
   type: 'EXISTING'
   userDescription: string
   documentType: ReportFileDocumentType
-  documentDescription: string | null
   details: ReportFileDetails
 }
 
@@ -96,14 +92,12 @@ function createFileInputs(
             type: 'EXISTING',
             userDescription: reportFile.description,
             documentType: required.documentType,
-            documentDescription: required.description,
             details: reportFile
           }
         : {
             type: 'NEW',
             userDescription: '',
             documentType: required.documentType,
-            documentDescription: required.description,
             file: null
           }
     })
@@ -126,6 +120,7 @@ function filesAreValid(
 }
 
 export const ReportForm = React.memo(function ReportForm(props: Props) {
+  const reportIsAlreadyApproved = props.mode === 'EDIT' && props.report.approved
   const requiredFiles = useMemo(
     () =>
       props.mode === 'EDIT' ? props.report.order?.reportDocuments ?? [] : [],
@@ -137,7 +132,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
     return createFileInputs(reportFiles, requiredFiles)
   }, [requiredFiles, props])
 
-  const [name, setName] = useDebouncedState(
+  const [name, _] = useDebouncedState(
     props.mode === 'CREATE' ? '' : props.report.name
   )
 
@@ -170,8 +165,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
             type: 'NEW',
             file: null,
             userDescription: '',
-            documentType: fi.documentType,
-            documentDescription: fi.documentDescription
+            documentType: fi.documentType
           }
         }
         return fi
@@ -216,22 +210,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
 
   return (
     <FlexCol>
-      <GroupOfInputRows>
-        <RowOfInputs>
-          <LabeledInput $cols={4}>
-            <Label>Selvityksen nimi</Label>
-            <InputField onChange={setName} value={name} />
-          </LabeledInput>
-        </RowOfInputs>
-        <RowOfInputs>
-          <LabeledInput $cols={4}>
-            <Label>Selvityksen kuvaus</Label>
-            <TextArea onChange={setDescription} value={description} rows={2} />
-          </LabeledInput>
-        </RowOfInputs>
-      </GroupOfInputRows>
-      <VerticalGap $size="XL" />
-      <H2>Tiedostot</H2>
+      <H3>Selvitettävät asiat</H3>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
         {fileInputs.map((fInput) => {
@@ -254,7 +233,11 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
               return (
                 <ExistingFile
                   key={fInput.documentType}
-                  data={{ type: 'REPORT', file: fInput.details }}
+                  data={{
+                    type: 'REPORT',
+                    file: fInput.details,
+                    readonly: reportIsAlreadyApproved
+                  }}
                   onRemove={(id) => {
                     removeCreatedFileInput(id)
                   }}
@@ -263,7 +246,17 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
           }
         })}
       </GroupOfInputRows>
-      <VerticalGap $size="XL" />
+      <VerticalGap $size="m" />
+      <LabeledInput $cols={4}>
+        <Label>Yhteenveto</Label>
+        <TextArea
+          onChange={setDescription}
+          value={description}
+          rows={2}
+          readonly={reportIsAlreadyApproved}
+        />
+      </LabeledInput>
+      <VerticalGap $size="m" />
     </FlexCol>
   )
 })

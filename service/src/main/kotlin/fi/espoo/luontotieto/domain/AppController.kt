@@ -239,14 +239,24 @@ class AppController {
         return jdbi.inTransactionUnchecked { tx -> tx.getOrder(id, user) }
     }
 
+    data class CreateOrderResponse(
+        val orderId: UUID,
+        val reportId: UUID,
+    )
+
     @PostMapping("/orders")
     @ResponseStatus(HttpStatus.CREATED)
     fun createOrderFromScratch(
         user: AuthenticatedUser,
         @RequestBody body: OrderInput
-    ): UUID {
+    ): CreateOrderResponse {
         return jdbi
-            .inTransactionUnchecked { tx -> tx.insertOrder(data = body, user = user) }
+            .inTransactionUnchecked { tx ->
+
+                val orderId = tx.insertOrder(data = body, user = user)
+                val report = tx.insertReport(Report.Companion.ReportInput(body.name, body.description), user, orderId)
+                CreateOrderResponse(orderId, report.id)
+            }
             .also { logger.audit(user, AuditEvent.CREATE_ORDER, mapOf("id" to "$it")) }
     }
 

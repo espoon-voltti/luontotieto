@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Button } from 'shared/buttons/Button'
 
 import { FlexRight, PageContainer, VerticalGap } from '../../shared/layout'
@@ -20,17 +20,22 @@ import {
   apiPutOrder
 } from 'api/order-api'
 import { Footer } from 'shared/Footer'
+import { BackNavigation } from 'shared/buttons/BackNavigation'
 
 interface CreateProps {
   mode: 'CREATE'
+  referer?: string
 }
 
 interface EditProps {
   mode: 'EDIT'
+  referer?: string
 }
 type Props = CreateProps | EditProps
 
 export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
+  const { state } = useLocation()
+
   const navigate = useNavigate()
   const { id } = useParams()
   if (!id && props.mode === 'EDIT') throw Error('Id not found in path')
@@ -54,7 +59,15 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   return (
     <>
       <PageContainer>
-        <VerticalGap $size="m" />
+        <BackNavigation
+          text={
+            order?.name
+              ? `Muokkaa tilausta: ${order?.name}`
+              : 'Uusi luontoselvitys'
+          }
+          destination={state?.referer ?? undefined}
+        />
+        <VerticalGap $size="s" />
         {props.mode == 'CREATE' && (
           <OrderForm
             mode="CREATE"
@@ -87,7 +100,9 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
 
               if (props.mode === 'CREATE') {
                 apiPostOrder(orderInput)
-                  .then((orderId) => navigate(`/luontotieto/tilaus/${orderId}`))
+                  .then((reportId) =>
+                    navigate(`/luontotieto/selvitys/${reportId}`)
+                  )
                   .catch(() => setSubmitting(false))
               } else {
                 apiPutOrder(id!, orderInput)

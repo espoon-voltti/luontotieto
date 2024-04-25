@@ -25,13 +25,13 @@ class OrderTests : FullApplicationTest() {
                 OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_PISTEET),
                 OrderReportDocument("Test description 2", DocumentType.LIITO_ORAVA_ALUEET)
             )
-        val createdOrderId =
+        val createdOrder =
             controller.createOrderFromScratch(
                 user = testUser,
                 body = OrderInput("Test order", "Test description", listOf("12345"), orderReportDocuments),
             )
 
-        val orderResponse = controller.getOrderById(testUser, createdOrderId)
+        val orderResponse = controller.getOrderById(testUser, createdOrder.orderId)
 
         assertNotNull(orderResponse)
         assertEquals("Test order", orderResponse.name)
@@ -53,15 +53,13 @@ class OrderTests : FullApplicationTest() {
             listOf(
                 OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_PISTEET),
             )
-        val createdOrderId =
+        val createdOrder =
             controller.createOrderFromScratch(
                 user = testUser,
                 body = OrderInput("Test order", "Test description", listOf("12345"), orderReportDocuments),
             )
 
-        val createdOrderReport = controller.createOrderReport(testUser, createdOrderId)
-
-        val orderReportResponse = controller.getReportById(testUser, createdOrderReport.id)
+        val orderReportResponse = controller.getReportById(testUser, createdOrder.reportId)
 
         assertNotNull(orderReportResponse)
         assertEquals("Test order", orderReportResponse.name)
@@ -100,7 +98,7 @@ class OrderTests : FullApplicationTest() {
 
     @Test
     fun `update existing order`() {
-        val orderId =
+        val createdOrder =
             controller.createOrderFromScratch(
                 user = testUser,
                 body =
@@ -117,7 +115,7 @@ class OrderTests : FullApplicationTest() {
         val updatedOrder =
             controller.updateOrder(
                 testUser,
-                orderId,
+                createdOrder.orderId,
                 OrderInput(
                     "New name",
                     "New description",

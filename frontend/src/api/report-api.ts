@@ -27,6 +27,8 @@ export function getDocumentTypeTitle<
       return 'Liito-orava alueet'
     case ReportFileDocumentType.LIITO_ORAVA_PISTEET:
       return 'Liito-orava pisteet'
+    case ReportFileDocumentType.LIITO_ORAVA_VIIVAT:
+      return 'Liito-orava viivat'
     case OrderFileDocumentType.ORDER_INFO:
       return 'Tilauksen esitiedot'
     case OrderFileDocumentType.ORDER_AREA:
@@ -38,12 +40,14 @@ export function getDocumentTypeTitle<
 
 export enum ReportFileDocumentType {
   LIITO_ORAVA_PISTEET = 'LIITO_ORAVA_PISTEET',
-  LIITO_ORAVA_ALUEET = 'LIITO_ORAVA_ALUEET'
+  LIITO_ORAVA_ALUEET = 'LIITO_ORAVA_ALUEET',
+  LIITO_ORAVA_VIIVAT = 'LIITO_ORAVA_VIIVAT'
 }
 
 export const reportFileDocumentTypes = [
   ReportFileDocumentType.LIITO_ORAVA_ALUEET,
-  ReportFileDocumentType.LIITO_ORAVA_PISTEET
+  ReportFileDocumentType.LIITO_ORAVA_PISTEET,
+  ReportFileDocumentType.LIITO_ORAVA_VIIVAT
 ]
 
 export interface ReportFileInput {

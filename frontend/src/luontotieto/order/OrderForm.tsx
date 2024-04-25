@@ -97,12 +97,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   const defaultReportDocuments = [
     {
       checked: false,
-      description: '',
       documentType: ReportFileDocumentType.LIITO_ORAVA_PISTEET
     },
     {
       checked: false,
-      description: '',
       documentType: ReportFileDocumentType.LIITO_ORAVA_ALUEET
     }
   ]
@@ -192,7 +190,6 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       reportDocuments: reportDocuments
         .filter((rd) => rd.checked)
         .map((rd) => ({
-          description: rd.description,
           documentType: rd.documentType
         })),
       filesToAdd: orderFiles.flatMap((e) =>
@@ -251,7 +248,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Tilauksen kaavanumero</Label>
+              <Label>Tilaukseen liittyvät maankäytön suunnitelmat</Label>
               <TagAutoComplete
                 suggestions={suggestions}
                 data={
@@ -265,8 +262,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
             </LabeledInput>
           </RowOfInputs>
         </GroupOfInputRows>
-        <VerticalGap $size="m" />
+        <VerticalGap $size="L" />
         <GroupOfInputRows>
+          <Label>Tilauksen liitteet</Label>
+
           {orderFiles.map((fInput) => {
             switch (fInput.type) {
               case 'NEW':
@@ -283,7 +282,11 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 return (
                   <ExistingFile
                     key={fInput.documentType}
-                    data={{ type: 'ORDER', file: fInput.orderFile }}
+                    data={{
+                      type: 'ORDER',
+                      file: fInput.orderFile,
+                      readonly: false
+                    }}
                     onRemove={(id) => {
                       removeCreatedFileInput(id)
                     }}
@@ -300,12 +303,19 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           <RowOfInputs>
             <LabeledInput $cols={8}>
               <Label>Kerättävät dokumentit</Label>
+              <VerticalGap $size="s" />
+
               {reportDocuments.map((rd) => (
-                <OrderReportDocumentInput
-                  key={rd.documentType}
-                  data={rd}
-                  onChange={updateReportDocuments}
-                />
+                <Checkbox
+                  label={getDocumentTypeTitle(rd.documentType)}
+                  checked={rd.checked}
+                  onChange={(checked) =>
+                    updateReportDocuments({
+                      checked,
+                      documentType: rd.documentType
+                    })
+                  }
+                ></Checkbox>
               ))}
             </LabeledInput>
           </RowOfInputs>
@@ -319,36 +329,3 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
 interface OrderCheckBoxComponentInput extends OrderReportDocumentInput {
   checked: boolean
 }
-
-interface OrderReportDocumentInputProps {
-  data: OrderCheckBoxComponentInput
-  onChange: (data: OrderCheckBoxComponentInput) => void
-}
-
-const OrderReportDocumentInput = React.memo(function OrderReportDocumentInput({
-  data,
-  onChange
-}: OrderReportDocumentInputProps) {
-  const [checked, setChecked] = useState(data.checked ?? false)
-  const [description, setDescription] = useDebouncedState(data.description)
-
-  useEffect(() => {
-    onChange({ checked, description, documentType: data.documentType })
-  }, [checked, description])
-
-  return (
-    <RowOfInputs>
-      <Checkbox
-        label={getDocumentTypeTitle(data.documentType)}
-        checked={checked}
-        onChange={setChecked}
-      ></Checkbox>
-      <InputField
-        onChange={(value) => {
-          setDescription(value)
-        }}
-        value={description}
-      />
-    </RowOfInputs>
-  )
-})
