@@ -18,8 +18,8 @@ import kotlin.test.assertNotNull
 
 class OrderTests : FullApplicationTest() {
     @Autowired lateinit var controller: OrderController
-    @Autowired lateinit var reportController: ReportController
 
+    @Autowired lateinit var reportController: ReportController
 
     @Test
     fun `create order with all data and fetch`() {

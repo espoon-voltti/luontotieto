@@ -14,5 +14,4 @@ fun checkFileContentType(file: InputStream): String {
     return detectedContentType
 }
 
-fun getAndCheckFileName(file: MultipartFile) =
-    (file.originalFilename?.takeIf { it.isNotBlank() } ?: throw BadRequest("Filename missing"))
+fun getAndCheckFileName(file: MultipartFile) = (file.originalFilename?.takeIf { it.isNotBlank() } ?: throw BadRequest("Filename missing"))

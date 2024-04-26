@@ -157,7 +157,6 @@ fun Handle.getReports(user: AuthenticatedUser) =
         .mapTo<Report>()
         .list() ?: emptyList()
 
-
 fun getTableDefinitionByDocumentType(documentType: DocumentType) =
     when (documentType) {
         DocumentType.LIITO_ORAVA_PISTEET -> TableDefinition.LiitoOravaPisteet

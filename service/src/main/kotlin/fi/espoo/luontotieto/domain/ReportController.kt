@@ -61,6 +61,7 @@ class ReportController {
     lateinit var bucketEnv: BucketEnv
 
     private val logger = KotlinLogging.logger {}
+
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     fun createReportFromScratch(

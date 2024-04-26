@@ -8,26 +8,14 @@ import fi.espoo.luontotieto.s3.Document
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
 import fi.espoo.luontotieto.s3.getAndCheckFileName
-import fi.espoo.paikkatieto.domain.TableDefinition
-import fi.espoo.paikkatieto.domain.getEnumRange
-import fi.espoo.paikkatieto.domain.insertLiitoOravaAlueet
-import fi.espoo.paikkatieto.domain.insertLiitoOravaPisteet
-import fi.espoo.paikkatieto.domain.insertLiitoOravaYhteysviivat
-import fi.espoo.paikkatieto.reader.GpkgReader
-import fi.espoo.paikkatieto.reader.GpkgValidationError
-import fi.espoo.paikkatieto.writer.GpkgWriter
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.core.io.Resource
-import org.springframework.core.io.UrlResource
 import org.springframework.http.ContentDisposition
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -40,9 +28,7 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.io.File
 import java.net.URL
-import java.nio.file.Files
 import java.util.UUID
 
 @RestController
@@ -68,8 +54,6 @@ class OrderController {
     fun getPlanNumbers(user: AuthenticatedUser): List<String> {
         return jdbi.inTransactionUnchecked { tx -> tx.getPlanNumbers() }
     }
-
-
 
     @GetMapping()
     fun getOrders(user: AuthenticatedUser): List<Order> {
@@ -216,5 +200,4 @@ class OrderController {
             documentClient.presignedGetUrl(dataBucket, "$orderId/$fileId", contentDisposition)
         return fileUrl
     }
-
 }
