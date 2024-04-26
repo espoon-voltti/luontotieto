@@ -26,6 +26,7 @@ import { getDocumentTypeTitle } from 'api/report-api'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen } from '@fortawesome/free-solid-svg-icons'
 import { useNavigate } from 'react-router-dom'
+import { LinkFileDownload } from 'shared/buttons/LinkFileDownload'
 
 type Props = { order: Order; reportId: string }
 
@@ -34,9 +35,6 @@ const StyledLi = styled.li`
     color: #0050bb;
     margin-right: 0.5ch;
   }
-`
-const StyledLink = styled.a`
-  font-weight: bold;
 `
 
 const StyledIcon = styled(FontAwesomeIcon)`
@@ -103,9 +101,11 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
               {orderFiles !== null &&
                 orderFiles.map((rf) => (
                   <StyledLi key={rf.id}>
-                    <StyledLink
-                      onClick={() => handleOrderFileClick(rf.id)}
-                    >{`${rf.fileName}`}</StyledLink>
+                    <LinkFileDownload
+                      fileName={rf.fileName}
+                      fileId={rf.id}
+                      onClick={(fileId) => handleOrderFileClick(fileId)}
+                    />
                     {`, ${getDocumentTypeTitle(rf.documentType)}`}
                   </StyledLi>
                 ))}

@@ -2325,6 +2325,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/file-saver@npm:^2.0.7":
+  version: 2.0.7
+  resolution: "@types/file-saver@npm:2.0.7"
+  checksum: c3d1cd80eab1214767922cabac97681f3fb688e82b74890450d70deaca49537949bbc96d80d363d91e8f0a4752c7164909cc8902d9721c5c4809baafc42a3801
+  languageName: node
+  linkType: hard
+
 "@types/history@npm:^4.7.11":
   version: 4.7.11
   resolution: "@types/history@npm:4.7.11"
@@ -4518,6 +4525,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"file-saver@npm:2.0.5":
+  version: 2.0.5
+  resolution: "file-saver@npm:2.0.5"
+  checksum: fbba443d9b682fec0be6676c048a7ac688b9bd33b105c02e8e1a1cb3e354ed441198dc1f15dcbc137fa044bea73f8a7549f2617e3a952fa7d96390356d54a7c3
+  languageName: node
+  linkType: hard
+
 "fill-range@npm:^7.0.1":
   version: 7.0.1
   resolution: "fill-range@npm:7.0.1"
@@ -5595,6 +5609,7 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": "npm:6.5.0"
     "@fortawesome/free-solid-svg-icons": "npm:6.5.0"
     "@fortawesome/react-fontawesome": "npm:0.2.0"
+    "@types/file-saver": "npm:^2.0.7"
     "@types/lodash": "npm:^4.17.0"
     "@types/node": "npm:^20.12.2"
     "@types/react": "npm:^18.2.36"
@@ -5624,6 +5639,7 @@ __metadata:
     eslint-plugin-react-hooks: "npm:^4.6.0"
     express: "npm:^4.19.2"
     express-http-proxy: "npm:^2.0.0"
+    file-saver: "npm:2.0.5"
     lodash: "npm:^4.17.21"
     polished: "npm:^4.3.1"
     postcss: "npm:^8.4.31"

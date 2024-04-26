@@ -17,7 +17,7 @@ import {
 } from '../../shared/layout'
 import { H3, Label } from '../../shared/typography'
 import { Checkbox } from 'shared/form/Checkbox'
-import { FileInput, FileInputData } from 'shared/FileInput'
+import { FileInput, FileInputData } from 'shared/form/File/FileInput'
 import {
   Order,
   OrderFile,
@@ -26,7 +26,7 @@ import {
   OrderReportDocumentInput
 } from 'api/order-api'
 import { ReportFileDocumentType, getDocumentTypeTitle } from 'api/report-api'
-import { ExistingFile } from 'shared/form/ExistingFile'
+import { ExistingFile } from 'shared/form/File/ExistingFile'
 import { TagAutoComplete } from 'shared/form/TagAutoComplete/TagAutoComplete'
 import { Tag } from 'react-tag-autocomplete'
 
@@ -285,7 +285,8 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                     data={{
                       type: 'ORDER',
                       file: fInput.orderFile,
-                      readonly: false
+                      readonly: false,
+                      documentType: fInput.documentType
                     }}
                     onRemove={(id) => {
                       removeCreatedFileInput(id)

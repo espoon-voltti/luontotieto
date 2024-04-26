@@ -11,7 +11,7 @@ import {
   reportFileDocumentTypes
 } from 'api/report-api'
 import React, { useEffect, useMemo, useState } from 'react'
-import { FileInput, FileInputData } from 'shared/FileInput'
+import { FileInput, FileInputData } from 'shared/form/File/FileInput'
 import { TextArea } from 'shared/form/TextArea'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
@@ -23,7 +23,7 @@ import {
 } from '../../shared/layout'
 import { H3, Label } from '../../shared/typography'
 
-import { ExistingFile } from 'shared/form/ExistingFile'
+import { ExistingFile } from 'shared/form/File/ExistingFile'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -236,7 +236,8 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
                   data={{
                     type: 'REPORT',
                     file: fInput.details,
-                    readonly: reportIsAlreadyApproved
+                    readonly: reportIsAlreadyApproved,
+                    documentType: fInput.documentType
                   }}
                   onRemove={(id) => {
                     removeCreatedFileInput(id)
