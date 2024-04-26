@@ -2,20 +2,45 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { OrderFile, apiGetOrderFileUrl } from 'api/order-api'
+import {
+  OrderFile,
+  OrderFileDocumentType,
+  apiGetOrderFileUrl
+} from 'api/order-api'
 import React from 'react'
-import { FlexRowWithGaps, FlexCol, LabeledInput } from 'shared/layout'
+import {
+  FlexRowWithGaps,
+  FlexCol,
+  LabeledInput,
+  VerticalGap,
+  FlexRow
+} from 'shared/layout'
 import FileDownloadButton from './FileDownloadButton'
 import { faX } from '@fortawesome/free-solid-svg-icons'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { Label } from 'shared/typography'
-import { InputField } from './InputField'
-import { ReportFileDetails, apiGetReportFileUrl } from 'api/report-api'
+import { InputField } from '../InputField'
+import {
+  ReportFileDetails,
+  ReportFileDocumentType,
+  apiGetReportFileUrl
+} from 'api/report-api'
+import { FileTitle } from './FileTitle'
 
 interface Props {
   data:
-    | { type: 'ORDER'; file: OrderFile; readonly: boolean }
-    | { type: 'REPORT'; file: ReportFileDetails; readonly: boolean }
+    | {
+        type: 'ORDER'
+        file: OrderFile
+        readonly: boolean
+        documentType: OrderFileDocumentType
+      }
+    | {
+        type: 'REPORT'
+        file: ReportFileDetails
+        readonly: boolean
+        documentType: ReportFileDocumentType
+      }
   onRemove: (id: string) => void
 }
 
@@ -35,6 +60,13 @@ export const ExistingFile = React.memo(function ExistingFile(props: Props) {
   return (
     <FlexRowWithGaps>
       <FlexCol>
+        <FlexRow>
+          <FileTitle
+            documentType={props.data.documentType}
+            required={true}
+          ></FileTitle>
+        </FlexRow>
+        <VerticalGap $size="s" />
         <FileDownloadButton file={props.data.file} onClick={handleClick} />
       </FlexCol>
       <FlexCol style={{ marginRight: 60 }}>

@@ -24,6 +24,7 @@ const Wrapper = styled.div<{ $width: InputWidth | undefined }>`
 interface StyledInputProps {
   $align?: 'left' | 'right'
   $icon?: boolean
+  $backgroundColor?: string
 }
 
 export const StyledInput = styled.input<StyledInputProps>`
@@ -35,7 +36,7 @@ export const StyledInput = styled.input<StyledInputProps>`
   border-radius: 0;
   outline: none;
   text-align: ${(p) => p.$align ?? 'left'};
-  background-color: ${colors.grayscale.g0};
+  background-color: ${(p) => p.$backgroundColor ?? colors.grayscale.g0};
   font-size: 1rem;
   color: ${colors.grayscale.g100};
   padding: 6px 10px;
@@ -162,6 +163,7 @@ export interface InputProps extends BaseProps {
   placeholder?: string
   info?: InputInfo
   align?: 'left' | 'right'
+  backgroundColor?: string
   icon?: IconProp
   inputMode?: HTMLAttributes<HTMLInputElement>['inputMode']
   onKeyDown?: HTMLAttributes<HTMLInputElement>['onKeyDown']
@@ -212,6 +214,7 @@ export const InputField = React.memo(function InputField({
   info,
   inputMode,
   align,
+  backgroundColor,
   autoComplete,
   'data-qa': dataQa,
   className,
@@ -264,6 +267,7 @@ export const InputField = React.memo(function InputField({
         disabled={readonly}
         $icon={showIcon}
         inputMode={inputMode}
+        $backgroundColor={backgroundColor}
         $align={align}
         className={classNames(className, infoStatus)}
         data-qa={dataQa}
@@ -281,7 +285,7 @@ export const InputField = React.memo(function InputField({
       />
       {showIcon && (
         <IconContainer $clickable={clearable}>
-          {clearable ? (
+          {clearable && value ? (
             <StyledIconButton
               icon={faTimes}
               onClick={() => onChange && onChange('')}

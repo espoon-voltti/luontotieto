@@ -4,6 +4,7 @@
 
 import { apiClient } from 'api-client'
 import { JsonOf } from 'shared/api-utils'
+import FileSaver from 'file-saver'
 
 import { Order, OrderFileDocumentType } from './order-api'
 
@@ -156,3 +157,16 @@ export const apiGetReportFileUrl = (
   apiClient
     .get<string>(`/reports/${reportId}/files/${fileId}`)
     .then((res) => res.data)
+
+export const apiGetReportDocumentTypeFileTemplate = (
+  documentType: ReportFileDocumentType
+): Promise<unknown> =>
+  apiClient
+    .get<Blob>(`/template/${documentType}.gpkg`, { responseType: 'blob' })
+    .then((res) => {
+      const fileName = res.headers['content-disposition']
+        .split('filename=')[1]
+        .replace(/"/g, '')
+
+      FileSaver.saveAs(res.data, fileName)
+    })

@@ -8,8 +8,8 @@ import React, { HTMLAttributes, RefObject, useState } from 'react'
 import { BaseProps, InputWidth, inputWidthCss } from 'shared/theme'
 import styled from 'styled-components'
 
-import { InputFieldUnderRow, InputInfo, StyledInput } from './InputField'
-import { UnderRowStatusIcon } from './StatusIcon'
+import { InputFieldUnderRow, InputInfo, StyledInput } from '../InputField'
+import { UnderRowStatusIcon } from '../StatusIcon'
 
 export interface FileInputProps extends BaseProps {
   onChange?: (files: FileList | null) => void

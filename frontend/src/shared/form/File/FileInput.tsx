@@ -6,11 +6,12 @@ import React, { useEffect, useState } from 'react'
 import { InputField } from 'shared/form/InputField'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
-import { FlexRow, LabeledInput, RowOfInputs } from '../shared/layout'
-import { Label } from '../shared/typography'
-import { FileInputField } from 'shared/form/FileInputField'
-import { ReportFileDocumentType, getDocumentTypeTitle } from 'api/report-api'
+import { FlexRow, LabeledInput, RowOfInputs } from '../../../shared/layout'
+import { Label } from '../../typography'
+import { FileInputField } from './FileInputField'
+import { ReportFileDocumentType } from 'api/report-api'
 import { OrderFileDocumentType } from 'api/order-api'
+import { FileTitle } from './FileTitle'
 
 export interface ValidFileInputData<T> {
   description: string
@@ -45,11 +46,7 @@ export const FileInput = <
   return (
     <RowOfInputs style={{ height: '100px' }}>
       <LabeledInput $cols={5}>
-        <Label>
-          {`${getDocumentTypeTitle<
-            ReportFileDocumentType | OrderFileDocumentType
-          >(data.documentType)} *`}
-        </Label>
+        <FileTitle documentType={data.documentType} required={true}></FileTitle>
         <FileInputField
           width="L"
           onChange={(fileList) => {

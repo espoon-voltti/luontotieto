@@ -19,6 +19,8 @@ import { InputField } from 'shared/form/InputField'
 import { SortableTh, Th } from 'shared/Table'
 import { orderBy } from 'lodash'
 import { Select } from 'shared/form/Select'
+import { useDebouncedState } from 'shared/useDebouncedState'
+import { faSearch } from '@fortawesome/free-solid-svg-icons'
 
 export type ReportSortColumn = 'name' | 'approved'
 export type SortDirection = 'ASC' | 'DESC'
@@ -31,7 +33,10 @@ export const ReportList = React.memo(function ReportList() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('ASC')
   const [filterByReportAssignee, setFilterByReportAssignee] = useState<
     string | null
-  >()
+  >(null)
+  const [filterBySearchQuery, setFilterBySearchQuery] = useDebouncedState<
+    string | null
+  >(null)
 
   const isSorted = (column: ReportSortColumn) =>
     sortBy === column ? sortDirection : undefined
@@ -47,8 +52,12 @@ export const ReportList = React.memo(function ReportList() {
 
   const orderReports = useCallback(
     (reports: ReportDetails[]) => {
-      //TODO: filter when we add the assignee to model
-      const filtered = filterByReportAssignee ? reports : reports
+      const filtered = filterReports(
+        reports,
+        filterBySearchQuery,
+        filterByReportAssignee
+      )
+
       return sortBy === null
         ? filtered
         : orderBy(
@@ -57,7 +66,7 @@ export const ReportList = React.memo(function ReportList() {
             [sortDirection === 'ASC' ? 'asc' : 'desc']
           )
     },
-    [sortBy, sortDirection, filterByReportAssignee]
+    [sortBy, sortDirection, filterByReportAssignee, filterBySearchQuery]
   )
 
   useEffect(() => {
@@ -70,7 +79,14 @@ export const ReportList = React.memo(function ReportList() {
         <VerticalGap $size="m" />
         <FlexLeftRight>
           <FlexRowWithGaps $gapSize="s">
-            <InputField onChange={() => console.log('value')} value={'Hae'} />
+            <InputField
+              onChange={setFilterBySearchQuery}
+              value={filterBySearchQuery ?? ''}
+              placeholder="Haku"
+              icon={faSearch}
+              clearable={true}
+              backgroundColor="#F7F7F7"
+            />
           </FlexRowWithGaps>
 
           <AddButton
@@ -135,3 +151,25 @@ export const ReportList = React.memo(function ReportList() {
     </PageContainer>
   )
 })
+
+const filterReports = (
+  reports: ReportDetails[],
+  searchQuery: string | null,
+  assignee: string | null
+) => {
+  const searchQueryToLower = searchQuery ? searchQuery.toLowerCase() : null
+
+  //TODO: we do not yet support assignee at the report data schema level so mock the filtering to return true
+  return reports.filter((report) => {
+    if (searchQueryToLower === null && assignee === null) {
+      return true
+    }
+    if (searchQueryToLower) {
+      return (
+        report.name.toLowerCase().includes(searchQueryToLower) ||
+        report.description.toLowerCase().includes(searchQueryToLower)
+      )
+    }
+    return true
+  })
+}
