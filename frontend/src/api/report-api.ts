@@ -162,7 +162,9 @@ export const apiGetReportDocumentTypeFileTemplate = (
   documentType: ReportFileDocumentType
 ): Promise<unknown> =>
   apiClient
-    .get<Blob>(`/template/${documentType}.gpkg`, { responseType: 'blob' })
+    .get<Blob>(`/reports/template/${documentType}.gpkg`, {
+      responseType: 'blob'
+    })
     .then((res) => {
       const fileName = res.headers['content-disposition']
         .split('filename=')[1]

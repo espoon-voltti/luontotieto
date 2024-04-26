@@ -4,9 +4,9 @@
 
 package fi.espoo.luontotieto
 
-import fi.espoo.luontotieto.domain.AppController
 import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.Report
+import fi.espoo.luontotieto.domain.ReportController
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.mock.web.MockMultipartFile
@@ -19,7 +19,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ReportFileTests : FullApplicationTest() {
-    @Autowired lateinit var controller: AppController
+    @Autowired lateinit var controller: ReportController
 
     @Test
     fun `create report files and fetch and delete`() {

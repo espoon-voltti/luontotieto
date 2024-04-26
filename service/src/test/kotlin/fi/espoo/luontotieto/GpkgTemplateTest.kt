@@ -5,8 +5,8 @@
 package fi.espoo.luontotieto
 
 import fi.espoo.luontotieto.common.databaseValue
-import fi.espoo.luontotieto.domain.AppController
 import fi.espoo.luontotieto.domain.DocumentType
+import fi.espoo.luontotieto.domain.ReportController
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import kotlin.test.Test
@@ -15,7 +15,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class GpkgTemplateTest : FullApplicationTest() {
-    @Autowired lateinit var controller: AppController
+    @Autowired lateinit var controller: ReportController
 
     @Test
     fun `download template file`() {

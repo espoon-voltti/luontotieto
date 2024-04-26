@@ -5,10 +5,11 @@
 package fi.espoo.luontotieto
 
 import fi.espoo.luontotieto.config.AuthenticatedUser
-import fi.espoo.luontotieto.domain.AppController
 import fi.espoo.luontotieto.domain.DocumentType
+import fi.espoo.luontotieto.domain.OrderController
 import fi.espoo.luontotieto.domain.OrderInput
 import fi.espoo.luontotieto.domain.OrderReportDocument
+import fi.espoo.luontotieto.domain.ReportController
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 import kotlin.test.Test
@@ -16,7 +17,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class OrderTests : FullApplicationTest() {
-    @Autowired lateinit var controller: AppController
+    @Autowired lateinit var controller: OrderController
+    @Autowired lateinit var reportController: ReportController
+
 
     @Test
     fun `create order with all data and fetch`() {
@@ -59,7 +62,7 @@ class OrderTests : FullApplicationTest() {
                 body = OrderInput("Test order", "Test description", listOf("12345"), orderReportDocuments),
             )
 
-        val orderReportResponse = controller.getReportById(testUser, createdOrder.reportId)
+        val orderReportResponse = reportController.getReportById(testUser, createdOrder.reportId)
 
         assertNotNull(orderReportResponse)
         assertEquals("Test order", orderReportResponse.name)
@@ -92,7 +95,7 @@ class OrderTests : FullApplicationTest() {
             body = OrderInput("Test order", "Test description", listOf("12345"), listOf()),
         )
 
-        val ordersResponse = controller.getReports(AuthenticatedUser(UUID.randomUUID()))
+        val ordersResponse = reportController.getReports(AuthenticatedUser(UUID.randomUUID()))
         assertEquals(0, ordersResponse.size)
     }
 
