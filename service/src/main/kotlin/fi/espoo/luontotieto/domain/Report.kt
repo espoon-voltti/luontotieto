@@ -6,6 +6,7 @@ package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuthenticatedUser
+import fi.espoo.paikkatieto.domain.TableDefinition
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
@@ -155,3 +156,11 @@ fun Handle.getReports(user: AuthenticatedUser) =
         .bind("userId", user.id)
         .mapTo<Report>()
         .list() ?: emptyList()
+
+fun getTableDefinitionByDocumentType(documentType: DocumentType) =
+    when (documentType) {
+        DocumentType.LIITO_ORAVA_PISTEET -> TableDefinition.LiitoOravaPisteet
+        DocumentType.LIITO_ORAVA_ALUEET -> TableDefinition.LiitoOravaAlueet
+        DocumentType.LIITO_ORAVA_VIIVAT -> TableDefinition.LiitoOravaYhteysviivat
+        else -> null
+    }

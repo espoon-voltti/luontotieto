@@ -5,8 +5,8 @@
 package fi.espoo.luontotieto
 
 import fi.espoo.luontotieto.config.AuthenticatedUser
-import fi.espoo.luontotieto.domain.AppController
 import fi.espoo.luontotieto.domain.Report
+import fi.espoo.luontotieto.domain.ReportController
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 import kotlin.test.Test
@@ -15,7 +15,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 
 class ReportTests : FullApplicationTest() {
-    @Autowired lateinit var controller: AppController
+    @Autowired lateinit var controller: ReportController
 
     @Test
     fun `create report with all data and fetch`() {

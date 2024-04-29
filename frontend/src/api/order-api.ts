@@ -147,4 +147,4 @@ export const apiGetOrderFileUrl = (
     .then((res) => res.data)
 
 export const apiGetPlanNumbers = (): Promise<string[]> =>
-  apiClient.get<string[]>(`/plan-numbers`).then((res) => res.data)
+  apiClient.get<string[]>(`/orders/plan-numbers`).then((res) => res.data)

@@ -4,8 +4,8 @@
 
 package fi.espoo.luontotieto
 
-import fi.espoo.luontotieto.domain.AppController
 import fi.espoo.luontotieto.domain.DocumentType
+import fi.espoo.luontotieto.domain.OrderController
 import fi.espoo.luontotieto.domain.OrderDocumentType
 import fi.espoo.luontotieto.domain.OrderInput
 import fi.espoo.luontotieto.domain.OrderReportDocument
@@ -16,7 +16,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class OrderFileTests : FullApplicationTest() {
-    @Autowired lateinit var controller: AppController
+    @Autowired lateinit var controller: OrderController
 
     @Test
     fun `create order files and fetch and delete`() {
