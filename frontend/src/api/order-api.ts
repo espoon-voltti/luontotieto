@@ -80,7 +80,12 @@ export const apiPutOrder = async (
   orderInput: OrderFormInput
 ): Promise<Order> => {
   const body: JsonOf<OrderInput> = {
-    ...orderInput
+    ...orderInput,
+    //TODO: The description is to be removed (but for the moment a bit hesitant to remove it, lets clean it up later)
+    reportDocuments: orderInput.reportDocuments.map((rd) => ({
+      ...rd,
+      description: ''
+    }))
   }
 
   const order = await apiClient

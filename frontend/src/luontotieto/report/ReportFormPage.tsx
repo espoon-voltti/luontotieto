@@ -75,12 +75,15 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
       void apiGetReportFiles(id).then(setReportFiles)
     }
   }, [props, id])
+
   const title =
     props.mode === 'CREATE'
       ? 'Uusi luontoselvitys'
-      : report?.approved
-        ? `${report?.name} (Hyväksytty)`
-        : report?.name ?? ''
+      : report?.order
+        ? report.order.name
+        : report?.approved
+          ? `${report?.name} (Hyväksytty)`
+          : report?.name ?? ''
 
   return (
     <>
