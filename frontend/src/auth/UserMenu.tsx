@@ -5,7 +5,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import classNames from 'classnames'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 
 import { logoutUrl } from './UserHeader'
@@ -23,8 +23,9 @@ const dropDownButtonStyles = css`
   background: transparent;
   cursor: pointer;
   font-family: Open Sans;
-  font-size: 1.125rem;
   line-height: 2rem;
+  font-size: 1.125rem;
+  font-weight: 600;
   color: ${colors.main.m1};
 
   &:hover {
@@ -49,6 +50,11 @@ export const DropDownButton = styled.button`
   ${dropDownButtonStyles}
 `
 
+export const DropDownItemButton = styled(DropDownButton)`
+  font-weight: 400;
+  font-size: 1rem;
+`
+
 export const DropDownLink = styled(NavLink)<{ $alignRight?: boolean }>`
   ${dropDownButtonStyles}
   ${(p) => p.$alignRight && 'justify-content: flex-end;'}
@@ -63,7 +69,6 @@ export const UserMenu = React.memo(function LanguageMenu({
 }: {
   userName: string
 }) {
-  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const toggleOpen = useCallback(() => setOpen((state) => !state), [setOpen])
   const dropDownContainerRef = useCloseOnOutsideClick<HTMLDivElement>(() =>
@@ -90,33 +95,31 @@ export const UserMenu = React.memo(function LanguageMenu({
       </DropDownButton>
       {open ? (
         <DropDown $align="right">
-          <DropDownButton
+          <DropDownItemButton
             ref={firstButtonRef}
             key={'user-management'}
             className={classNames({ active: true })}
             onClick={() => {
-              navigate('/')
+              //TODO: Add navigation once we have käyttäjänhallinta
               setOpen(false)
             }}
-            data-qa={`user-management}`}
             role="menuitemradio"
             aria-checked={true}
           >
             Käyttäjänhallinta
-          </DropDownButton>
-          <DropDownButton
+          </DropDownItemButton>
+          <DropDownItemButton
             ref={firstButtonRef}
             key={'logout'}
             className={classNames({ active: true })}
             onClick={() => {
               setOpen(false)
             }}
-            data-qa={``}
             role="menuitemradio"
             aria-checked={true}
           >
             <a href={logoutUrl}>Kirjaudu ulos</a>
-          </DropDownButton>
+          </DropDownItemButton>
         </DropDown>
       ) : null}
     </DropDownContainer>
@@ -145,6 +148,7 @@ export const DropDown = styled.ul<{ $align: 'left' | 'right' }>`
   min-width: 240px;
   max-width: 600px;
   width: max-content;
+  padding: 8px;
   ${({ $align }) =>
     $align === 'left'
       ? css`
