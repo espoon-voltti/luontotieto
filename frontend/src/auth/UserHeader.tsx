@@ -7,6 +7,7 @@ import React, { useContext } from 'react'
 import { FlexRowWithGaps } from '../shared/layout'
 
 import { UserContext } from './UserContext'
+import { UserMenu } from './UserMenu'
 
 export const logoutUrl = `/api/auth/saml/logout?RelayState=/kirjaudu`
 
@@ -17,10 +18,7 @@ export const UserHeader = React.memo(function UserHeader() {
 
   return (
     <FlexRowWithGaps>
-      <span data-qa="logged-in-user">
-        {user.firstName} {user.lastName}
-      </span>
-      <a href={logoutUrl}>Kirjaudu ulos</a>
+      <UserMenu userName={`${user.firstName} ${user.lastName}`}></UserMenu>
     </FlexRowWithGaps>
   )
 })

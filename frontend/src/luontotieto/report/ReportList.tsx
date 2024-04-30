@@ -14,15 +14,20 @@ import {
   Table,
   VerticalGap
 } from '../../shared/layout'
-import { ReportDetails, apiGetReports } from 'api/report-api'
+import {
+  ReportDetails,
+  apiGetReports,
+  getDocumentTypeTitle
+} from 'api/report-api'
 import { InputField } from 'shared/form/InputField'
 import { SortableTh, Th } from 'shared/Table'
 import { orderBy } from 'lodash'
 import { Select } from 'shared/form/Select'
 import { useDebouncedState } from 'shared/useDebouncedState'
 import { faSearch } from '@fortawesome/free-solid-svg-icons'
+import { formatDateTime } from 'shared/dates'
 
-export type ReportSortColumn = 'name' | 'approved'
+export type ReportSortColumn = 'updated' | 'name' | 'approved'
 export type SortDirection = 'ASC' | 'DESC'
 
 export const ReportList = React.memo(function ReportList() {
@@ -102,6 +107,12 @@ export const ReportList = React.memo(function ReportList() {
           <thead>
             <tr>
               <SortableTh
+                sorted={isSorted('updated')}
+                onClick={toggleSort('updated')}
+              >
+                Viimeksi päivitetty
+              </SortableTh>
+              <SortableTh
                 sorted={isSorted('approved')}
                 onClick={toggleSort('approved')}
               >
@@ -113,8 +124,8 @@ export const ReportList = React.memo(function ReportList() {
               >
                 TILAUKSEN NIMI
               </SortableTh>
-              <Th>TILAUKSEN KAAVANUMERO</Th>
-              <Th style={{ width: '160px' }}>YHTEENVETO</Th>
+              <Th style={{ width: '300px' }}>TILAUKSEN KAAVANUMERO</Th>
+              <Th style={{ width: '160px' }}>Luontotyypit</Th>
               <Th style={{ width: '80px' }}>
                 SELVITYKSEN TEKJÄ
                 <Select
@@ -128,6 +139,8 @@ export const ReportList = React.memo(function ReportList() {
           <tbody>
             {orderReports(reports).map((report) => (
               <tr key={report.id}>
+                <td>{formatDateTime(report.updated)}</td>
+
                 <td>{report.approved ? 'Hyväksytty' : 'Lähetetty'}</td>
                 <td>
                   <Link to={`/luontotieto/selvitys/${report.id}/muokkaa`}>
@@ -136,7 +149,11 @@ export const ReportList = React.memo(function ReportList() {
                 </td>
                 <td>{report.order?.planNumber?.toString() ?? '-'}</td>
 
-                <td>{report.description}</td>
+                <td>
+                  {report.order?.reportDocuments.map((r) =>
+                    getDocumentTypeTitle(r.documentType)
+                  )}
+                </td>
                 <td>Luontoselvityskonsultit Oy</td>
               </tr>
             ))}
@@ -158,7 +175,6 @@ const filterReports = (
   assignee: string | null
 ) => {
   const searchQueryToLower = searchQuery ? searchQuery.toLowerCase() : null
-
   //TODO: we do not yet support assignee at the report data schema level so mock the filtering to return true
   return reports.filter((report) => {
     if (searchQueryToLower === null && assignee === null) {
@@ -167,7 +183,12 @@ const filterReports = (
     if (searchQueryToLower) {
       return (
         report.name.toLowerCase().includes(searchQueryToLower) ||
-        report.description.toLowerCase().includes(searchQueryToLower)
+        report.description.toLowerCase().includes(searchQueryToLower) ||
+        (report.order &&
+          report.order.planNumber
+            ?.toString()
+            .toLowerCase()
+            .includes(searchQueryToLower))
       )
     }
     return true
