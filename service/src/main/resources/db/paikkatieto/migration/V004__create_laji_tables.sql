@@ -60,6 +60,7 @@ CREATE TABLE muut_huomioitavat_lajit_pisteet
     paikan_nimi           TEXT,
     havaintopaikan_kuvaus TEXT,
     koordinaatti_tarkkuus REAL                                           DEFAULT 0,
+    tarkkuus              luontotieto_mittaustyyppi             NOT NULL,
     yksilo_maara          INTEGER                               NOT NULL DEFAULT 0,
     yksikko               TEXT,                                           -- Onko havaittu 15 protoneemaa, yksilöä, itiö jne.
     lisatieto             TEXT,                                           -- Yhdistä havainnon_kuvaus ja lisätieto
@@ -94,17 +95,20 @@ COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.selvitys_id IS 'TODO';
 CREATE TABLE muut_huomioitavat_lajit_viivat
 (
     id                    INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    pvm                   DATE                       NOT NULL,                                           -- Oletus 1.1.yyyy
-    laji                  TEXT                       NOT NULL,
-    direktiivi            TEXT                       NOT NULL DEFAULT '-' CHECK ( direktiivi <> '' ),
+    pvm                   DATE                                  NOT NULL,
+    elioryhma             muut_huomioitavat_lajit_elioryhma     NOT NULL,
+    tieteellinen_nimi     TEXT                                  NOT NULL,
+    suomenkielinen_nimi   TEXT                                  NOT NULL,
+    "IUCN_luokka"         "muut_huomioitavat_lajit_IUCN_luokka" NOT NULL,                                           -- Oletus 1.1.yyyy
+    direktiivi            TEXT                                  NOT NULL DEFAULT '-' CHECK ( direktiivi <> '' ),
     havaintopaikan_kuvaus TEXT,
-    laji_luokitus         TEXT                       NOT NULL DEFAULT '-' CHECK ( laji_luokitus <> '' ), -- esim. lepakoille eurobat luokka
+    laji_luokitus         TEXT                                  NOT NULL DEFAULT '-' CHECK ( laji_luokitus <> '' ), -- esim. lepakoille eurobat luokka
     lisatieto             TEXT,                                                                          -- Yhdistä havainnon_kuvaus ja lisätieto
-    pituus                REAL                       NOT NULL GENERATED ALWAYS AS ( st_length(geom)) STORED,
-    viite                 TEXT                       NOT NULL,                                           -- vanha nimi: Tietolähteen selite. Jatkossa luontotietosovellus kirjoittaa tämän arvon
-    havaitsija            TEXT                       NOT NULL DEFAULT '-' CHECK ( havaitsija <> '' ),
-    selvitys_id           UUID                       NULL,
-    geom                  geometry(LINESTRING, 3879) NOT NULL
+    pituus                REAL                                  NOT NULL GENERATED ALWAYS AS ( st_length(geom)) STORED,
+    viite                 TEXT                                  NOT NULL,                                           -- vanha nimi: Tietolähteen selite. Jatkossa luontotietosovellus kirjoittaa tämän arvon
+    havaitsija            TEXT                                  NOT NULL DEFAULT '-' CHECK ( havaitsija <> '' ),
+    selvitys_id           UUID                                  NULL,
+    geom                  geometry(LINESTRING, 3879)            NOT NULL
 );
 
 
@@ -129,7 +133,10 @@ CREATE TABLE muut_huomioitavat_lajit_alueet
 (
     id                    INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     pvm                   DATE                    NOT NULL,                                                    -- Oletus 1.1.yyyy
-    laji                  TEXT                    NOT NULL,
+    elioryhma             muut_huomioitavat_lajit_elioryhma     NOT NULL,
+    tieteellinen_nimi     TEXT                                  NOT NULL,
+    suomenkielinen_nimi   TEXT                                  NOT NULL,
+    "IUCN_luokka"         "muut_huomioitavat_lajit_IUCN_luokka" NOT NULL,
     direktiivi            TEXT                    NOT NULL DEFAULT '-' CHECK ( direktiivi <> '' ),
     havaintopaikan_kuvaus TEXT,
     laji_luokitus         TEXT                    NOT NULL DEFAULT '-' CHECK ( laji_luokitus <> '' ),          -- esim. lepakoille eurobat luokka
@@ -158,3 +165,12 @@ COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.pinta_ala IS 'TODO';
 COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.viite IS 'TODO';
 COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.havaitsija IS 'TODO';
 COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.selvitys_id IS 'TODO';
+
+CREATE TYPE laatu AS ENUM (
+    'Hyvä',
+    'Heikko/Parannettava',
+    'Yhteystarve');
+
+ALTER TABLE liito_orava_yhteysviivat
+    ALTER COLUMN laatu TYPE laatu
+        USING laatu::laatu;
