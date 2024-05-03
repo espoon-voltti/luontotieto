@@ -73,20 +73,21 @@ CREATE TABLE muut_huomioitavat_lajit_pisteet
 CREATE INDEX muut_huomioitavat_lajit_pisteet_idx ON muut_huomioitavat_lajit_pisteet USING gist (geom);
 
 COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.id IS 'Kohteen yksilöllinen tunniste. Generoidaan automaattisesti.';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.pvm IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.elioryhma IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.tieteellinen_nimi IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.suomenkielinen_nimi IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet."IUCN_luokka" IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.direktiivi IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.paikan_nimi IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.havaintopaikan_kuvaus IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.koordinaatti_tarkkuus IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.yksilo_maara IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.yksikko IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.lisatieto IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.viite IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.havaitsija IS 'TODO';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.pvm IS 'Päivämäärä, jolloin havainto on tehty tai arvio siitä.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.elioryhma IS 'Eliöryhmä, johon laji kuuluu. Valitaan listasta sopiva.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.tieteellinen_nimi IS 'Lajin tieteellinen nimi';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.suomenkielinen_nimi IS 'Lajin suomenkielinen (yleiskielinen) nimi, jos sellainen on';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet."IUCN_luokka" IS 'Uhanalaisluokituksessa käytetään viimeisintä Suomen uhanalaisuusarviointia (Punainen kirja), joka noudattaa kansainvälisen luonnonsuojeluliiton IUCN:n ohjeita. Uhanalaisuustarkastelussa käytettävät IUCN-luokat, valitaan listasta sopiva: Suomesta hävinneet (RE), Äärimmäisen uhanalaiset (CR), Erittäin uhanalaiset (EN), Vaarantuneet (VU), Silmälläpidettävät (NT), Elinvoimaiset (LC), Puutteellisesti tunnetut (DD)';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.direktiivi IS 'Jos kyseinen laji on luontodirektiivin liitteen tai lintudirektiivin liitteen laji se saa sen direktiivin numeron (I, II, III, IV, V), mihin se kuuluu. Sama laji voi kuulua useampaan liitteeseen. Jos laji ei kuulu direktiivilajeihin, sen merkintä on aina "-".';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.paikan_nimi IS 'Paikan nimi, kun havainto ei ole tarkka';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.havaintopaikan_kuvaus IS 'Lyhyt, vapaamuotoinen kuvaus havaintopaikasta.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.koordinaatti_tarkkuus IS 'Koordinaattien arvioitu heitto metreissä';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.tarkkuus IS 'Tarkkuustasoksi laitetaan joko "GPS", "muu" tai "tarkkuusmitattu". "Tarkkuusmitattu" tarkoittaa sitä, että sijainti on varmistettu tarkkuusmittaamalla esim. takymetrillä. "Muu" tarkoittaa arviota paikasta ilman laitteistoa, esim. ilmakuvan perusteella merkittyä sijaintia.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.yksilo_maara IS 'Havaittujen yksilöiden määrä. Jos yksilömäärä ei ole tarkasti tiedossa, merkitään yksilömääräksi 0. Lisätietoja voi merkitä Lisätieto-kenttään.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.yksikko IS 'Havaittujen yksiköiden tyyppi, esim. yksilö, itiöemä, pariskunta, protoneema.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.lisatieto IS 'Mahdollisia lisätietoja havainnoista tai lyhyt kuvaus havainnosta. Mahdollisia tarkempia mainintoja esiintymän laadusta tai muu arvoperuste (hot spot, lisääntymiskolonia, ruokailualue tms.)';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.viite IS 'Viite; viittaus selvitykseen tai vastaavaan, jonka yhteydessä havainto on tehty. Selvityksen täydellinen nimi, ei päivämääriä.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.havaitsija IS 'Havainnon tekijän yrityksen virallinen nimi (Oy:t mukaan).';
 COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.selvitys_id IS 'TODO';
 
 -- ************************
@@ -115,15 +116,18 @@ CREATE TABLE muut_huomioitavat_lajit_viivat
 CREATE INDEX muut_huomioitavat_lajit_viivat_idx ON muut_huomioitavat_lajit_viivat USING gist (geom);
 
 COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.id IS 'Kohteen yksilöllinen tunniste. Generoidaan automaattisesti.';
-COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.pvm IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.laji IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.direktiivi IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.havaintopaikan_kuvaus IS 'TODO';
+COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.pvm IS 'Päivämäärä, jolloin havainto on tehty tai arvio siitä.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.elioryhma IS 'Eliöryhmä, johon laji kuuluu. Valitaan listasta sopiva.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.tieteellinen_nimi IS 'Lajin tieteellinen nimi';
+COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.suomenkielinen_nimi IS 'Lajin suomenkielinen (yleiskielinen) nimi, jos sellainen on';
+COMMENT ON COLUMN muut_huomioitavat_lajit_viivat."IUCN_luokka" IS 'Uhanalaisluokituksessa käytetään viimeisintä Suomen uhanalaisuusarviointia (Punainen kirja), joka noudattaa kansainvälisen luonnonsuojeluliiton IUCN:n ohjeita. Uhanalaisuustarkastelussa käytettävät IUCN-luokat, valitaan listasta sopiva: Suomesta hävinneet (RE), Äärimmäisen uhanalaiset (CR), Erittäin uhanalaiset (EN), Vaarantuneet (VU), Silmälläpidettävät (NT), Elinvoimaiset (LC), Puutteellisesti tunnetut (DD)';
+COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.direktiivi IS 'Jos kyseinen laji on luontodirektiivin liitteen tai lintudirektiivin liitteen laji se saa sen direktiivin numeron (I, II, III, IV, V), mihin se kuuluu. Sama laji voi kuulua useampaan liitteeseen. Jos laji ei kuulu direktiivilajeihin, sen merkintä on aina "-".';
+COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.havaintopaikan_kuvaus IS 'Lyhyt, vapaamuotoinen kuvaus havaintopaikasta.';
 COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.laji_luokitus IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.lisatieto IS 'TODO';
+COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.lisatieto IS 'Mahdollisia lisätietoja havainnoista tai lyhyt kuvaus havainnosta. Mahdollisia tarkempia mainintoja esiintymän laadusta tai muu arvoperuste (hot spot, lisääntymiskolonia, ruokailualue tms.)';
 COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.pituus IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.viite IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.havaitsija IS 'TODO';
+COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.viite IS 'Viite; viittaus selvitykseen tai vastaavaan, jonka yhteydessä havainto on tehty. Selvityksen täydellinen nimi, ei päivämääriä.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.havaitsija IS 'Havainnon tekijän yrityksen virallinen nimi (Oy:t mukaan).';
 COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.selvitys_id IS 'TODO';
 
 -- ************************
@@ -153,24 +157,20 @@ CREATE TABLE muut_huomioitavat_lajit_alueet
 CREATE INDEX muut_huomioitavat_lajit_alueet_idx ON muut_huomioitavat_lajit_alueet USING gist (geom);
 
 COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.id IS 'Kohteen yksilöllinen tunniste. Generoidaan automaattisesti.';
-COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.pvm IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.laji IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.direktiivi IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.havaintopaikan_kuvaus IS 'TODO';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.pvm IS 'Päivämäärä, jolloin havainto on tehty tai arvio siitä.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.elioryhma IS 'Eliöryhmä, johon laji kuuluu. Valitaan listasta sopiva.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.tieteellinen_nimi IS 'Lajin tieteellinen nimi';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.suomenkielinen_nimi IS 'Lajin suomenkielinen (yleiskielinen) nimi, jos sellainen on';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet."IUCN_luokka" IS 'Uhanalaisluokituksessa käytetään viimeisintä Suomen uhanalaisuusarviointia (Punainen kirja), joka noudattaa kansainvälisen luonnonsuojeluliiton IUCN:n ohjeita. Uhanalaisuustarkastelussa käytettävät IUCN-luokat, valitaan listasta sopiva: Suomesta hävinneet (RE), Äärimmäisen uhanalaiset (CR), Erittäin uhanalaiset (EN), Vaarantuneet (VU), Silmälläpidettävät (NT), Elinvoimaiset (LC), Puutteellisesti tunnetut (DD)';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.direktiivi IS 'Jos kyseinen laji on luontodirektiivin liitteen tai lintudirektiivin liitteen laji se saa sen direktiivin numeron (I, II, III, IV, V), mihin se kuuluu. Sama laji voi kuulua useampaan liitteeseen. Jos laji ei kuulu direktiivilajeihin, sen merkintä on aina "-".';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.havaintopaikan_kuvaus IS 'Lyhyt, vapaamuotoinen kuvaus havaintopaikasta.';
 COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.laji_luokitus IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.yksilo_maara IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.yksikko IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.lisatieto IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.pinta_ala IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.viite IS 'TODO';
-COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.havaitsija IS 'TODO';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.yksilo_maara IS 'Havaittujen yksilöiden määrä. Jos yksilömäärä ei ole tarkasti tiedossa, merkitään yksilömääräksi 0. Lisätietoja voi merkitä Lisätieto-kenttään.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.yksikko IS 'Havaittujen yksiköiden tyyppi, esim. yksilö, itiöemä, pariskunta, protoneema.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.lisatieto IS 'Mahdollisia lisätietoja havainnoista tai lyhyt kuvaus havainnosta. Mahdollisia tarkempia mainintoja esiintymän laadusta tai muu arvoperuste (hot spot, lisääntymiskolonia, ruokailualue tms.)';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.pinta_ala IS 'Alueen koko hehtaareina';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.viite IS 'Viite; viittaus selvitykseen tai vastaavaan, jonka yhteydessä havainto on tehty. Selvityksen täydellinen nimi, ei päivämääriä.';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.havaitsija IS 'Havainnon tekijän yrityksen virallinen nimi (Oy:t mukaan).';
 COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.selvitys_id IS 'TODO';
 
-CREATE TYPE laatu AS ENUM (
-    'Hyvä',
-    'Heikko/Parannettava',
-    'Yhteystarve');
 
-ALTER TABLE liito_orava_yhteysviivat
-    ALTER COLUMN laatu TYPE laatu
-        USING laatu::laatu;
