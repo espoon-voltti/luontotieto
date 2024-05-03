@@ -116,7 +116,9 @@ export const FileInputField = React.memo(function FileInputField({
       {!!infoText && (
         <InputFieldUnderRow className={classNames(infoStatus)}>
           <span data-qa={dataQa ? `${dataQa}-info` : undefined}>
-            {infoText}
+            {Array.isArray(infoText)
+              ? infoText.map((i) => <li>{i}</li>)
+              : infoText}
           </span>
           <UnderRowStatusIcon status={info?.status} />
         </InputFieldUnderRow>

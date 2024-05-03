@@ -33,9 +33,9 @@ interface FileInputProps<T> {
 
 const fileValidationErrorToMessage = (error: FileValidationError): string => {
   if (error.reason === 'IS_NULL') {
-    return `Virhe sarakkeessa ${error.column}: tyhjä arvo ei sallittu`
+    return `${error.column}: tyhjä arvo ei sallittu`
   }
-  return `Virhe sarakkeessa ${error.column}:  ${error.reason}`
+  return `${error.column}:  ${error.reason}`
 }
 
 export const FileInput = <
@@ -55,8 +55,10 @@ export const FileInput = <
   const errorMessage =
     errors && errors.length > 0
       ? {
-          text: `Tiedostoa ei voitu tallentaa koska se sisältää seuraavat virheet: 
-          ${errors.map((e) => fileValidationErrorToMessage(e))}`,
+          text: [
+            'Tiedosto sisältää seuraavat virheet:',
+            ...errors.map((e) => fileValidationErrorToMessage(e))
+          ],
           status: 'warning' as const
         }
       : undefined
