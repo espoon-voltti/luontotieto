@@ -31,6 +31,13 @@ interface FileInputProps<T> {
   onChange: (data: FileInputData<T>) => void
 }
 
+const fileValidationErrorToMessage = (error: FileValidationError): string => {
+  if (error.reason === 'IS_NULL') {
+    return `Virhe sarakkeessa ${error.column}: tyhjä arvo ei sallittu`
+  }
+  return `Virhe sarakkeessa ${error.column}:  ${error.reason}`
+}
+
 export const FileInput = <
   T extends ReportFileDocumentType | OrderFileDocumentType
 >({
@@ -48,7 +55,8 @@ export const FileInput = <
   const errorMessage =
     errors && errors.length > 0
       ? {
-          text: `Tiedostoa ei voitu tallentaa koska se sisältää seuraavat virheet: ${JSON.stringify(errors)}`,
+          text: `Tiedostoa ei voitu tallentaa koska se sisältää seuraavat virheet: 
+          ${errors.map((e) => fileValidationErrorToMessage(e))}`,
           status: 'warning' as const
         }
       : undefined
