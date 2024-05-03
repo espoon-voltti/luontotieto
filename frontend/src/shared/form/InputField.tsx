@@ -146,7 +146,7 @@ export const InputFieldUnderRow = styled.div`
 `
 
 export type InputInfo = {
-  text: string
+  text: string | string[]
   status?: InfoStatus
 }
 

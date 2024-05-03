@@ -55,6 +55,7 @@ export interface ReportFileInput {
   description: string
   documentType: ReportFileDocumentType
   file: File
+  saveErrors?: FileValidationError[]
 }
 
 export interface ReportDetails extends ReportInput {
@@ -127,7 +128,17 @@ export const apiApproveReport = async (reportId: string): Promise<void> => {
   await apiClient.post(`/reports/${reportId}/approve`, {})
 }
 
-const apiPostReportFile = (
+export interface FileValidationError {
+  column: string
+  value: null
+  reason: string
+}
+export interface FileValidationErrorResponse {
+  documentType: ReportFileDocumentType
+  errors: FileValidationError[]
+}
+
+const apiPostReportFile = async (
   id: string,
   file: ReportFileInput
 ): Promise<void> => {
@@ -136,7 +147,14 @@ const apiPostReportFile = (
   formData.append('description', file.description)
   formData.append('documentType', ReportFileDocumentType[file.documentType])
 
-  return apiClient.postForm(`/reports/${id}/files`, formData)
+  await apiClient.postForm(`/reports/${id}/files`, formData).catch((error) => {
+    const errorResponse = {
+      documentType: file.documentType,
+      errors: error.response.data as FileValidationError
+    }
+    return Promise.reject(errorResponse)
+  })
+  return Promise.resolve()
 }
 
 export const apiGetReport = (id: string): Promise<ReportDetails> =>

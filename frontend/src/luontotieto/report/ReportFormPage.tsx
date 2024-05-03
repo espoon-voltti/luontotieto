@@ -10,7 +10,8 @@ import {
   apiGetReportFiles,
   ReportFormInput,
   apiPutReport,
-  apiApproveReport
+  apiApproveReport,
+  FileValidationErrorResponse
 } from 'api/report-api'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -53,6 +54,10 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const [reportFiles, setReportFiles] = useState<ReportFileDetails[] | null>(
     null
   )
+  const [reportFileErrors, setReportFileErrors] = useState<
+    FileValidationErrorResponse[] | undefined
+  >(undefined)
+
   const [approving, setApproving] = useState<boolean>(false)
 
   const onSubmit = (reportInput: ReportFormInput) => {
@@ -60,12 +65,18 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
       setSubmitting(true)
       apiPostReport(reportInput)
         .then((report) => navigate(`/luontotieto/selvitys/${report.id}`))
-        .catch(() => setSubmitting(false))
+        .catch((e) => {
+          setReportFileErrors([e])
+          setSubmitting(false)
+        })
     } else {
       setSubmitting(true)
       apiPutReport(id!, reportInput)
         .then((report) => navigate(`/luontotieto/selvitys/${report.id}`))
-        .catch(() => setSubmitting(false))
+        .catch((e) => {
+          setReportFileErrors([e])
+          setSubmitting(false)
+        })
     }
   }
 
@@ -101,6 +112,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
               onChange={setReportInput}
               report={report}
               reportFiles={reportFiles}
+              saveErrors={reportFileErrors}
             />
           )}
 
