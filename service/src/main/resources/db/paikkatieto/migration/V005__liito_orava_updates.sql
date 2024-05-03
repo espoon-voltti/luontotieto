@@ -33,7 +33,7 @@ COMMENT ON COLUMN liito_orava_pisteet.pesankorkeus IS 'Pesän arvioitu korkeus m
 COMMENT ON COLUMN liito_orava_pisteet.lisatieto IS 'Jos puussa sijaitseva kolo on tarkastettu endoskoopilla eli tarkastuskameralla, tulee tähän sarakkeeseen tieto tarkastuksesta. Lisäksi tähän voi kirjoittaa, jos kohteessa tai ympäristössä on jotain omasta mielestä mainitsemisen arvoista. Jos puu on kaadettu, lisätään teksti "KAADETTU"';
 COMMENT ON COLUMN liito_orava_pisteet.viite IS 'Selvityksen täydellinen nimi, ei päivämääriä. Jos havainto on luontokartoittajan vapaa-ajalla tekemä havainto, niin se on hyvä merkitä.';
 COMMENT ON COLUMN liito_orava_pisteet.kunta IS 'Kunnan numero: Espoo 49, Helsinki 91, Vantaa 92 ja Kauniainen 235, kunnan numerokoodit löytyvät internetistä.';
-COMMENT ON COLUMN liito_orava_pisteet.tarkkuus IS 'Tarkkuustasoksi laitetaan joko "GPS", "muu" tai "tarkkuusmitattu". "Tarkkuusmitattu" tarkoittaa sitä, että puun sijainti on varmistettu tarkkuusmittaamalla esim. takymetrillä. "Muu" tarkoittaa arviota paikasta ilman laitteistoa, esim. ilmakuvan perusteella merkittyä sijaintia.'
+COMMENT ON COLUMN liito_orava_pisteet.tarkkuus IS 'Tarkkuustasoksi laitetaan joko "GPS", "muu" tai "tarkkuusmitattu". "Tarkkuusmitattu" tarkoittaa sitä, että puun sijainti on varmistettu tarkkuusmittaamalla esim. takymetrillä. "Muu" tarkoittaa arviota paikasta ilman laitteistoa, esim. ilmakuvan perusteella merkittyä sijaintia.';
 
 COMMENT ON COLUMN liito_orava_alueet.id IS 'Kohteen yksilöllinen tunniste. Generoidaan automaattisesti.';
 COMMENT ON COLUMN liito_orava_alueet.pvm IS 'Päivämäärä, jolloin havainto on maastossa tehty';
