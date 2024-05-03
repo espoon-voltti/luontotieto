@@ -9,7 +9,7 @@ import { useDebouncedState } from 'shared/useDebouncedState'
 import { FlexRow, LabeledInput, RowOfInputs } from '../../../shared/layout'
 import { Label } from '../../typography'
 import { FileInputField } from './FileInputField'
-import { ReportFileDocumentType } from 'api/report-api'
+import { FileValidationError, ReportFileDocumentType } from 'api/report-api'
 import { OrderFileDocumentType } from 'api/order-api'
 import { FileTitle } from './FileTitle'
 
@@ -27,6 +27,7 @@ export interface FileInputData<T> {
 
 interface FileInputProps<T> {
   data: FileInputData<T>
+  errors?: FileValidationError[]
   onChange: (data: FileInputData<T>) => void
 }
 
@@ -34,7 +35,8 @@ export const FileInput = <
   T extends ReportFileDocumentType | OrderFileDocumentType
 >({
   data,
-  onChange
+  onChange,
+  errors
 }: FileInputProps<T>) => {
   const [file, setFile] = useState(data.file ?? null)
   const [description, setDescription] = useDebouncedState(data.description)
@@ -43,8 +45,16 @@ export const FileInput = <
     onChange({ file, description, documentType: data.documentType })
   }, [file, description])
 
+  const errorMessage =
+    errors && errors.length > 0
+      ? {
+          text: `Tiedostoa ei voitu tallentaa koska se sisältää seuraavat virheet: ${JSON.stringify(errors)}`,
+          status: 'warning' as const
+        }
+      : undefined
+
   return (
-    <RowOfInputs style={{ height: '100px' }}>
+    <RowOfInputs>
       <LabeledInput $cols={5}>
         <FileTitle documentType={data.documentType} required={true}></FileTitle>
         <FileInputField
@@ -53,6 +63,7 @@ export const FileInput = <
             const file = fileList?.[0]
             file && setFile(file)
           }}
+          info={errorMessage}
         />
       </LabeledInput>
       <FlexRow style={{ height: '100%' }}>

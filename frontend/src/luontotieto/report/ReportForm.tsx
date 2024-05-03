@@ -4,6 +4,7 @@
 
 import { OrderReportDocumentInput } from 'api/order-api'
 import {
+  FileValidationErrorResponse,
   ReportDetails,
   ReportFileDetails,
   ReportFileDocumentType,
@@ -28,6 +29,7 @@ import { ExistingFile } from 'shared/form/File/ExistingFile'
 interface CreateProps {
   mode: 'CREATE'
   onChange: (validInput: ReportFormInput | null) => void
+  saveErrors?: FileValidationErrorResponse[]
 }
 
 interface EditProps {
@@ -35,6 +37,7 @@ interface EditProps {
   report: ReportDetails
   reportFiles: ReportFileDetails[]
   onChange: (validInput: ReportFormInput | null) => void
+  saveErrors?: FileValidationErrorResponse[]
 }
 type Props = CreateProps | EditProps
 
@@ -214,6 +217,12 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
       <VerticalGap $size="m" />
       <GroupOfInputRows>
         {fileInputs.map((fInput) => {
+          const documentSaveError = props.saveErrors
+            ? props.saveErrors.find(
+                (error) => error.documentType === fInput.documentType
+              )
+            : undefined
+
           switch (fInput.type) {
             case 'NEW':
               return (
@@ -227,6 +236,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
                   onChange={(data) => {
                     updateFileInput(data)
                   }}
+                  errors={documentSaveError?.errors}
                 />
               )
             case 'EXISTING':

@@ -103,11 +103,18 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
                   .then((reportId) =>
                     navigate(`/luontotieto/selvitys/${reportId}/muokkaa`)
                   )
-                  .catch(() => setSubmitting(false))
+                  .catch((e) => {
+                    console.log(e)
+                    setSubmitting(false)
+                  })
               } else {
                 apiPutOrder(id!, orderInput)
                   .then((order) => navigate(`/luontotieto/tilaus/${order.id}`))
-                  .catch(() => setSubmitting(false))
+                  .catch((e) => {
+                    console.log('e:', e)
+                    setSubmitting(false)
+                    Promise.reject()
+                  })
               }
             }}
           />
