@@ -16,7 +16,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { OrderFile } from 'api/order-api'
 import { ReportFileDetails } from 'api/report-api'
-import { InlineButton } from 'shared/buttons/InlineButton'
 
 export interface SavedFile {
   id: string
@@ -77,10 +76,12 @@ export default React.memo(function FileDownloadButton({
     <DownloadButton onClick={() => onClick(file.id)} data-qa={dataQa}>
       {icon && <FontAwesomeIcon icon={icon === true ? fileIcon(file) : icon} />}
       <div>{text ?? file.fileName}</div>
-      <InlineButton
+      <FontAwesomeIcon
         icon={faX}
-        text={'Poista'}
-        onClick={() => onDelete(file.id)}
+        onClick={(event) => {
+          event.stopPropagation()
+          onDelete(file.id)
+        }}
       />
     </DownloadButton>
   )
