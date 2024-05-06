@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
+import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
+import java.net.URL
 import java.nio.file.Files
 import java.util.UUID
 
@@ -200,6 +202,23 @@ class ReportController {
         @PathVariable reportId: UUID
     ): List<ReportFile> {
         return jdbi.inTransactionUnchecked { tx -> tx.getReportFiles(reportId) }
+    }
+
+    @GetMapping("/{reportId}/files/{fileId}")
+    fun getReportFileById(
+        user: AuthenticatedUser,
+        @PathVariable reportId: UUID,
+        @PathVariable fileId: UUID
+    ): URL {
+        val dataBucket = bucketEnv.data
+
+        val reportFile =
+            jdbi.inTransactionUnchecked { tx -> tx.getReportFileById(reportId, fileId) }
+        val contentDisposition =
+            ContentDisposition.attachment().filename(reportFile.fileName).build()
+        val fileUrl =
+            documentClient.presignedGetUrl(dataBucket, "$reportId/$fileId", contentDisposition)
+        return fileUrl
     }
 
     @DeleteMapping("/{reportId}/files/{fileId}")

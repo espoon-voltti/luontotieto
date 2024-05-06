@@ -7,12 +7,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
 import styled from 'styled-components'
 
-import { FlexRow } from 'shared/layout'
 import {
   faFile,
   faFileImage,
   faFilePdf,
-  faFileWord
+  faFileWord,
+  faX
 } from '@fortawesome/free-solid-svg-icons'
 import { OrderFile } from 'api/order-api'
 import { ReportFileDetails } from 'api/report-api'
@@ -42,6 +42,8 @@ export const fileIcon = (
 }
 
 const DownloadButton = styled.button`
+  display: flex;
+  justify-content: space-between;
   background: #f7f7f7;
   border: none;
   color: #0047b6;
@@ -51,13 +53,12 @@ const DownloadButton = styled.button`
   padding: 20px;
   text-align: center;
   text-decoration: none;
-  width: 300px;
-  justify-content: center;
 `
 
 interface FileDownloadButtonProps {
   file: OrderFile | ReportFileDetails
   onClick: (fileId: string) => void
+  onDelete: (fileId: string) => void
   icon?: IconDefinition | boolean
   'data-qa'?: string
   text?: string
@@ -67,17 +68,21 @@ export default React.memo(function FileDownloadButton({
   file,
   icon,
   onClick,
+  onDelete,
   'data-qa': dataQa,
   text
 }: FileDownloadButtonProps) {
   return (
     <DownloadButton onClick={() => onClick(file.id)} data-qa={dataQa}>
-      <FlexRow>
-        {icon && (
-          <FontAwesomeIcon icon={icon === true ? fileIcon(file) : icon} />
-        )}
-        <div>{text ?? file.fileName}</div>
-      </FlexRow>
+      {icon && <FontAwesomeIcon icon={icon === true ? fileIcon(file) : icon} />}
+      <div>{text ?? file.fileName}</div>
+      <FontAwesomeIcon
+        icon={faX}
+        onClick={(event) => {
+          event.stopPropagation()
+          onDelete(file.id)
+        }}
+      />
     </DownloadButton>
   )
 })
