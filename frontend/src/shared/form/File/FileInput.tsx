@@ -66,7 +66,10 @@ export const FileInput = <
   return (
     <FlexRowWithGaps>
       <LabeledInput $cols={5}>
-        <FileTitle documentType={data.documentType} required={true}></FileTitle>
+        <FileTitle
+          documentType={data.documentType}
+          required={data.documentType !== ReportFileDocumentType.OTHER}
+        ></FileTitle>
         <FileInputField
           onChange={(fileList) => {
             const file = fileList?.[0]
