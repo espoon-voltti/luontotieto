@@ -43,7 +43,7 @@ export interface FileInputProps extends BaseProps {
 const Wrapper = styled.div<{ $width: InputWidth | undefined }>`
   position: relative;
   display: inline-block;
-  ${(p) => (p.$width ? inputWidthCss(p.$width) : '')}
+  ${(p) => (p.$width ? inputWidthCss(p.$width) : 'width: 100%;')}
   flex-grow: 1;
 `
 

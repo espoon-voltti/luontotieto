@@ -8,8 +8,7 @@ import {
   ReportDetails,
   ReportFileDetails,
   ReportFileDocumentType,
-  ReportFormInput,
-  reportFileDocumentTypes
+  ReportFormInput
 } from 'api/report-api'
 import React, { useEffect, useMemo, useState } from 'react'
 import { FileInput, FileInputData } from 'shared/form/File/FileInput'
@@ -25,6 +24,13 @@ import {
 import { H3, Label } from '../../shared/typography'
 
 import { ExistingFile } from 'shared/form/File/ExistingFile'
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { InlineButton } from 'shared/buttons/InlineButton'
+import styled from 'styled-components'
+
+const StyledInlineButton = styled(InlineButton)`
+  font-size: 0.9rem;
+`
 
 interface CreateProps {
   mode: 'CREATE'
@@ -63,48 +69,34 @@ function createFileInputs(
   reportFiles: ReportFileDetails[],
   requiredFiles: OrderReportDocumentInput[]
 ): ReportFileInputElement[] {
-  if (requiredFiles.length === 0) {
-    // Display inputs for all possible file types
-    return reportFileDocumentTypes.map((type) => {
-      const reportFile = reportFiles.find(
-        (reportFile) => reportFile.documentType === type
-      )
-      return reportFile
-        ? {
-            type: 'EXISTING',
-            userDescription: reportFile.description,
-            documentType: type,
-            documentDescription: null,
-            details: reportFile
-          }
-        : {
-            type: 'NEW',
-            userDescription: '',
-            documentType: type,
-            documentDescription: null,
-            file: null
-          }
-    })
-  } else {
-    return requiredFiles.map((required) => {
-      const reportFile = reportFiles.find(
-        (reportFile) => reportFile.documentType === required.documentType
-      )
-      return reportFile
-        ? {
-            type: 'EXISTING',
-            userDescription: reportFile.description,
-            documentType: required.documentType,
-            details: reportFile
-          }
-        : {
-            type: 'NEW',
-            userDescription: '',
-            documentType: required.documentType,
-            file: null
-          }
-    })
-  }
+  const requiredFileInputs = requiredFiles.map((required) => {
+    const reportFile = reportFiles.find(
+      (reportFile) => reportFile.documentType === required.documentType
+    )
+    return reportFile
+      ? {
+          type: 'EXISTING' as const,
+          userDescription: reportFile.description,
+          documentType: required.documentType,
+          details: reportFile
+        }
+      : {
+          type: 'NEW' as const,
+          userDescription: '',
+          documentType: required.documentType,
+          file: null
+        }
+  })
+  const otherFiles = reportFiles
+    .filter((rf) => rf.documentType === ReportFileDocumentType.OTHER)
+    .map((rf) => ({
+      type: 'EXISTING' as const,
+      userDescription: rf.description,
+      documentType: rf.documentType,
+      details: rf
+    }))
+
+  return [...requiredFileInputs, ...otherFiles]
 }
 
 function filesAreValid(
@@ -129,7 +121,6 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
       props.mode === 'EDIT' ? props.report.order?.reportDocuments ?? [] : [],
     [props]
   )
-
   const originalFileInputs = useMemo(() => {
     const reportFiles = props.mode === 'EDIT' ? props.reportFiles : []
     return createFileInputs(reportFiles, requiredFiles)
@@ -176,6 +167,18 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
     )
   }
 
+  const addFileInput = (documentType: ReportFileDocumentType) => {
+    setFileInputs([
+      ...fileInputs,
+      {
+        type: 'NEW',
+        file: null,
+        userDescription: '',
+        documentType: documentType
+      }
+    ])
+  }
+
   const validInput: ReportFormInput | null = useMemo(() => {
     if (name.trim() === '') return null
     if (description.trim() === '') return null
@@ -216,7 +219,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
       <H3>Selvitettävät asiat</H3>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
-        {fileInputs.map((fInput) => {
+        {fileInputs.map((fInput, index) => {
           const documentSaveError = props.saveErrors
             ? props.saveErrors.find(
                 (error) => error.documentType === fInput.documentType
@@ -227,7 +230,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
             case 'NEW':
               return (
                 <FileInput
-                  key={fInput.documentType}
+                  key={fInput.documentType + index}
                   data={{
                     description: fInput.userDescription,
                     file: fInput.file,
@@ -242,7 +245,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
             case 'EXISTING':
               return (
                 <ExistingFile
-                  key={fInput.documentType}
+                  key={fInput.documentType + index}
                   data={{
                     type: 'REPORT',
                     file: fInput.details,
@@ -256,6 +259,11 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
               )
           }
         })}
+        <StyledInlineButton
+          text={'Lisää muu liite'}
+          icon={faPlus}
+          onClick={() => addFileInput(ReportFileDocumentType.OTHER)}
+        />
       </GroupOfInputRows>
       <VerticalGap $size="m" />
       <LabeledInput $cols={4}>
