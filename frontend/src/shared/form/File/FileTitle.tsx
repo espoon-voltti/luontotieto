@@ -12,6 +12,8 @@ import {
   getDocumentTypeTitle
 } from 'api/report-api'
 import styled from 'styled-components'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faDownload } from '@fortawesome/free-solid-svg-icons'
 
 interface Props {
   documentType: ReportFileDocumentType | OrderFileDocumentType
@@ -27,8 +29,8 @@ const isReportFileDocumentType = (
 }
 
 export const StyledLink = styled.a`
-  font-weight: bold;
-  margin-left: 20px;
+  font-weight: 600;
+  margin-left: 30px;
 `
 
 export const FileTitle = React.memo(function FileTitle(props: Props) {
@@ -44,6 +46,10 @@ export const FileTitle = React.memo(function FileTitle(props: Props) {
               )
             }
           >
+            <FontAwesomeIcon
+              icon={faDownload}
+              style={{ marginRight: '10px' }}
+            />
             Lataa Pohja
           </StyledLink>
         )}

@@ -6,7 +6,11 @@ import React, { useEffect, useState } from 'react'
 import { InputField } from 'shared/form/InputField'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
-import { FlexRowWithGaps, LabeledInput } from '../../../shared/layout'
+import {
+  FlexRowWithGaps,
+  LabeledInput,
+  VerticalGap
+} from '../../../shared/layout'
 import { Label } from '../../typography'
 import { FileInputField } from './FileInputField'
 import { FileValidationError, ReportFileDocumentType } from 'api/report-api'
@@ -70,6 +74,7 @@ export const FileInput = <
           documentType={data.documentType}
           required={data.documentType !== ReportFileDocumentType.OTHER}
         ></FileTitle>
+        <VerticalGap $size="s" />
         <FileInputField
           onChange={(fileList) => {
             const file = fileList?.[0]
