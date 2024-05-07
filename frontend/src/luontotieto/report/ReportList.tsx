@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AddButton } from 'shared/buttons/AddButton'
 
@@ -14,11 +14,7 @@ import {
   Table,
   VerticalGap
 } from '../../shared/layout'
-import {
-  ReportDetails,
-  apiGetReports,
-  getDocumentTypeTitle
-} from 'api/report-api'
+import { ReportDetails, getDocumentTypeTitle } from 'api/report-api'
 import { InputField } from 'shared/form/InputField'
 import { SortableTh, Th } from 'shared/Table'
 import { orderBy } from 'lodash'
@@ -26,13 +22,15 @@ import { Select } from 'shared/form/Select'
 import { useDebouncedState } from 'shared/useDebouncedState'
 import { faSearch } from '@fortawesome/free-solid-svg-icons'
 import { formatDateTime } from 'shared/dates'
+import { useGetReportsQuery } from 'api/hooks/reports'
 
 export type ReportSortColumn = 'updated' | 'name' | 'approved'
 export type SortDirection = 'ASC' | 'DESC'
 
 export const ReportList = React.memo(function ReportList() {
   const navigate = useNavigate()
-  const [reports, setReports] = useState<ReportDetails[]>([])
+
+  const { data: reports, isLoading } = useGetReportsQuery()
 
   const [sortBy, setSortBy] = useState<ReportSortColumn | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>('ASC')
@@ -74,9 +72,10 @@ export const ReportList = React.memo(function ReportList() {
     [sortBy, sortDirection, filterByReportAssignee, filterBySearchQuery]
   )
 
-  useEffect(() => {
-    void apiGetReports().then(setReports)
-  }, [])
+  if (isLoading || !reports) {
+    //TODO: What we want to show when loading?
+    return null
+  }
 
   return (
     <PageContainer>

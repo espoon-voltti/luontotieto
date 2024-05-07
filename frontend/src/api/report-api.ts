@@ -105,15 +105,14 @@ export const apiPostReport = async (
 }
 
 export const apiPutReport = async (
-  reportId: string,
-  reportInput: ReportFormInput
+  reportInput: { reportId: string } & ReportFormInput
 ): Promise<ReportDetails> => {
   const body: JsonOf<ReportInput> = {
     ...reportInput
   }
 
   const report = await apiClient
-    .put<ReportDetails>(`/reports/${reportId}`, body)
+    .put<ReportDetails>(`/reports/${reportInput.reportId}`, body)
     .then((r) => r.data)
 
   for (const id of reportInput.filesToRemove) {

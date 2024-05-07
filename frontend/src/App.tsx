@@ -16,6 +16,7 @@ import { FlexRowWithGaps } from './shared/layout'
 import { H1 } from './shared/typography'
 import { OrderFormPage } from 'luontotieto/order/OrderFormPage'
 import { theme } from 'shared/theme'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
@@ -30,6 +31,7 @@ const Header = styled.nav`
   padding: 0 32px;
   background-color: #fff;
 `
+const queryClient = new QueryClient()
 
 function App() {
   const authStatus = useAuthStatus()
@@ -38,22 +40,24 @@ function App() {
   const user = authStatus.loggedIn && authStatus.user ? authStatus.user : null
 
   return (
-    <ThemeProvider theme={theme}>
-      <UserContextProvider user={user}>
-        <Fragment>
-          <Header>
-            <FlexRowWithGaps>
-              <img src={EspooLogo} width="100px" alt="Espoon kaupunki" />
-              <Link to="/luontoselvitys">
-                <H1>Luontotietoportaali</H1>
-              </Link>
-            </FlexRowWithGaps>
-            <UserHeader />
-          </Header>
-          <Outlet />
-        </Fragment>
-      </UserContextProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <UserContextProvider user={user}>
+          <Fragment>
+            <Header>
+              <FlexRowWithGaps>
+                <img src={EspooLogo} width="100px" alt="Espoon kaupunki" />
+                <Link to="/luontoselvitys">
+                  <H1>Luontotietoportaali</H1>
+                </Link>
+              </FlexRowWithGaps>
+              <UserHeader />
+            </Header>
+            <Outlet />
+          </Fragment>
+        </UserContextProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   )
 }
 
