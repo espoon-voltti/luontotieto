@@ -13,6 +13,7 @@ import { InlineButton } from './InlineButton'
 
 interface Props extends BaseProps {
   text: string
+  navigationText?: string
   destination?: string
 }
 
@@ -29,7 +30,7 @@ export const BackNavigation = React.memo(function BackNavigation({
           <InlineButton
             data-qa={dataQa}
             icon={faChevronLeft}
-            text="Takaisin"
+            text={props.navigationText ?? 'Takaisin'}
             onClick={() => navigate(props.destination ?? '/luontotieto')}
           />
           <H3>{props.text}</H3>

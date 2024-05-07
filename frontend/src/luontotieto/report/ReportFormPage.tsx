@@ -99,7 +99,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   return (
     <>
       <PageContainer>
-        <BackNavigation text={title} />
+        <BackNavigation text={title} navigationText="Etusivulle" />
         {report?.order && (
           <OrderDetails order={report?.order} reportId={report.id} />
         )}
