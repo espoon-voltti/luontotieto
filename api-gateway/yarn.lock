@@ -2652,7 +2652,7 @@ __metadata:
     nodemon: "npm:^3.1.0"
     passport: "npm:^0.7.0"
     pino: "npm:^9.0.0"
-    pino-http: "npm:^9.0.0"
+    pino-http: "npm:^10.0.0"
     pino-pretty: "npm:^11.0.0"
     prettier: "npm:^3.2.4"
     query-string: "npm:^9.0.0"
@@ -3166,7 +3166,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-abstract-transport@npm:^1.0.0, pino-abstract-transport@npm:v1.1.0":
+"pino-abstract-transport@npm:^1.0.0":
   version: 1.1.0
   resolution: "pino-abstract-transport@npm:1.1.0"
   dependencies:
@@ -3186,15 +3186,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-http@npm:^9.0.0":
-  version: 9.0.0
-  resolution: "pino-http@npm:9.0.0"
+"pino-http@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "pino-http@npm:10.0.0"
   dependencies:
     get-caller-file: "npm:^2.0.5"
-    pino: "npm:^8.17.1"
-    pino-std-serializers: "npm:^6.2.2"
+    pino: "npm:^9.0.0"
+    pino-std-serializers: "npm:^7.0.0"
     process-warning: "npm:^3.0.0"
-  checksum: 12a0b016c62c1f4e7d506f6a690d10b7ccdbb5868fba8156a1bf515143e522087f87ce83a732615773e903271468c308d5f5eb908ca5446208803da119025fdf
+  checksum: 6618021f828ee8ad5c7672a3706ae744ff913684c46a9d522223603e9001351533f2bee6da7260fa0318e90f6332bfd4a4b4224711b3478c31ef0bd830f88eef
   languageName: node
   linkType: hard
 
@@ -3222,31 +3222,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-std-serializers@npm:*, pino-std-serializers@npm:^6.0.0, pino-std-serializers@npm:^6.2.2":
+"pino-std-serializers@npm:*, pino-std-serializers@npm:^6.0.0":
   version: 6.2.2
   resolution: "pino-std-serializers@npm:6.2.2"
   checksum: a00cdff4e1fbc206da9bed047e6dc400b065f43e8b4cef1635b0192feab0e8f932cdeb0faaa38a5d93d2e777ba4cda939c2ed4c1a70f6839ff25f9aef97c27ff
   languageName: node
   linkType: hard
 
-"pino@npm:^8.17.1":
-  version: 8.19.0
-  resolution: "pino@npm:8.19.0"
-  dependencies:
-    atomic-sleep: "npm:^1.0.0"
-    fast-redact: "npm:^3.1.1"
-    on-exit-leak-free: "npm:^2.1.0"
-    pino-abstract-transport: "npm:v1.1.0"
-    pino-std-serializers: "npm:^6.0.0"
-    process-warning: "npm:^3.0.0"
-    quick-format-unescaped: "npm:^4.0.3"
-    real-require: "npm:^0.2.0"
-    safe-stable-stringify: "npm:^2.3.1"
-    sonic-boom: "npm:^3.7.0"
-    thread-stream: "npm:^2.0.0"
-  bin:
-    pino: bin.js
-  checksum: c98e8bedb7c9eca5c0e75c2dd910a58b0e470da282c5a4787873a591666cc7cce33561d9ba6d6a20cf6bc4bc8d15b7db84cf6156f262081a5c6b8de134285789
+"pino-std-serializers@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "pino-std-serializers@npm:7.0.0"
+  checksum: 884e08f65aa5463d820521ead3779d4472c78fc434d8582afb66f9dcb8d8c7119c69524b68106cb8caf92c0487be7794cf50e5b9c0383ae65b24bf2a03480951
   languageName: node
   linkType: hard
 
@@ -3928,15 +3914,6 @@ __metadata:
   version: 0.2.0
   resolution: "text-table@npm:0.2.0"
   checksum: 4383b5baaeffa9bb4cda2ac33a4aa2e6d1f8aaf811848bf73513a9b88fd76372dc461f6fd6d2e9cb5100f48b473be32c6f95bd983509b7d92bb4d92c10747452
-  languageName: node
-  linkType: hard
-
-"thread-stream@npm:^2.0.0":
-  version: 2.4.1
-  resolution: "thread-stream@npm:2.4.1"
-  dependencies:
-    real-require: "npm:^0.2.0"
-  checksum: baac5bf555912f216a2494bf3f66377733a843306cddd233b1c5ad63084307266f61af35d6122e3936c657836d5db4a14da34300cd25930e013943b807a29c9b
   languageName: node
   linkType: hard
 
