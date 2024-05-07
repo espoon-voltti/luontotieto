@@ -65,6 +65,9 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
               ? `Muokkaa tilausta: ${order?.name}`
               : 'Uusi luontoselvitys'
           }
+          navigationText={
+            props.mode === 'EDIT' ? 'Takaisin selvitykseen' : 'Etusivulle'
+          }
           destination={state?.referer ?? undefined}
         />
         <VerticalGap $size="s" />
