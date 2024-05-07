@@ -3,10 +3,11 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import React, { useEffect, useState } from 'react'
-import { InputField } from 'shared/form/InputField'
+import { InputField, InputFieldUnderRow } from 'shared/form/InputField'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
 import {
+  FlexCol,
   FlexRowWithGaps,
   LabeledInput,
   VerticalGap
@@ -16,6 +17,8 @@ import { FileInputField } from './FileInputField'
 import { FileValidationError, ReportFileDocumentType } from 'api/report-api'
 import { OrderFileDocumentType } from 'api/order-api'
 import { FileTitle } from './FileTitle'
+import classNames from 'classnames'
+import { UnderRowStatusIcon } from '../StatusIcon'
 
 export interface ValidFileInputData<T> {
   description: string
@@ -68,30 +71,43 @@ export const FileInput = <
       : undefined
 
   return (
-    <FlexRowWithGaps>
-      <LabeledInput $cols={5}>
-        <FileTitle
-          documentType={data.documentType}
-          required={data.documentType !== ReportFileDocumentType.OTHER}
-        ></FileTitle>
-        <VerticalGap $size="s" />
-        <FileInputField
-          onChange={(fileList) => {
-            const file = fileList?.[0]
-            file && setFile(file)
-          }}
-          info={errorMessage}
-        />
-      </LabeledInput>
-      <LabeledInput $cols={5}>
-        <Label>Liitteen kuvaus</Label>
-        <InputField
-          onChange={(value) => {
-            setDescription(value)
-          }}
-          value={description}
-        />
-      </LabeledInput>
-    </FlexRowWithGaps>
+    <FlexCol>
+      <FlexRowWithGaps $gapSize="s" style={{ marginBottom: '5px' }}>
+        <LabeledInput $cols={5}>
+          <FileTitle
+            documentType={data.documentType}
+            required={data.documentType !== ReportFileDocumentType.OTHER}
+          ></FileTitle>
+          <VerticalGap $size="s" />
+          <FileInputField
+            onChange={(fileList) => {
+              const file = fileList?.[0]
+              file && setFile(file)
+            }}
+          />
+        </LabeledInput>
+        <LabeledInput $cols={5}>
+          <Label>Liitteen kuvaus</Label>
+          <InputField
+            onChange={(value) => {
+              setDescription(value)
+            }}
+            value={description}
+          />
+        </LabeledInput>
+      </FlexRowWithGaps>
+      {errorMessage && (
+        <FlexRowWithGaps>
+          <InputFieldUnderRow className={classNames('warning')}>
+            <span>
+              {errorMessage.text.map((i) => (
+                <li>{i}</li>
+              ))}
+            </span>
+            <UnderRowStatusIcon status={'warning'} />
+          </InputFieldUnderRow>
+        </FlexRowWithGaps>
+      )}
+    </FlexCol>
   )
 }
