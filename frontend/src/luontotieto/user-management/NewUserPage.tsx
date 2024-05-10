@@ -5,6 +5,7 @@
 import React, { useState } from 'react'
 
 import {
+  FixedWidthDiv,
   FlexRowWithGaps,
   GroupOfInputRows,
   LabeledInput,
@@ -16,6 +17,7 @@ import { InputField } from 'shared/form/InputField'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Label } from 'shared/typography'
 import { Button } from 'shared/buttons/Button'
+import { InfoBox } from 'shared/MessageBoxes'
 
 export const NewUserPage = React.memo(function NewUserPage() {
   const [userInput, setUserInput] = useState({
@@ -54,8 +56,19 @@ export const NewUserPage = React.memo(function NewUserPage() {
             />
           </LabeledInput>
           <FlexRowWithGaps>
-            <Button primary text={'Luo'} disabled={!isValid}></Button>
+            <Button
+              primary
+              text={'Luo yrityskäyttäjä'}
+              disabled={!isValid}
+            ></Button>
           </FlexRowWithGaps>
+
+          <FixedWidthDiv $cols={8}>
+            <InfoBox
+              message={`Kun käyttäjä on luotu lähetetään käyttäjälle automaattisesti sähköposti,
+               joka sisältää luontotietoportaalin osoitteen sekä kirjautumiseen vaadittavat tunnukset.`}
+            ></InfoBox>
+          </FixedWidthDiv>
         </GroupOfInputRows>
       </SectionContainer>
       <VerticalGap $size="XL" />

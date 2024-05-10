@@ -2,12 +2,14 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+export type UserRole = 'pääkäyttäjä' | 'tilaaja' | 'katsoja' | 'yrityskäyttäjä'
+
 export interface User {
   id: string
   userName: string
   email: string
   active: boolean
-  role: 'pääkäyttäjä' | 'tilaaja' | 'katsoja' | 'yrityskäyttäjä'
+  role: UserRole
 }
 export const userlist: User[] = [
   {
