@@ -20,15 +20,20 @@ import { InlineButton } from 'shared/buttons/InlineButton'
 import { Button } from 'shared/buttons/Button'
 import Radio from 'shared/form/Radio'
 import Switch from 'shared/form/Switch'
+import { faPen } from '@fortawesome/free-solid-svg-icons'
 
 export const UserManagementPage = React.memo(function UserManagementPage() {
   //TODO: get from context and whos this page only for konsultti/yritys users
-  const [userInput, setUserInput] = useState(userlist[0])
+  const [userInput, setUserInput] = useState(userlist[2])
   const [enableEdit, setEnableEdit] = useState(false)
 
   return (
     <PageContainer>
-      <BackNavigation text={userInput.userName} navigationText="Etusivulle" />
+      <BackNavigation
+        text={userInput.userName}
+        navigationText="Käyttäjänhallinta"
+        destination={'/luontotieto/käyttäjät/'}
+      />
 
       <SectionContainer>
         <GroupOfInputRows>
@@ -36,65 +41,73 @@ export const UserManagementPage = React.memo(function UserManagementPage() {
             <Label>Käyttäjä</Label>
             <InputField
               value={userInput.userName}
-              readonly={true}
               onChange={(value) =>
                 setUserInput({ ...userInput, userName: value })
               }
+              readonly={!enableEdit}
             />
           </LabeledInput>
           <LabeledInput $cols={3}>
             <Label>Yhteyssähköposti</Label>
             <InputField
               value={userInput.email}
-              readonly={true}
               onChange={(value) => setUserInput({ ...userInput, email: value })}
+              readonly={!enableEdit}
             />
           </LabeledInput>
 
-          <LabeledInput $cols={3}>
-            <Label>Käyttäjäoikeudet</Label>
-            <FlexRowWithGaps>
-              <Radio
-                key={'Pääkäyttäjä'}
-                label={'Pääkäyttäjä'}
-                checked={userInput.role === 'pääkäyttäjä'}
-                onChange={() =>
-                  setUserInput({ ...userInput, role: 'pääkäyttäjä' })
-                }
-                disabled={!enableEdit}
-                small={true}
-              ></Radio>
-              <Radio
-                key={'Tilaaja'}
-                label={'Tilaaja'}
-                checked={userInput.role === 'tilaaja'}
-                onChange={() => setUserInput({ ...userInput, role: 'tilaaja' })}
-                disabled={!enableEdit}
-                small={true}
-              ></Radio>
-              <Radio
-                key={'Katsoja'}
-                label={'Katsoja'}
-                checked={userInput.role === 'katsoja'}
-                onChange={() => setUserInput({ ...userInput, role: 'katsoja' })}
-                disabled={!enableEdit}
-                small={true}
-              ></Radio>
-            </FlexRowWithGaps>
-          </LabeledInput>
-          <LabeledInput>
-            <Label>Tila</Label>
-            <Switch
-              key="tila"
-              label="Aktiivinen"
-              checked={userInput.active}
-              onChange={() => {
-                console.log('we change we chagne')
-                setUserInput({ ...userInput, active: !userInput.active })
-              }}
-              disabled={!enableEdit}
-            />
-          </LabeledInput>
+          {userInput.role !== 'yrityskäyttäjä' && (
+            <>
+              <LabeledInput $cols={3}>
+                <Label>Käyttäjäoikeudet</Label>
+                <FlexRowWithGaps>
+                  <Radio
+                    key={'Pääkäyttäjä'}
+                    label={'Pääkäyttäjä'}
+                    checked={userInput.role === 'pääkäyttäjä'}
+                    onChange={() =>
+                      setUserInput({ ...userInput, role: 'pääkäyttäjä' })
+                    }
+                    disabled={!enableEdit}
+                    small={true}
+                  ></Radio>
+                  <Radio
+                    key={'Tilaaja'}
+                    label={'Tilaaja'}
+                    checked={userInput.role === 'tilaaja'}
+                    onChange={() =>
+                      setUserInput({ ...userInput, role: 'tilaaja' })
+                    }
+                    disabled={!enableEdit}
+                    small={true}
+                  ></Radio>
+                  <Radio
+                    key={'Katsoja'}
+                    label={'Katsoja'}
+                    checked={userInput.role === 'katsoja'}
+                    onChange={() =>
+                      setUserInput({ ...userInput, role: 'katsoja' })
+                    }
+                    disabled={!enableEdit}
+                    small={true}
+                  ></Radio>
+                </FlexRowWithGaps>
+              </LabeledInput>
+              <LabeledInput>
+                <Label>Tila</Label>
+                <Switch
+                  key="tila"
+                  label="Aktiivinen"
+                  checked={userInput.active}
+                  onChange={() => {
+                    setUserInput({ ...userInput, active: !userInput.active })
+                  }}
+                  disabled={!enableEdit}
+                />
+              </LabeledInput>
+            </>
+          )}
+
           {enableEdit ? (
             <FlexRowWithGaps>
               <Button
@@ -107,6 +120,14 @@ export const UserManagementPage = React.memo(function UserManagementPage() {
             <InlineButton
               text={'Muokkaa tietoja'}
               onClick={() => setEnableEdit(!enableEdit)}
+              icon={faPen}
+              iconRight={true}
+            />
+          )}
+          {userInput.role === 'yrityskäyttäjä' && (
+            <InlineButton
+              text={'Resetoi salasana'}
+              onClick={() => console.log('Resetoi salasana')}
             />
           )}
         </GroupOfInputRows>

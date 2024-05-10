@@ -83,8 +83,7 @@ export const UserListPage = React.memo(function UserListPage() {
 
           <AddButton
             text="Lisää yrityskäyttäjä"
-            onClick={() => navigate('/luontotieto/tilaus/uusi')}
-            data-qa="create-report-button"
+            onClick={() => navigate('/luontotieto/käyttäjät/uusi')}
           />
         </FlexLeftRight>
 

@@ -21,6 +21,7 @@ import { UserListPage } from 'luontotieto/user-management/UserListPage'
 import { UserLoginPage } from 'auth/UserLoginPage'
 import { UserSettingsPage } from 'luontotieto/user-management/UserSettingsPage'
 import { UserManagementPage } from 'luontotieto/user-management/UserManagementPage'
+import { NewUserPage } from 'luontotieto/user-management/NewUserPage'
 
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
@@ -139,6 +140,14 @@ export const appRouter = createBrowserRouter([
         element: (
           <AuthGuard allow="AUTHENTICATED_ONLY">
             <UserManagementPage />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/luontotieto/käyttäjät/uusi',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <NewUserPage />
           </AuthGuard>
         )
       },
