@@ -17,6 +17,10 @@ import { H1 } from './shared/typography'
 import { OrderFormPage } from 'luontotieto/order/OrderFormPage'
 import { theme } from 'shared/theme'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { UserListPage } from 'luontotieto/user-management/UserListPage'
+import { UserLoginPage } from 'auth/UserLoginPage'
+import { UserSettingsPage } from 'luontotieto/user-management/UserSettingsPage'
+import { UserManagementPage } from 'luontotieto/user-management/UserManagementPage'
 
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
@@ -75,6 +79,14 @@ export const appRouter = createBrowserRouter([
         )
       },
       {
+        path: '/kirjaudu/yrityskäyttäjä',
+        element: (
+          <AuthGuard allow="UNAUTHENTICATED_ONLY">
+            <UserLoginPage />
+          </AuthGuard>
+        )
+      },
+      {
         path: '/luontotieto',
         element: (
           <AuthGuard allow="AUTHENTICATED_ONLY">
@@ -114,6 +126,31 @@ export const appRouter = createBrowserRouter([
           </AuthGuard>
         )
       },
+      {
+        path: '/luontotieto/käyttäjät',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <UserListPage />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/luontotieto/käyttäjät/:id',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <UserManagementPage />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/luontotieto/omat-asetukset',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <UserSettingsPage />
+          </AuthGuard>
+        )
+      },
+
       {
         path: '/*',
         element: <Navigate replace to="/luontotieto" />

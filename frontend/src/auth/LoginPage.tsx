@@ -8,6 +8,7 @@ import styled from 'styled-components'
 import { LinkStyledAsButton } from '../shared/buttons/LinkStyledAsButton'
 import {
   FlexColWithGaps,
+  FlexRowWithGaps,
   PageContainer,
   SectionContainer
 } from '../shared/layout'
@@ -46,11 +47,19 @@ export const LoginPage = React.memo(function LoginPage() {
     <PageContainer>
       <SectionContainer>
         <Wrapper>
-          <FlexColWithGaps $gapSize="L" style={{ alignItems: 'center' }}>
-            <H2>Kirjaudu sisään Espoo-AD:lla</H2>
-            <LinkStyledAsButton href={getLoginUrl()} data-qa="start-login">
-              Kirjaudu sisään
-            </LinkStyledAsButton>
+          <FlexColWithGaps $gapSize="L">
+            <H2>Kirjaudu sisään Luontotietoportaaliin</H2>
+            <FlexRowWithGaps style={{ justifyContent: 'center' }}>
+              <LinkStyledAsButton
+                href={getLoginUrl()}
+                style={{ marginRight: '32px' }}
+              >
+                Espoo AD
+              </LinkStyledAsButton>
+              <LinkStyledAsButton href={`/kirjaudu/yrityskäyttäjä`}>
+                Yrityskäyttäjä
+              </LinkStyledAsButton>
+            </FlexRowWithGaps>
           </FlexColWithGaps>
         </Wrapper>
       </SectionContainer>

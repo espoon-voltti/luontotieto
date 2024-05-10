@@ -5,7 +5,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import classNames from 'classnames'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 
 import { logoutUrl } from './UserHeader'
@@ -69,6 +69,7 @@ export const UserMenu = React.memo(function LanguageMenu({
 }: {
   userName: string
 }) {
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const toggleOpen = useCallback(() => setOpen((state) => !state), [setOpen])
   const dropDownContainerRef = useCloseOnOutsideClick<HTMLDivElement>(() =>
@@ -100,13 +101,26 @@ export const UserMenu = React.memo(function LanguageMenu({
             key={'user-management'}
             className={classNames({ active: true })}
             onClick={() => {
-              //TODO: Add navigation once we have käyttäjänhallinta
+              navigate(`/luontotieto/käyttäjät`)
               setOpen(false)
             }}
             role="menuitemradio"
             aria-checked={true}
           >
             Käyttäjänhallinta
+          </DropDownItemButton>
+          <DropDownItemButton
+            ref={firstButtonRef}
+            key={'user-settings'}
+            className={classNames({ active: true })}
+            onClick={() => {
+              navigate(`/luontotieto/omat-asetukset`)
+              setOpen(false)
+            }}
+            role="menuitemradio"
+            aria-checked={true}
+          >
+            Asetukset
           </DropDownItemButton>
           <DropDownItemButton
             ref={firstButtonRef}
