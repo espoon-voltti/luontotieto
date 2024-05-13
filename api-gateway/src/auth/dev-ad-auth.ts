@@ -32,19 +32,17 @@ class DevStrategy extends Strategy {
 const devUsers: AdUser[] = [
   {
     externalId: 'ad:001',
-    firstName: 'Sanna',
-    lastName: 'Suunnittelija'
+    name: 'Sanna Suunnittelija'
   },
   {
     externalId: 'ad:002',
-    firstName: 'Olli Oiva Otto',
-    lastName: 'Ohjaaja'
+    name: 'Olli Oiva Otto Ohjaaja'
   }
 ]
 
 const loginFormHandler: AsyncRequestHandler = async (req, res) => {
   const userOptions = devUsers.map((user, idx) => {
-    const { externalId, firstName, lastName } = user
+    const { externalId, name } = user
     const json = JSON.stringify(user)
     return `<div>
             <input
@@ -53,7 +51,7 @@ const loginFormHandler: AsyncRequestHandler = async (req, res) => {
               name="preset"
               ${idx == 0 ? 'checked' : ''}
               value="${_.escape(json)}" />
-            <label for="${externalId}">${firstName} ${lastName}</label>
+            <label for="${externalId}">${name}</label>
           </div>`
   })
 

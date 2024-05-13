@@ -99,8 +99,7 @@ export function createAdSamlStrategy(
     if (!aad) throw Error('No user ID in SAML data')
     const person = await userLogin({
       externalId: `${config.externalIdPrefix}:${aad}`,
-      firstName: asString(profile[AD_GIVEN_NAME_KEY]) ?? '',
-      lastName: asString(profile[AD_FAMILY_NAME_KEY]) ?? '',
+      name: `${asString(profile[AD_GIVEN_NAME_KEY])} ${asString(profile[AD_FAMILY_NAME_KEY])}`,
       email: asString(profile[AD_EMAIL_KEY])
     })
     return {

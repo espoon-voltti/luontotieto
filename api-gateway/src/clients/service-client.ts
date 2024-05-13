@@ -32,8 +32,7 @@ export function createServiceRequestHeaders(
 
 export interface AdUser {
   externalId: string
-  firstName: string
-  lastName: string
+  name: string
   email?: string | null
 }
 

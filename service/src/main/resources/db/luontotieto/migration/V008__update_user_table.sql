@@ -15,7 +15,6 @@ ALTER TABLE users DROP COLUMN first_name;
 ALTER TABLE users DROP COLUMN last_name;
 ALTER TABLE users DROP COLUMN first_names;
 
-
 ALTER TABLE users ALTER COLUMN name SET NOT NULL;
 
 ALTER TABLE users

@@ -7,39 +7,31 @@ package fi.espoo.luontotieto.common
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
-import org.jdbi.v3.core.mapper.PropagateNull
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
 data class AdUser(
     val externalId: String,
-    val firstName: String,
-    val lastName: String,
+    val name: String,
     val email: String?
 )
 
 data class AppUser(
     val id: UUID,
     val externalId: String,
-    val firstName: String,
-    val lastName: String,
+    val name: String,
     val email: String?
-)
-
-data class UserBasics(
-    @PropagateNull val id: UUID,
-    val name: String
 )
 
 fun Handle.upsertAppUserFromAd(adUser: AdUser): AppUser =
     createQuery(
         // language=SQL
         """
-INSERT INTO users (external_id, first_names, last_name, email)
-VALUES (:externalId, :firstName, :lastName, :email)
+INSERT INTO users (external_id, name, email)
+VALUES (:externalId, :name, :email)
 ON CONFLICT (external_id) DO UPDATE
-SET updated = now(), first_names = :firstName, last_name = :lastName, email = :email
-RETURNING id, external_id, first_name, last_name, email
+SET updated = now(), name = :name, role = 'katselija'
+RETURNING id, external_id, name, email
     """
             .trimIndent()
     )
@@ -50,7 +42,7 @@ RETURNING id, external_id, first_name, last_name, email
 fun Handle.getAppUsers(): List<AppUser> =
     createQuery(
         """
-    SELECT id, external_id, first_name, last_name, email
+    SELECT id, external_id, name, email
     FROM users
     WHERE NOT system_user
 """
@@ -60,7 +52,7 @@ fun Handle.getAppUser(id: UUID) =
     createQuery(
         // language=SQL
         """
-SELECT id, external_id, first_name, last_name, email
+SELECT id, external_id, name, email
 FROM users 
 WHERE id = :id AND NOT system_user
     """
