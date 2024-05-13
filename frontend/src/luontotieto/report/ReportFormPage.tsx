@@ -3,17 +3,13 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import {
-  ReportDetails,
   apiPostReport,
-  apiGetReport,
-  ReportFileDetails,
-  apiGetReportFiles,
   ReportFormInput,
   apiPutReport,
   apiApproveReport,
   FileValidationErrorResponse
 } from 'api/report-api'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
@@ -29,6 +25,8 @@ import { ReportForm } from './ReportForm'
 import { Footer } from 'shared/Footer'
 import { OrderDetails } from './OrderDetails'
 import styled from 'styled-components'
+import { useGetReportFilesQuery, useGetReportQuery } from 'api/hooks/reports'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -45,48 +43,55 @@ const StyledButton = styled(Button)`
 
 export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { id } = useParams()
-  if (!id && props.mode === 'EDIT') throw Error('Id not found in path')
-  const [reportInput, setReportInput] = useState<ReportFormInput | null>(null)
-  const [submitting, setSubmitting] = useState<boolean>(false)
 
-  const [report, setReport] = useState<ReportDetails | null>(null)
-  const [reportFiles, setReportFiles] = useState<ReportFileDetails[] | null>(
-    null
-  )
+  if (!id && props.mode === 'EDIT') throw Error('Id not found in path')
+
+  const [reportInput, setReportInput] = useState<ReportFormInput | null>(null)
   const [reportFileErrors, setReportFileErrors] = useState<
     FileValidationErrorResponse[] | undefined
   >(undefined)
 
+  const { data: report, isLoading: isLoadingReport } = useGetReportQuery(id)
+  const { data: reportFiles, isLoading: isLoadingReportFiles } =
+    useGetReportFilesQuery(id)
+
+  const { mutateAsync: createReportMutation, isPending: savingReport } =
+    useMutation({
+      mutationFn: apiPostReport,
+      onSuccess: (report) => {
+        queryClient.invalidateQueries({ queryKey: ['report', id] })
+        queryClient.invalidateQueries({ queryKey: ['reportfiles', id] })
+        navigate(`/luontotieto/selvitys/${report.id}`)
+      },
+      onError: (error: any) => setReportFileErrors([error])
+    })
+
+  const { mutateAsync: updateReportMutation, isPending: updatingReport } =
+    useMutation({
+      mutationFn: apiPutReport,
+      onSuccess: (report) => {
+        queryClient.invalidateQueries({ queryKey: ['report', id] })
+        queryClient.invalidateQueries({ queryKey: ['reportfiles', id] })
+        navigate(`/luontotieto/selvitys/${report.id}`)
+      },
+      onError: (error: any) => setReportFileErrors([error])
+    })
+
   const [approving, setApproving] = useState<boolean>(false)
 
-  const onSubmit = (reportInput: ReportFormInput) => {
+  const onSubmit = async (reportInput: ReportFormInput) => {
     if (props.mode === 'CREATE') {
-      setSubmitting(true)
-      apiPostReport(reportInput)
-        .then((report) => navigate(`/luontotieto/selvitys/${report.id}`))
-        .catch((e) => {
-          setReportFileErrors([e])
-          setSubmitting(false)
-        })
+      await createReportMutation(reportInput)
     } else {
-      setSubmitting(true)
-      apiPutReport(id!, reportInput)
-        .then((report) => navigate(`/luontotieto/selvitys/${report.id}`))
-        .catch((e) => {
-          setReportFileErrors([e])
-          setSubmitting(false)
-        })
+      await updateReportMutation({ ...reportInput, reportId: id! })
     }
   }
 
-  useEffect(() => {
-    if (props.mode === 'EDIT' && id) {
-      void apiGetReport(id).then(setReport)
-      void apiGetReportFiles(id).then(setReportFiles)
-    }
-  }, [props, id])
-
+  if (isLoadingReport || isLoadingReportFiles || !report || !reportFiles) {
+    return null
+  }
   const title =
     props.mode === 'CREATE'
       ? 'Uusi luontoselvitys'
@@ -129,7 +134,9 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
             text="Tallenna"
             data-qa="save-button"
             primary
-            disabled={!reportInput || submitting || report?.approved}
+            disabled={
+              !reportInput || savingReport || updatingReport || report?.approved
+            }
             onClick={() => {
               if (!reportInput) return
 

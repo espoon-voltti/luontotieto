@@ -2304,6 +2304,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.35.1":
+  version: 5.35.1
+  resolution: "@tanstack/query-core@npm:5.35.1"
+  checksum: 00a41b99e686914198649ae06c451632e3335dd1f26d037e5e9c0db3b49eadb01783289fba2cf7dc5b36cc309db17809d02a4b13dc6e2c1df8a767ea10bc4d58
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.35.1":
+  version: 5.35.1
+  resolution: "@tanstack/react-query@npm:5.35.1"
+  dependencies:
+    "@tanstack/query-core": "npm:5.35.1"
+  peerDependencies:
+    react: ^18.0.0
+  checksum: d64fbbddadd220e60b87d828112ea47d93ee2139f75b1d21a57919577f6cbbc1cf55e93c474d43e188bd81a34c9bcdb598959aff066ca6e1674e9d0e6a153367
+  languageName: node
+  linkType: hard
+
 "@tsconfig/node10@npm:^1.0.7":
   version: 1.0.9
   resolution: "@tsconfig/node10@npm:1.0.9"
@@ -5626,6 +5644,7 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": "npm:6.5.0"
     "@fortawesome/free-solid-svg-icons": "npm:6.5.0"
     "@fortawesome/react-fontawesome": "npm:0.2.0"
+    "@tanstack/react-query": "npm:^5.35.1"
     "@types/file-saver": "npm:^2.0.7"
     "@types/lodash": "npm:^4.17.0"
     "@types/node": "npm:^20.12.2"
