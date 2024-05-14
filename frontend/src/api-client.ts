@@ -13,7 +13,9 @@ apiClient.interceptors.response.use(
     (res) => res,
     (err) => {
         if (err instanceof AxiosError) {
-            if (err.response?.status === 401) {
+            const request: XMLHttpRequest | undefined = err.request
+            const responseURL = request?.responseURL
+            if (err.response?.status === 401 && !responseURL?.endsWith('/auth/password/login')) {
                 window.location.reload()
             }
         }
@@ -21,8 +23,3 @@ apiClient.interceptors.response.use(
         return Promise.reject(err)
     }
 )
-
-export const loginApiClient = axios.create({
-    baseURL: '/api',
-    xsrfCookieName: 'luontotieto.xsrf'
-})

@@ -4,7 +4,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { getAuthStatus } from '../../auth/auth-status'
-import { loginApiClient } from '../../api-client'
+import { apiClient } from '../../api-client'
 
 
 export function useAuthStatusQuery() {
@@ -15,7 +15,7 @@ export function useAuthStatusQuery() {
 }
 
 export const apiPostLogin = async (email: string, password: string) => {
-    return loginApiClient.post(
+    return apiClient.post(
         `/auth/password/login`,
         {email, password}
     ).then(res => res.status === 200)
