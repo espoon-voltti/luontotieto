@@ -8,8 +8,6 @@ export function useGetOrderQuery(id?: string) {
   return useQuery({
     queryKey: ['order', id],
     queryFn: () => {
-      //TODO: a bit hacky find out if theres better way to pass conditional params
-      // the enabled param should however prevent that this will not fire without the id
       if (id) {
         return apiGetOrder(id)
       }
