@@ -7,7 +7,6 @@ package fi.espoo.luontotieto.domain
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.audit
-import java.util.UUID
 import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.jdbi.v3.core.Jdbi
@@ -24,19 +23,22 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @RestController
 @RequestMapping("/users")
 class UserController {
-    @Qualifier("jdbi-luontotieto") @Autowired lateinit var jdbi: Jdbi
+    @Qualifier("jdbi-luontotieto")
+    @Autowired
+    lateinit var jdbi: Jdbi
 
     private val logger = KotlinLogging.logger {}
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     fun createUser(
-            user: AuthenticatedUser,
-            @RequestBody body: User.Companion.CreateCustomerUser
+        user: AuthenticatedUser,
+        @RequestBody body: User.Companion.CreateCustomerUser
     ): User {
         val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
         val generatedString = generatePassword()
@@ -44,14 +46,17 @@ class UserController {
         val passwordHash = encoder.encode(generatedString)
         // TODO: communicate the password via email
         return jdbi
-                .inTransactionUnchecked { tx ->
-                    tx.insertUser(data = body, user = user, passwordHash)
-                }
-                .also { logger.audit(user, AuditEvent.CREATE_USER, mapOf("id" to "$it")) }
+            .inTransactionUnchecked { tx ->
+                tx.insertUser(data = body, user = user, passwordHash)
+            }
+            .also { logger.audit(user, AuditEvent.CREATE_USER, mapOf("id" to "$it")) }
     }
 
     @GetMapping("/{id}")
-    fun getUser(user: AuthenticatedUser, @PathVariable id: UUID): User {
+    fun getUser(
+        user: AuthenticatedUser,
+        @PathVariable id: UUID
+    ): User {
         return jdbi.inTransactionUnchecked { tx -> tx.getUser(id, user) }
     }
 
@@ -62,9 +67,9 @@ class UserController {
 
     @PutMapping("/{id}")
     fun updateUser(
-            user: AuthenticatedUser,
-            @PathVariable id: UUID,
-            @RequestBody data: User.Companion.UserInput
+        user: AuthenticatedUser,
+        @PathVariable id: UUID,
+        @RequestBody data: User.Companion.UserInput
     ): User {
         return jdbi.inTransactionUnchecked { tx -> tx.putUser(id, data, user) }.also {
             logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id"))
