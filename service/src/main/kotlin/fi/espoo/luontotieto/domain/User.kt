@@ -37,17 +37,18 @@ data class User(
     val role: UserRole,
     val created: OffsetDateTime,
     val updated: OffsetDateTime,
-    val createdBy: String,
-    val updatedBy: String,
     val active: Boolean,
     val email: String?,
     val externalId: String?,
+    val createdBy: String?,
+    val updatedBy: String?,
 ) {
     companion object {
         data class UserInput(
             val email: String,
             val name: String,
             val role: UserRole,
+            val active: Boolean
         )
     }
 }
@@ -76,7 +77,7 @@ fun Handle.insertUser(
 ): User {
     return createUpdate(
         """
-            WITH user AS (
+            WITH users AS (
                 INSERT INTO users (email, name, created_by, updated_by) 
                 VALUES (:email, :name, :createdBy, :updatedBy)
                 RETURNING *
@@ -101,9 +102,10 @@ fun Handle.putUser(
 ): User {
     return createQuery(
         """
-             WITH user AS (
-                UPDATE report 
-                 SET email = :email, name = :name, updated_by = :updatedBy
+             WITH users AS (
+                UPDATE users 
+                 SET email = :email, name = :name, role = :role, 
+                 active = :active,  updated_by = :updatedBy
                  WHERE id = :id AND NOT system_user
                  RETURNING *
                ) 

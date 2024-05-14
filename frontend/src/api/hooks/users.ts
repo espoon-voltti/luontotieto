@@ -12,15 +12,9 @@ export function useGetUsersQuery() {
   })
 }
 
-export function useGetUserQuery(id?: string) {
+export function useGetUserQuery(id: string) {
   return useQuery({
     queryKey: ['user', id],
-    queryFn: () => {
-      if (id) {
-        return apiGetUser(id)
-      }
-      return null
-    },
-    enabled: !!id
+    queryFn: () => apiGetUser(id)
   })
 }

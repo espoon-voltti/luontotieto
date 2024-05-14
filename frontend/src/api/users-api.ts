@@ -37,7 +37,7 @@ export const apiPostUser = async (userInput: UserFormInput): Promise<User> => {
   return await apiClient.post<User>('/users', body).then((r) => r.data)
 }
 
-export const apiPutReport = async (
+export const apiPutUser = async (
   userInput: { userId: string } & UserFormInput
 ): Promise<User> => {
   const body: JsonOf<UserFormInput> = {
