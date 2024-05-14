@@ -2,25 +2,22 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Button } from 'shared/buttons/Button'
 
 import { FlexRight, PageContainer, VerticalGap } from '../../shared/layout'
 
 import { OrderForm } from './OrderForm'
-import {
-  Order,
-  OrderFile,
-  OrderFormInput,
-  apiGetOrder,
-  apiGetOrderFiles,
-  apiGetPlanNumbers,
-  apiPostOrder,
-  apiPutOrder
-} from 'api/order-api'
+import { OrderFormInput, apiPostOrder, apiPutOrder } from 'api/order-api'
 import { Footer } from 'shared/Footer'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
+import {
+  useGetOrderFilesQuery,
+  useGetOrderPlanNumbersQuery,
+  useGetOrderQuery
+} from 'api/hooks/orders'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -36,25 +33,44 @@ type Props = CreateProps | EditProps
 export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   const { state } = useLocation()
 
+  const queryClient = useQueryClient()
+
   const navigate = useNavigate()
   const { id } = useParams()
   if (!id && props.mode === 'EDIT') throw Error('Id not found in path')
 
+  const { data: order, isLoading: isLoadingOrder } = useGetOrderQuery(id)
+  const { data: orderFiles, isLoading: isLoadingOrderFiles } =
+    useGetOrderFilesQuery(id)
+  const { data: planNumbers } = useGetOrderPlanNumbersQuery()
+
   const [orderInput, setOrderInput] = useState<OrderFormInput | null>(null)
-  const [order, setOrder] = useState<Order | null>(null)
-  const [orderFiles, setOrderFiles] = useState<OrderFile[] | null>(null)
-  const [planNumbers, setPlanNumbers] = useState<string[]>([])
 
-  const [submitting, setSubmitting] = useState<boolean>(false)
+  const { mutateAsync: createOrderMutation, isPending: savingOrder } =
+    useMutation({
+      mutationFn: apiPostOrder,
+      onSuccess: (reportId) => {
+        queryClient.invalidateQueries({ queryKey: ['order', id] })
+        queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
+        queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
+        navigate(`/luontotieto/selvitys/${reportId}/muokkaa`)
+      }
+    })
 
-  useEffect(() => {
-    void apiGetPlanNumbers().then(setPlanNumbers)
+  const { mutateAsync: updateOrderMutation, isPending: updatingOrder } =
+    useMutation({
+      mutationFn: apiPutOrder,
+      onSuccess: (order) => {
+        queryClient.invalidateQueries({ queryKey: ['order', id] })
+        queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
+        queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
+        navigate(`/luontotieto/selvitys/${order.id}`)
+      }
+    })
 
-    if (props.mode === 'EDIT' && id) {
-      void apiGetOrder(id).then(setOrder)
-      void apiGetOrderFiles(id).then(setOrderFiles)
-    }
-  }, [props, id])
+  if (isLoadingOrder || isLoadingOrderFiles) {
+    return null
+  }
 
   return (
     <>
@@ -75,7 +91,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
           <OrderForm
             mode="CREATE"
             onChange={setOrderInput}
-            planNumbers={planNumbers}
+            planNumbers={planNumbers ?? []}
           />
         )}
 
@@ -85,7 +101,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             order={order}
             orderFiles={orderFiles}
             onChange={setOrderInput}
-            planNumbers={planNumbers}
+            planNumbers={planNumbers ?? []}
           />
         )}
       </PageContainer>
@@ -96,21 +112,14 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             text="Tallenna"
             data-qa="save-button"
             primary
-            disabled={!orderInput || submitting}
-            onClick={() => {
+            disabled={!orderInput || savingOrder || updatingOrder}
+            onClick={async () => {
               if (!orderInput) return
-              setSubmitting(true)
 
               if (props.mode === 'CREATE') {
-                apiPostOrder(orderInput)
-                  .then((reportId) =>
-                    navigate(`/luontotieto/selvitys/${reportId}/muokkaa`)
-                  )
-                  .catch(() => setSubmitting(false))
+                await createOrderMutation(orderInput)
               } else {
-                apiPutOrder(id!, orderInput)
-                  .then((order) => navigate(`/luontotieto/tilaus/${order.id}`))
-                  .catch(() => setSubmitting(false))
+                await updateOrderMutation({ ...orderInput, orderId: id! })
               }
             }}
           />
