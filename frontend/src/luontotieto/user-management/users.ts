@@ -28,8 +28,8 @@ export const userlist: User[] = [
   },
   {
     id: '3',
-    userName: 'Rambol Oy',
-    email: 'rambol@konsultti.com',
+    userName: 'Karhut Oy',
+    email: 'karhu@konsultti.com',
     active: true,
     role: 'yrityskäyttäjä'
   },
