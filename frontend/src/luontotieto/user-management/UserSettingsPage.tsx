@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 
 import {
   FlexRowWithGaps,
@@ -13,30 +13,32 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { InputField } from 'shared/form/InputField'
-import { userlist } from './users'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Label } from 'shared/typography'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { Button } from 'shared/buttons/Button'
+import { UserContext } from 'auth/UserContext'
 
 export const UserSettingsPage = React.memo(function UserSettingsPage() {
-  //TODO: get from context and whos this page only for konsultti/yritys users
-  const [userInput, _] = useState(userlist[3])
-  const [showChangePassword, setShowChangePassword] = useState(false)
+  const { user } = useContext(UserContext)
 
+  const [showChangePassword, setShowChangePassword] = useState(false)
+  if (!user) {
+    return null
+  }
   return (
     <PageContainer>
-      <BackNavigation text={userInput.userName} navigationText="Etusivulle" />
+      <BackNavigation text={user.name} navigationText="Etusivulle" />
 
       <SectionContainer>
         <GroupOfInputRows>
           <LabeledInput $cols={3}>
             <Label>Yritys</Label>
-            <InputField value={userInput.userName} readonly={true} />
+            <InputField value={user.name} readonly={true} />
           </LabeledInput>
           <LabeledInput $cols={3}>
             <Label>Yhteyssähköposti</Label>
-            <InputField value={userInput.email} readonly={true} />
+            <InputField value={user.email ?? ''} readonly={true} />
           </LabeledInput>
           {!showChangePassword ? (
             <InlineButton

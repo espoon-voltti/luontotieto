@@ -22,7 +22,7 @@ enum class UserRole : DatabaseEnum {
     @DatabaseValue("tilaaja")
     ORDERER,
 
-    @DatabaseValue("katsoja")
+    @DatabaseValue("katselija")
     VIEWER,
 
     @DatabaseValue("yrityskäyttäjä")
@@ -33,22 +33,27 @@ enum class UserRole : DatabaseEnum {
 
 data class User(
     val id: UUID,
-    val email: String,
     val name: String,
     val role: UserRole,
     val created: OffsetDateTime,
     val updated: OffsetDateTime,
-    val createdBy: String,
-    val updatedBy: String,
     val active: Boolean,
-    val systemUser: Boolean,
+    val email: String?,
     val externalId: String?,
+    val createdBy: String?,
+    val updatedBy: String?,
 ) {
     companion object {
         data class UserInput(
             val email: String,
             val name: String,
             val role: UserRole,
+            val active: Boolean
+        )
+
+        data class CreateCustomerUser(
+            val email: String,
+            val name: String,
         )
     }
 }
@@ -62,6 +67,7 @@ private const val SELECT_USER_SQL =
            u.created                                  AS "created",
            u.updated                                  AS "updated",
            u.active                                   AS "active",
+           u.external_id                              AS "externalId",
            uc.name                                    AS "createdBy",
            uu.name                                    AS "updatedBy"
     FROM users u
@@ -71,27 +77,27 @@ private const val SELECT_USER_SQL =
 """
 
 fun Handle.insertUser(
-    data: User.Companion.UserInput,
-    user: AuthenticatedUser
+    data: User.Companion.CreateCustomerUser,
+    user: AuthenticatedUser,
+    passwordHash: String
 ): User {
-    return createUpdate(
+    return createQuery(
         """
-            WITH user AS (
-                INSERT INTO users (email, name, created_by, updated_by) 
-                VALUES (:email, :name, :createdBy, :updatedBy)
+            WITH users AS (
+                INSERT INTO users (email, name, role, password_hash, created_by, updated_by) 
+                VALUES (:email, :name, :role, :passwordHash, :createdBy, :updatedBy)
                 RETURNING *
                 ) 
             $SELECT_USER_SQL
             """
     )
         .bindKotlin(data)
+        .bind("role", UserRole.CUSTOMER)
+        .bind("passwordHash", passwordHash)
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
-        .executeAndReturnGeneratedKeys()
         .mapTo<User>()
-        .findOne()
-        .getOrNull()
-        ?: throw NotFound()
+        .one()
 }
 
 fun Handle.putUser(
@@ -101,9 +107,10 @@ fun Handle.putUser(
 ): User {
     return createQuery(
         """
-             WITH user AS (
-                UPDATE report 
-                 SET email = :email, name = :name, updated_by = :updatedBy
+             WITH users AS (
+                UPDATE users 
+                 SET email = :email, name = :name, role = :role, 
+                 active = :active,  updated_by = :updatedBy
                  WHERE id = :id AND NOT system_user
                  RETURNING *
                ) 
@@ -125,7 +132,7 @@ fun Handle.getUser(
 ) = createQuery(
     """
                 $SELECT_USER_SQL
-                WHERE u.id = :id AND NOT system_user
+                WHERE u.id = :id AND NOT u.system_user
             """
 )
     .bind("id", id)
@@ -135,14 +142,13 @@ fun Handle.getUser(
     .getOrNull()
     ?: throw NotFound()
 
-fun Handle.getUsers(user: AuthenticatedUser) =
+fun Handle.getUsers() =
     createQuery(
         """
                 $SELECT_USER_SQL
-                WHERE NOT system_user
+                WHERE NOT u.system_user
             """
     )
-        .bind("userId", user.id)
         .mapTo<User>()
         .list()
         ?: emptyList()

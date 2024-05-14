@@ -44,11 +44,12 @@ class SystemController {
 
     @PostMapping("/user-login")
     fun adLogin(
+        user: AuthenticatedUser,
         @RequestBody adUser: AdUser
     ): AppUser {
-        return jdbi
-            .inTransactionUnchecked { it.upsertAppUserFromAd(adUser) }
-            .also { logger.audit(AuthenticatedUser(it.id), AuditEvent.USER_LOGIN) }
+        return jdbi.inTransactionUnchecked { it.upsertAppUserFromAd(adUser, user) }.also {
+            logger.audit(user, AuditEvent.USER_LOGIN)
+        }
     }
 
     @PostMapping("/password-login")
