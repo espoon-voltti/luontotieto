@@ -77,8 +77,8 @@ fun Handle.insertUser(
     return createUpdate(
         """
             WITH user AS (
-                INSERT INTO users (email, first_name, last_name, created_by, updated_by) 
-                VALUES (:email, :first_name, :last_name, :createdBy, :updatedBy)
+                INSERT INTO users (email, name, created_by, updated_by) 
+                VALUES (:email, :name, :createdBy, :updatedBy)
                 RETURNING *
                 ) 
             $SELECT_USER_SQL
@@ -103,7 +103,7 @@ fun Handle.putUser(
         """
              WITH user AS (
                 UPDATE report 
-                 SET email = :email, first_name = :first_name, last_name = :last_name, updated_by = :updatedBy
+                 SET email = :email, name = :name, updated_by = :updatedBy
                  WHERE id = :id AND NOT system_user
                  RETURNING *
                ) 
