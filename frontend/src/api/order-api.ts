@@ -133,10 +133,6 @@ const apiDeleteOrderFile = (orderId: string, fileId: string): Promise<void> => {
 export const apiGetOrder = (id: string): Promise<Order> =>
   apiClient.get<Order>(`/orders/${id}`).then((res) => res.data)
 
-//TODO: cleanup
-// export const apiGetOrders = (): Promise<Order[]> =>
-//   apiClient.get<Order[]>(`/orders`).then((res) => res.data)
-
 export const apiGetOrderFiles = (id: string): Promise<OrderFile[]> =>
   apiClient.get<OrderFile[]>(`/orders/${id}/files`).then((res) => res.data)
 
