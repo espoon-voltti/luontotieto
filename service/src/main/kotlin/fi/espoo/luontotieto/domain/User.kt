@@ -78,7 +78,8 @@ private const val SELECT_USER_SQL =
 
 fun Handle.insertUser(
     data: User.Companion.CreateCustomerUser,
-    user: AuthenticatedUser
+    user: AuthenticatedUser,
+    passwordHash: String
 ): User {
     return createQuery(
         """
@@ -92,7 +93,7 @@ fun Handle.insertUser(
     )
         .bindKotlin(data)
         .bind("role", UserRole.CUSTOMER)
-        .bind("passwordHash", "smile")
+        .bind("passwordHash", passwordHash)
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
         .mapTo<User>()
