@@ -76,8 +76,7 @@ const handleFiles = async (
 }
 
 export const apiPutOrder = async (
-  orderId: string,
-  orderInput: OrderFormInput
+  orderInput: { orderId: string } & OrderFormInput
 ): Promise<Order> => {
   const body: JsonOf<OrderInput> = {
     ...orderInput,
@@ -89,10 +88,14 @@ export const apiPutOrder = async (
   }
 
   const order = await apiClient
-    .put<Order>(`/orders/${orderId}`, body)
+    .put<Order>(`/orders/${orderInput.orderId}`, body)
     .then((r) => r.data)
 
-  await handleFiles(orderId, orderInput.filesToAdd, orderInput.filesToRemove)
+  await handleFiles(
+    orderInput.orderId,
+    orderInput.filesToAdd,
+    orderInput.filesToRemove
+  )
 
   return order
 }
@@ -129,9 +132,6 @@ const apiDeleteOrderFile = (orderId: string, fileId: string): Promise<void> => {
 
 export const apiGetOrder = (id: string): Promise<Order> =>
   apiClient.get<Order>(`/orders/${id}`).then((res) => res.data)
-
-export const apiGetOrders = (): Promise<Order[]> =>
-  apiClient.get<Order[]>(`/orders`).then((res) => res.data)
 
 export const apiGetOrderFiles = (id: string): Promise<OrderFile[]> =>
   apiClient.get<OrderFile[]>(`/orders/${id}/files`).then((res) => res.data)

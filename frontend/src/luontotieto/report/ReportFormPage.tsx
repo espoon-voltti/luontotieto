@@ -62,7 +62,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
       mutationFn: apiPostReport,
       onSuccess: (report) => {
         queryClient.invalidateQueries({ queryKey: ['report', id] })
-        queryClient.invalidateQueries({ queryKey: ['reportfiles', id] })
+        queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
         navigate(`/luontotieto/selvitys/${report.id}`)
       },
       onError: (error: any) => setReportFileErrors([error])
@@ -73,13 +73,20 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
       mutationFn: apiPutReport,
       onSuccess: (report) => {
         queryClient.invalidateQueries({ queryKey: ['report', id] })
-        queryClient.invalidateQueries({ queryKey: ['reportfiles', id] })
+        queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
         navigate(`/luontotieto/selvitys/${report.id}`)
       },
       onError: (error: any) => setReportFileErrors([error])
     })
 
-  const [approving, setApproving] = useState<boolean>(false)
+  const { mutateAsync: approveReport, isPending: approving } = useMutation({
+    mutationFn: apiApproveReport,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['report', id] })
+      queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+      alert('Hyväksytty ja tiedostot lähetetty PostGIS kantaan.')
+    }
+  })
 
   const onSubmit = async (reportInput: ReportFormInput) => {
     if (props.mode === 'CREATE') {
@@ -139,7 +146,6 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
             }
             onClick={() => {
               if (!reportInput) return
-
               onSubmit(reportInput)
             }}
           />
@@ -149,15 +155,9 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
             data-qa="approve-button"
             primary
             disabled={!report || !reportInput || approving || report.approved}
-            onClick={() => {
+            onClick={async () => {
               if (!report) return
-
-              setApproving(true)
-              apiApproveReport(report.id)
-                .then(() =>
-                  alert('Hyväksytty ja tiedostot lähetetty PostGIS kantaan.')
-                )
-                .catch(() => setApproving(false))
+              await approveReport(report.id)
             }}
           />
         </FlexRight>

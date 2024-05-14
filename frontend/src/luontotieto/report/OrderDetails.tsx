@@ -15,18 +15,14 @@ import {
 } from '../../shared/layout'
 import { H3, Label } from '../../shared/typography'
 
-import {
-  Order,
-  OrderFile,
-  apiGetOrderFileUrl,
-  apiGetOrderFiles
-} from 'api/order-api'
+import { Order, apiGetOrderFileUrl } from 'api/order-api'
 import styled from 'styled-components'
 import { getDocumentTypeTitle } from 'api/report-api'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen } from '@fortawesome/free-solid-svg-icons'
 import { useNavigate } from 'react-router-dom'
 import { LinkFileDownload } from 'shared/buttons/LinkFileDownload'
+import { useGetOrderFilesQuery } from 'api/hooks/orders'
 
 type Props = { order: Order; reportId: string }
 
@@ -44,7 +40,8 @@ const StyledIcon = styled(FontAwesomeIcon)`
 export const OrderDetails = React.memo(function OrderDetails(props: Props) {
   const navigate = useNavigate()
   const { order } = props
-  const [orderFiles, setOrderFiles] = useState<OrderFile[] | null>(null)
+
+  const { data: orderFiles } = useGetOrderFilesQuery(order.id)
 
   const handleOrderFileClick = async (fileId: string) => {
     let url = ''
@@ -53,10 +50,6 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
       window.open(url)
     }
   }
-
-  useEffect(() => {
-    void apiGetOrderFiles(order.id).then(setOrderFiles)
-  }, [order])
 
   return (
     <SectionContainer>
@@ -98,7 +91,7 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
           <RowOfInputs>
             <LabeledInput>
               <Label>Tilauksen liitteet</Label>
-              {orderFiles !== null &&
+              {!!orderFiles &&
                 orderFiles.map((rf) => (
                   <StyledLi key={rf.id}>
                     <LinkFileDownload
