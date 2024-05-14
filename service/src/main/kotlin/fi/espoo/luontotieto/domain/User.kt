@@ -22,7 +22,7 @@ enum class UserRole : DatabaseEnum {
     @DatabaseValue("tilaaja")
     ORDERER,
 
-    @DatabaseValue("katsoja")
+    @DatabaseValue("katselija")
     VIEWER,
 
     @DatabaseValue("yrityskäyttäjä")
@@ -33,7 +33,6 @@ enum class UserRole : DatabaseEnum {
 
 data class User(
     val id: UUID,
-    val email: String,
     val name: String,
     val role: UserRole,
     val created: OffsetDateTime,
@@ -41,7 +40,7 @@ data class User(
     val createdBy: String,
     val updatedBy: String,
     val active: Boolean,
-    val systemUser: Boolean,
+    val email: String?,
     val externalId: String?,
 ) {
     companion object {
@@ -62,6 +61,7 @@ private const val SELECT_USER_SQL =
            u.created                                  AS "created",
            u.updated                                  AS "updated",
            u.active                                   AS "active",
+           u.external_id                              AS "externalId",
            uc.name                                    AS "createdBy",
            uu.name                                    AS "updatedBy"
     FROM users u
@@ -125,7 +125,7 @@ fun Handle.getUser(
 ) = createQuery(
     """
                 $SELECT_USER_SQL
-                WHERE u.id = :id AND NOT system_user
+                WHERE u.id = :id AND NOT u.system_user
             """
 )
     .bind("id", id)
@@ -139,10 +139,9 @@ fun Handle.getUsers(user: AuthenticatedUser) =
     createQuery(
         """
                 $SELECT_USER_SQL
-                WHERE NOT system_user
+                WHERE NOT u.system_user
             """
     )
-        .bind("userId", user.id)
         .mapTo<User>()
         .list()
         ?: emptyList()

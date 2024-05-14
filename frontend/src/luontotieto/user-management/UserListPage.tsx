@@ -19,15 +19,17 @@ import { SortableTh, Th } from 'shared/Table'
 import { orderBy } from 'lodash'
 import { useDebouncedState } from 'shared/useDebouncedState'
 import { faSearch } from '@fortawesome/free-solid-svg-icons'
-import { User, userlist } from './users'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
+import { useGetUsersQuery } from 'api/hooks/users'
+import { User, getUserRole } from 'api/users-api'
 
 export type UserSortColumn = 'role' | 'active'
 export type SortDirection = 'ASC' | 'DESC'
 
 export const UserListPage = React.memo(function UserListPage() {
   const navigate = useNavigate()
-  const [users, _] = useState<User[]>(userlist)
+
+  const { data: users, isLoading } = useGetUsersQuery()
 
   const [sortBy, setSortBy] = useState<UserSortColumn | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>('ASC')
@@ -63,6 +65,9 @@ export const UserListPage = React.memo(function UserListPage() {
     [sortBy, sortDirection, filterBySearchQuery]
   )
 
+  if (isLoading || !users) {
+    return null
+  }
   return (
     <PageContainer>
       <BackNavigation text={'Käyttäjänhallinta'} navigationText="Etusivulle" />
@@ -113,11 +118,13 @@ export const UserListPage = React.memo(function UserListPage() {
               <tr key={user.id}>
                 <td>
                   <Link to={`/luontotieto/käyttäjät/${user.id}`}>
-                    {user.userName}
+                    {user.name}
                   </Link>
                 </td>
-                <td>{user.email.toLowerCase()}</td>
-                <td style={{ textTransform: 'capitalize' }}>{user.role}</td>
+                <td>{user.email?.toLowerCase() ?? ''}</td>
+                <td style={{ textTransform: 'capitalize' }}>
+                  {getUserRole(user.role)}
+                </td>
                 <td>{user.active ? 'Aktiivinen' : 'Epäaktiivinen'}</td>
               </tr>
             ))}
