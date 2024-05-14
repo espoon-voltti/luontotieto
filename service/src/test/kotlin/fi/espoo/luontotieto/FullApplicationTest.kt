@@ -16,20 +16,18 @@ import org.springframework.test.context.ActiveProfiles
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = [SharedIntegrationTestConfig::class]
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        classes = [SharedIntegrationTestConfig::class]
 )
 @ActiveProfiles("test")
 abstract class FullApplicationTest {
-    @Qualifier("jdbi-luontotieto")
-    @Autowired
-    protected lateinit var jdbi: Jdbi
+    @Qualifier("jdbi-luontotieto") @Autowired protected lateinit var jdbi: Jdbi
 
     @BeforeAll
     fun beforeAll() {
         jdbi.withHandleUnchecked { tx ->
             tx.execute(
-                """
+                    """
                 CREATE OR REPLACE FUNCTION reset_database() RETURNS void AS ${'$'}${'$'}
                 BEGIN
                   EXECUTE (
@@ -45,8 +43,7 @@ abstract class FullApplicationTest {
                     WHERE sequence_schema = 'public'
                   );
                 END ${'$'}${'$'} LANGUAGE plpgsql;
-                """
-                    .trimIndent()
+                """.trimIndent()
             )
         }
     }
@@ -56,13 +53,13 @@ abstract class FullApplicationTest {
         jdbi.withHandleUnchecked { tx ->
             tx.execute("SELECT reset_database()")
             tx.createUpdate(
-                """
-                INSERT INTO users (id, updated, external_id, first_names, last_name, email) 
-                VALUES (:id, now(), 'test', 'Teija', 'Testaaja', NULL)
+                            """
+                INSERT INTO users (id, updated, external_id, name, email) 
+                VALUES (:id, now(), 'test', 'Teija Testaaja', NULL)
             """
-            )
-                .bind("id", testUser.id)
-                .execute()
+                    )
+                    .bind("id", testUser.id)
+                    .execute()
         }
     }
 }
