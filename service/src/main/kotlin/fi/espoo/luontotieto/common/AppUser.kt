@@ -10,18 +10,26 @@ import org.jdbi.v3.core.kotlin.mapTo
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
-data class AdUser(
-    val externalId: String,
-    val name: String,
-    val email: String?
-)
+data class AdUser(val externalId: String, val name: String, val email: String?)
 
-data class AppUser(
+data class AppUser(val id: UUID, val externalId: String, val name: String, val email: String?)
+
+data class AppUserWithPassword(
     val id: UUID,
     val externalId: String,
     val name: String,
-    val email: String?
-)
+    val email: String?,
+    val password: String
+) {
+    fun toAppUser(): AppUser {
+        return AppUser(
+            id = this.id,
+            externalId = this.externalId,
+            name = this.name,
+            email = this.email
+        )
+    }
+}
 
 fun Handle.upsertAppUserFromAd(adUser: AdUser): AppUser =
     createQuery(
@@ -46,7 +54,9 @@ fun Handle.getAppUsers(): List<AppUser> =
     FROM users
     WHERE NOT system_user
 """
-    ).mapTo<AppUser>().list()
+    )
+        .mapTo<AppUser>()
+        .list()
 
 fun Handle.getAppUser(id: UUID) =
     createQuery(
@@ -60,5 +70,20 @@ WHERE id = :id AND NOT system_user
     )
         .bind("id", id)
         .mapTo<AppUser>()
+        .findOne()
+        .getOrNull()
+
+fun Handle.getAppUserWithPassword(email: String) =
+    createQuery(
+        // language=SQL
+        """
+SELECT id, external_id, name, email, password_hash AS password
+FROM users 
+WHERE email = :email AND NOT system_user AND password_hash IS NOT NULL
+    """
+            .trimIndent()
+    )
+        .bind("email", email)
+        .mapTo<AppUserWithPassword>()
         .findOne()
         .getOrNull()

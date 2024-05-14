@@ -6,7 +6,9 @@ package fi.espoo.luontotieto
 
 import fi.espoo.luontotieto.common.AdUser
 import fi.espoo.luontotieto.common.AppUser
+import fi.espoo.luontotieto.common.Unauthorized
 import fi.espoo.luontotieto.common.getAppUser
+import fi.espoo.luontotieto.common.getAppUserWithPassword
 import fi.espoo.luontotieto.common.upsertAppUserFromAd
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
@@ -16,6 +18,7 @@ import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -23,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
+
+data class PasswordUser(val email: String, val password: String)
 
 /**
  * Controller for "system" endpoints intended to be only called from api-gateway as the system
@@ -38,12 +43,35 @@ class SystemController {
     private val logger = KotlinLogging.logger {}
 
     @PostMapping("/user-login")
-    fun userLogin(
+    fun adLogin(
         @RequestBody adUser: AdUser
     ): AppUser {
         return jdbi
             .inTransactionUnchecked { it.upsertAppUserFromAd(adUser) }
             .also { logger.audit(AuthenticatedUser(it.id), AuditEvent.USER_LOGIN) }
+    }
+
+    @PostMapping("/password-login")
+    fun passwordLogin(
+        @RequestBody passwordUser: PasswordUser
+    ): AppUser {
+        return jdbi
+            .inTransactionUnchecked {
+                val user = it.getAppUserWithPassword(passwordUser.email)
+                if (user == null) {
+                    logger.info("Login attempt failed. Invalid email.")
+                    throw Unauthorized()
+                }
+
+                val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
+
+                if (!encoder.matches(passwordUser.password, user.password)) {
+                    logger.info("Login attempt failed. Invalid password.")
+                    throw Unauthorized()
+                }
+                user.toAppUser()
+            }
+            .also { logger.audit(AuthenticatedUser(it.id), AuditEvent.PASSWORD_LOGIN) }
     }
 
     @GetMapping("/users/{id}")
