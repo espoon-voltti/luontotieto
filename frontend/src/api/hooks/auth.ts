@@ -3,8 +3,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { useQuery } from '@tanstack/react-query'
-import { getAuthStatus } from '../../auth/auth-status'
-import { apiClient } from '../../api-client'
+import { getAuthStatus } from '../auth-api'
 
 
 export function useAuthStatusQuery() {
@@ -13,12 +12,3 @@ export function useAuthStatusQuery() {
         queryKey: ['auth-status']
     })
 }
-
-export const apiPostLogin = async (email: string, password: string) => {
-    return apiClient.post(
-        `/auth/password/login`,
-        {email, password}
-    ).then(res => res.status === 200)
-}
-
-

@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import styled from 'styled-components'
 import { colors } from '../shared/theme'
-import { apiPostLogin } from '../api/hooks/auth'
+import { apiPostLogin } from '../api/auth-api'
 
 
 const LoginMessage = styled.label`
@@ -33,8 +33,8 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
     const queryClient = useQueryClient()
 
     const {mutateAsync: loginMutation, isPending} =
-        useMutation<boolean, unknown, { email: string, password: string }, unknown>({
-            mutationFn: ({email, password}) => apiPostLogin(email, password),
+        useMutation({
+            mutationFn: apiPostLogin,
             onSuccess: async (success: boolean) => {
                 if (success) {
                     await queryClient.invalidateQueries({queryKey: ['auth-status']})
@@ -76,9 +76,7 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
                         text="Kirjaudu sisään"
                         primary
                         disabled={!email || !password || isPending}
-                        onClick={async () => {
-                            await loginMutation({email, password})
-                        }}
+                        onClick={async () => await loginMutation({email, password})}
                     />
                     <InlineButton
                         text={'Unohdin salasanan'}
