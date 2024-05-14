@@ -18,16 +18,27 @@ import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Label } from 'shared/typography'
 import { Button } from 'shared/buttons/Button'
 import { InfoBox } from 'shared/MessageBoxes'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { apiPostUser } from 'api/users-api'
+import { useNavigate } from 'react-router-dom'
 
 export const NewUserPage = React.memo(function NewUserPage() {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [userInput, setUserInput] = useState({
-    userName: '',
-    email: '',
-    active: true,
-    role: 'konsultti'
+    name: '',
+    email: ''
   })
 
-  const isValid = userInput.userName && userInput.email
+  const { mutateAsync: createUser, isPending } = useMutation({
+    mutationFn: apiPostUser,
+    onSuccess: (user) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      navigate(`/luontotieto/käyttäjät/${user.id}`)
+    }
+  })
+
+  const isValid = userInput.name && userInput.email
 
   return (
     <PageContainer>
@@ -42,10 +53,8 @@ export const NewUserPage = React.memo(function NewUserPage() {
           <LabeledInput $cols={3}>
             <Label>Yritys</Label>
             <InputField
-              value={userInput.userName}
-              onChange={(value) =>
-                setUserInput({ ...userInput, userName: value })
-              }
+              value={userInput.name}
+              onChange={(value) => setUserInput({ ...userInput, name: value })}
             />
           </LabeledInput>
           <LabeledInput $cols={3}>
@@ -59,7 +68,8 @@ export const NewUserPage = React.memo(function NewUserPage() {
             <Button
               primary
               text={'Luo yrityskäyttäjä'}
-              disabled={!isValid}
+              disabled={!isValid || isPending}
+              onClick={async () => await createUser(userInput)}
             ></Button>
           </FlexRowWithGaps>
 

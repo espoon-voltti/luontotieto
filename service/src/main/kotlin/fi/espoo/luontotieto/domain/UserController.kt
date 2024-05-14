@@ -36,7 +36,7 @@ class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     fun createUser(
         user: AuthenticatedUser,
-        @RequestBody body: User.Companion.UserInput
+        @RequestBody body: User.Companion.CreateCustomerUser
     ): User {
         return jdbi
             .inTransactionUnchecked { tx -> tx.insertUser(data = body, user = user) }
@@ -53,7 +53,7 @@ class UserController {
 
     @GetMapping()
     fun getUsers(user: AuthenticatedUser): List<User> {
-        return jdbi.inTransactionUnchecked { tx -> tx.getUsers(user) }
+        return jdbi.inTransactionUnchecked { tx -> tx.getUsers() }
     }
 
     @PutMapping("/{id}")

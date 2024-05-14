@@ -50,6 +50,11 @@ data class User(
             val role: UserRole,
             val active: Boolean
         )
+
+        data class CreateCustomerUser(
+            val email: String,
+            val name: String,
+        )
     }
 }
 
@@ -72,27 +77,26 @@ private const val SELECT_USER_SQL =
 """
 
 fun Handle.insertUser(
-    data: User.Companion.UserInput,
+    data: User.Companion.CreateCustomerUser,
     user: AuthenticatedUser
 ): User {
-    return createUpdate(
+    return createQuery(
         """
             WITH users AS (
-                INSERT INTO users (email, name, created_by, updated_by) 
-                VALUES (:email, :name, :createdBy, :updatedBy)
+                INSERT INTO users (email, name, role, password_hash, created_by, updated_by) 
+                VALUES (:email, :name, :role, :passwordHash, :createdBy, :updatedBy)
                 RETURNING *
                 ) 
             $SELECT_USER_SQL
             """
     )
         .bindKotlin(data)
+        .bind("role", UserRole.CUSTOMER)
+        .bind("passwordHash", "smile")
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
-        .executeAndReturnGeneratedKeys()
         .mapTo<User>()
-        .findOne()
-        .getOrNull()
-        ?: throw NotFound()
+        .one()
 }
 
 fun Handle.putUser(
@@ -137,7 +141,7 @@ fun Handle.getUser(
     .getOrNull()
     ?: throw NotFound()
 
-fun Handle.getUsers(user: AuthenticatedUser) =
+fun Handle.getUsers() =
     createQuery(
         """
                 $SELECT_USER_SQL
