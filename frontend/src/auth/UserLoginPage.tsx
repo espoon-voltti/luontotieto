@@ -32,7 +32,7 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
         <GroupOfInputRows>
           <RowOfInputs>
             <LabeledInput $cols={3}>
-              <Label>Käyttäjätunnus</Label>
+              <Label>Sähköposti</Label>
               <InputField onChange={setUsername} value={userName} />
             </LabeledInput>
           </RowOfInputs>
