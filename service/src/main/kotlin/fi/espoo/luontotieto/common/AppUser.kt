@@ -13,14 +13,14 @@ import kotlin.jvm.optionals.getOrNull
 
 data class AdUser(val externalId: String, val name: String, val email: String?)
 
-data class AppUser(val id: UUID, val externalId: String, val name: String, val email: String?)
+data class AppUser(val id: UUID, val name: String, val externalId: String?, val email: String?)
 
 data class AppUserWithPassword(
     val id: UUID,
-    val externalId: String,
     val name: String,
     val email: String?,
-    val password: String
+    val password: String,
+    val externalId: String?,
 ) {
     fun toAppUser(): AppUser {
         return AppUser(
