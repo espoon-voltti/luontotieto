@@ -57,8 +57,6 @@ export function createRouter(config: Config, redisClient: RedisClient): Router {
 
     router.use('/auth/password', createPasswordAuthRouter())
 
-    router.get('/auth/moi/hei', (req, res) => res.send('MOI HEI'))
-
     router.get('/auth/status', csrf, csrfCookie(), authStatus(sessions))
 
     router.get('/version', (_, res) => {
