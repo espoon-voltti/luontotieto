@@ -7,8 +7,7 @@ import React, { createContext, useMemo } from 'react'
 export interface EmployeeUser {
   id: string
   externalId: string
-  firstName: string
-  lastName: string
+  name: string
   email?: string | null
 }
 

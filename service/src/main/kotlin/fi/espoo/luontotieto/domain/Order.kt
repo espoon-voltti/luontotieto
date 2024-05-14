@@ -45,8 +45,8 @@ private const val SELECT_ORDER_SQL =
            o.report_documents as "reportDocuments",
            o.created,
            o.updated,
-           CONCAT(uc.first_name, ' ', uc.last_name) AS "createdBy",
-           CONCAT(uu.first_name, ' ', uu.last_name) AS "updatedBy"
+           uc.name AS "createdBy",
+           uu.name AS "updatedBy"
     FROM "order" o
         LEFT JOIN users uc ON o.created_by = uc.id
         LEFT JOIN users uu ON o.updated_by = uu.id
@@ -87,12 +87,14 @@ fun Handle.purOrder(
             ) 
             $SELECT_ORDER_SQL
             """
-    ).bindKotlin(order)
+    )
+        .bindKotlin(order)
         .bind("id", id)
         .bind("updatedBy", user.id)
         .mapTo<Order>()
         .findOne()
-        .getOrNull() ?: throw NotFound()
+        .getOrNull()
+        ?: throw NotFound()
 }
 
 fun Handle.getOrder(
@@ -109,7 +111,8 @@ fun Handle.getOrder(
         .bind("userId", user.id)
         .mapTo<Order>()
         .findOne()
-        .getOrNull() ?: throw NotFound()
+        .getOrNull()
+        ?: throw NotFound()
 
 fun Handle.getOrders(user: AuthenticatedUser) =
     createQuery(
@@ -121,7 +124,8 @@ fun Handle.getOrders(user: AuthenticatedUser) =
     )
         .bind("userId", user.id)
         .mapTo<Order>()
-        .list() ?: emptyList()
+        .list()
+        ?: emptyList()
 
 fun Handle.getPlanNumbers(): List<String> =
     createQuery(
@@ -129,4 +133,5 @@ fun Handle.getPlanNumbers(): List<String> =
             SELECT DISTINCT (unnest(plan_number)) FROM "order"
             """
     )
-        .mapTo<String>().sorted()
+        .mapTo<String>()
+        .sorted()

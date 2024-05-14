@@ -18,7 +18,7 @@ export const UserHeader = React.memo(function UserHeader() {
 
   return (
     <FlexRowWithGaps>
-      <UserMenu userName={`${user.firstName} ${user.lastName}`}></UserMenu>
+      <UserMenu userName={user.name}></UserMenu>
     </FlexRowWithGaps>
   )
 })

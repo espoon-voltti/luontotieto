@@ -41,8 +41,8 @@ private const val SELECT_REPORT_SQL =
            r.created                                  AS "created",
            r.updated                                  AS "updated",
            r.approved                                 AS "approved",
-           CONCAT(uc.first_name, ' ', uc.last_name)   AS "createdBy",
-           CONCAT(uu.first_name, ' ', uu.last_name)   AS "updatedBy",
+           uc.name                                    AS "createdBy",
+           uu.name                                    AS "updatedBy",
            r.order_id                                 AS "orderId",
            o.id                                       AS "o_id",
            o.name                                     AS "o_name",
@@ -51,8 +51,8 @@ private const val SELECT_REPORT_SQL =
            o.updated                                  AS "o_updated",
            o.plan_number                              AS "o_planNumber",
            o.report_documents                         AS "o_reportDocuments",
-           CONCAT(ouc.first_name, ' ', ouc.last_name) AS "o_createdBy",
-           CONCAT(ouu.first_name, ' ', ouu.last_name) AS "o_updatedBy"
+           ouc.name                                   AS "o_createdBy",
+           ouu.name                                   AS "o_updatedBy"
     FROM report r
              LEFT JOIN users uc ON r.created_by = uc.id
              LEFT JOIN users uu ON r.updated_by = uu.id
@@ -127,7 +127,8 @@ fun Handle.putReport(
         .bind("updatedBy", user.id)
         .mapTo<Report>()
         .findOne()
-        .getOrNull() ?: throw NotFound()
+        .getOrNull()
+        ?: throw NotFound()
 }
 
 fun Handle.getReport(
@@ -143,7 +144,8 @@ fun Handle.getReport(
     .bind("userId", user.id)
     .mapTo<Report>()
     .findOne()
-    .getOrNull() ?: throw NotFound()
+    .getOrNull()
+    ?: throw NotFound()
 
 fun Handle.getReports(user: AuthenticatedUser) =
     createQuery(
@@ -155,7 +157,8 @@ fun Handle.getReports(user: AuthenticatedUser) =
     )
         .bind("userId", user.id)
         .mapTo<Report>()
-        .list() ?: emptyList()
+        .list()
+        ?: emptyList()
 
 fun getTableDefinitionByDocumentType(documentType: DocumentType) =
     when (documentType) {
