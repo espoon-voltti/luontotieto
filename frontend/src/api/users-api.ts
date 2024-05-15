@@ -49,6 +49,35 @@ export const apiPutUser = async (
     .then((r) => r.data)
 }
 
+interface ChangePasswordPayload {
+  currentPassword: string
+  newPassword: string
+}
+
+export type ChangePasswordErrorCode =
+  | 'wrong-current-password'
+  | 'new-password-already-in-use'
+
+export const ChangePasswordError = {
+  'wrong-current-password': 'Väärä nykyinen salasana',
+  'new-password-already-in-use':
+    'Uusi salasana ei saa olla sama kuin nykyinen salana'
+}
+
+export const apiChangeUserPassword = async (
+  userInput: {
+    userId: string
+  } & ChangePasswordPayload
+): Promise<string> => {
+  const body: JsonOf<ChangePasswordPayload> = {
+    ...userInput
+  }
+
+  return await apiClient
+    .put<string>(`/users/${userInput.userId}/password`, body)
+    .then((r) => r.data)
+}
+
 export const apiGetUser = (id: string): Promise<User> =>
   apiClient.get<User>(`/users/${id}`).then((res) => res.data)
 

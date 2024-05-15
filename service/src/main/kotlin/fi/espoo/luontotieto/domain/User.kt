@@ -55,6 +55,11 @@ data class User(
             val email: String,
             val name: String,
         )
+
+        data class UpdatePasswordPayload(
+            val currentPassword: String,
+            val newPassword: String,
+        )
     }
 }
 
@@ -121,6 +126,42 @@ fun Handle.putUser(
         .bind("id", id)
         .bind("updatedBy", user.id)
         .mapTo<User>()
+        .findOne()
+        .getOrNull()
+        ?: throw NotFound()
+}
+
+fun Handle.getUserPasswordHash(id: UUID) =
+    createQuery(
+        // language=SQL
+        """
+        SELECT password_hash AS password
+        FROM users 
+        WHERE id = :id AND NOT system_user AND password_hash IS NOT NULL
+        """.trimIndent()
+    )
+        .bind("id", id)
+        .mapTo<String>()
+        .findOne()
+        .getOrNull()
+
+fun Handle.putPassword(
+    id: UUID,
+    password: String,
+    user: AuthenticatedUser
+): UUID {
+    return createQuery(
+        """
+                UPDATE users 
+                 SET password_hash = :password, updated_by = :updatedBy
+                 WHERE id = :id
+                 RETURNING id
+            """
+    )
+        .bind("id", id)
+        .bind("updatedBy", user.id)
+        .bind("password", password)
+        .mapTo<UUID>()
         .findOne()
         .getOrNull()
         ?: throw NotFound()
