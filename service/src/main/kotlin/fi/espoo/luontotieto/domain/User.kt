@@ -4,6 +4,7 @@
 
 package fi.espoo.luontotieto.domain
 
+import fi.espoo.luontotieto.common.AppUserWithPassword
 import fi.espoo.luontotieto.common.DatabaseEnum
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuthenticatedUser
@@ -54,6 +55,11 @@ data class User(
         data class CreateCustomerUser(
             val email: String,
             val name: String,
+        )
+
+        data class UpdatePasswordPayload(
+            val currentPassword: String,
+            val newPassword: String,
         )
     }
 }
@@ -120,6 +126,46 @@ fun Handle.putUser(
         .bindKotlin(data)
         .bind("id", id)
         .bind("updatedBy", user.id)
+        .mapTo<User>()
+        .findOne()
+        .getOrNull()
+        ?: throw NotFound()
+}
+
+
+fun Handle.getUserPasswordHash(id: UUID) =
+    createQuery(
+        // language=SQL
+        """
+        SELECT password_hash AS password
+        FROM users 
+        WHERE id = :id AND NOT system_user AND password_hash IS NOT NULL
+        """.trimIndent()
+    )
+        .bind("id", id)
+        .mapTo<String>()
+        .findOne()
+        .getOrNull()
+
+fun Handle.putPassword(
+    id: UUID,
+    password: String,
+    user: AuthenticatedUser
+): User {
+    return createQuery(
+        """
+             WITH users AS (
+                UPDATE users 
+                 SET password_hash = :password, updated_by = :updatedBy
+                 WHERE id = :id
+                 RETURNING *
+               ) 
+             $SELECT_USER_SQL
+            """
+    )
+        .bind("id", id)
+        .bind("updatedBy", user.id)
+        .bind("password", password)
         .mapTo<User>()
         .findOne()
         .getOrNull()

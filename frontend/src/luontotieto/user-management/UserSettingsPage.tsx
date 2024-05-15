@@ -18,6 +18,14 @@ import { Label } from 'shared/typography'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { Button } from 'shared/buttons/Button'
 import { UserContext } from 'auth/UserContext'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  ChangePasswordErrorCode,
+  ChangePasswordError,
+  apiChangeUserPassword
+} from 'api/users-api'
+import { AxiosError } from 'axios'
+import { AlertBox } from 'shared/MessageBoxes'
 
 export const UserSettingsPage = React.memo(function UserSettingsPage() {
   const { user } = useContext(UserContext)
@@ -46,7 +54,10 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
               onClick={() => setShowChangePassword(!showChangePassword)}
             />
           ) : (
-            <ChangePasswordForm onCancel={() => setShowChangePassword(false)} />
+            <ChangePasswordForm
+              userId={user.id}
+              onClose={() => setShowChangePassword(false)}
+            />
           )}
         </GroupOfInputRows>
       </SectionContainer>
@@ -56,13 +67,36 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
 })
 
 const ChangePasswordForm = React.memo(function ChangePasswordForm({
-  onCancel
+  userId,
+  onClose
 }: {
-  onCancel: () => void
+  userId: string
+  onClose: () => void
 }) {
+  const queryClient = useQueryClient()
+
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newPassword2, setNewPassword2] = useState('')
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const { mutateAsync: changePassword, isPending } = useMutation({
+    mutationFn: apiChangeUserPassword,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users', userId] })
+      onClose()
+    },
+    onError: (e: AxiosError<{ errorCode: ChangePasswordErrorCode }>) => {
+      if (e instanceof AxiosError) {
+        const errorCode = e.response?.data.errorCode
+        const errorMessage = errorCode
+          ? ChangePasswordError[errorCode]
+          : 'Odottamaton virhe'
+        setErrorMessage(errorMessage)
+      }
+    }
+  })
 
   return (
     <GroupOfInputRows>
@@ -90,9 +124,23 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
           type="password"
         />
       </LabeledInput>
+      {errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
       <FlexRowWithGaps>
-        <Button text={'Peruuta'} onClick={onCancel}></Button>
-        <Button primary text={'Tallenna'}></Button>
+        <Button text={'Peruuta'} onClick={onClose}></Button>
+        <Button
+          disabled={
+            isPending ||
+            !currentPassword ||
+            !newPassword ||
+            !newPassword2 ||
+            newPassword !== newPassword2
+          }
+          primary
+          text={'Tallenna'}
+          onClick={async () =>
+            await changePassword({ userId, currentPassword, newPassword })
+          }
+        ></Button>
       </FlexRowWithGaps>
     </GroupOfInputRows>
   )

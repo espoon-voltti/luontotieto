@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
+import fi.espoo.luontotieto.common.BadRequest
+
 
 @RestController
 @RequestMapping("/users")
@@ -73,6 +75,33 @@ class UserController {
     ): User {
         return jdbi.inTransactionUnchecked { tx -> tx.putUser(id, data, user) }.also {
             logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id"))
+        }
+    }
+    @PutMapping("/{id}/password")
+    fun updateUser(
+        user: AuthenticatedUser,
+        @PathVariable id: UUID,
+        @RequestBody data: User.Companion.UpdatePasswordPayload
+    ): User {
+
+
+        return jdbi.inTransactionUnchecked { tx ->
+            val currentPassword =  tx.getUserPasswordHash(id)
+            val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
+
+            if (!encoder.matches(data.currentPassword, currentPassword)) {
+                logger.info("User entered invalid current password.")
+                throw BadRequest("User entered invalid current password.", "wrong-current-password")
+            }
+
+            if (encoder.matches(data.newPassword, currentPassword)) {
+                logger.info("New password cannot be same as the current password.")
+                throw BadRequest("New password cannot be same as the current password.", "new-password-already-in-use")
+            }
+
+            val passwordHash = encoder.encode(data.newPassword)
+            tx.putPassword(id, passwordHash, user) }.also {
+            logger.audit(user, AuditEvent.UPDATE_USER_PASSWORD, mapOf("id" to "$id"))
         }
     }
 }
