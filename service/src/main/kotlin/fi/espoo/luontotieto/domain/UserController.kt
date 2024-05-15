@@ -4,6 +4,7 @@
 
 package fi.espoo.luontotieto.domain
 
+import fi.espoo.luontotieto.common.BadRequest
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.audit
@@ -24,8 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
-import fi.espoo.luontotieto.common.BadRequest
-
 
 @RestController
 @RequestMapping("/users")
@@ -77,16 +76,15 @@ class UserController {
             logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id"))
         }
     }
+
     @PutMapping("/{id}/password")
     fun updateUser(
         user: AuthenticatedUser,
         @PathVariable id: UUID,
         @RequestBody data: User.Companion.UpdatePasswordPayload
     ): User {
-
-
         return jdbi.inTransactionUnchecked { tx ->
-            val currentPassword =  tx.getUserPasswordHash(id)
+            val currentPassword = tx.getUserPasswordHash(id)
             val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
 
             if (!encoder.matches(data.currentPassword, currentPassword)) {
@@ -100,7 +98,8 @@ class UserController {
             }
 
             val passwordHash = encoder.encode(data.newPassword)
-            tx.putPassword(id, passwordHash, user) }.also {
+            tx.putPassword(id, passwordHash, user)
+        }.also {
             logger.audit(user, AuditEvent.UPDATE_USER_PASSWORD, mapOf("id" to "$id"))
         }
     }

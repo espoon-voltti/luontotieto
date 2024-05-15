@@ -4,7 +4,6 @@
 
 package fi.espoo.luontotieto.domain
 
-import fi.espoo.luontotieto.common.AppUserWithPassword
 import fi.espoo.luontotieto.common.DatabaseEnum
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuthenticatedUser
@@ -131,7 +130,6 @@ fun Handle.putUser(
         .getOrNull()
         ?: throw NotFound()
 }
-
 
 fun Handle.getUserPasswordHash(id: UUID) =
     createQuery(
