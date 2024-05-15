@@ -68,13 +68,13 @@ export const apiChangeUserPassword = async (
   userInput: {
     userId: string
   } & ChangePasswordPayload
-): Promise<User> => {
+): Promise<string> => {
   const body: JsonOf<ChangePasswordPayload> = {
     ...userInput
   }
 
   return await apiClient
-    .put<User>(`/users/${userInput.userId}/password`, body)
+    .put<string>(`/users/${userInput.userId}/password`, body)
     .then((r) => r.data)
 }
 

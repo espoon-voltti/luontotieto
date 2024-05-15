@@ -149,22 +149,19 @@ fun Handle.putPassword(
     id: UUID,
     password: String,
     user: AuthenticatedUser
-): User {
+): UUID {
     return createQuery(
         """
-             WITH users AS (
                 UPDATE users 
                  SET password_hash = :password, updated_by = :updatedBy
                  WHERE id = :id
-                 RETURNING *
-               ) 
-             $SELECT_USER_SQL
+                 RETURNING id
             """
     )
         .bind("id", id)
         .bind("updatedBy", user.id)
         .bind("password", password)
-        .mapTo<User>()
+        .mapTo<UUID>()
         .findOne()
         .getOrNull()
         ?: throw NotFound()

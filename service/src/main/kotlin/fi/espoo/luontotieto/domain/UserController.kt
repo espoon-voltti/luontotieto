@@ -82,7 +82,7 @@ class UserController {
         user: AuthenticatedUser,
         @PathVariable id: UUID,
         @RequestBody data: User.Companion.UpdatePasswordPayload
-    ): User {
+    ): UUID {
         return jdbi.inTransactionUnchecked { tx ->
             val currentPassword = tx.getUserPasswordHash(id)
             val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
