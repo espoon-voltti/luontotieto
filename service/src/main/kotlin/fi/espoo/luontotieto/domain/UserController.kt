@@ -83,6 +83,10 @@ class UserController {
         @PathVariable id: UUID,
         @RequestBody data: User.Companion.UpdatePasswordPayload
     ): UUID {
+        if (!data.newPassword.matches("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{10,}\$".toRegex()))
+            {
+                throw BadRequest("User entered a weak new password.", "weak-password")
+            }
         return jdbi.inTransactionUnchecked { tx ->
             val currentPassword = tx.getUserPasswordHash(id)
             val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()

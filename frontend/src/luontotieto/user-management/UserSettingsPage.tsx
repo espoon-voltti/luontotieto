@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import React, { useContext, useState } from 'react'
+import React, { useContext, useMemo, useState } from 'react'
 
 import {
   FlexRowWithGaps,
@@ -66,6 +66,8 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
   )
 })
 
+const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{10,}$/
+
 const ChangePasswordForm = React.memo(function ChangePasswordForm({
   userId,
   onClose
@@ -98,6 +100,24 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
     }
   })
 
+  const passwordIsWeakInfo = useMemo(() => {
+    return newPassword && !passwordRegex.test(newPassword)
+      ? {
+          text: ChangePasswordError['weak-password'],
+          status: 'warning' as const
+        }
+      : undefined
+  }, [newPassword])
+
+  const newPassWordDoesNotMatchInfo = useMemo(() => {
+    return newPassword2 && newPassword !== newPassword2
+      ? {
+          text: 'Uudet salasanat eivät täsmää.',
+          status: 'warning' as const
+        }
+      : undefined
+  }, [newPassword2])
+
   return (
     <GroupOfInputRows>
       <LabeledInput $cols={3}>
@@ -114,6 +134,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
           onChange={setNewPassword}
           value={newPassword}
           type="password"
+          info={passwordIsWeakInfo}
         />
       </LabeledInput>
       <LabeledInput $cols={3}>
@@ -122,6 +143,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
           onChange={setNewPassword2}
           value={newPassword2}
           type="password"
+          info={newPassWordDoesNotMatchInfo}
         />
       </LabeledInput>
       {errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
@@ -133,7 +155,8 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
             !currentPassword ||
             !newPassword ||
             !newPassword2 ||
-            newPassword !== newPassword2
+            !!newPassWordDoesNotMatchInfo ||
+            !!passwordIsWeakInfo
           }
           primary
           text={'Tallenna'}
