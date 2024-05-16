@@ -5,6 +5,7 @@
 package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.DatabaseEnum
+import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.enums.DatabaseValue
@@ -94,7 +95,7 @@ fun Handle.getReportFileById(
         .bind("fileId", fileId)
         .mapTo<ReportFile>()
         .findOne()
-        .getOrNull() ?: throw fi.espoo.luontotieto.common.NotFound()
+        .getOrNull() ?: throw NotFound()
 
 fun Handle.getReportFiles(reportId: UUID): List<ReportFile> =
     createQuery(

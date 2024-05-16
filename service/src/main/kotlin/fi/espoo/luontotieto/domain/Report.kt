@@ -116,10 +116,11 @@ fun Handle.putReport(
     return createQuery(
         """
             WITH report AS (
-                UPDATE report 
+                UPDATE report r
                  SET name = :name, description = :description, updated_by = :updatedBy
-                 WHERE id = :id AND (created_by = :updatedBy OR updated_by = :updatedBy)
-                RETURNING *
+                 FROM "order" o
+                 WHERE r.id = :id AND (o.assignee_id = :updatedBy OR r.created_by = :updatedBy OR r.updated_by = :updatedBy)
+                RETURNING r.*
             ) 
             $SELECT_REPORT_SQL
             """
@@ -136,29 +137,53 @@ fun Handle.putReport(
 fun Handle.getReport(
     id: UUID,
     user: AuthenticatedUser
-) = createQuery(
-    """
+): Report {
+    val filter =
+        when (user.role) {
+            UserRole.CUSTOMER ->
+                "(r.created_by = :userId OR r.updated_by = :userId OR o.assignee_id = :userId)"
+            else -> "1 = 1"
+        }
+    return createQuery(
+        """ 
                 $SELECT_REPORT_SQL
-                WHERE r.id = :id AND (r.created_by = :userId OR r.updated_by = :userId)
+                WHERE r.id = :id AND $filter
             """
-)
-    .bind("id", id)
-    .bind("userId", user.id)
-    .mapTo<Report>()
-    .findOne()
-    .getOrNull() ?: throw NotFound()
+    )
+        .bind("id", id)
+        .apply {
+            if (user.role == UserRole.CUSTOMER) {
+                this.bind("userId", user.id)
+            }
+        }
+        .mapTo<Report>()
+        .findOne()
+        .getOrNull() ?: throw NotFound()
+}
 
-fun Handle.getReports(user: AuthenticatedUser) =
-    createQuery(
+fun Handle.getReports(user: AuthenticatedUser): List<Report> {
+    val filter =
+        when (user.role) {
+            UserRole.CUSTOMER ->
+                "r.created_by = :userId OR r.updated_by = :userId OR o.assignee_id = :userId"
+            else -> "1 = 1"
+        }
+
+    return createQuery(
         """
                 $SELECT_REPORT_SQL
-                WHERE r.created_by = :userId OR r.updated_by = :userId
+                WHERE $filter
                 ORDER BY r.created DESC
             """
     )
-        .bind("userId", user.id)
+        .apply {
+            if (user.role == UserRole.CUSTOMER) {
+                this.bind("userId", user.id)
+            }
+        }
         .mapTo<Report>()
         .list() ?: emptyList()
+}
 
 fun getTableDefinitionByDocumentType(documentType: DocumentType) =
     when (documentType) {

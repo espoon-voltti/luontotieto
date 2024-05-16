@@ -47,9 +47,7 @@ class UserController {
         val passwordHash = encoder.encode(generatedString)
         // TODO: communicate the password via email
         return jdbi
-            .inTransactionUnchecked { tx ->
-                tx.insertUser(data = body, user = user, passwordHash)
-            }
+            .inTransactionUnchecked { tx -> tx.insertUser(data = body, user = user, passwordHash) }
             .also { logger.audit(user, AuditEvent.CREATE_USER, mapOf("id" to "$it")) }
     }
 
@@ -58,7 +56,7 @@ class UserController {
         user: AuthenticatedUser,
         @PathVariable id: UUID
     ): User {
-        return jdbi.inTransactionUnchecked { tx -> tx.getUser(id, user) }
+        return jdbi.inTransactionUnchecked { tx -> tx.getUser(id) }
     }
 
     @GetMapping()
@@ -72,9 +70,9 @@ class UserController {
         @PathVariable id: UUID,
         @RequestBody data: User.Companion.UserInput
     ): User {
-        return jdbi.inTransactionUnchecked { tx -> tx.putUser(id, data, user) }.also {
-            logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id"))
-        }
+        return jdbi
+            .inTransactionUnchecked { tx -> tx.putUser(id, data, user) }
+            .also { logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id")) }
     }
 
     @PutMapping("/{id}/password")
@@ -86,25 +84,31 @@ class UserController {
         if (!data.newPassword.matches("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{10,}\$".toRegex())) {
             throw BadRequest("User entered a weak new password.", "weak-password")
         }
-        return jdbi.inTransactionUnchecked { tx ->
-            val currentPassword = tx.getUserPasswordHash(id)
-            val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
+        return jdbi
+            .inTransactionUnchecked { tx ->
+                val currentPassword = tx.getUserPasswordHash(id)
+                val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
 
-            if (!encoder.matches(data.currentPassword, currentPassword)) {
-                logger.info("User entered invalid current password.")
-                throw BadRequest("User entered invalid current password.", "wrong-current-password")
+                if (!encoder.matches(data.currentPassword, currentPassword)) {
+                    logger.info("User entered invalid current password.")
+                    throw BadRequest(
+                        "User entered invalid current password.",
+                        "wrong-current-password"
+                    )
+                }
+
+                if (encoder.matches(data.newPassword, currentPassword)) {
+                    logger.info("New password cannot be same as the current password.")
+                    throw BadRequest(
+                        "New password cannot be same as the current password.",
+                        "new-password-already-in-use"
+                    )
+                }
+
+                val passwordHash = encoder.encode(data.newPassword)
+                tx.putPassword(id, passwordHash, user)
             }
-
-            if (encoder.matches(data.newPassword, currentPassword)) {
-                logger.info("New password cannot be same as the current password.")
-                throw BadRequest("New password cannot be same as the current password.", "new-password-already-in-use")
-            }
-
-            val passwordHash = encoder.encode(data.newPassword)
-            tx.putPassword(id, passwordHash, user)
-        }.also {
-            logger.audit(user, AuditEvent.UPDATE_USER_PASSWORD, mapOf("id" to "$id"))
-        }
+            .also { logger.audit(user, AuditEvent.UPDATE_USER_PASSWORD, mapOf("id" to "$id")) }
     }
 }
 

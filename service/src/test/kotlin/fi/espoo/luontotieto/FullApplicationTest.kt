@@ -61,7 +61,7 @@ abstract class FullApplicationTest {
                 VALUES (:id, now(), 'test:01', 'Teija Testaaja', NULL)
             """
             )
-                .bind("id", testUser.id)
+                .bind("id", adminUser.id)
                 .execute()
 
             tx.createUpdate(
@@ -70,7 +70,7 @@ abstract class FullApplicationTest {
                 VALUES (:id, now(), 'test:02', 'Yritys Oy', 'yritys@example.com', 'yrityskäyttäjä')
             """
             )
-                .bind("id", companyUser.id)
+                .bind("id", customerUser.id)
                 .execute()
         }
     }

@@ -52,7 +52,7 @@ export async function getUserDetails(
     req: express.Request,
     userId: string
 ): Promise<AppUser | undefined> {
-    const {data} = await client.get<AppUser | undefined>(
+    const { data } = await client.get<AppUser | undefined>(
         `/system/users/${userId}`,
         {
             headers: createServiceRequestHeaders(req, systemUser)
@@ -62,9 +62,9 @@ export async function getUserDetails(
 }
 
 export async function postPasswordLogin(email: String, password: String): Promise<AppUser | undefined> {
-    const {data} = await client.post<AppUser | undefined>(
+    const { data } = await client.post<AppUser | undefined>(
         `/system/password-login`,
-        {email, password},
+        { email, password },
         {
             headers: createServiceRequestHeaders(undefined, systemUser)
         }

@@ -5,6 +5,7 @@
 package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.DatabaseEnum
+import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.enums.DatabaseValue
@@ -81,6 +82,37 @@ fun Handle.getOrderFiles(orderId: UUID): List<OrderFile> =
         .mapTo<OrderFile>()
         .list()
 
+fun Handle.getOrderFiles(
+    orderId: UUID,
+    user: AuthenticatedUser
+): List<OrderFile> {
+    val filter =
+        when (user.role) {
+            UserRole.CUSTOMER ->
+                "o.created_by = :userId OR o.updated_by = :userId OR assignee_id = :userId"
+            else -> "1 = 1"
+        }
+
+    return createQuery(
+        """
+                SELECT of.id, of.description, of.order_id AS "orderId", of.media_type AS "mediaType", 
+                of.file_name AS "fileName", of.document_type AS "documentType",
+                of.created, of.updated, of.created_by AS "createdBy", of.updated_by AS "updatedBy"
+                FROM order_file of
+                JOIN "order" o ON o.id = of.order_id
+                WHERE of.order_id = :orderId AND ($filter)
+            """
+    )
+        .bind("orderId", orderId)
+        .apply {
+            if (user.role == UserRole.CUSTOMER) {
+                this.bind("userId", user.id)
+            }
+        }
+        .mapTo<OrderFile>()
+        .list()
+}
+
 fun Handle.getOrderFileById(
     orderId: UUID,
     fileId: UUID
@@ -99,7 +131,41 @@ fun Handle.getOrderFileById(
         .bind("fileId", fileId)
         .mapTo<OrderFile>()
         .findOne()
-        .getOrNull() ?: throw fi.espoo.luontotieto.common.NotFound()
+        .getOrNull() ?: throw NotFound()
+
+fun Handle.getOrderFileById(
+    orderId: UUID,
+    fileId: UUID,
+    user: AuthenticatedUser
+): OrderFile {
+    val filter =
+        when (user.role) {
+            UserRole.CUSTOMER ->
+                "(o.created_by = :userId OR o.updated_by = :userId OR assignee_id = :userId)"
+            else -> "1 = 1"
+        }
+
+    return createQuery(
+        """
+                SELECT of.id, of.description, of.order_id AS "orderId", of.media_type AS "mediaType", 
+                of.file_name AS "fileName", of.document_type AS "documentType",
+                of.created, of.updated, of.created_by AS "createdBy", of.updated_by AS "updatedBy"
+                FROM order_file of JOIN "order" o ON o.id = of.order_id
+                WHERE of.order_id = :orderId AND $filter
+                AND of.id = :fileId  
+            """
+    )
+        .bind("orderId", orderId)
+        .bind("fileId", fileId)
+        .apply {
+            if (user.isCustomer()) {
+                this.bind("userId", user.id)
+            }
+        }
+        .mapTo<OrderFile>()
+        .findOne()
+        .getOrNull() ?: throw NotFound()
+}
 
 fun Handle.deleteOrderFile(
     orderId: UUID,

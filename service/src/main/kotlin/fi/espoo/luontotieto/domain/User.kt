@@ -127,8 +127,7 @@ fun Handle.putUser(
         .bind("updatedBy", user.id)
         .mapTo<User>()
         .findOne()
-        .getOrNull()
-        ?: throw NotFound()
+        .getOrNull() ?: throw NotFound()
 }
 
 fun Handle.getUserPasswordHash(id: UUID) =
@@ -138,7 +137,8 @@ fun Handle.getUserPasswordHash(id: UUID) =
         SELECT password_hash AS password
         FROM users 
         WHERE id = :id AND NOT system_user AND password_hash IS NOT NULL
-        """.trimIndent()
+        """
+            .trimIndent()
     )
         .bind("id", id)
         .mapTo<String>()
@@ -163,25 +163,32 @@ fun Handle.putPassword(
         .bind("password", password)
         .mapTo<UUID>()
         .findOne()
-        .getOrNull()
-        ?: throw NotFound()
+        .getOrNull() ?: throw NotFound()
 }
 
-fun Handle.getUser(
-    id: UUID,
-    user: AuthenticatedUser
-) = createQuery(
-    """
+fun Handle.getUser(id: UUID) =
+    createQuery(
+        """
                 $SELECT_USER_SQL
                 WHERE u.id = :id AND NOT u.system_user
             """
-)
-    .bind("id", id)
-    .bind("userId", user.id)
-    .mapTo<User>()
-    .findOne()
-    .getOrNull()
-    ?: throw NotFound()
+    )
+        .bind("id", id)
+        .mapTo<User>()
+        .findOne()
+        .getOrNull() ?: throw NotFound()
+
+fun Handle.getAuthUser(id: UUID) =
+    createQuery(
+        """
+                $SELECT_USER_SQL
+                WHERE u.id = :id
+            """
+    )
+        .bind("id", id)
+        .mapTo<User>()
+        .findOne()
+        .getOrNull() ?: throw NotFound()
 
 fun Handle.getUsers() =
     createQuery(
@@ -191,5 +198,4 @@ fun Handle.getUsers() =
             """
     )
         .mapTo<User>()
-        .list()
-        ?: emptyList()
+        .list() ?: emptyList()

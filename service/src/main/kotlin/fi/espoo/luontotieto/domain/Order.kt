@@ -102,33 +102,17 @@ fun Handle.putOrder(
         .getOrNull() ?: throw NotFound()
 }
 
-fun Handle.getOrder(
-    id: UUID,
-    user: AuthenticatedUser
-): Order =
+fun Handle.getOrder(id: UUID): Order =
     createQuery(
         """
             $SELECT_ORDER_SQL
-            WHERE o.id = :id AND (o.created_by = :userId OR o.updated_by = :userId)
+            WHERE o.id = :id
             """
     )
         .bind("id", id)
-        .bind("userId", user.id)
         .mapTo<Order>()
         .findOne()
         .getOrNull() ?: throw NotFound()
-
-fun Handle.getOrders(user: AuthenticatedUser) =
-    createQuery(
-        """
-             $SELECT_ORDER_SQL
-              WHERE o.created_by = :userId OR o.updated_by = :userId
-              ORDER BY o.created DESC
-            """
-    )
-        .bind("userId", user.id)
-        .mapTo<Order>()
-        .list() ?: emptyList()
 
 fun Handle.getPlanNumbers(): List<String> =
     createQuery(

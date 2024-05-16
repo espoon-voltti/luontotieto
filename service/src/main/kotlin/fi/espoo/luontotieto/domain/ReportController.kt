@@ -4,6 +4,7 @@
 
 package fi.espoo.luontotieto.domain
 
+import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.BucketEnv
@@ -60,24 +61,11 @@ class ReportController {
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired
-    lateinit var documentClient: S3DocumentService
+    @Autowired lateinit var documentClient: S3DocumentService
 
-    @Autowired
-    lateinit var bucketEnv: BucketEnv
+    @Autowired lateinit var bucketEnv: BucketEnv
 
     private val logger = KotlinLogging.logger {}
-
-    @PostMapping("")
-    @ResponseStatus(HttpStatus.CREATED)
-    fun createReportFromScratch(
-        user: AuthenticatedUser,
-        @RequestBody body: Report.Companion.ReportInput
-    ): Report {
-        return jdbi
-            .inTransactionUnchecked { tx -> tx.insertReport(data = body, user = user) }
-            .also { logger.audit(user, AuditEvent.CREATE_REPORT, mapOf("id" to "$it")) }
-    }
 
     @PostMapping("/{reportId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @ResponseStatus(HttpStatus.CREATED)
@@ -107,8 +95,16 @@ class ReportController {
         if (errors.isEmpty()) {
             val id =
                 jdbi.inTransactionUnchecked { tx ->
+                    // Check that user has permission to report
+                    val report = tx.getReport(reportId, user)
                     tx.insertReportFile(
-                        ReportFileInput(reportId, description, contentType, fileName, documentType),
+                        ReportFileInput(
+                            report.id,
+                            description,
+                            contentType,
+                            fileName,
+                            documentType
+                        ),
                         user
                     )
                 }
@@ -137,14 +133,10 @@ class ReportController {
     fun getReportById(
         user: AuthenticatedUser,
         @PathVariable id: UUID
-    ): Report {
-        return jdbi.inTransactionUnchecked { tx -> tx.getReport(id, user) }
-    }
+    ) = jdbi.inTransactionUnchecked { tx -> tx.getReport(id, user) }
 
     @GetMapping()
-    fun getReports(user: AuthenticatedUser): List<Report> {
-        return jdbi.inTransactionUnchecked { tx -> tx.getReports(user) }
-    }
+    fun getReports(user: AuthenticatedUser) = jdbi.inTransactionUnchecked { tx -> tx.getReports(user) }
 
     @PutMapping("/{id}")
     fun updateReport(
@@ -163,6 +155,7 @@ class ReportController {
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
     ) {
+        user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         val dataBucket = bucketEnv.data
 
         val reportFiles =
@@ -199,9 +192,13 @@ class ReportController {
 
     @GetMapping("/{reportId}/files")
     fun getReportFiles(
+        user: AuthenticatedUser,
         @PathVariable reportId: UUID
     ): List<ReportFile> {
-        return jdbi.inTransactionUnchecked { tx -> tx.getReportFiles(reportId) }
+        return jdbi.inTransactionUnchecked { tx ->
+            val report = tx.getReport(reportId, user)
+            tx.getReportFiles(reportId)
+        }
     }
 
     @GetMapping("/{reportId}/files/{fileId}")

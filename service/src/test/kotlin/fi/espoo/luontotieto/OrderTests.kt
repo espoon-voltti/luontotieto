@@ -10,6 +10,7 @@ import fi.espoo.luontotieto.domain.OrderController
 import fi.espoo.luontotieto.domain.OrderInput
 import fi.espoo.luontotieto.domain.OrderReportDocument
 import fi.espoo.luontotieto.domain.ReportController
+import fi.espoo.luontotieto.domain.UserRole
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 import kotlin.test.Test
@@ -30,18 +31,18 @@ class OrderTests : FullApplicationTest() {
             )
         val createdOrder =
             controller.createOrderFromScratch(
-                user = testUser,
+                user = adminUser,
                 body =
                     OrderInput(
                         name = "Test order",
                         description = "Test description",
                         planNumber = listOf("12345"),
-                        assigneeId = companyUser.id,
+                        assigneeId = customerUser.id,
                         reportDocuments = orderReportDocuments
                     ),
             )
 
-        val orderResponse = controller.getOrderById(testUser, createdOrder.orderId)
+        val orderResponse = controller.getOrderById(adminUser, createdOrder.orderId)
 
         assertNotNull(orderResponse)
         assertEquals("Test order", orderResponse.name)
@@ -56,7 +57,7 @@ class OrderTests : FullApplicationTest() {
             )
         )
         assertEquals("Yritys Oy", orderResponse.assignee)
-        assertEquals(companyUser.id, orderResponse.assigneeId)
+        assertEquals(customerUser.id, orderResponse.assigneeId)
     }
 
     @Test
@@ -67,18 +68,18 @@ class OrderTests : FullApplicationTest() {
             )
         val createdOrder =
             controller.createOrderFromScratch(
-                user = testUser,
+                user = adminUser,
                 body =
                     OrderInput(
                         name = "Test order",
                         description = "Test description",
                         planNumber = listOf("12345"),
-                        assigneeId = companyUser.id,
+                        assigneeId = customerUser.id,
                         reportDocuments = orderReportDocuments
                     ),
             )
 
-        val orderReportResponse = reportController.getReportById(testUser, createdOrder.reportId)
+        val orderReportResponse = reportController.getReportById(adminUser, createdOrder.reportId)
 
         assertNotNull(orderReportResponse)
         assertEquals("Test order", orderReportResponse.name)
@@ -88,46 +89,25 @@ class OrderTests : FullApplicationTest() {
         assertEquals("Test order", orderReportResponse.order?.name)
         assertEquals("Test description", orderReportResponse.order?.description)
         assertEquals("Yritys Oy", orderReportResponse.order?.assignee)
-        assertEquals(companyUser.id, orderReportResponse.order?.assigneeId)
+        assertEquals(customerUser.id, orderReportResponse.order?.assigneeId)
     }
 
     @Test
-    fun `get all orders for user`() {
-        for (i in 0..2) {
-            controller.createOrderFromScratch(
-                user = testUser,
-                body =
-                    OrderInput(
-                        name = "Test order $i",
-                        description = "Test description $i",
-                        planNumber = listOf("12345"),
-                        assigneeId = companyUser.id,
-                        reportDocuments = listOf()
-                    ),
-            )
-        }
-
-        val expected = setOf("Test order 1", "Test order 2", "Test order 0")
-        val ordersResponse = controller.getOrders(testUser).map { it.name }.toSet()
-
-        assertEquals(expected, ordersResponse)
-    }
-
-    @Test
-    fun `get all reports for user - no reports`() {
+    fun `get all reports - no reports`() {
         controller.createOrderFromScratch(
-            user = testUser,
+            user = adminUser,
             body =
                 OrderInput(
                     name = "Test order",
                     description = "Test description",
                     planNumber = listOf("12345"),
-                    assigneeId = companyUser.id,
+                    assigneeId = customerUser.id,
                     reportDocuments = listOf()
                 ),
         )
 
-        val ordersResponse = reportController.getReports(AuthenticatedUser(UUID.randomUUID()))
+        val ordersResponse =
+            reportController.getReports(AuthenticatedUser(UUID.randomUUID(), UserRole.CUSTOMER))
         assertEquals(0, ordersResponse.size)
     }
 
@@ -135,13 +115,13 @@ class OrderTests : FullApplicationTest() {
     fun `update existing order`() {
         val createdOrder =
             controller.createOrderFromScratch(
-                user = testUser,
+                user = adminUser,
                 body =
                     OrderInput(
                         name = "Test order",
                         description = "Test description",
                         planNumber = listOf("12345"),
-                        assigneeId = companyUser.id,
+                        assigneeId = customerUser.id,
                         reportDocuments =
                             listOf(
                                 OrderReportDocument(
@@ -155,13 +135,13 @@ class OrderTests : FullApplicationTest() {
             listOf(OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_ALUEET))
         val updatedOrder =
             controller.updateOrder(
-                testUser,
+                adminUser,
                 createdOrder.orderId,
                 OrderInput(
                     name = "New name",
                     description = "New description",
                     planNumber = listOf("12345"),
-                    assigneeId = companyUser.id,
+                    assigneeId = customerUser.id,
                     reportDocuments = updatedReportDocuments
                 )
             )
@@ -169,7 +149,7 @@ class OrderTests : FullApplicationTest() {
         assertEquals("New name", updatedOrder.name)
         assertEquals("New description", updatedOrder.description)
         assertEquals("Yritys Oy", updatedOrder.assignee)
-        assertEquals(companyUser.id, updatedOrder.assigneeId)
+        assertEquals(customerUser.id, updatedOrder.assigneeId)
         assertEquals(updatedReportDocuments, updatedOrder.reportDocuments)
     }
 }

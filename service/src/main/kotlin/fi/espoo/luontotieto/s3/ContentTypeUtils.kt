@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 package fi.espoo.luontotieto.s3
-import fi.espoo.luontotieto.domain.BadRequest
+
+import fi.espoo.luontotieto.common.BadRequest
 import org.springframework.web.multipart.MultipartFile
 import java.io.InputStream
 

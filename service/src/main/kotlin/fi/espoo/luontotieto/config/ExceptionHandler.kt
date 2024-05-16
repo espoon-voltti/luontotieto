@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import java.io.IOException
-import java.lang.Exception
 import java.time.Instant
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -86,7 +85,8 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
     ): ResponseEntity<ErrorResponse> {
         if (ex.isUniqueConstraintViolation()) {
             logger.warn("Unique constraint violation (${ex.message})", ex)
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse("UniqueConstraintViolation"))
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErrorResponse("UniqueConstraintViolation"))
         }
         return unexpectedError(req, ex)
     }

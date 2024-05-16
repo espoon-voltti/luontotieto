@@ -5,12 +5,19 @@
 package fi.espoo.luontotieto.config
 
 import com.auth0.jwt.interfaces.JWTVerifier
+import org.jdbi.v3.core.Jdbi
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
 class HttpFilterConfig {
+    @Qualifier("jdbi-luontotieto")
+    @Autowired
+    lateinit var jdbi: Jdbi
+
     @Bean
     fun jwtTokenParser(jwtVerifier: JWTVerifier) =
         FilterRegistrationBean(JwtTokenDecoder(jwtVerifier)).apply {
@@ -21,7 +28,7 @@ class HttpFilterConfig {
 
     @Bean
     fun jwtToAuthenticatedUser() =
-        FilterRegistrationBean(JwtToAuthenticatedUser()).apply {
+        FilterRegistrationBean(JwtToAuthenticatedUser(jdbi)).apply {
             setName("jwtToAuthenticatedUser")
             urlPatterns = listOf("/*")
             order = -9

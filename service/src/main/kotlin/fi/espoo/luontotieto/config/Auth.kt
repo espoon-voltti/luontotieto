@@ -7,20 +7,31 @@ package fi.espoo.luontotieto.config
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.interfaces.JWTVerifier
+import fi.espoo.luontotieto.common.NotFound
+import fi.espoo.luontotieto.domain.UserRole
+import fi.espoo.luontotieto.domain.getAuthUser
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpFilter
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
+import org.jdbi.v3.core.Jdbi
+import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import java.util.UUID
 
-data class AuthenticatedUser(
-    val id: UUID
-) {
+data class AuthenticatedUser(val id: UUID, val role: UserRole) {
     fun isSystemUser() = id == UUID.fromString("00000000-0000-0000-0000-000000000000")
+
+    fun isCustomer() = role == UserRole.CUSTOMER
+
+    fun checkRoles(vararg roles: UserRole) {
+        if (!roles.contains(role)) {
+            throw NotFound("Not Found")
+        }
+    }
 }
 
-class JwtToAuthenticatedUser : HttpFilter() {
+class JwtToAuthenticatedUser(val jdbi: Jdbi) : HttpFilter() {
     override fun doFilter(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -28,7 +39,11 @@ class JwtToAuthenticatedUser : HttpFilter() {
     ) {
         val user =
             request.getDecodedJwt()?.subject?.let { subject ->
-                AuthenticatedUser(id = UUID.fromString(subject))
+                jdbi.inTransactionUnchecked {
+                    val userId = UUID.fromString(subject)
+                    val user = it.getAuthUser(userId)
+                    AuthenticatedUser(id = user.id, role = user.role)
+                }
             }
         if (user != null) {
             request.setAttribute(ATTR_USER, user)
@@ -46,10 +61,16 @@ class HttpAccessControl : HttpFilter() {
         if (request.requiresAuthentication()) {
             val authenticatedUser = request.getAuthenticatedUser()
             if (authenticatedUser == null) {
-                return response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "fi.espoo.luontotieto.common.Unauthorized")
+                return response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "fi.espoo.luontotieto.common.Unauthorized"
+                )
             }
             if (!request.isAuthorized(authenticatedUser)) {
-                return response.sendError(HttpServletResponse.SC_FORBIDDEN, "fi.espoo.luontotieto.common.Forbidden")
+                return response.sendError(
+                    HttpServletResponse.SC_FORBIDDEN,
+                    "fi.espoo.luontotieto.common.Forbidden"
+                )
             }
         }
 
@@ -78,7 +99,8 @@ class JwtTokenDecoder(private val jwtVerifier: JWTVerifier) : HttpFilter() {
         chain: FilterChain
     ) {
         try {
-            request.getBearerToken()
+            request
+                .getBearerToken()
                 ?.takeIf { it.isNotEmpty() }
                 ?.let { request.setDecodedJwt(jwtVerifier.verify(it)) }
         } catch (e: JWTVerificationException) {

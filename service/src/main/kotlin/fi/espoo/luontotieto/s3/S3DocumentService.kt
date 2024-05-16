@@ -5,8 +5,8 @@
 package fi.espoo.luontotieto.s3
 
 import com.github.kittinunf.fuel.core.Response
+import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.BucketEnv
-import fi.espoo.luontotieto.domain.NotFound
 import mu.KotlinLogging
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpStatus
@@ -52,7 +52,10 @@ class S3DocumentService(
         contentDisposition: ContentDisposition
     ): URL {
         val request =
-            GetObjectRequest.builder().bucket(bucketName).key(key).responseContentDisposition(contentDisposition.toString())
+            GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .responseContentDisposition(contentDisposition.toString())
                 .build()
 
         val getObjectPresignRequest =
