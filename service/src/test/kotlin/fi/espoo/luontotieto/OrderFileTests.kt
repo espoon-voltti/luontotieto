@@ -25,10 +25,14 @@ class OrderFileTests : FullApplicationTest() {
                 user = testUser,
                 body =
                     OrderInput(
-                        "Test order",
-                        "Test description",
-                        listOf("12345"),
-                        listOf(OrderReportDocument("Description", DocumentType.LIITO_ORAVA_PISTEET))
+                        name = "Test order",
+                        description = "Test description",
+                        planNumber = listOf("12345"),
+                        assigneeId = companyUser.id,
+                        reportDocuments =
+                            listOf(
+                                OrderReportDocument("Description", DocumentType.LIITO_ORAVA_PISTEET)
+                            )
                     )
             )
 

@@ -114,10 +114,11 @@ const StyledSelect = styled.select`
   background-color: ${colors.grayscale.g0};
   display: block;
   font-size: 1rem;
+  font-weight: normal;
   width: 100%;
   padding: 8px 30px 8px 12px;
   border: 1px solid ${colors.grayscale.g70};
-  border-radius: 2px;
+  border-radius: 4px;
   box-shadow: none;
 `
 

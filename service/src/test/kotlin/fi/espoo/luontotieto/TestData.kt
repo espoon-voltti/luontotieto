@@ -8,3 +8,4 @@ import fi.espoo.luontotieto.config.AuthenticatedUser
 import java.util.UUID
 
 val testUser = AuthenticatedUser(UUID.randomUUID())
+val companyUser = AuthenticatedUser(UUID.randomUUID())

@@ -31,7 +31,14 @@ class OrderTests : FullApplicationTest() {
         val createdOrder =
             controller.createOrderFromScratch(
                 user = testUser,
-                body = OrderInput("Test order", "Test description", listOf("12345"), orderReportDocuments),
+                body =
+                    OrderInput(
+                        name = "Test order",
+                        description = "Test description",
+                        planNumber = listOf("12345"),
+                        assigneeId = companyUser.id,
+                        reportDocuments = orderReportDocuments
+                    ),
             )
 
         val orderResponse = controller.getOrderById(testUser, createdOrder.orderId)
@@ -48,6 +55,8 @@ class OrderTests : FullApplicationTest() {
                 OrderReportDocument("Test description 2", DocumentType.LIITO_ORAVA_ALUEET)
             )
         )
+        assertEquals("Yritys Oy", orderResponse.assignee)
+        assertEquals(companyUser.id, orderResponse.assigneeId)
     }
 
     @Test
@@ -59,7 +68,14 @@ class OrderTests : FullApplicationTest() {
         val createdOrder =
             controller.createOrderFromScratch(
                 user = testUser,
-                body = OrderInput("Test order", "Test description", listOf("12345"), orderReportDocuments),
+                body =
+                    OrderInput(
+                        name = "Test order",
+                        description = "Test description",
+                        planNumber = listOf("12345"),
+                        assigneeId = companyUser.id,
+                        reportDocuments = orderReportDocuments
+                    ),
             )
 
         val orderReportResponse = reportController.getReportById(testUser, createdOrder.reportId)
@@ -71,6 +87,8 @@ class OrderTests : FullApplicationTest() {
         assertEquals("Teija Testaaja", orderReportResponse.updatedBy)
         assertEquals("Test order", orderReportResponse.order?.name)
         assertEquals("Test description", orderReportResponse.order?.description)
+        assertEquals("Yritys Oy", orderReportResponse.order?.assignee)
+        assertEquals(companyUser.id, orderReportResponse.order?.assigneeId)
     }
 
     @Test
@@ -78,7 +96,14 @@ class OrderTests : FullApplicationTest() {
         for (i in 0..2) {
             controller.createOrderFromScratch(
                 user = testUser,
-                body = OrderInput("Test order $i", "Test description $i", listOf("12345"), listOf()),
+                body =
+                    OrderInput(
+                        name = "Test order $i",
+                        description = "Test description $i",
+                        planNumber = listOf("12345"),
+                        assigneeId = companyUser.id,
+                        reportDocuments = listOf()
+                    ),
             )
         }
 
@@ -92,7 +117,14 @@ class OrderTests : FullApplicationTest() {
     fun `get all reports for user - no reports`() {
         controller.createOrderFromScratch(
             user = testUser,
-            body = OrderInput("Test order", "Test description", listOf("12345"), listOf()),
+            body =
+                OrderInput(
+                    name = "Test order",
+                    description = "Test description",
+                    planNumber = listOf("12345"),
+                    assigneeId = companyUser.id,
+                    reportDocuments = listOf()
+                ),
         )
 
         val ordersResponse = reportController.getReports(AuthenticatedUser(UUID.randomUUID()))
@@ -106,29 +138,38 @@ class OrderTests : FullApplicationTest() {
                 user = testUser,
                 body =
                     OrderInput(
-                        "Test order",
-                        "Test description",
-                        listOf("12345"),
-                        listOf(
-                            OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_PISTEET)
-                        )
+                        name = "Test order",
+                        description = "Test description",
+                        planNumber = listOf("12345"),
+                        assigneeId = companyUser.id,
+                        reportDocuments =
+                            listOf(
+                                OrderReportDocument(
+                                    "Test description",
+                                    DocumentType.LIITO_ORAVA_PISTEET
+                                )
+                            )
                     ),
             )
-        val updatedReportDocuments = listOf(OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_ALUEET))
+        val updatedReportDocuments =
+            listOf(OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_ALUEET))
         val updatedOrder =
             controller.updateOrder(
                 testUser,
                 createdOrder.orderId,
                 OrderInput(
-                    "New name",
-                    "New description",
-                    listOf("12345"),
-                    updatedReportDocuments
+                    name = "New name",
+                    description = "New description",
+                    planNumber = listOf("12345"),
+                    assigneeId = companyUser.id,
+                    reportDocuments = updatedReportDocuments
                 )
             )
 
         assertEquals("New name", updatedOrder.name)
         assertEquals("New description", updatedOrder.description)
+        assertEquals("Yritys Oy", updatedOrder.assignee)
+        assertEquals(companyUser.id, updatedOrder.assigneeId)
         assertEquals(updatedReportDocuments, updatedOrder.reportDocuments)
     }
 }
