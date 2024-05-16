@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import {
   FlexRowWithGaps,
@@ -17,9 +17,11 @@ import { Button } from 'shared/buttons/Button'
 import Radio from 'shared/form/Radio'
 import Switch from 'shared/form/Switch'
 import { faPen } from '@fortawesome/free-solid-svg-icons'
-import { InfoBox } from 'shared/MessageBoxes'
+import { AlertBox, InfoBox } from 'shared/MessageBoxes'
 import { User, UserRole, apiPutUser, getUserRole } from 'api/users-api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { emailRegex } from './common'
+import { AxiosError } from 'axios'
 
 const roles = [
   {
@@ -50,9 +52,9 @@ export const UserManagementForm = React.memo(function UserManagementForm({
   const queryClient = useQueryClient()
   const [userInput, setUserInput] = useState(userEditableFields)
   const [enableEdit, setEnableEdit] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const userSelectedRoleInfo = roles.find((r) => r.role === userInput.role)
-
   const { mutateAsync: updateReportMutation, isPending: updatingUser } =
     useMutation({
       mutationFn: apiPutUser,
@@ -60,8 +62,27 @@ export const UserManagementForm = React.memo(function UserManagementForm({
         queryClient.invalidateQueries({ queryKey: ['users'] })
         queryClient.invalidateQueries({ queryKey: ['user', user.id] })
         setEnableEdit(false)
+      },
+      onError: (e: AxiosError<{ errorCode: string }>) => {
+        if (e instanceof AxiosError) {
+          const errorCode = e.response?.data.errorCode
+          const errorMessage =
+            errorCode === 'UniqueConstraintViolation'
+              ? 'Syötetty sähköposti on jo käytössä toisella käyttäjällä.'
+              : 'Tapahtui odottamaton virhe.'
+          setErrorMessage(errorMessage)
+        }
       }
     })
+
+  const invalidEmailInfo = useMemo(() => {
+    return enableEdit && userInput.email && !userInput.email.match(emailRegex)
+      ? {
+          text: 'Syötä oikeaa muotoa oleva sähköposti',
+          status: 'warning' as const
+        }
+      : undefined
+  }, [userInput.email])
 
   return (
     <SectionContainer>
@@ -80,6 +101,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
             value={userInput.email}
             onChange={(value) => setUserInput({ ...userInput, email: value })}
             readonly={!enableEdit}
+            info={invalidEmailInfo}
           />
         </LabeledInput>
 
@@ -87,7 +109,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
           <>
             <LabeledInput $cols={5}>
               <Label>Käyttäjäoikeudet</Label>
-              <FlexRowWithGaps>
+              <FlexRowWithGaps style={{ paddingTop: '4px' }}>
                 {roles.map((r) => (
                   <Radio
                     key={r.role}
@@ -120,6 +142,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
             </LabeledInput>
           </>
         )}
+        {errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
 
         {enableEdit ? (
           <FlexRowWithGaps>
@@ -129,7 +152,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
               onClick={() => setEnableEdit(!enableEdit)}
             ></Button>
             <Button
-              disabled={updatingUser}
+              disabled={updatingUser || !!invalidEmailInfo}
               primary
               text={'Tallenna'}
               onClick={async () =>
