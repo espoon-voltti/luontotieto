@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AddButton } from 'shared/buttons/AddButton'
 
@@ -14,7 +14,7 @@ import {
   Table,
   VerticalGap
 } from '../../shared/layout'
-import { ReportDetails, getDocumentTypeTitle } from 'api/report-api'
+import { getDocumentTypeTitle, ReportDetails } from 'api/report-api'
 import { InputField } from 'shared/form/InputField'
 import { SortableTh, Th } from 'shared/Table'
 import { orderBy } from 'lodash'
@@ -41,6 +41,14 @@ export const ReportList = React.memo(function ReportList() {
     string | null
   >(null)
 
+  const reportAssignees = useMemo(() => {
+    const assignees = (reports ?? [])
+      .flatMap(r => r.order?.assignee !== undefined ? r.order?.assignee : [])
+      .sort()
+
+    return [null, ...new Set(assignees)]
+  }, [reports])
+
   const isSorted = (column: ReportSortColumn) =>
     sortBy === column ? sortDirection : undefined
 
@@ -64,10 +72,10 @@ export const ReportList = React.memo(function ReportList() {
       return sortBy === null
         ? filtered
         : orderBy(
-            filtered,
-            [sortBy],
-            [sortDirection === 'ASC' ? 'asc' : 'desc']
-          )
+          filtered,
+          [sortBy],
+          [sortDirection === 'ASC' ? 'asc' : 'desc']
+        )
     },
     [sortBy, sortDirection, filterByReportAssignee, filterBySearchQuery]
   )
@@ -80,7 +88,7 @@ export const ReportList = React.memo(function ReportList() {
   return (
     <PageContainer>
       <SectionContainer>
-        <VerticalGap $size="m" />
+        <VerticalGap $size="m"/>
         <FlexLeftRight>
           <FlexRowWithGaps $gapSize="s">
             <InputField
@@ -126,10 +134,11 @@ export const ReportList = React.memo(function ReportList() {
               <Th style={{ width: '300px' }}>TILAUKSEN KAAVANUMERO</Th>
               <Th style={{ width: '160px' }}>Luontotyypit</Th>
               <Th style={{ width: '80px' }}>
-                SELVITYKSEN TEKJÄ
+                SELVITYKSEN TEKIJÄ
                 <Select
                   selectedItem={filterByReportAssignee}
-                  items={['', 'Luontotietokonsultit Oy', 'Kuka']}
+                  items={reportAssignees ?? []}
+                  getItemLabel={(u) => u ?? 'Valitse'}
                   onChange={setFilterByReportAssignee}
                 ></Select>
               </Th>
@@ -153,7 +162,7 @@ export const ReportList = React.memo(function ReportList() {
                     getDocumentTypeTitle(r.documentType)
                   )}
                 </td>
-                <td>Luontoselvityskonsultit Oy</td>
+                <td>{report.order?.assignee}</td>
               </tr>
             ))}
             {reports.length == 0 && (
@@ -174,21 +183,21 @@ const filterReports = (
   assignee: string | null
 ) => {
   const searchQueryToLower = searchQuery ? searchQuery.toLowerCase() : null
-  //TODO: we do not yet support assignee at the report data schema level so mock the filtering to return true
+  const assigneeLower = assignee ? assignee.toLowerCase() : null
   return reports.filter((report) => {
-    if (searchQueryToLower === null && assignee === null) {
-      return true
-    }
     if (searchQueryToLower) {
       return (
         report.name.toLowerCase().includes(searchQueryToLower) ||
         report.description.toLowerCase().includes(searchQueryToLower) ||
-        (report.order &&
+        (report.order && report.order.assignee.toLowerCase().includes(searchQueryToLower)) ||
+        (report.order && searchQueryToLower &&
           report.order.planNumber
             ?.toString()
             .toLowerCase()
             .includes(searchQueryToLower))
-      )
+      ) && (assigneeLower ? (report.order && report.order.assignee.toLowerCase().includes(assigneeLower)) : true)
+    } else if (assigneeLower) {
+      return (report.order && assigneeLower && report.order.assignee.toLowerCase().includes(assigneeLower))
     }
     return true
   })

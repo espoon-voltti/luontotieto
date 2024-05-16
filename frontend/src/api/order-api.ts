@@ -11,6 +11,7 @@ export interface Order extends OrderInput {
   id: string
   created: Date
   updated: Date
+  assignee: string
   createdBy: string
   updatedBy: string
 }
@@ -22,12 +23,14 @@ export interface OrderFormInput {
   reportDocuments: OrderReportDocumentInput[]
   filesToAdd: OrderFileInput[]
   filesToRemove: string[]
+  assigneeId: string
 }
 
 export interface OrderInput {
   name: string
   description: string
   planNumber?: string[]
+  assigneeId: string
   reportDocuments: OrderReportDocumentInput[]
 }
 

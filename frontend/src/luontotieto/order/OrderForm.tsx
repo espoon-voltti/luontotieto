@@ -18,17 +18,14 @@ import {
 import { H3, Label } from '../../shared/typography'
 import { Checkbox } from 'shared/form/Checkbox'
 import { FileInput, FileInputData } from 'shared/form/File/FileInput'
-import {
-  Order,
-  OrderFile,
-  OrderFileDocumentType,
-  OrderFormInput,
-  OrderReportDocumentInput
-} from 'api/order-api'
-import { ReportFileDocumentType, getDocumentTypeTitle } from 'api/report-api'
+import { Order, OrderFile, OrderFileDocumentType, OrderFormInput, OrderReportDocumentInput } from 'api/order-api'
+import { getDocumentTypeTitle, ReportFileDocumentType } from 'api/report-api'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
 import { TagAutoComplete } from 'shared/form/TagAutoComplete/TagAutoComplete'
 import { Tag } from 'react-tag-autocomplete'
+import { useGetAssigneeUsersQuery } from '../../api/hooks/users'
+import { User } from '../../api/users-api'
+import { Select } from '../../shared/form/Select'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -43,6 +40,7 @@ interface EditProps {
   onChange: (validInput: OrderFormInput | null) => void
   planNumbers: string[]
 }
+
 type Props = CreateProps | EditProps
 
 const orderFileTypes = [
@@ -178,10 +176,21 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     setPlanNumbers(selected.map((s) => s.label))
   }
 
+  const {data: assigneeUsers} = useGetAssigneeUsersQuery()
+  const [assignee, setAssignee] = useState<User | undefined>()
+
+  useEffect(() => {
+    if (props.mode === 'EDIT') {
+      const assignee = assigneeUsers?.find((u) => u?.id === props.order.assigneeId)
+      setAssignee(assignee)
+    }
+  }, [assigneeUsers, props])
+
   const validInput: OrderFormInput | null = useMemo(() => {
     if (name.trim() === '') return null
     if (description.trim() === '') return null
     if (!filesAreValid(orderFiles)) return null
+    if (!assignee) return null
 
     return {
       name: name.trim(),
@@ -210,9 +219,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
         )
           ? [e.orderFile.id]
           : []
-      )
+      ),
+      assigneeId: assignee.id
     }
-  }, [name, description, planNumbers, reportDocuments, orderFiles])
+  }, [name, description, planNumbers, reportDocuments, orderFiles, assignee])
 
   useEffect(() => {
     props.onChange(validInput)
@@ -259,6 +269,18 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 onChange={updatePlanNumbers}
               />
+            </LabeledInput>
+          </RowOfInputs>
+          <RowOfInputs>
+            <LabeledInput $cols={4}>
+              <Label>Selvityksen tekijä</Label>
+              <Select
+                selectedItem={assignee}
+                items={assigneeUsers ?? []}
+                onChange={setAssignee}
+                getItemLabel={(u) => u?.name ?? '-'}
+                getItemValue={(u) => u?.id ?? '-'}
+              ></Select>
             </LabeledInput>
           </RowOfInputs>
         </GroupOfInputRows>

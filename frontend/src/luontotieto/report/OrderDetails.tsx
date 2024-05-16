@@ -15,7 +15,7 @@ import {
 } from '../../shared/layout'
 import { H3, Label } from '../../shared/typography'
 
-import { Order, apiGetOrderFileUrl } from 'api/order-api'
+import { apiGetOrderFileUrl, Order } from 'api/order-api'
 import styled from 'styled-components'
 import { getDocumentTypeTitle } from 'api/report-api'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -68,7 +68,7 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
           />
         </FlexRowWithGaps>
 
-        <VerticalGap $size="m" />
+        <VerticalGap $size="m"/>
         <GroupOfInputRows>
           <RowOfInputs>
             <LabeledInput>
@@ -85,7 +85,7 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
             </LabeledInput>
             <LabeledInput>
               <Label>Selvityksen tekijä</Label>
-              Luontoselvityskonsultit Oy
+              {order.assignee}
             </LabeledInput>
           </RowOfInputs>
           <RowOfInputs>

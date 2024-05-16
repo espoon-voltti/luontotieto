@@ -45,7 +45,8 @@ abstract class FullApplicationTest {
                     WHERE sequence_schema = 'public'
                   );
                 END ${'$'}${'$'} LANGUAGE plpgsql;
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
         }
     }
@@ -57,10 +58,19 @@ abstract class FullApplicationTest {
             tx.createUpdate(
                 """
                 INSERT INTO users (id, updated, external_id, name, email) 
-                VALUES (:id, now(), 'test', 'Teija Testaaja', NULL)
+                VALUES (:id, now(), 'test:01', 'Teija Testaaja', NULL)
             """
             )
                 .bind("id", testUser.id)
+                .execute()
+
+            tx.createUpdate(
+                """
+                INSERT INTO users (id, updated, external_id, name, email, role) 
+                VALUES (:id, now(), 'test:02', 'Yritys Oy', 'yritys@example.com', 'yrityskäyttäjä')
+            """
+            )
+                .bind("id", companyUser.id)
                 .execute()
         }
     }

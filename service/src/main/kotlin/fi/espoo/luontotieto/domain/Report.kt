@@ -51,6 +51,8 @@ private const val SELECT_REPORT_SQL =
            o.updated                                  AS "o_updated",
            o.plan_number                              AS "o_planNumber",
            o.report_documents                         AS "o_reportDocuments",
+           oua.name                                   AS "o_assignee",
+           o.assignee_id                               AS "o_assigneeId",
            ouc.name                                   AS "o_createdBy",
            ouu.name                                   AS "o_updatedBy"
     FROM report r
@@ -59,6 +61,7 @@ private const val SELECT_REPORT_SQL =
              LEFT JOIN "order" o ON r.order_id = o.id
              LEFT JOIN users ouc ON o.created_by = ouc.id
              LEFT JOIN users ouu ON o.updated_by = ouu.id
+             LEFT JOIN users oua ON o.assignee_id = oua.id
 """
 
 fun Handle.insertReport(
@@ -127,8 +130,7 @@ fun Handle.putReport(
         .bind("updatedBy", user.id)
         .mapTo<Report>()
         .findOne()
-        .getOrNull()
-        ?: throw NotFound()
+        .getOrNull() ?: throw NotFound()
 }
 
 fun Handle.getReport(
@@ -144,8 +146,7 @@ fun Handle.getReport(
     .bind("userId", user.id)
     .mapTo<Report>()
     .findOne()
-    .getOrNull()
-    ?: throw NotFound()
+    .getOrNull() ?: throw NotFound()
 
 fun Handle.getReports(user: AuthenticatedUser) =
     createQuery(
@@ -157,8 +158,7 @@ fun Handle.getReports(user: AuthenticatedUser) =
     )
         .bind("userId", user.id)
         .mapTo<Report>()
-        .list()
-        ?: emptyList()
+        .list() ?: emptyList()
 
 fun getTableDefinitionByDocumentType(documentType: DocumentType) =
     when (documentType) {

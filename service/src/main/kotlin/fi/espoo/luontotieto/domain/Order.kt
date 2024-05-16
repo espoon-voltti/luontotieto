@@ -26,6 +26,8 @@ data class Order(
     val updated: OffsetDateTime,
     val createdBy: String,
     val updatedBy: String,
+    val assignee: String,
+    val assigneeId: UUID,
     @Json val reportDocuments: List<OrderReportDocument>
 )
 
@@ -33,6 +35,7 @@ data class OrderInput(
     val name: String,
     val description: String,
     val planNumber: List<String>? = null,
+    val assigneeId: UUID,
     @Json val reportDocuments: List<OrderReportDocument>
 )
 
@@ -46,10 +49,13 @@ private const val SELECT_ORDER_SQL =
            o.created,
            o.updated,
            uc.name AS "createdBy",
-           uu.name AS "updatedBy"
+           uu.name AS "updatedBy",
+           ua.name AS "assignee",
+           o.assignee_id AS "assigneeId"
     FROM "order" o
         LEFT JOIN users uc ON o.created_by = uc.id
         LEFT JOIN users uu ON o.updated_by = uu.id
+        LEFT JOIN users ua ON o.assignee_id = ua.id
 """
 
 fun Handle.insertOrder(
@@ -58,8 +64,8 @@ fun Handle.insertOrder(
 ): UUID {
     return createUpdate(
         """
-            INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents) 
-            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments)
+            INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents, assignee_id) 
+            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments, :assigneeId)
             RETURNING id
             """
     )
@@ -71,7 +77,7 @@ fun Handle.insertOrder(
         .one()
 }
 
-fun Handle.purOrder(
+fun Handle.putOrder(
     id: UUID,
     order: OrderInput,
     user: AuthenticatedUser
@@ -81,7 +87,7 @@ fun Handle.purOrder(
             WITH "order" AS (
                 UPDATE "order" 
                  SET name = :name, description = :description, updated_by = :updatedBy,
-                  plan_number = :planNumber, report_documents = :reportDocuments
+                  plan_number = :planNumber, report_documents = :reportDocuments, assignee_id = :assigneeId
                  WHERE id = :id AND (created_by = :updatedBy OR updated_by = :updatedBy)
                 RETURNING *
             ) 
@@ -93,8 +99,7 @@ fun Handle.purOrder(
         .bind("updatedBy", user.id)
         .mapTo<Order>()
         .findOne()
-        .getOrNull()
-        ?: throw NotFound()
+        .getOrNull() ?: throw NotFound()
 }
 
 fun Handle.getOrder(
@@ -111,8 +116,7 @@ fun Handle.getOrder(
         .bind("userId", user.id)
         .mapTo<Order>()
         .findOne()
-        .getOrNull()
-        ?: throw NotFound()
+        .getOrNull() ?: throw NotFound()
 
 fun Handle.getOrders(user: AuthenticatedUser) =
     createQuery(
@@ -124,8 +128,7 @@ fun Handle.getOrders(user: AuthenticatedUser) =
     )
         .bind("userId", user.id)
         .mapTo<Order>()
-        .list()
-        ?: emptyList()
+        .list() ?: emptyList()
 
 fun Handle.getPlanNumbers(): List<String> =
     createQuery(

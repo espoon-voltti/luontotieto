@@ -46,11 +46,9 @@ class OrderController {
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired
-    lateinit var documentClient: S3DocumentService
+    @Autowired lateinit var documentClient: S3DocumentService
 
-    @Autowired
-    lateinit var bucketEnv: BucketEnv
+    @Autowired lateinit var bucketEnv: BucketEnv
 
     private val logger = KotlinLogging.logger {}
 
@@ -85,9 +83,13 @@ class OrderController {
     ): CreateOrderResponse {
         return jdbi
             .inTransactionUnchecked { tx ->
-
                 val orderId = tx.insertOrder(data = body, user = user)
-                val report = tx.insertReport(Report.Companion.ReportInput(body.name, body.description), user, orderId)
+                val report =
+                    tx.insertReport(
+                        Report.Companion.ReportInput(body.name, body.description),
+                        user,
+                        orderId
+                    )
                 CreateOrderResponse(orderId, report.id)
             }
             .also { logger.audit(user, AuditEvent.CREATE_ORDER, mapOf("id" to "$it")) }
@@ -100,7 +102,7 @@ class OrderController {
         @RequestBody order: OrderInput
     ): Order {
         return jdbi
-            .inTransactionUnchecked { tx -> tx.purOrder(id, order, user) }
+            .inTransactionUnchecked { tx -> tx.putOrder(id, order, user) }
             .also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
     }
 
