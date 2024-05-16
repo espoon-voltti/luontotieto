@@ -8,7 +8,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import classNames from 'classnames'
 import React, { HTMLAttributes, RefObject, useState } from 'react'
 import styled, { css } from 'styled-components'
-
 import { IconButton } from '../buttons/IconButton'
 import { BaseProps, colors, InputWidth, inputWidthCss } from '../theme'
 
@@ -158,7 +157,6 @@ export interface InputProps extends BaseProps {
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
   readonly?: boolean
   width?: InputWidth
-
   autoComplete?: string
   placeholder?: string
   info?: InputInfo

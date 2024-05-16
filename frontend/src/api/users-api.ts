@@ -57,11 +57,14 @@ interface ChangePasswordPayload {
 export type ChangePasswordErrorCode =
   | 'wrong-current-password'
   | 'new-password-already-in-use'
+  | 'weak-password'
 
 export const ChangePasswordError = {
   'wrong-current-password': 'Väärä nykyinen salasana',
   'new-password-already-in-use':
-    'Uusi salasana ei saa olla sama kuin nykyinen salana'
+    'Uusi salasana ei saa olla sama kuin nykyinen salana',
+  'weak-password':
+    'Syötä vahva salasana jossa on: vähintään 10 merkkiä, yksi iso kirjain, yksi pieni kirjain ja yksi numero.'
 }
 
 export const apiChangeUserPassword = async (
