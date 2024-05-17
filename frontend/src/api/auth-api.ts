@@ -2,29 +2,34 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { AppUser } from 'auth/UserContext'
 import { apiClient } from '../api-client'
 
 import { JsonOf } from '../shared/api-utils'
 
-import { EmployeeUser } from '../auth/UserContext'
-
 export interface AuthStatus {
-    loggedIn: boolean
-    user?: EmployeeUser
-    apiVersion: string
+  loggedIn: boolean
+  user?: AppUser
+  apiVersion: string
 }
 
 export async function getAuthStatus(): Promise<AuthStatus> {
-    return apiClient
-        .get<JsonOf<AuthStatus>>('/auth/status')
-        .then((res) => res.data)
+  return apiClient
+    .get<JsonOf<AuthStatus>>('/auth/status')
+    .then((res) => res.data)
 }
 
-export const apiPostLogin = async (emailAndPassword: { email: string, password: string }) => {
-    return apiClient.post(
-        `/auth/password/login`,
-        emailAndPassword
-    ).then(res => res.status === 200)
+export const apiPostLogin = async (emailAndPassword: {
+  email: string
+  password: string
+}) => {
+  return apiClient
+    .post(`/auth/password/login`, emailAndPassword)
+    .then((res) => res.status === 200)
 }
 
-
+export const apiPostLogout = async () => {
+  return apiClient
+    .post(`/auth/password/logout`)
+    .then((res) => res.status === 200)
+}
