@@ -9,8 +9,6 @@ import { FlexRowWithGaps } from '../shared/layout'
 import { UserContext } from './UserContext'
 import { UserMenu } from './UserMenu'
 
-export const logoutUrl = `/api/auth/saml/logout?RelayState=/kirjaudu`
-
 export const UserHeader = React.memo(function UserHeader() {
   const { user } = useContext(UserContext)
 
@@ -18,7 +16,7 @@ export const UserHeader = React.memo(function UserHeader() {
 
   return (
     <FlexRowWithGaps>
-      <UserMenu userName={user.name}></UserMenu>
+      <UserMenu user={user}></UserMenu>
     </FlexRowWithGaps>
   )
 })

@@ -4,15 +4,15 @@
 
 import React, { createContext, useMemo } from 'react'
 
-export interface EmployeeUser {
+export interface AppUser {
   id: string
-  externalId: string
   name: string
   email?: string | null
+  externalId?: string
 }
 
 export interface UserState {
-  user: EmployeeUser | null
+  user: AppUser | null
 }
 
 export const UserContext = createContext<UserState>({
@@ -24,7 +24,7 @@ export const UserContextProvider = React.memo(function UserContextProvider({
   user
 }: {
   children: React.JSX.Element
-  user: EmployeeUser | null
+  user: AppUser | null
 }) {
   const value = useMemo(
     () => ({
