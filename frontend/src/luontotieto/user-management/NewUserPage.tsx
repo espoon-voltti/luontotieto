@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import {
   FixedWidthDiv,
@@ -17,10 +17,12 @@ import { InputField } from 'shared/form/InputField'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Label } from 'shared/typography'
 import { Button } from 'shared/buttons/Button'
-import { InfoBox } from 'shared/MessageBoxes'
+import { AlertBox, InfoBox } from 'shared/MessageBoxes'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiPostUser } from 'api/users-api'
 import { useNavigate } from 'react-router-dom'
+import { emailRegex } from './common'
+import { AxiosError } from 'axios'
 
 export const NewUserPage = React.memo(function NewUserPage() {
   const navigate = useNavigate()
@@ -29,16 +31,37 @@ export const NewUserPage = React.memo(function NewUserPage() {
     name: '',
     email: ''
   })
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const { mutateAsync: createUser, isPending } = useMutation({
     mutationFn: apiPostUser,
     onSuccess: (user) => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       navigate(`/luontotieto/käyttäjät/${user.id}`)
+    },
+    onError: (e: AxiosError<{ errorCode: string }>) => {
+      if (e instanceof AxiosError) {
+        const errorCode = e.response?.data.errorCode
+        const errorMessage =
+          errorCode === 'UniqueConstraintViolation'
+            ? 'Syötetty sähköposti on jo käytössä toisella käyttäjällä.'
+            : 'Tapahtui odottamaton virhe.'
+        setErrorMessage(errorMessage)
+      }
     }
   })
 
-  const isValid = userInput.name && userInput.email
+  const isValid =
+    userInput.name && userInput.email && userInput.email.match(emailRegex)
+
+  const invalidEmailInfo = useMemo(() => {
+    return userInput.email && !userInput.email.match(emailRegex)
+      ? {
+          text: 'Syötä oikeaa muotoa oleva sähköposti',
+          status: 'warning' as const
+        }
+      : undefined
+  }, [userInput.email])
 
   return (
     <PageContainer>
@@ -50,20 +73,22 @@ export const NewUserPage = React.memo(function NewUserPage() {
 
       <SectionContainer>
         <GroupOfInputRows>
-          <LabeledInput $cols={3}>
+          <LabeledInput $cols={4}>
             <Label>Yritys</Label>
             <InputField
               value={userInput.name}
               onChange={(value) => setUserInput({ ...userInput, name: value })}
             />
           </LabeledInput>
-          <LabeledInput $cols={3}>
+          <LabeledInput $cols={4}>
             <Label>Yhteyssähköposti</Label>
             <InputField
               value={userInput.email}
               onChange={(value) => setUserInput({ ...userInput, email: value })}
+              info={invalidEmailInfo}
             />
           </LabeledInput>
+          {errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
           <FlexRowWithGaps>
             <Button
               primary
