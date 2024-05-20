@@ -18,6 +18,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.S3Configuration
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
+import software.amazon.awssdk.services.ses.SesClient
 import software.amazon.awssdk.utils.AttributeMap
 
 @Configuration
@@ -63,7 +64,9 @@ class AwsConfig {
     ): S3Presigner =
         S3Presigner.builder()
             .region(env.region)
-            .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
+            .serviceConfiguration(
+                S3Configuration.builder().pathStyleAccessEnabled(true).build()
+            )
             .endpointOverride(env.s3MockUrl)
             .credentialsProvider(credentialsProvider)
             .build()
@@ -95,4 +98,14 @@ class AwsConfig {
             .credentialsProvider(credentialsProvider)
             .build()
     }
+
+    @Bean
+    fun amazonSES(
+        env: EmailEnv,
+        awsCredentialsProvider: AwsCredentialsProvider?
+    ): SesClient =
+        SesClient.builder()
+            .credentialsProvider(awsCredentialsProvider)
+            .region(env.region)
+            .build()
 }

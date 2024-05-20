@@ -8,6 +8,11 @@ luontotieto:
   bucket:
     data: ${DATA_BUCKET}
     proxy_through_nginx: true
+  email:
+    enabled: ${EMAIL_ENABLED}
+    region: ${EMAIL_AWS_REGION}
+    sender_address: ${EMAIL_SENDER_ADDRESS}
+    sender_name: ${EMAIL_SENDER_NAME}
 
 spring:
   main:
