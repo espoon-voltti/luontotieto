@@ -5,7 +5,7 @@
 import { apiClient } from 'api-client'
 import { JsonOf } from 'shared/api-utils'
 
-import { ReportDetails, ReportFileDocumentType } from './report-api'
+import { ReportFileDocumentType } from './report-api'
 
 export interface Order extends OrderInput {
   id: string
@@ -138,13 +138,6 @@ export const apiGetOrder = (id: string): Promise<Order> =>
 
 export const apiGetOrderFiles = (id: string): Promise<OrderFile[]> =>
   apiClient.get<OrderFile[]>(`/orders/${id}/files`).then((res) => res.data)
-
-export const apiPostOrderReport = async (
-  orderId: string
-): Promise<ReportDetails> =>
-  await apiClient
-    .post<ReportDetails>(`/orders/${orderId}/reports`, {})
-    .then((r) => r.data)
 
 export const apiGetOrderFileUrl = (
   orderId: string,

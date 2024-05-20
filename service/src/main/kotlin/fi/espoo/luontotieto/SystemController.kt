@@ -13,6 +13,7 @@ import fi.espoo.luontotieto.common.upsertAppUserFromAd
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.audit
+import fi.espoo.luontotieto.domain.UserRole
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
@@ -47,9 +48,9 @@ class SystemController {
         user: AuthenticatedUser,
         @RequestBody adUser: AdUser
     ): AppUser {
-        return jdbi.inTransactionUnchecked { it.upsertAppUserFromAd(adUser, user) }.also {
-            logger.audit(user, AuditEvent.USER_LOGIN)
-        }
+        return jdbi
+            .inTransactionUnchecked { it.upsertAppUserFromAd(adUser, user) }
+            .also { logger.audit(user, AuditEvent.USER_LOGIN) }
     }
 
     @PostMapping("/password-login")
@@ -72,7 +73,9 @@ class SystemController {
                 }
                 user.toAppUser()
             }
-            .also { logger.audit(AuthenticatedUser(it.id), AuditEvent.PASSWORD_LOGIN) }
+            .also {
+                logger.audit(AuthenticatedUser(it.id, UserRole.CUSTOMER), AuditEvent.PASSWORD_LOGIN)
+            }
     }
 
     @GetMapping("/users/{id}")

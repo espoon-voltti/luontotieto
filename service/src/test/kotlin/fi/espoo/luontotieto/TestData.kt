@@ -5,7 +5,8 @@
 package fi.espoo.luontotieto
 
 import fi.espoo.luontotieto.config.AuthenticatedUser
+import fi.espoo.luontotieto.domain.UserRole
 import java.util.UUID
 
-val testUser = AuthenticatedUser(UUID.randomUUID())
-val companyUser = AuthenticatedUser(UUID.randomUUID())
+val adminUser = AuthenticatedUser(UUID.randomUUID(), UserRole.ADMIN)
+val customerUser = AuthenticatedUser(UUID.randomUUID(), UserRole.CUSTOMER)

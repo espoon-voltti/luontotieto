@@ -5,6 +5,7 @@
 package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.DatabaseEnum
+import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.enums.DatabaseValue
@@ -67,39 +68,50 @@ fun Handle.insertOrderFile(
         .one()
 }
 
-fun Handle.getOrderFiles(orderId: UUID): List<OrderFile> =
-    createQuery(
+fun Handle.getOrderFiles(
+    orderId: UUID,
+    user: AuthenticatedUser
+): List<OrderFile> {
+    return createQuery(
         """
-                SELECT id, description, order_id AS "orderId", media_type AS "mediaType", 
-                file_name AS "fileName", document_type AS "documentType",
-                created, updated,  created_by AS "createdBy", updated_by AS "updatedBy"
-                FROM order_file
-                WHERE order_id = :orderId
+                SELECT of.id, of.description, of.order_id AS "orderId", of.media_type AS "mediaType", 
+                of.file_name AS "fileName", of.document_type AS "documentType",
+                of.created, of.updated, of.created_by AS "createdBy", of.updated_by AS "updatedBy"
+                FROM order_file of
+                JOIN "order" o ON o.id = of.order_id
+                JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
+                WHERE of.order_id = :orderId
             """
     )
         .bind("orderId", orderId)
+        .bind("userId", user.id)
         .mapTo<OrderFile>()
         .list()
+}
 
 fun Handle.getOrderFileById(
     orderId: UUID,
-    fileId: UUID
-): OrderFile =
-    createQuery(
+    fileId: UUID,
+    user: AuthenticatedUser
+): OrderFile {
+    return createQuery(
         """
-                SELECT id, description, order_id AS "orderId", media_type AS "mediaType", 
-                file_name AS "fileName", document_type AS "documentType",
-                created, updated,  created_by AS "createdBy", updated_by AS "updatedBy"
-                FROM order_file
-                WHERE order_id = :orderId
-                AND id = :fileId
+                SELECT of.id, of.description, of.order_id AS "orderId", of.media_type AS "mediaType", 
+                of.file_name AS "fileName", of.document_type AS "documentType",
+                of.created, of.updated, of.created_by AS "createdBy", of.updated_by AS "updatedBy"
+                FROM order_file of 
+                JOIN "order" o ON o.id = of.order_id
+                JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
+                WHERE of.order_id = :orderId AND of.id = :fileId  
             """
     )
         .bind("orderId", orderId)
         .bind("fileId", fileId)
+        .bind("userId", user.id)
         .mapTo<OrderFile>()
         .findOne()
-        .getOrNull() ?: throw fi.espoo.luontotieto.common.NotFound()
+        .getOrNull() ?: throw NotFound()
+}
 
 fun Handle.deleteOrderFile(
     orderId: UUID,

@@ -116,10 +116,11 @@ fun Handle.putReport(
     return createQuery(
         """
             WITH report AS (
-                UPDATE report 
+                UPDATE report r
                  SET name = :name, description = :description, updated_by = :updatedBy
-                 WHERE id = :id AND (created_by = :updatedBy OR updated_by = :updatedBy)
-                RETURNING *
+                 FROM "order" o, users u
+                WHERE r.id = :id AND u.id = :updatedBy AND (o.assignee_id = u.id OR u.role != 'yrityskäyttäjä')
+                RETURNING r.*
             ) 
             $SELECT_REPORT_SQL
             """
@@ -136,29 +137,33 @@ fun Handle.putReport(
 fun Handle.getReport(
     id: UUID,
     user: AuthenticatedUser
-) = createQuery(
-    """
+): Report {
+    return createQuery(
+        """ 
                 $SELECT_REPORT_SQL
-                WHERE r.id = :id AND (r.created_by = :userId OR r.updated_by = :userId)
+                JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
+                WHERE r.id = :id
             """
-)
-    .bind("id", id)
-    .bind("userId", user.id)
-    .mapTo<Report>()
-    .findOne()
-    .getOrNull() ?: throw NotFound()
+    )
+        .bind("id", id)
+        .bind("userId", user.id)
+        .mapTo<Report>()
+        .findOne()
+        .getOrNull() ?: throw NotFound()
+}
 
-fun Handle.getReports(user: AuthenticatedUser) =
-    createQuery(
+fun Handle.getReports(user: AuthenticatedUser): List<Report> {
+    return createQuery(
         """
                 $SELECT_REPORT_SQL
-                WHERE r.created_by = :userId OR r.updated_by = :userId
+                JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
                 ORDER BY r.created DESC
             """
     )
         .bind("userId", user.id)
         .mapTo<Report>()
         .list() ?: emptyList()
+}
 
 fun getTableDefinitionByDocumentType(documentType: DocumentType) =
     when (documentType) {

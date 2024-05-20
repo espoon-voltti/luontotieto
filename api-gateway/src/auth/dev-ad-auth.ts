@@ -4,11 +4,7 @@
 
 import _ from 'lodash'
 import { Request, Router, urlencoded } from 'express'
-import {
-  assertStringProp,
-  AsyncRequestHandler,
-  toRequestHandler
-} from '../utils/express.js'
+import { assertStringProp, AsyncRequestHandler, toRequestHandler } from '../utils/express.js'
 import { AdUser, userLogin } from '../clients/service-client.js'
 import { Sessions } from './session.js'
 import passport, { Strategy } from 'passport'

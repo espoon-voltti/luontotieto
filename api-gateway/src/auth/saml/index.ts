@@ -12,7 +12,7 @@ import {
   VerifyWithRequest
 } from '@node-saml/passport-saml'
 import { logError, logWarn } from '../../logging/index.js'
-import { createLogoutToken, AppSessionUser } from '../index.js'
+import { AppSessionUser, createLogoutToken } from '../index.js'
 import { appBaseUrl, Config, EspooSamlConfig } from '../../config.js'
 import { readFileSync } from 'node:fs'
 import certificates, { TrustedCertificates } from './certificates.js'

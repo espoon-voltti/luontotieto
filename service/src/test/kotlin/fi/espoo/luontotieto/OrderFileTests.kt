@@ -22,13 +22,13 @@ class OrderFileTests : FullApplicationTest() {
     fun `create order files and fetch and delete`() {
         val createdOrder =
             controller.createOrderFromScratch(
-                user = testUser,
+                user = adminUser,
                 body =
                     OrderInput(
                         name = "Test order",
                         description = "Test description",
                         planNumber = listOf("12345"),
-                        assigneeId = companyUser.id,
+                        assigneeId = customerUser.id,
                         reportDocuments =
                             listOf(
                                 OrderReportDocument("Description", DocumentType.LIITO_ORAVA_PISTEET)
@@ -37,7 +37,7 @@ class OrderFileTests : FullApplicationTest() {
             )
 
         controller.uploadOrderFile(
-            user = testUser,
+            user = adminUser,
             orderId = createdOrder.orderId,
             file =
                 MockMultipartFile(
@@ -50,7 +50,7 @@ class OrderFileTests : FullApplicationTest() {
             description = "Test Description"
         )
 
-        val orderFileResponse = controller.getOrderFiles(createdOrder.orderId)
+        val orderFileResponse = controller.getOrderFiles(adminUser, createdOrder.orderId)
 
         assertNotNull(orderFileResponse)
         assertEquals(orderFileResponse.count(), 1)
@@ -59,8 +59,8 @@ class OrderFileTests : FullApplicationTest() {
         assertEquals("tilaus_ohje.txt", fileResponse.fileName)
         assertEquals(OrderDocumentType.ORDER_INFO, fileResponse.documentType)
         assertEquals("text/plain", fileResponse.mediaType)
-        assertEquals(testUser.id, fileResponse.createdBy)
-        assertEquals(testUser.id, fileResponse.updatedBy)
+        assertEquals(adminUser.id, fileResponse.createdBy)
+        assertEquals(adminUser.id, fileResponse.updatedBy)
 
         val s3Doc =
             controller.documentClient.get(
@@ -71,12 +71,12 @@ class OrderFileTests : FullApplicationTest() {
         assertEquals("ORDER INFO CONTENT", String(s3Doc.bytes))
 
         controller.deleteOrderFile(
-            user = testUser,
+            user = adminUser,
             orderId = createdOrder.orderId,
             fileId = fileResponse.id
         )
 
-        val orderFilesAfterDelete = controller.getOrderFiles(createdOrder.orderId)
+        val orderFilesAfterDelete = controller.getOrderFiles(adminUser, createdOrder.orderId)
         assertEquals(0, orderFilesAfterDelete.count())
     }
 }

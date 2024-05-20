@@ -1,10 +1,12 @@
-// SPDX-FileCopyrightText: 2023-2024 City of Espoo
+// SPDX-FileCopyrightText: 2017-2024 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 package fi.espoo.luontotieto.common
 
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException
+
+fun UnableToExecuteStatementException.isUniqueConstraintViolation() = message?.contains("violates unique constraint") == true
 
 data class BadRequest(
     override val message: String,
@@ -35,5 +37,3 @@ data class Unauthorized(
     val errorCode: String? = null,
     override val cause: Throwable? = null
 ) : RuntimeException(message, cause)
-
-fun UnableToExecuteStatementException.isUniqueConstraintViolation() = message?.contains("violates unique constraint") == true

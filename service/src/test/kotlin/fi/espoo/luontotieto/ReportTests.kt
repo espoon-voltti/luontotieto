@@ -5,8 +5,10 @@
 package fi.espoo.luontotieto
 
 import fi.espoo.luontotieto.config.AuthenticatedUser
+import fi.espoo.luontotieto.domain.OrderController
 import fi.espoo.luontotieto.domain.Report
 import fi.espoo.luontotieto.domain.ReportController
+import fi.espoo.luontotieto.domain.UserRole
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID
 import kotlin.test.Test
@@ -15,37 +17,35 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 
 class ReportTests : FullApplicationTest() {
-    @Autowired lateinit var controller: ReportController
+    @Autowired lateinit var reportController: ReportController
+
+    @Autowired lateinit var orderController: OrderController
 
     @Test
     fun `create report with all data and fetch`() {
-        val createdReport =
-            controller.createReportFromScratch(
-                user = testUser,
-                body = Report.Companion.ReportInput("Test report", "Test description")
-            )
-
-        val reportResponse = controller.getReportById(testUser, createdReport.id)
+        val createOrderResponse =
+            createOrderAndReport(controller = orderController, name = "Test report")
+        val reportResponse = reportController.getReportById(adminUser, createOrderResponse.reportId)
 
         assertNotNull(reportResponse)
-        assertEquals(createdReport, reportResponse)
-        assertEquals("Test report", createdReport.name)
-        assertEquals("Test description", createdReport.description)
-        assertEquals("Teija Testaaja", createdReport.createdBy)
-        assertEquals("Teija Testaaja", createdReport.updatedBy)
+        assertEquals("Test report", reportResponse.name)
+        assertEquals("Test description", reportResponse.description)
+        assertEquals("Teija Testaaja", reportResponse.createdBy)
+        assertEquals("Teija Testaaja", reportResponse.updatedBy)
     }
 
     @Test
     fun `get all reports for user`() {
         for (i in 0..2) {
-            controller.createReportFromScratch(
-                user = testUser,
-                body = Report.Companion.ReportInput("Test report $i", "Test description")
+            createOrderAndReport(
+                controller = orderController,
+                name = "Test report $i",
+                description = "Test description"
             )
         }
 
         val expected = setOf("Test report 1", "Test report 2", "Test report 0")
-        val reportsResponse = controller.getReports(testUser).map { it.name }.toSet()
+        val reportsResponse = reportController.getReports(adminUser).map { it.name }.toSet()
 
         assertEquals(expected, reportsResponse)
     }
@@ -53,26 +53,32 @@ class ReportTests : FullApplicationTest() {
     @Test
     fun `get all reports for user - no reports`() {
         for (i in 0..2) {
-            controller.createReportFromScratch(
-                user = testUser,
-                body = Report.Companion.ReportInput("Test report $i", "Test description")
+            createOrderAndReport(
+                controller = orderController,
+                name = "Test report $i",
+                description = "Test description"
             )
         }
 
-        val reportsResponse = controller.getReports(AuthenticatedUser(UUID.randomUUID()))
+        val reportsResponse =
+            reportController.getReports(AuthenticatedUser(UUID.randomUUID(), UserRole.CUSTOMER))
         assertEquals(0, reportsResponse.size)
     }
 
     @Test
     fun `update existing report`() {
-        val report =
-            controller.createReportFromScratch(
-                testUser,
-                Report.Companion.ReportInput("Original name", "Original description")
+        val createOrderResponse =
+            createOrderAndReport(
+                controller = orderController,
+                name = "Original name",
+                description = "Original description"
             )
+
+        val report = reportController.getReportById(customerUser, createOrderResponse.reportId)
+
         val updatedReport =
-            controller.updateReport(
-                testUser,
+            reportController.updateReport(
+                adminUser,
                 report.id,
                 Report.Companion.ReportInput("New name", "New description")
             )

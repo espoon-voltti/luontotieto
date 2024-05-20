@@ -5,7 +5,7 @@
 package fi.espoo.luontotieto
 
 import fi.espoo.luontotieto.domain.DocumentType
-import fi.espoo.luontotieto.domain.Report
+import fi.espoo.luontotieto.domain.OrderController
 import fi.espoo.luontotieto.domain.ReportController
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -21,13 +21,12 @@ import kotlin.test.assertTrue
 class ReportFileTests : FullApplicationTest() {
     @Autowired lateinit var controller: ReportController
 
+    @Autowired lateinit var orderController: OrderController
+
     @Test
     fun `create report files and fetch and delete`() {
-        val createdReport =
-            controller.createReportFromScratch(
-                user = testUser,
-                body = Report.Companion.ReportInput("Test report", "Test description")
-            )
+        val createOrderResponse = createOrderAndReport(orderController)
+
         val file = File("src/test/resources/test-data/liito_orava_pisteet.gpkg")
         val multipartFile: MultipartFile =
             MockMultipartFile(
@@ -38,14 +37,15 @@ class ReportFileTests : FullApplicationTest() {
             )
 
         controller.uploadReportFile(
-            user = testUser,
-            reportId = createdReport.id,
+            user = adminUser,
+            reportId = createOrderResponse.reportId,
             file = multipartFile,
             documentType = DocumentType.LIITO_ORAVA_PISTEET,
             description = "Test Description"
         )
 
-        val reportFileResponse = controller.getReportFiles(createdReport.id)
+        val reportFileResponse =
+            controller.getReportFiles(customerUser, createOrderResponse.reportId)
 
         assertNotNull(reportFileResponse)
         assertEquals(reportFileResponse.count(), 1)
@@ -54,26 +54,23 @@ class ReportFileTests : FullApplicationTest() {
         assertEquals("liito_orava_pisteet.gpkg", fileResponse.fileName)
         assertEquals(DocumentType.LIITO_ORAVA_PISTEET, fileResponse.documentType)
         assertEquals("application/x-sqlite3", fileResponse.mediaType)
-        assertEquals(testUser.id, fileResponse.createdBy)
-        assertEquals(testUser.id, fileResponse.updatedBy)
+        assertEquals(adminUser.id, fileResponse.createdBy)
+        assertEquals(adminUser.id, fileResponse.updatedBy)
 
         controller.deleteReportFile(
-            user = testUser,
-            reportId = createdReport.id,
+            user = customerUser,
+            reportId = createOrderResponse.reportId,
             fileId = fileResponse.id
         )
 
-        val reportFileResponseAfterDelete = controller.getReportFiles(createdReport.id)
+        val reportFileResponseAfterDelete =
+            controller.getReportFiles(customerUser, createOrderResponse.reportId)
         assertEquals(0, reportFileResponseAfterDelete.count())
     }
 
     @Test
     fun `create report files - bad request`() {
-        val createdReport =
-            controller.createReportFromScratch(
-                user = testUser,
-                body = Report.Companion.ReportInput("Test report", "Test description")
-            )
+        val createOrderResponse = createOrderAndReport(orderController)
         val file = File("src/test/resources/test-data/liito_orava_alueet.gpkg")
         val multipartFile: MultipartFile =
             MockMultipartFile(
@@ -85,8 +82,8 @@ class ReportFileTests : FullApplicationTest() {
 
         val response =
             controller.uploadReportFile(
-                user = testUser,
-                reportId = createdReport.id,
+                user = adminUser,
+                reportId = createOrderResponse.reportId,
                 file = multipartFile,
                 documentType = DocumentType.LIITO_ORAVA_PISTEET,
                 description = "Test Description"
@@ -96,7 +93,8 @@ class ReportFileTests : FullApplicationTest() {
         assertTrue(errors?.isNotEmpty() == true)
 
         assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
-        val reportFileResponse = controller.getReportFiles(createdReport.id)
+        val reportFileResponse =
+            controller.getReportFiles(customerUser, createOrderResponse.reportId)
 
         assertNotNull(reportFileResponse)
         assertEquals(0, reportFileResponse.count())
@@ -104,15 +102,11 @@ class ReportFileTests : FullApplicationTest() {
 
     @Test
     fun `create report files - text document`() {
-        val createdReport =
-            controller.createReportFromScratch(
-                user = testUser,
-                body = Report.Companion.ReportInput("Test report", "Test description")
-            )
+        val createOrderResponse = createOrderAndReport(orderController)
         val response =
             controller.uploadReportFile(
-                user = testUser,
-                reportId = createdReport.id,
+                user = adminUser,
+                reportId = createOrderResponse.reportId,
                 file =
                     MockMultipartFile(
                         "selvitys.txt",
@@ -129,8 +123,8 @@ class ReportFileTests : FullApplicationTest() {
         assertEquals(HttpStatus.CREATED, response.statusCode)
 
         controller.uploadReportFile(
-            user = testUser,
-            reportId = createdReport.id,
+            user = adminUser,
+            reportId = createOrderResponse.reportId,
             file =
                 MockMultipartFile(
                     "lisatieto.txt",
@@ -142,7 +136,7 @@ class ReportFileTests : FullApplicationTest() {
             description = "Test Description"
         )
 
-        val reportFileResponse = controller.getReportFiles(createdReport.id)
+        val reportFileResponse = controller.getReportFiles(adminUser, createOrderResponse.reportId)
 
         assertNotNull(reportFileResponse)
         assertEquals(2, reportFileResponse.count())
@@ -150,7 +144,7 @@ class ReportFileTests : FullApplicationTest() {
         val s3Doc =
             controller.documentClient.get(
                 controller.bucketEnv.data,
-                "${createdReport.id}/${reportFileResponse.first { it.fileName == "selvitys.txt" }.id}"
+                "${createOrderResponse.reportId}/${reportFileResponse.first { it.fileName == "selvitys.txt" }.id}"
             )
         assertEquals("TEST FILE CONTENT", String(s3Doc.bytes))
     }
