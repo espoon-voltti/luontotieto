@@ -118,8 +118,8 @@ fun Handle.putReport(
             WITH report AS (
                 UPDATE report r
                  SET name = :name, description = :description, updated_by = :updatedBy
-                 FROM "order" o
-                 WHERE r.id = :id AND (o.assignee_id = :updatedBy OR r.created_by = :updatedBy OR r.updated_by = :updatedBy)
+                 FROM "order" o, users u
+                WHERE r.id = :id AND u.id = :updatedBy AND (o.assignee_id = u.id OR u.role != 'yrityskäyttäjä')
                 RETURNING r.*
             ) 
             $SELECT_REPORT_SQL
@@ -138,49 +138,29 @@ fun Handle.getReport(
     id: UUID,
     user: AuthenticatedUser
 ): Report {
-    val filter =
-        when (user.role) {
-            UserRole.CUSTOMER ->
-                "(r.created_by = :userId OR r.updated_by = :userId OR o.assignee_id = :userId)"
-            else -> "1 = 1"
-        }
     return createQuery(
         """ 
                 $SELECT_REPORT_SQL
-                WHERE r.id = :id AND $filter
+                JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
+                WHERE r.id = :id
             """
     )
         .bind("id", id)
-        .apply {
-            if (user.role == UserRole.CUSTOMER) {
-                this.bind("userId", user.id)
-            }
-        }
+        .bind("userId", user.id)
         .mapTo<Report>()
         .findOne()
         .getOrNull() ?: throw NotFound()
 }
 
 fun Handle.getReports(user: AuthenticatedUser): List<Report> {
-    val filter =
-        when (user.role) {
-            UserRole.CUSTOMER ->
-                "r.created_by = :userId OR r.updated_by = :userId OR o.assignee_id = :userId"
-            else -> "1 = 1"
-        }
-
     return createQuery(
         """
                 $SELECT_REPORT_SQL
-                WHERE $filter
+                JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
                 ORDER BY r.created DESC
             """
     )
-        .apply {
-            if (user.role == UserRole.CUSTOMER) {
-                this.bind("userId", user.id)
-            }
-        }
+        .bind("userId", user.id)
         .mapTo<Report>()
         .list() ?: emptyList()
 }

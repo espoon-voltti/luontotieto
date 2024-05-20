@@ -68,31 +68,10 @@ fun Handle.insertOrderFile(
         .one()
 }
 
-fun Handle.getOrderFiles(orderId: UUID): List<OrderFile> =
-    createQuery(
-        """
-                SELECT id, description, order_id AS "orderId", media_type AS "mediaType", 
-                file_name AS "fileName", document_type AS "documentType",
-                created, updated,  created_by AS "createdBy", updated_by AS "updatedBy"
-                FROM order_file
-                WHERE order_id = :orderId
-            """
-    )
-        .bind("orderId", orderId)
-        .mapTo<OrderFile>()
-        .list()
-
 fun Handle.getOrderFiles(
     orderId: UUID,
     user: AuthenticatedUser
 ): List<OrderFile> {
-    val filter =
-        when (user.role) {
-            UserRole.CUSTOMER ->
-                "o.created_by = :userId OR o.updated_by = :userId OR assignee_id = :userId"
-            else -> "1 = 1"
-        }
-
     return createQuery(
         """
                 SELECT of.id, of.description, of.order_id AS "orderId", of.media_type AS "mediaType", 
@@ -100,68 +79,35 @@ fun Handle.getOrderFiles(
                 of.created, of.updated, of.created_by AS "createdBy", of.updated_by AS "updatedBy"
                 FROM order_file of
                 JOIN "order" o ON o.id = of.order_id
-                WHERE of.order_id = :orderId AND ($filter)
+                JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
+                WHERE of.order_id = :orderId
             """
     )
         .bind("orderId", orderId)
-        .apply {
-            if (user.role == UserRole.CUSTOMER) {
-                this.bind("userId", user.id)
-            }
-        }
+        .bind("userId", user.id)
         .mapTo<OrderFile>()
         .list()
 }
 
 fun Handle.getOrderFileById(
     orderId: UUID,
-    fileId: UUID
-): OrderFile =
-    createQuery(
-        """
-                SELECT id, description, order_id AS "orderId", media_type AS "mediaType", 
-                file_name AS "fileName", document_type AS "documentType",
-                created, updated,  created_by AS "createdBy", updated_by AS "updatedBy"
-                FROM order_file
-                WHERE order_id = :orderId
-                AND id = :fileId
-            """
-    )
-        .bind("orderId", orderId)
-        .bind("fileId", fileId)
-        .mapTo<OrderFile>()
-        .findOne()
-        .getOrNull() ?: throw NotFound()
-
-fun Handle.getOrderFileById(
-    orderId: UUID,
     fileId: UUID,
     user: AuthenticatedUser
 ): OrderFile {
-    val filter =
-        when (user.role) {
-            UserRole.CUSTOMER ->
-                "(o.created_by = :userId OR o.updated_by = :userId OR assignee_id = :userId)"
-            else -> "1 = 1"
-        }
-
     return createQuery(
         """
                 SELECT of.id, of.description, of.order_id AS "orderId", of.media_type AS "mediaType", 
                 of.file_name AS "fileName", of.document_type AS "documentType",
                 of.created, of.updated, of.created_by AS "createdBy", of.updated_by AS "updatedBy"
-                FROM order_file of JOIN "order" o ON o.id = of.order_id
-                WHERE of.order_id = :orderId AND $filter
-                AND of.id = :fileId  
+                FROM order_file of 
+                JOIN "order" o ON o.id = of.order_id
+                JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
+                WHERE of.order_id = :orderId AND of.id = :fileId  
             """
     )
         .bind("orderId", orderId)
         .bind("fileId", fileId)
-        .apply {
-            if (user.isCustomer()) {
-                this.bind("userId", user.id)
-            }
-        }
+        .bind("userId", user.id)
         .mapTo<OrderFile>()
         .findOne()
         .getOrNull() ?: throw NotFound()

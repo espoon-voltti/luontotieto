@@ -88,7 +88,7 @@ fun Handle.putOrder(
                 UPDATE "order" 
                  SET name = :name, description = :description, updated_by = :updatedBy,
                   plan_number = :planNumber, report_documents = :reportDocuments, assignee_id = :assigneeId
-                 WHERE id = :id AND (created_by = :updatedBy OR updated_by = :updatedBy)
+                 WHERE id = :id
                 RETURNING *
             ) 
             $SELECT_ORDER_SQL
