@@ -34,11 +34,10 @@ class SESEmailClient(
     private val charset = "UTF-8"
 
     fun send(email: Email) {
-        if (!env.enabled)
-            {
-                logger.info { "Sending email $email.content" }
-                return
-            }
+        if (!env.enabled) {
+            logger.info { "Sending email $email.content" }
+            return
+        }
         val fromAddress = env.senderAddress
         val arn = env.senderArn
         val title = "Luontotietoportaali: ${email.title}"
