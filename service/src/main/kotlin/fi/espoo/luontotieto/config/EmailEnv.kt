@@ -7,7 +7,6 @@ data class EmailEnv(
     val enabled: Boolean,
     val region: Region,
     val senderAddress: String,
-    val senderName: String,
 ) {
     companion object {
         fun fromEnvironment(env: Environment) =
@@ -23,9 +22,7 @@ data class EmailEnv(
                 senderAddress =
                     env.lookup(
                         "luontotieto.email.sender_address",
-                    ),
-                senderName =
-                    env.lookup("luontotieto.email.sender_name")
+                    )
             )
     }
 }
