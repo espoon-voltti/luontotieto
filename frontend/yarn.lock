@@ -3037,14 +3037,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.6.0":
-  version: 1.6.0
-  resolution: "axios@npm:1.6.0"
+"axios@npm:^1.7.1":
+  version: 1.7.1
+  resolution: "axios@npm:1.7.1"
   dependencies:
-    follow-redirects: "npm:^1.15.0"
+    follow-redirects: "npm:^1.15.6"
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
-  checksum: f069d938a05d2293e27c7cd6f0c08a1cb764f7cc43a1e637572f8d5928837ecd735890ad67a867d696094ee4b8b4dfdb3727a57aae600845e4c295581cb32f9a
+  checksum: 38de04929014eca46c04fddb916f8f8cfdf3b62f05f85f87a181898587a8e23478737bc6e9ba211fb8fe137a494032e4575741bb598bec9049159de6a5ad8edf
   languageName: node
   linkType: hard
 
@@ -4626,7 +4626,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.15.0":
+"follow-redirects@npm:^1.15.6":
   version: 1.15.6
   resolution: "follow-redirects@npm:1.15.6"
   peerDependenciesMeta:
@@ -5643,7 +5643,7 @@ __metadata:
     "@types/styled-components": "npm:^5.1.29"
     "@typescript-eslint/eslint-plugin": "npm:^7.9.0"
     "@typescript-eslint/parser": "npm:^7.9.0"
-    axios: "npm:^1.6.0"
+    axios: "npm:^1.7.1"
     babel-loader: "npm:^9.1.3"
     babel-plugin-styled-components: "npm:^2.1.4"
     classnames: "npm:^2.5.1"
