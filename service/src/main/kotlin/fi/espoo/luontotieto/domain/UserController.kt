@@ -102,6 +102,7 @@ class UserController {
         @PathVariable id: UUID,
         @RequestBody data: User.Companion.UserInput
     ): User {
+        user.checkRoles(UserRole.ADMIN)
         return jdbi.inTransactionUnchecked { tx -> tx.putUser(id, data, user) }.also {
             logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id"))
         }
