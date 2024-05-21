@@ -2,12 +2,14 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { UserRole } from 'api/users-api'
 import React, { createContext, useMemo } from 'react'
 
 export interface AppUser {
   id: string
   name: string
   email?: string | null
+  role: UserRole
   externalId?: string
 }
 

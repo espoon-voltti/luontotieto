@@ -5,6 +5,7 @@
 package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.BadRequest
+import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.audit
@@ -41,6 +42,7 @@ class UserController {
         user: AuthenticatedUser,
         @RequestBody body: User.Companion.CreateCustomerUser
     ): User {
+        user.checkRoles(UserRole.ADMIN)
         val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
         val generatedString = generatePassword()
         println("Password: $generatedString")
@@ -56,11 +58,16 @@ class UserController {
         user: AuthenticatedUser,
         @PathVariable id: UUID
     ): User {
-        return jdbi.inTransactionUnchecked { tx -> tx.getUser(id) }
+        if (user.isSystemUser() || user.role == UserRole.ADMIN) {
+            return jdbi.inTransactionUnchecked { tx -> tx.getUser(id) }
+        } else {
+            throw NotFound()
+        }
     }
 
     @GetMapping()
     fun getUsers(user: AuthenticatedUser): List<User> {
+        user.checkRoles(UserRole.ADMIN)
         return jdbi.inTransactionUnchecked { tx -> tx.getUsers() }
     }
 
@@ -70,23 +77,24 @@ class UserController {
         @PathVariable id: UUID,
         @RequestBody data: User.Companion.UserInput
     ): User {
+        user.checkRoles(UserRole.ADMIN)
         return jdbi
             .inTransactionUnchecked { tx -> tx.putUser(id, data, user) }
             .also { logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id")) }
     }
 
-    @PutMapping("/{id}/password")
-    fun updateUser(
+    @PutMapping("/password")
+    fun updateUserPassword(
         user: AuthenticatedUser,
-        @PathVariable id: UUID,
         @RequestBody data: User.Companion.UpdatePasswordPayload
     ): UUID {
+        user.checkRoles(UserRole.CUSTOMER)
         if (!data.newPassword.matches("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{10,}\$".toRegex())) {
             throw BadRequest("User entered a weak new password.", "weak-password")
         }
         return jdbi
             .inTransactionUnchecked { tx ->
-                val currentPassword = tx.getUserPasswordHash(id)
+                val currentPassword = tx.getUserPasswordHash(user.id)
                 val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
 
                 if (!encoder.matches(data.currentPassword, currentPassword)) {
@@ -106,9 +114,11 @@ class UserController {
                 }
 
                 val passwordHash = encoder.encode(data.newPassword)
-                tx.putPassword(id, passwordHash, user)
+                tx.putPassword(user.id, passwordHash, user)
             }
-            .also { logger.audit(user, AuditEvent.UPDATE_USER_PASSWORD, mapOf("id" to "$id")) }
+            .also {
+                logger.audit(user, AuditEvent.UPDATE_USER_PASSWORD, mapOf("id" to "${user.id}"))
+            }
     }
 }
 

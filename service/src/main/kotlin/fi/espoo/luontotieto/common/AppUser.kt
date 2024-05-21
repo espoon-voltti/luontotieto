@@ -19,7 +19,8 @@ data class AppUser(
     val name: String,
     val externalId: String?,
     val email: String?,
-    val role: UserRole
+    val role: UserRole,
+    val active: Boolean
 )
 
 data class AppUserWithPassword(
@@ -28,7 +29,8 @@ data class AppUserWithPassword(
     val email: String?,
     val password: String,
     val externalId: String?,
-    val role: UserRole
+    val role: UserRole,
+    val active: Boolean
 ) {
     fun toAppUser(): AppUser {
         return AppUser(
@@ -36,7 +38,8 @@ data class AppUserWithPassword(
             externalId = this.externalId,
             name = this.name,
             email = this.email,
-            role = this.role
+            role = this.role,
+            active = this.active
         )
     }
 }
@@ -52,7 +55,7 @@ fun Handle.upsertAppUserFromAd(
         VALUES (:externalId, :name, :email, :createdBy, :updatedBy)
         ON CONFLICT (external_id) DO UPDATE
         SET updated = now(), name = :name, updated_by = :updatedBy
-        RETURNING id, external_id, name, email, role
+        RETURNING id, external_id, name, email, role, active
         """
             .trimIndent()
     )
@@ -65,7 +68,7 @@ fun Handle.upsertAppUserFromAd(
 fun Handle.getAppUsers(): List<AppUser> =
     createQuery(
         """
-    SELECT id, external_id, name, email
+    SELECT id, external_id, name, email, active
     FROM users
     WHERE NOT system_user
 """
@@ -77,7 +80,7 @@ fun Handle.getAppUser(id: UUID) =
     createQuery(
         // language=SQL
         """
-        SELECT id, external_id, name, email, role
+        SELECT id, external_id, name, email, role, active
         FROM users 
         WHERE id = :id AND NOT system_user
         """
@@ -92,7 +95,7 @@ fun Handle.getAppUserWithPassword(email: String) =
     createQuery(
         // language=SQL
         """
-        SELECT id, external_id, name, email, password_hash AS password, role
+        SELECT id, external_id, name, email, password_hash AS password, role, active
         FROM users 
         WHERE email = :email AND NOT system_user AND password_hash IS NOT NULL
         """
