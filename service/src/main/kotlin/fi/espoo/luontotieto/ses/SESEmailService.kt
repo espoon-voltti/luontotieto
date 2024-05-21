@@ -35,7 +35,7 @@ class SESEmailClient(
 
     fun send(email: Email) {
         if (!env.enabled) {
-            logger.info { "Sending email $email.content" }
+            logger.info { "Sending email ${email.content}" }
             return
         }
         val fromAddress = env.senderAddress
