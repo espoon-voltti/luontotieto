@@ -9,6 +9,8 @@ import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.audit
+import fi.espoo.luontotieto.ses.Email
+import fi.espoo.luontotieto.ses.SESEmailClient
 import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.jdbi.v3.core.Jdbi
@@ -34,6 +36,8 @@ class UserController {
     @Autowired
     lateinit var jdbi: Jdbi
 
+    @Autowired lateinit var sesEmailClient: SESEmailClient
+
     private val logger = KotlinLogging.logger {}
 
     @PostMapping("")
@@ -45,11 +49,24 @@ class UserController {
         user.checkRoles(UserRole.ADMIN)
         val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
         val generatedString = generatePassword()
-        println("Password: $generatedString")
         val passwordHash = encoder.encode(generatedString)
-        // TODO: communicate the password via email
         return jdbi
-            .inTransactionUnchecked { tx -> tx.insertUser(data = body, user = user, passwordHash) }
+            .inTransactionUnchecked { tx ->
+                val createdUser = tx.insertUser(data = body, user = user, passwordHash)
+
+                val email =
+                    Email(
+                        body.email,
+                        "Käyttäjä luotu",
+                        """Teille on luotu uusi käyttäjä luontotietoportaaliin.
+                                     Voitte kirjautua portaaliin osoitteessa luontotietoportaali.fi käyttämällä salasanaa: $generatedString . 
+                                     Olkaa hyvä ja vaihtakaa salasana kirjautumisen jälkeen.
+                        """.trimMargin()
+                    )
+                sesEmailClient.send(email)
+
+                createdUser
+            }
             .also { logger.audit(user, AuditEvent.CREATE_USER, mapOf("id" to "$it")) }
     }
 
@@ -78,9 +95,9 @@ class UserController {
         @RequestBody data: User.Companion.UserInput
     ): User {
         user.checkRoles(UserRole.ADMIN)
-        return jdbi
-            .inTransactionUnchecked { tx -> tx.putUser(id, data, user) }
-            .also { logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id")) }
+        return jdbi.inTransactionUnchecked { tx -> tx.putUser(id, data, user) }.also {
+            logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id"))
+        }
     }
 
     @PutMapping("/password")

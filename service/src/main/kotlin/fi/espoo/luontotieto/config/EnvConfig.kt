@@ -13,4 +13,6 @@ import org.springframework.core.env.Environment
 @Lazy
 class EnvConfig {
     @Bean fun bucketEnv(env: Environment): BucketEnv = BucketEnv.fromEnvironment(env)
+
+    @Bean fun emailEnv(env: Environment): EmailEnv = EmailEnv.fromEnvironment(env)
 }

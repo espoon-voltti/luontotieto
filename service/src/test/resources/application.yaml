@@ -10,6 +10,11 @@ luontotieto:
   bucket:
     data: "data"
     proxy_through_nginx: false
+  email:
+    enabled: "false"
+    region: "fake"
+    sender_address: "fake"
+    sender_arn: "fake"
 
 app:
   jwt:
