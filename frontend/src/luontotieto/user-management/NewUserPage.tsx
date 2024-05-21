@@ -15,7 +15,7 @@ import {
 } from '../../shared/layout'
 import { InputField } from 'shared/form/InputField'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
-import { Label } from 'shared/typography'
+import { H3, Label } from 'shared/typography'
 import { Button } from 'shared/buttons/Button'
 import { AlertBox, InfoBox } from 'shared/MessageBoxes'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -57,22 +57,23 @@ export const NewUserPage = React.memo(function NewUserPage() {
   const invalidEmailInfo = useMemo(() => {
     return userInput.email && !userInput.email.match(emailRegex)
       ? {
-          text: 'Syötä oikeaa muotoa oleva sähköposti',
-          status: 'warning' as const
-        }
+        text: 'Syötä oikeaa muotoa oleva sähköposti',
+        status: 'warning' as const
+      }
       : undefined
   }, [userInput.email])
 
   return (
     <PageContainer>
       <BackNavigation
-        text={'Luo uusi yrityskäyttäjä'}
+        text={'Lisää yrityskäyttäjä'}
         navigationText="Käyttäjänhallinta"
         destination={'/luontotieto/käyttäjät'}
       />
 
       <SectionContainer>
         <GroupOfInputRows>
+          <H3>Yrityksen tiedot</H3>
           <LabeledInput $cols={4}>
             <Label>Yritys</Label>
             <InputField
@@ -88,7 +89,7 @@ export const NewUserPage = React.memo(function NewUserPage() {
               info={invalidEmailInfo}
             />
           </LabeledInput>
-          {errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
+          {errorMessage && <AlertBox title="Virhe" message={errorMessage}/>}
           <FlexRowWithGaps>
             <Button
               primary
@@ -106,7 +107,7 @@ export const NewUserPage = React.memo(function NewUserPage() {
           </FixedWidthDiv>
         </GroupOfInputRows>
       </SectionContainer>
-      <VerticalGap $size="XL" />
+      <VerticalGap $size="XL"/>
     </PageContainer>
   )
 })

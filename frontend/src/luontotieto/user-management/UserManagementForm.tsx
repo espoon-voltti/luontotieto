@@ -4,21 +4,16 @@
 
 import React, { useMemo, useState } from 'react'
 
-import {
-  FlexRowWithGaps,
-  GroupOfInputRows,
-  LabeledInput,
-  SectionContainer
-} from '../../shared/layout'
+import { FlexRowWithGaps, GroupOfInputRows, LabeledInput, SectionContainer } from '../../shared/layout'
 import { InputField } from 'shared/form/InputField'
-import { Label } from 'shared/typography'
+import { H3, Label } from 'shared/typography'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { Button } from 'shared/buttons/Button'
 import Radio from 'shared/form/Radio'
 import Switch from 'shared/form/Switch'
 import { faPen } from '@fortawesome/free-solid-svg-icons'
 import { AlertBox, InfoBox } from 'shared/MessageBoxes'
-import { User, UserRole, apiPutUser, getUserRole } from 'api/users-api'
+import { apiPutUser, getUserRole, User, UserRole } from 'api/users-api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { emailRegex } from './common'
 import { AxiosError } from 'axios'
@@ -39,8 +34,8 @@ const roles = [
 ]
 
 export const UserManagementForm = React.memo(function UserManagementForm({
-  user
-}: {
+                                                                           user
+                                                                         }: {
   user: User
 }) {
   const userEditableFields = {
@@ -78,15 +73,16 @@ export const UserManagementForm = React.memo(function UserManagementForm({
   const invalidEmailInfo = useMemo(() => {
     return enableEdit && userInput.email && !userInput.email.match(emailRegex)
       ? {
-          text: 'Syötä oikeaa muotoa oleva sähköposti',
-          status: 'warning' as const
-        }
+        text: 'Syötä oikeaa muotoa oleva sähköposti',
+        status: 'warning' as const
+      }
       : undefined
   }, [userInput.email])
 
   return (
     <SectionContainer>
       <GroupOfInputRows>
+        <H3>Käyttäjän tiedot</H3>
         <LabeledInput $cols={3}>
           <Label>Käyttäjä</Label>
           <InputField
@@ -106,43 +102,42 @@ export const UserManagementForm = React.memo(function UserManagementForm({
         </LabeledInput>
 
         {userInput.role !== UserRole.CUSTOMER && (
-          <>
-            <LabeledInput $cols={5}>
-              <Label>Käyttäjäoikeudet</Label>
-              <FlexRowWithGaps style={{ paddingTop: '4px' }}>
-                {roles.map((r) => (
-                  <Radio
-                    key={r.role}
-                    label={getUserRole(r.role)}
-                    checked={userInput.role === r.role}
-                    onChange={() =>
-                      setUserInput({ ...userInput, role: r.role })
-                    }
-                    disabled={!enableEdit}
-                    small={true}
-                  />
-                ))}
-              </FlexRowWithGaps>
+          <LabeledInput $cols={5}>
+            <Label>Käyttöoikeudet</Label>
+            <FlexRowWithGaps style={{ paddingTop: '4px' }}>
+              {roles.map((r) => (
+                <Radio
+                  key={r.role}
+                  label={getUserRole(r.role)}
+                  checked={userInput.role === r.role}
+                  onChange={() =>
+                    setUserInput({ ...userInput, role: r.role })
+                  }
+                  disabled={!enableEdit}
+                  small={true}
+                />
+              ))}
+            </FlexRowWithGaps>
 
-              {enableEdit && userSelectedRoleInfo && (
-                <InfoBox message={userSelectedRoleInfo.info} />
-              )}
-            </LabeledInput>
-            <LabeledInput>
-              <Label>Tila</Label>
-              <Switch
-                key="tila"
-                label="Aktiivinen"
-                checked={userInput.active}
-                onChange={() => {
-                  setUserInput({ ...userInput, active: !userInput.active })
-                }}
-                disabled={!enableEdit}
-              />
-            </LabeledInput>
-          </>
+            {enableEdit && userSelectedRoleInfo && (
+              <InfoBox message={userSelectedRoleInfo.info}/>
+            )}
+          </LabeledInput>
         )}
-        {errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
+        <LabeledInput>
+          <Label>Tila</Label>
+          <Switch
+            key="tila"
+            label="Aktiivinen"
+            checked={userInput.active}
+            onChange={() => {
+              setUserInput({ ...userInput, active: !userInput.active })
+            }}
+            disabled={!enableEdit}
+          />
+        </LabeledInput>
+
+        {errorMessage && <AlertBox title="Virhe" message={errorMessage}/>}
 
         {enableEdit ? (
           <FlexRowWithGaps>

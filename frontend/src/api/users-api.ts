@@ -77,7 +77,7 @@ export const apiChangeUserPassword = async (
   }
 
   return await apiClient
-    .put<string>(`/users/${userInput.userId}/password`, body)
+    .put<string>(`/users/password`, body)
     .then((r) => r.data)
 }
 

@@ -67,10 +67,18 @@ abstract class FullApplicationTest {
             tx.createUpdate(
                 """
                 INSERT INTO users (id, updated, external_id, name, email, role) 
-                VALUES (:id, now(), 'test:02', 'Yritys Oy', 'yritys@example.com', 'yrityskäyttäjä')
+                VALUES (:id, now(), NULL, 'Yritys Oy', 'yritys@example.com', 'yrityskäyttäjä')
             """
             )
                 .bind("id", customerUser.id)
+                .execute()
+            tx.createUpdate(
+                """
+                INSERT INTO users (id, updated, external_id, name, email, role, system_user) 
+                VALUES (:id, now(), 'api-gw', 'api-gw system-user', NULL, 'katselija', true)
+            """
+            )
+                .bind("id", systemUser.id)
                 .execute()
         }
     }

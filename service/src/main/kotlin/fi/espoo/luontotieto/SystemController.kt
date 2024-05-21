@@ -49,7 +49,14 @@ class SystemController {
         @RequestBody adUser: AdUser
     ): AppUser {
         return jdbi
-            .inTransactionUnchecked { it.upsertAppUserFromAd(adUser, user) }
+            .inTransactionUnchecked {
+                val appUser = it.upsertAppUserFromAd(adUser, user)
+                if (!appUser.active) {
+                    logger.info("Login attempt failed. User is inactive.")
+                    throw Unauthorized()
+                }
+                appUser
+            }
             .also { logger.audit(user, AuditEvent.USER_LOGIN) }
     }
 
@@ -62,6 +69,10 @@ class SystemController {
                 val user = it.getAppUserWithPassword(passwordUser.email)
                 if (user == null) {
                     logger.info("Login attempt failed. Invalid email.")
+                    throw Unauthorized()
+                }
+                if (!user.active) {
+                    logger.info("Login attempt failed. User is inactive.")
                     throw Unauthorized()
                 }
 

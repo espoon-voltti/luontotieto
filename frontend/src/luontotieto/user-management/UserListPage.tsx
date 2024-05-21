@@ -21,7 +21,8 @@ import { useDebouncedState } from 'shared/useDebouncedState'
 import { faSearch } from '@fortawesome/free-solid-svg-icons'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { useGetUsersQuery } from 'api/hooks/users'
-import { User, getUserRole } from 'api/users-api'
+import { getUserRole, User } from 'api/users-api'
+import { H2 } from 'shared/typography'
 
 export type UserSortColumn = 'role' | 'active'
 export type SortDirection = 'ASC' | 'DESC'
@@ -57,10 +58,10 @@ export const UserListPage = React.memo(function UserListPage() {
       return sortBy === null
         ? filtered
         : orderBy(
-            filtered,
-            [sortBy],
-            [sortDirection === 'ASC' ? 'asc' : 'desc']
-          )
+          filtered,
+          [sortBy],
+          [sortDirection === 'ASC' ? 'asc' : 'desc']
+        )
     },
     [sortBy, sortDirection, filterBySearchQuery]
   )
@@ -70,10 +71,11 @@ export const UserListPage = React.memo(function UserListPage() {
   }
   return (
     <PageContainer>
-      <BackNavigation text={'Käyttäjänhallinta'} navigationText="Etusivulle" />
+      <BackNavigation text={'Käyttäjähallinta'} navigationText="Etusivulle"/>
 
       <SectionContainer>
-        <VerticalGap $size="m" />
+        <H2>Käyttäjähallinta</H2>
+        <VerticalGap $size="m"/>
         <FlexLeftRight>
           <FlexRowWithGaps $gapSize="s">
             <InputField
@@ -92,47 +94,47 @@ export const UserListPage = React.memo(function UserListPage() {
           />
         </FlexLeftRight>
 
-        <VerticalGap $size="L" />
+        <VerticalGap $size="L"/>
 
         <Table style={{ width: '100%' }}>
           <thead>
-            <tr>
-              <Th style={{ width: '300px' }}>Nimi</Th>
-              <Th style={{ width: '300px' }}>Yhteyssähköposti</Th>
-              <SortableTh
-                sorted={isSorted('role')}
-                onClick={toggleSort('role')}
-              >
-                Käyttöoikeudet
-              </SortableTh>
-              <SortableTh
-                sorted={isSorted('active')}
-                onClick={toggleSort('active')}
-              >
-                Tila
-              </SortableTh>
-            </tr>
+          <tr>
+            <Th style={{ width: '300px' }}>Nimi</Th>
+            <Th style={{ width: '300px' }}>Yhteyssähköposti</Th>
+            <SortableTh
+              sorted={isSorted('role')}
+              onClick={toggleSort('role')}
+            >
+              Käyttöoikeudet
+            </SortableTh>
+            <SortableTh
+              sorted={isSorted('active')}
+              onClick={toggleSort('active')}
+            >
+              Tila
+            </SortableTh>
+          </tr>
           </thead>
           <tbody>
-            {orderUsers(users).map((user) => (
-              <tr key={user.id}>
-                <td>
-                  <Link to={`/luontotieto/käyttäjät/${user.id}`}>
-                    {user.name}
-                  </Link>
-                </td>
-                <td>{user.email?.toLowerCase() ?? ''}</td>
-                <td style={{ textTransform: 'capitalize' }}>
-                  {getUserRole(user.role)}
-                </td>
-                <td>{user.active ? 'Aktiivinen' : 'Epäaktiivinen'}</td>
-              </tr>
-            ))}
-            {users.length == 0 && (
-              <tr>
-                <td colSpan={4}>Ei näytettäviä käyttäjiä</td>
-              </tr>
-            )}
+          {orderUsers(users).map((user) => (
+            <tr key={user.id}>
+              <td>
+                <Link to={`/luontotieto/käyttäjät/${user.id}`}>
+                  {user.name}
+                </Link>
+              </td>
+              <td>{user.email?.toLowerCase() ?? ''}</td>
+              <td style={{ textTransform: 'capitalize' }}>
+                {getUserRole(user.role)}
+              </td>
+              <td>{user.active ? 'Aktiivinen' : 'Epäaktiivinen'}</td>
+            </tr>
+          ))}
+          {users.length == 0 && (
+            <tr>
+              <td colSpan={4}>Ei näytettäviä käyttäjiä</td>
+            </tr>
+          )}
           </tbody>
         </Table>
       </SectionContainer>
@@ -140,7 +142,7 @@ export const UserListPage = React.memo(function UserListPage() {
   )
 })
 
-const filterUsers = (users: any[], searchQuery: string | null): User[] => {
+const filterUsers = (users: User[], searchQuery: string | null): User[] => {
   const searchQueryToLower = searchQuery ? searchQuery.toLowerCase() : null
   return users.filter((user) => {
     if (searchQueryToLower === null) {
@@ -148,8 +150,8 @@ const filterUsers = (users: any[], searchQuery: string | null): User[] => {
     }
     if (searchQueryToLower) {
       return (
-        user.userName.toLowerCase().includes(searchQueryToLower) ||
-        user.email.toLowerCase().includes(searchQueryToLower)
+        user.name.toLowerCase().includes(searchQueryToLower) ||
+        user.email?.toLowerCase().includes(searchQueryToLower)
       )
     }
     return true

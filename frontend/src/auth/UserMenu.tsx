@@ -14,6 +14,7 @@ import { colors } from 'shared/theme'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiPostLogout } from 'api/auth-api'
 import { AppUser } from './UserContext'
+import { UserRole } from 'api/users-api'
 
 const dropDownButtonStyles = css`
   display: inline-flex;
@@ -112,6 +113,7 @@ export const UserMenu = React.memo(function LanguageMenu({
       </DropDownButton>
       {open ? (
         <DropDown $align="right">
+          {user.role === UserRole.ADMIN && 
           <DropDownItemButton
             ref={firstButtonRef}
             key={'user-management'}
@@ -125,6 +127,8 @@ export const UserMenu = React.memo(function LanguageMenu({
           >
             Käyttäjänhallinta
           </DropDownItemButton>
+          }
+          {user.role === UserRole.CUSTOMER && 
           <DropDownItemButton
             ref={firstButtonRef}
             key={'user-settings'}
@@ -138,6 +142,7 @@ export const UserMenu = React.memo(function LanguageMenu({
           >
             Asetukset
           </DropDownItemButton>
+          }
           <DropDownItemButton
             ref={firstButtonRef}
             key={'logout'}
