@@ -4,6 +4,7 @@
 
 package fi.espoo.luontotieto.ses
 
+import fi.espoo.luontotieto.config.EmailEnv
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.ses.SesClient
@@ -21,7 +22,6 @@ private val logger = KotlinLogging.logger {}
 
 data class Email(
     val toAddress: String,
-    val fromAddress: String,
     val title: String,
     val content: String,
 )
@@ -29,14 +29,21 @@ data class Email(
 @Service
 class SESEmailClient(
     private val client: SesClient,
+    private val env: EmailEnv
 ) {
     private val charset = "UTF-8"
 
     fun send(email: Email) {
-        val toAddress = email.toAddress
-        val fromAddress = email.fromAddress
+        if (!env.enabled)
+            {
+                logger.info { "Sending email $email.content" }
+                return
+            }
+        val fromAddress = env.senderAddress
+        val arn = env.senderArn
         val title = "Luontotietoportaali: ${email.title}"
         val content = email.content
+        val toAddress = email.toAddress
 
         val html =
             """
@@ -55,6 +62,7 @@ $content
             val request =
                 SendEmailRequest.builder()
                     .destination(Destination.builder().toAddresses(toAddress).build())
+                    .sourceArn(arn)
                     .message(
                         Message.builder()
                             .body(

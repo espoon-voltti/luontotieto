@@ -10,6 +10,7 @@ import software.amazon.awssdk.regions.Region
 data class EmailEnv(
     val enabled: Boolean,
     val region: Region,
+    val senderArn: String,
     val senderAddress: String,
 ) {
     companion object {
@@ -22,6 +23,10 @@ data class EmailEnv(
                 region =
                     env.lookup(
                         "luontotieto.email.region",
+                    ),
+                senderArn =
+                    env.lookup(
+                        "luontotieto.email.sender_arn",
                     ),
                 senderAddress =
                     env.lookup(

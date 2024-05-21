@@ -15,9 +15,10 @@ luontotieto:
     data: "data"
     proxy_through_nginx: false
   email:
-    enabled: "false"
+    enabled: "true"
     region: "eu-west-1"
     sender_address: "voltti-devops@espoo.fi"
+    sender_arn: "arn:aws:ses:eu-west-1:758397969161:identity/voltti-devops@espoo.fi"
 
 spring:
   datasource:

@@ -8,7 +8,6 @@ import fi.espoo.luontotieto.common.BadRequest
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
-import fi.espoo.luontotieto.config.EmailEnv
 import fi.espoo.luontotieto.config.audit
 import fi.espoo.luontotieto.ses.Email
 import fi.espoo.luontotieto.ses.SESEmailClient
@@ -39,8 +38,6 @@ class UserController {
 
     @Autowired lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired lateinit var emailEnv: EmailEnv
-
     private val logger = KotlinLogging.logger {}
 
     @PostMapping("")
@@ -57,21 +54,16 @@ class UserController {
             .inTransactionUnchecked { tx ->
                 val createdUser = tx.insertUser(data = body, user = user, passwordHash)
 
-                if (emailEnv.enabled) {
-                    val email =
-                        Email(
-                            body.email,
-                            emailEnv.senderAddress,
-                            "Käyttäjä luotu",
-                            """Teille on luotu uusi käyttäjä luontotietoportaaliin.
+                val email =
+                    Email(
+                        body.email,
+                        "Käyttäjä luotu",
+                        """Teille on luotu uusi käyttäjä luontotietoportaaliin.
                                      Voitte kirjautua portaaliin osoitteessa luontotietoportaali.fi käyttämällä salasanaa: $generatedString . 
                                      Olkaa hyvä ja vaihtakaa salasana kirjautumisen jälkeen.
-                            """.trimMargin()
-                        )
-                    sesEmailClient.send(email)
-                } else {
-                    println("Password: $generatedString")
-                }
+                        """.trimMargin()
+                    )
+                sesEmailClient.send(email)
 
                 createdUser
             }

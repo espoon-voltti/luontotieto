@@ -14,6 +14,7 @@ luontotieto:
     enabled: "false"
     region: "fake"
     sender_address: "fake"
+    sender_arn: "fake"
 
 app:
   jwt:

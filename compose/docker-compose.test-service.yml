@@ -23,6 +23,7 @@ services:
       EMAIL_ENABLED: false
       EMAIL_AWS_REGION: fake
       EMAIL_SENDER_ADDRESS: fake
+      EMAIL_SENDER_ARN: fake
     entrypoint: ./gradlew test
     depends_on:
       - luontotieto-db
