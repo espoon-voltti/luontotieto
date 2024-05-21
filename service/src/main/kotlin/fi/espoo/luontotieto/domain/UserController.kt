@@ -53,10 +53,7 @@ class UserController {
         val passwordHash = encoder.encode(generatedString)
         return jdbi
                 .inTransactionUnchecked { tx ->
-                    tx.insertUser(data = body, user = user, passwordHash)
-                }
-                .also {
-                    logger.audit(user, AuditEvent.CREATE_USER, mapOf("id" to "$it"))
+                    val createdUser = tx.insertUser(data = body, user = user, passwordHash)
 
                     if (emailEnv.enabled) {
                         val email =
@@ -70,8 +67,13 @@ class UserController {
                             """.trimMargin()
                                 )
                         sesEmailClient.send(email)
+                    } else {
+                        println("Password: $generatedString")
                     }
+
+                    createdUser
                 }
+                .also { logger.audit(user, AuditEvent.CREATE_USER, mapOf("id" to "$it")) }
     }
 
     @GetMapping("/{id}")
