@@ -55,9 +55,6 @@ $content
             val request =
                 SendEmailRequest.builder()
                     .destination(Destination.builder().toAddresses(toAddress).build())
-                    .sourceArn("arn:aws:ses:eu-west-1:758397969161:identity/voltti-devops@espoo.fi")
-                    // Locally needed this to work
-                    // .sourceArn()
                     .message(
                         Message.builder()
                             .body(
