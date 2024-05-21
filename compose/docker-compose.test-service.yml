@@ -20,6 +20,9 @@ services:
       PAIKKATIETO_DB_PORT: 5432
       S3_HOST: s3-mock
       S3_PORT: 9191
+      EMAIL_ENABLED: false
+      EMAIL_REGION: fake
+      EMAIL_SENDER_ADDRESS: fake
     entrypoint: ./gradlew test
     depends_on:
       - luontotieto-db
