@@ -107,10 +107,9 @@ class UserController {
         }
     }
 
-    @PutMapping("/{id}/password")
-    fun updateUser(
+    @PutMapping("/password")
+    fun updateUserPassword(
         user: AuthenticatedUser,
-        @PathVariable id: UUID,
         @RequestBody data: User.Companion.UpdatePasswordPayload
     ): UUID {
         user.checkRoles(UserRole.CUSTOMER)
