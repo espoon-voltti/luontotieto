@@ -2,7 +2,13 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import React, { useContext, useMemo, useState } from 'react'
+import React, {
+  FormEvent,
+  useCallback,
+  useContext,
+  useMemo,
+  useState
+} from 'react'
 
 import {
   FlexRowWithGaps,
@@ -118,53 +124,61 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
       : undefined
   }, [newPassword2])
 
+  const onSubmit = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      await changePassword({ userId, currentPassword, newPassword })
+    },
+    [changePassword, userId, currentPassword, newPassword]
+  )
+
   return (
-    <GroupOfInputRows>
-      <LabeledInput $cols={3}>
-        <Label>Nykyinen salasana</Label>
-        <InputField
-          onChange={setCurrentPassword}
-          value={currentPassword}
-          type="password"
-        />
-      </LabeledInput>
-      <LabeledInput $cols={3}>
-        <Label>Uusi salasana</Label>
-        <InputField
-          onChange={setNewPassword}
-          value={newPassword}
-          type="password"
-          info={passwordIsWeakInfo}
-        />
-      </LabeledInput>
-      <LabeledInput $cols={3}>
-        <Label>Vahvista uusi salasana</Label>
-        <InputField
-          onChange={setNewPassword2}
-          value={newPassword2}
-          type="password"
-          info={newPassWordDoesNotMatchInfo}
-        />
-      </LabeledInput>
-      {errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
-      <FlexRowWithGaps>
-        <Button text={'Peruuta'} onClick={onClose}></Button>
-        <Button
-          disabled={
-            isPending ||
-            !currentPassword ||
-            !newPassword ||
-            !newPassword2 ||
-            !!newPassWordDoesNotMatchInfo ||
-            !!passwordIsWeakInfo
-          }
-          primary
-          text={'Tallenna'}
-          onClick={async () =>
-            await changePassword({ userId, currentPassword, newPassword })
-          }
-        ></Button>
-      </FlexRowWithGaps>
-    </GroupOfInputRows>
+    <form onSubmit={onSubmit}>
+      <GroupOfInputRows>
+        <LabeledInput $cols={3}>
+          <Label>Nykyinen salasana</Label>
+          <InputField
+            onChange={setCurrentPassword}
+            value={currentPassword}
+            type="password"
+          />
+        </LabeledInput>
+        <LabeledInput $cols={3}>
+          <Label>Uusi salasana</Label>
+          <InputField
+            onChange={setNewPassword}
+            value={newPassword}
+            type="password"
+            info={passwordIsWeakInfo}
+          />
+        </LabeledInput>
+        <LabeledInput $cols={3}>
+          <Label>Vahvista uusi salasana</Label>
+          <InputField
+            onChange={setNewPassword2}
+            value={newPassword2}
+            type="password"
+            info={newPassWordDoesNotMatchInfo}
+          />
+        </LabeledInput>
+        {errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
+        <FlexRowWithGaps>
+          <Button text={'Peruuta'} onClick={onClose}></Button>
+          <Button
+            disabled={
+              isPending ||
+              !currentPassword ||
+              !newPassword ||
+              !newPassword2 ||
+              !!newPassWordDoesNotMatchInfo ||
+              !!passwordIsWeakInfo
+            }
+            primary
+            type="submit"
+            text={'Tallenna'}
+          ></Button>
+        </FlexRowWithGaps>
+      </GroupOfInputRows>
+    </form>
   )
 })

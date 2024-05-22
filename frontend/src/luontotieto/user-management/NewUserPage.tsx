@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import React, { useMemo, useState } from 'react'
+import React, { FormEvent, useCallback, useMemo, useState } from 'react'
 
 import {
   FixedWidthDiv,
@@ -57,11 +57,19 @@ export const NewUserPage = React.memo(function NewUserPage() {
   const invalidEmailInfo = useMemo(() => {
     return userInput.email && !userInput.email.match(emailRegex)
       ? {
-        text: 'Syötä oikeaa muotoa oleva sähköposti',
-        status: 'warning' as const
-      }
+          text: 'Syötä oikeaa muotoa oleva sähköposti',
+          status: 'warning' as const
+        }
       : undefined
   }, [userInput.email])
+
+  const onSubmit = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      await createUser(userInput)
+    },
+    [createUser, userInput]
+  )
 
   return (
     <PageContainer>
@@ -72,42 +80,48 @@ export const NewUserPage = React.memo(function NewUserPage() {
       />
 
       <SectionContainer>
-        <GroupOfInputRows>
-          <H3>Yrityksen tiedot</H3>
-          <LabeledInput $cols={4}>
-            <Label>Yritys</Label>
-            <InputField
-              value={userInput.name}
-              onChange={(value) => setUserInput({ ...userInput, name: value })}
-            />
-          </LabeledInput>
-          <LabeledInput $cols={4}>
-            <Label>Yhteyssähköposti</Label>
-            <InputField
-              value={userInput.email}
-              onChange={(value) => setUserInput({ ...userInput, email: value })}
-              info={invalidEmailInfo}
-            />
-          </LabeledInput>
-          {errorMessage && <AlertBox title="Virhe" message={errorMessage}/>}
-          <FlexRowWithGaps>
-            <Button
-              primary
-              text={'Luo yrityskäyttäjä'}
-              disabled={!isValid || isPending}
-              onClick={async () => await createUser(userInput)}
-            ></Button>
-          </FlexRowWithGaps>
+        <form onSubmit={onSubmit}>
+          <GroupOfInputRows>
+            <H3>Yrityksen tiedot</H3>
+            <LabeledInput $cols={4}>
+              <Label>Yritys</Label>
+              <InputField
+                value={userInput.name}
+                onChange={(value) =>
+                  setUserInput({ ...userInput, name: value })
+                }
+              />
+            </LabeledInput>
+            <LabeledInput $cols={4}>
+              <Label>Yhteyssähköposti</Label>
+              <InputField
+                value={userInput.email}
+                onChange={(value) =>
+                  setUserInput({ ...userInput, email: value })
+                }
+                info={invalidEmailInfo}
+              />
+            </LabeledInput>
+            {errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
+            <FlexRowWithGaps>
+              <Button
+                primary
+                type="submit"
+                text={'Luo yrityskäyttäjä'}
+                disabled={!isValid || isPending}
+              ></Button>
+            </FlexRowWithGaps>
 
-          <FixedWidthDiv $cols={8}>
-            <InfoBox
-              message={`Kun käyttäjä on luotu lähetetään käyttäjälle automaattisesti sähköposti,
+            <FixedWidthDiv $cols={8}>
+              <InfoBox
+                message={`Kun käyttäjä on luotu lähetetään käyttäjälle automaattisesti sähköposti,
                joka sisältää luontotietoportaalin osoitteen sekä kirjautumiseen vaadittavat tunnukset.`}
-            ></InfoBox>
-          </FixedWidthDiv>
-        </GroupOfInputRows>
+              ></InfoBox>
+            </FixedWidthDiv>
+          </GroupOfInputRows>
+        </form>
       </SectionContainer>
-      <VerticalGap $size="XL"/>
+      <VerticalGap $size="XL" />
     </PageContainer>
   )
 })
