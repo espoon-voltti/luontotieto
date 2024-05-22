@@ -7,7 +7,7 @@ import typescriptEslint from 'typescript-eslint'
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 
 export default [
-  { ignores: ['dist/*', '.yarn/*'] },
+  { ignores: ['build.js','dist/*', '.yarn/*'] },
   ...typescriptEslint.config(
     eslint.configs.recommended,
     ...typescriptEslint.configs.recommended,

@@ -65,7 +65,8 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
         queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
         navigate(`/luontotieto/selvitys/${report.id}`)
       },
-      onError: (error: any) => setReportFileErrors([error])
+      onError: (error: FileValidationErrorResponse) =>
+        setReportFileErrors([error])
     })
 
   const { mutateAsync: updateReportMutation, isPending: updatingReport } =
@@ -76,7 +77,8 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
         queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
         navigate(`/luontotieto/selvitys/${report.id}`)
       },
-      onError: (error: any) => setReportFileErrors([error])
+      onError: (error: FileValidationErrorResponse) =>
+        setReportFileErrors([error])
     })
 
   const { mutateAsync: approveReport, isPending: approving } = useMutation({

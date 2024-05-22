@@ -60,8 +60,6 @@ export const FileInputField = React.memo(function FileInputField({
   autoComplete,
   'data-qa': dataQa,
   className,
-  icon,
-  symbol,
   maxLength,
   step,
   hideErrorsBeforeTouched,

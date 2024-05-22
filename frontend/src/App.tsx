@@ -23,6 +23,7 @@ import { UserManagementPage } from 'luontotieto/user-management/UserManagementPa
 import { NewUserPage } from 'luontotieto/user-management/NewUserPage'
 import { useAuthStatusQuery } from './api/hooks/auth'
 
+/* eslint-disable */
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
 const Header = styled.nav`
