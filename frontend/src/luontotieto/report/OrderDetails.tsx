@@ -2,7 +2,15 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { faPen } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useGetOrderFilesQuery } from 'api/hooks/orders'
+import { apiGetOrderFileUrl, Order } from 'api/order-api'
+import { getDocumentTypeTitle } from 'api/report-api'
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { LinkFileDownload } from 'shared/buttons/LinkFileDownload'
+import styled from 'styled-components'
 
 import {
   FlexCol,
@@ -14,15 +22,6 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H3, Label } from '../../shared/typography'
-
-import { apiGetOrderFileUrl, Order } from 'api/order-api'
-import styled from 'styled-components'
-import { getDocumentTypeTitle } from 'api/report-api'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPen } from '@fortawesome/free-solid-svg-icons'
-import { useNavigate } from 'react-router-dom'
-import { LinkFileDownload } from 'shared/buttons/LinkFileDownload'
-import { useGetOrderFilesQuery } from 'api/hooks/orders'
 
 type Props = { order: Order; reportId: string }
 
@@ -68,7 +67,7 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
           />
         </FlexRowWithGaps>
 
-        <VerticalGap $size="m"/>
+        <VerticalGap $size="m" />
         <GroupOfInputRows>
           <RowOfInputs>
             <LabeledInput>

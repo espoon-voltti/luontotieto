@@ -2,6 +2,9 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { OrderFileDocumentType } from 'api/order-api'
+import { FileValidationError, ReportFileDocumentType } from 'api/report-api'
+import classNames from 'classnames'
 import React, { useEffect, useState } from 'react'
 import { InputField, InputFieldUnderRow } from 'shared/form/InputField'
 import { useDebouncedState } from 'shared/useDebouncedState'
@@ -13,12 +16,10 @@ import {
   VerticalGap
 } from '../../../shared/layout'
 import { Label } from '../../typography'
-import { FileInputField } from './FileInputField'
-import { FileValidationError, ReportFileDocumentType } from 'api/report-api'
-import { OrderFileDocumentType } from 'api/order-api'
-import { FileTitle } from './FileTitle'
-import classNames from 'classnames'
 import { UnderRowStatusIcon } from '../StatusIcon'
+
+import { FileInputField } from './FileInputField'
+import { FileTitle } from './FileTitle'
 
 export interface ValidFileInputData<T> {
   description: string
@@ -26,16 +27,16 @@ export interface ValidFileInputData<T> {
   documentType: T
 }
 
-export interface FileInputData<T> {
+export interface FileInputData {
   description: string
   file: File | null
-  documentType: T
 }
 
 interface FileInputProps<T> {
-  data: FileInputData<T>
+  documentType: T
+  data: FileInputData
   errors?: FileValidationError[]
-  onChange: (data: FileInputData<T>) => void
+  onChange: (data: FileInputData) => void
 }
 
 const fileValidationErrorToMessage = (error: FileValidationError): string => {
@@ -49,6 +50,7 @@ export const FileInput = <
   T extends ReportFileDocumentType | OrderFileDocumentType
 >({
   data,
+  documentType,
   onChange,
   errors
 }: FileInputProps<T>) => {
@@ -56,7 +58,8 @@ export const FileInput = <
   const [description, setDescription] = useDebouncedState(data.description)
 
   useEffect(() => {
-    onChange({ file, description, documentType: data.documentType })
+    onChange({ file, description })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file, description])
 
   const errorMessage =
@@ -75,9 +78,9 @@ export const FileInput = <
       <FlexRowWithGaps $gapSize="s" style={{ marginBottom: '5px' }}>
         <LabeledInput $cols={5}>
           <FileTitle
-            documentType={data.documentType}
-            required={data.documentType !== ReportFileDocumentType.OTHER}
-          ></FileTitle>
+            documentType={documentType}
+            required={documentType !== ReportFileDocumentType.OTHER}
+          />
           <VerticalGap $size="s" />
           <FileInputField
             onChange={(fileList) => {
@@ -101,10 +104,10 @@ export const FileInput = <
           <InputFieldUnderRow className={classNames('warning')}>
             <span>
               {errorMessage.text.map((i) => (
-                <li>{i}</li>
+                <li key={i}>{i}</li>
               ))}
             </span>
-            <UnderRowStatusIcon status={'warning'} />
+            <UnderRowStatusIcon status="warning" />
           </InputFieldUnderRow>
         </FlexRowWithGaps>
       )}

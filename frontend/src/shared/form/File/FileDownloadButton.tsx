@@ -3,10 +3,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React from 'react'
-import styled from 'styled-components'
-
 import {
   faFile,
   faFileImage,
@@ -14,8 +10,11 @@ import {
   faFileWord,
   faX
 } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { OrderFile } from 'api/order-api'
 import { ReportFileDetails } from 'api/report-api'
+import React from 'react'
+import styled from 'styled-components'
 
 export interface SavedFile {
   id: string

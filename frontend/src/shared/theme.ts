@@ -13,7 +13,36 @@ const blueColors = {
   m4: '#d9e4f4'
 }
 
-export const colors = {
+interface IColors {
+  main: {
+    m1: string
+    m2: string
+    m3: string
+    m4: string
+    m2Hover: string
+    m2Active: string
+    m2Focus: string
+  }
+  grayscale: {
+    g100: string
+    g70: string
+    g35: string
+    g15: string
+    g4: string
+    g0: string
+  }
+  status: {
+    danger: string
+    warning: string
+    success: string
+    info: string
+  }
+}
+export interface ITheme {
+  colors: IColors
+}
+
+export const colors: IColors = {
   main: {
     ...blueColors,
     m2Hover: blueColors.m1,
@@ -67,4 +96,4 @@ export const inputWidthCss = (width: InputWidth) => css`
   }
 `
 
-export const theme = { colors }
+export const theme: ITheme = { colors }

@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { OrderReportDocumentInput } from 'api/order-api'
 import {
   FileValidationErrorResponse,
@@ -10,10 +11,13 @@ import {
   ReportFileDocumentType,
   ReportFormInput
 } from 'api/report-api'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { InlineButton } from 'shared/buttons/InlineButton'
+import { ExistingFile } from 'shared/form/File/ExistingFile'
 import { FileInput, FileInputData } from 'shared/form/File/FileInput'
 import { TextArea } from 'shared/form/TextArea'
 import { useDebouncedState } from 'shared/useDebouncedState'
+import styled from 'styled-components'
 
 import {
   FlexCol,
@@ -22,11 +26,6 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H3, Label } from '../../shared/typography'
-
-import { ExistingFile } from 'shared/form/File/ExistingFile'
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
-import { InlineButton } from 'shared/buttons/InlineButton'
-import styled from 'styled-components'
 
 const StyledInlineButton = styled(InlineButton)`
   font-size: 0.9rem;
@@ -136,20 +135,23 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
 
   const [fileInputs, setFileInputs] = useState(originalFileInputs)
 
-  const updateFileInput = (modified: FileInputData<ReportFileDocumentType>) => {
-    setFileInputs(
-      fileInputs.map((fi) => {
-        if (fi.documentType === modified.documentType) {
-          return {
-            ...fi,
-            userDescription: modified.description,
-            file: modified.file
+  const updateFileInput = useCallback(
+    (modified: FileInputData & { documentType: ReportFileDocumentType }) => {
+      setFileInputs(
+        fileInputs.map((fi) => {
+          if (fi.documentType === modified.documentType) {
+            return {
+              ...fi,
+              userDescription: modified.description,
+              file: modified.file
+            }
           }
-        }
-        return fi
-      })
-    )
-  }
+          return fi
+        })
+      )
+    },
+    [setFileInputs, fileInputs]
+  )
 
   const removeCreatedFileInput = (id: string) => {
     setFileInputs(
@@ -230,14 +232,17 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
             case 'NEW':
               return (
                 <FileInput
+                  documentType={fInput.documentType}
                   key={fInput.documentType + index}
                   data={{
                     description: fInput.userDescription,
-                    file: fInput.file,
-                    documentType: fInput.documentType
+                    file: fInput.file
                   }}
                   onChange={(data) => {
-                    updateFileInput(data)
+                    updateFileInput({
+                      ...data,
+                      documentType: fInput.documentType
+                    })
                   }}
                   errors={documentSaveError?.errors}
                 />
@@ -260,7 +265,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
           }
         })}
         <StyledInlineButton
-          text={'Lisää muu liite'}
+          text="Lisää muu liite"
           icon={faPlus}
           onClick={() => addFileInput(ReportFileDocumentType.OTHER)}
         />

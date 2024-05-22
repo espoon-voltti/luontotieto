@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useGetReportFilesQuery, useGetReportQuery } from 'api/hooks/reports'
 import {
   apiPostReport,
   ReportFormInput,
@@ -11,8 +13,10 @@ import {
 } from 'api/report-api'
 import React, { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Footer } from 'shared/Footer'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
+import styled from 'styled-components'
 
 import {
   FlexRight,
@@ -21,12 +25,8 @@ import {
   VerticalGap
 } from '../../shared/layout'
 
-import { ReportForm } from './ReportForm'
-import { Footer } from 'shared/Footer'
 import { OrderDetails } from './OrderDetails'
-import styled from 'styled-components'
-import { useGetReportFilesQuery, useGetReportQuery } from 'api/hooks/reports'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { ReportForm } from './ReportForm'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -61,29 +61,31 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
     useMutation({
       mutationFn: apiPostReport,
       onSuccess: (report) => {
-        queryClient.invalidateQueries({ queryKey: ['report', id] })
-        queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+        void queryClient.invalidateQueries({ queryKey: ['report', id] })
+        void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
         navigate(`/luontotieto/selvitys/${report.id}`)
       },
-      onError: (error: any) => setReportFileErrors([error])
+      onError: (error: FileValidationErrorResponse) =>
+        setReportFileErrors([error])
     })
 
   const { mutateAsync: updateReportMutation, isPending: updatingReport } =
     useMutation({
       mutationFn: apiPutReport,
       onSuccess: (report) => {
-        queryClient.invalidateQueries({ queryKey: ['report', id] })
-        queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+        void queryClient.invalidateQueries({ queryKey: ['report', id] })
+        void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
         navigate(`/luontotieto/selvitys/${report.id}`)
       },
-      onError: (error: any) => setReportFileErrors([error])
+      onError: (error: FileValidationErrorResponse) =>
+        setReportFileErrors([error])
     })
 
   const { mutateAsync: approveReport, isPending: approving } = useMutation({
     mutationFn: apiApproveReport,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['report', id] })
-      queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+      void queryClient.invalidateQueries({ queryKey: ['report', id] })
+      void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
       alert('Hyväksytty ja tiedostot lähetetty PostGIS kantaan.')
     }
   })
@@ -146,7 +148,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
             }
             onClick={() => {
               if (!reportInput) return
-              onSubmit(reportInput)
+              void onSubmit(reportInput)
             }}
           />
 

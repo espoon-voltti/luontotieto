@@ -2,9 +2,18 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { faSearch } from '@fortawesome/free-solid-svg-icons'
+import { useGetReportsQuery } from 'api/hooks/reports'
+import { getDocumentTypeTitle, ReportDetails } from 'api/report-api'
+import orderBy from 'lodash/orderBy'
 import React, { useCallback, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { SortableTh, Th } from 'shared/Table'
 import { AddButton } from 'shared/buttons/AddButton'
+import { formatDateTime } from 'shared/dates'
+import { InputField } from 'shared/form/InputField'
+import { Select } from 'shared/form/Select'
+import { useDebouncedState } from 'shared/useDebouncedState'
 
 import {
   FlexLeftRight,
@@ -14,15 +23,6 @@ import {
   Table,
   VerticalGap
 } from '../../shared/layout'
-import { getDocumentTypeTitle, ReportDetails } from 'api/report-api'
-import { InputField } from 'shared/form/InputField'
-import { SortableTh, Th } from 'shared/Table'
-import { orderBy } from 'lodash'
-import { Select } from 'shared/form/Select'
-import { useDebouncedState } from 'shared/useDebouncedState'
-import { faSearch } from '@fortawesome/free-solid-svg-icons'
-import { formatDateTime } from 'shared/dates'
-import { useGetReportsQuery } from 'api/hooks/reports'
 
 export type ReportSortColumn = 'updated' | 'name' | 'approved'
 export type SortDirection = 'ASC' | 'DESC'
@@ -43,7 +43,9 @@ export const ReportList = React.memo(function ReportList() {
 
   const reportAssignees = useMemo(() => {
     const assignees = (reports ?? [])
-      .flatMap(r => r.order?.assignee !== undefined ? r.order?.assignee : [])
+      .flatMap((r) =>
+        r.order?.assignee !== undefined ? r.order?.assignee : []
+      )
       .sort()
 
     return [null, ...new Set(assignees)]
@@ -72,10 +74,10 @@ export const ReportList = React.memo(function ReportList() {
       return sortBy === null
         ? filtered
         : orderBy(
-          filtered,
-          [sortBy],
-          [sortDirection === 'ASC' ? 'asc' : 'desc']
-        )
+            filtered,
+            [sortBy],
+            [sortDirection === 'ASC' ? 'asc' : 'desc']
+          )
     },
     [sortBy, sortDirection, filterByReportAssignee, filterBySearchQuery]
   )
@@ -88,7 +90,7 @@ export const ReportList = React.memo(function ReportList() {
   return (
     <PageContainer>
       <SectionContainer>
-        <VerticalGap $size="m"/>
+        <VerticalGap $size="m" />
         <FlexLeftRight>
           <FlexRowWithGaps $gapSize="s">
             <InputField
@@ -140,7 +142,7 @@ export const ReportList = React.memo(function ReportList() {
                   items={reportAssignees ?? []}
                   getItemLabel={(u) => u ?? 'Valitse'}
                   onChange={setFilterByReportAssignee}
-                ></Select>
+                />
               </Th>
             </tr>
           </thead>
@@ -187,17 +189,27 @@ const filterReports = (
   return reports.filter((report) => {
     if (searchQueryToLower) {
       return (
-        report.name.toLowerCase().includes(searchQueryToLower) ||
-        report.description.toLowerCase().includes(searchQueryToLower) ||
-        (report.order && report.order.assignee.toLowerCase().includes(searchQueryToLower)) ||
-        (report.order && searchQueryToLower &&
-          report.order.planNumber
-            ?.toString()
-            .toLowerCase()
-            .includes(searchQueryToLower))
-      ) && (assigneeLower ? (report.order && report.order.assignee.toLowerCase().includes(assigneeLower)) : true)
+        (report.name.toLowerCase().includes(searchQueryToLower) ||
+          report.description.toLowerCase().includes(searchQueryToLower) ||
+          (report.order &&
+            report.order.assignee.toLowerCase().includes(searchQueryToLower)) ||
+          (report.order &&
+            searchQueryToLower &&
+            report.order.planNumber
+              ?.toString()
+              .toLowerCase()
+              .includes(searchQueryToLower))) &&
+        (assigneeLower
+          ? report.order &&
+            report.order.assignee.toLowerCase().includes(assigneeLower)
+          : true)
+      )
     } else if (assigneeLower) {
-      return (report.order && assigneeLower && report.order.assignee.toLowerCase().includes(assigneeLower))
+      return (
+        report.order &&
+        assigneeLower &&
+        report.order.assignee.toLowerCase().includes(assigneeLower)
+      )
     }
     return true
   })

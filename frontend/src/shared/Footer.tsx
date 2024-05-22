@@ -2,8 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import React from 'react'
-
+import React, { ReactElement } from 'react'
 import styled from 'styled-components'
 
 const StyledFooter = styled.div`
@@ -26,7 +25,7 @@ export const ContentContainer = styled.div`
 `
 
 export interface FooterProps {
-  children: any
+  children: ReactElement
 }
 
 export const Footer = React.memo(function Footer({ children }: FooterProps) {

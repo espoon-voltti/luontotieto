@@ -129,9 +129,8 @@ const apiPostOrderFile = (id: string, file: OrderFileInput): Promise<void> => {
   return apiClient.postForm(`/orders/${id}/files`, formData)
 }
 
-const apiDeleteOrderFile = (orderId: string, fileId: string): Promise<void> => {
-  return apiClient.delete(`/orders/${orderId}/files/${fileId}`)
-}
+const apiDeleteOrderFile = (orderId: string, fileId: string): Promise<void> =>
+  apiClient.delete(`/orders/${orderId}/files/${fileId}`)
 
 export const apiGetOrder = (id: string): Promise<Order> =>
   apiClient.get<Order>(`/orders/${id}`).then((res) => res.data)

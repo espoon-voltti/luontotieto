@@ -2,11 +2,27 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import React, { useEffect, useMemo, useState } from 'react'
+import {
+  Order,
+  OrderFile,
+  OrderFileDocumentType,
+  OrderFormInput,
+  OrderReportDocumentInput
+} from 'api/order-api'
+import { getDocumentTypeTitle, ReportFileDocumentType } from 'api/report-api'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { Tag } from 'react-tag-autocomplete'
+import { Checkbox } from 'shared/form/Checkbox'
+import { ExistingFile } from 'shared/form/File/ExistingFile'
+import { FileInput, FileInputData } from 'shared/form/File/FileInput'
 import { InputField } from 'shared/form/InputField'
+import { TagAutoComplete } from 'shared/form/TagAutoComplete/TagAutoComplete'
 import { TextArea } from 'shared/form/TextArea'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
+import { useGetAssigneeUsersQuery } from '../../api/hooks/users'
+import { User } from '../../api/users-api'
+import { Select } from '../../shared/form/Select'
 import {
   FlexCol,
   GroupOfInputRows,
@@ -16,16 +32,6 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H3, Label } from '../../shared/typography'
-import { Checkbox } from 'shared/form/Checkbox'
-import { FileInput, FileInputData } from 'shared/form/File/FileInput'
-import { Order, OrderFile, OrderFileDocumentType, OrderFormInput, OrderReportDocumentInput } from 'api/order-api'
-import { getDocumentTypeTitle, ReportFileDocumentType } from 'api/report-api'
-import { ExistingFile } from 'shared/form/File/ExistingFile'
-import { TagAutoComplete } from 'shared/form/TagAutoComplete/TagAutoComplete'
-import { Tag } from 'react-tag-autocomplete'
-import { useGetAssigneeUsersQuery } from '../../api/hooks/users'
-import { User } from '../../api/users-api'
-import { Select } from '../../shared/form/Select'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -135,25 +141,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   )
 
   const updateReportDocuments = (item: OrderCheckBoxComponentInput) => {
-    const newArray = reportDocuments.map((row) => {
-      return row.documentType === item.documentType ? item : row
-    })
-    setReportDocuments(newArray)
-  }
-
-  const updateOrderFiles = (modified: FileInputData<OrderFileDocumentType>) => {
-    setOrderFiles(
-      orderFiles.map((fi) => {
-        if (fi.documentType === modified.documentType) {
-          return {
-            ...fi,
-            description: modified.description,
-            file: modified.file
-          }
-        }
-        return fi
-      })
+    const newArray = reportDocuments.map((row) =>
+      row.documentType === item.documentType ? item : row
     )
+    setReportDocuments(newArray)
   }
 
   const removeCreatedFileInput = (id: string) => {
@@ -171,17 +162,43 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       })
     )
   }
+  const updateOrderFiles = useCallback(
+    (
+      modified: FileInputData & {
+        documentType: OrderFileDocumentType
+      }
+    ) => {
+      setOrderFiles(
+        orderFiles.map((fi) => {
+          if (fi.documentType === modified.documentType) {
+            return {
+              ...fi,
+              description: modified.description,
+              file: modified.file
+            }
+          }
+          return fi
+        })
+      )
+    },
+    [setOrderFiles, orderFiles]
+  )
 
-  const updatePlanNumbers = (selected: Tag[]) => {
-    setPlanNumbers(selected.map((s) => s.label))
-  }
+  const updatePlanNumbers = useCallback(
+    (selected: Tag[]) => {
+      setPlanNumbers(selected.map((s) => s.label))
+    },
+    [setPlanNumbers]
+  )
 
-  const {data: assigneeUsers} = useGetAssigneeUsersQuery()
+  const { data: assigneeUsers } = useGetAssigneeUsersQuery()
   const [assignee, setAssignee] = useState<User | undefined>()
 
   useEffect(() => {
     if (props.mode === 'EDIT') {
-      const assignee = assigneeUsers?.find((u) => u?.id === props.order.assigneeId)
+      const assignee = assigneeUsers?.find(
+        (u) => u?.id === props.order.assigneeId
+      )
       setAssignee(assignee)
     }
   }, [assigneeUsers, props])
@@ -222,7 +239,15 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       ),
       assigneeId: assignee.id
     }
-  }, [name, description, planNumbers, reportDocuments, orderFiles, assignee])
+  }, [
+    name,
+    description,
+    planNumbers,
+    reportDocuments,
+    orderFiles,
+    assignee,
+    originalFileInputs
+  ])
 
   useEffect(() => {
     props.onChange(validInput)
@@ -280,7 +305,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 onChange={setAssignee}
                 getItemLabel={(u) => u?.name ?? '-'}
                 getItemValue={(u) => u?.id ?? '-'}
-              ></Select>
+              />
             </LabeledInput>
           </RowOfInputs>
         </GroupOfInputRows>
@@ -294,9 +319,13 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 return (
                   <FileInput
                     key={fInput.documentType}
+                    documentType={fInput.documentType}
                     data={fInput}
                     onChange={(data) => {
-                      updateOrderFiles(data)
+                      updateOrderFiles({
+                        ...data,
+                        documentType: fInput.documentType
+                      })
                     }}
                   />
                 )
@@ -328,8 +357,9 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               <Label>Kerättävät dokumentit</Label>
               <VerticalGap $size="s" />
 
-              {reportDocuments.map((rd) => (
+              {reportDocuments.map((rd, index) => (
                 <Checkbox
+                  key={index}
                   label={getDocumentTypeTitle(rd.documentType)}
                   checked={rd.checked}
                   onChange={(checked) =>
@@ -338,7 +368,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                       documentType: rd.documentType
                     })
                   }
-                ></Checkbox>
+                />
               ))}
             </LabeledInput>
           </RowOfInputs>

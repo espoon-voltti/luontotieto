@@ -2,6 +2,14 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  ChangePasswordErrorCode,
+  ChangePasswordError,
+  apiChangeUserPassword
+} from 'api/users-api'
+import { UserContext } from 'auth/UserContext'
+import { AxiosError } from 'axios'
 import React, {
   FormEvent,
   useCallback,
@@ -9,6 +17,12 @@ import React, {
   useMemo,
   useState
 } from 'react'
+import { AlertBox } from 'shared/MessageBoxes'
+import { BackNavigation } from 'shared/buttons/BackNavigation'
+import { Button } from 'shared/buttons/Button'
+import { InlineButton } from 'shared/buttons/InlineButton'
+import { InputField } from 'shared/form/InputField'
+import { Label } from 'shared/typography'
 
 import {
   FlexRowWithGaps,
@@ -18,20 +32,6 @@ import {
   SectionContainer,
   VerticalGap
 } from '../../shared/layout'
-import { InputField } from 'shared/form/InputField'
-import { BackNavigation } from 'shared/buttons/BackNavigation'
-import { Label } from 'shared/typography'
-import { InlineButton } from 'shared/buttons/InlineButton'
-import { Button } from 'shared/buttons/Button'
-import { UserContext } from 'auth/UserContext'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  ChangePasswordErrorCode,
-  ChangePasswordError,
-  apiChangeUserPassword
-} from 'api/users-api'
-import { AxiosError } from 'axios'
-import { AlertBox } from 'shared/MessageBoxes'
 
 export const UserSettingsPage = React.memo(function UserSettingsPage() {
   const { user } = useContext(UserContext)
@@ -56,7 +56,7 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
           </LabeledInput>
           {!showChangePassword ? (
             <InlineButton
-              text={'Vaihda salasana'}
+              text="Vaihda salasana"
               onClick={() => setShowChangePassword(!showChangePassword)}
             />
           ) : (
@@ -92,7 +92,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
   const { mutateAsync: changePassword, isPending } = useMutation({
     mutationFn: apiChangeUserPassword,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users', userId] })
+      void queryClient.invalidateQueries({ queryKey: ['users', userId] })
       onClose()
     },
     onError: (e: AxiosError<{ errorCode: ChangePasswordErrorCode }>) => {
@@ -106,23 +106,27 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
     }
   })
 
-  const passwordIsWeakInfo = useMemo(() => {
-    return newPassword && !passwordRegex.test(newPassword)
-      ? {
-          text: ChangePasswordError['weak-password'],
-          status: 'warning' as const
-        }
-      : undefined
-  }, [newPassword])
+  const passwordIsWeakInfo = useMemo(
+    () =>
+      newPassword && !passwordRegex.test(newPassword)
+        ? {
+            text: ChangePasswordError['weak-password'],
+            status: 'warning' as const
+          }
+        : undefined,
+    [newPassword]
+  )
 
-  const newPassWordDoesNotMatchInfo = useMemo(() => {
-    return newPassword2 && newPassword !== newPassword2
-      ? {
-          text: 'Uudet salasanat eivät täsmää.',
-          status: 'warning' as const
-        }
-      : undefined
-  }, [newPassword2])
+  const newPassWordDoesNotMatchInfo = useMemo(
+    () =>
+      newPassword2 && newPassword !== newPassword2
+        ? {
+            text: 'Uudet salasanat eivät täsmää.',
+            status: 'warning' as const
+          }
+        : undefined,
+    [newPassword, newPassword2]
+  )
 
   const onSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -161,9 +165,9 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
             info={newPassWordDoesNotMatchInfo}
           />
         </LabeledInput>
-        {errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
+        {!!errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
         <FlexRowWithGaps>
-          <Button text={'Peruuta'} onClick={onClose}></Button>
+          <Button text="Peruuta" onClick={onClose} />
           <Button
             disabled={
               isPending ||
@@ -175,8 +179,8 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
             }
             primary
             type="submit"
-            text={'Tallenna'}
-          ></Button>
+            text="Tallenna"
+          />
         </FlexRowWithGaps>
       </GroupOfInputRows>
     </form>

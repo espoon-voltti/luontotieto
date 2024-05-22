@@ -4,9 +4,10 @@
 
 import classNames from 'classnames'
 import React, { ReactNode, useRef } from 'react'
+import { ITheme } from 'shared/theme'
 import styled from 'styled-components'
 
-const Container = styled.label`
+const Container = styled.label<{ theme: ITheme }>`
   display: flex;
   align-items: center;
   gap: 10px;
@@ -46,7 +47,7 @@ const StyledSwitch = styled.div`
   }
 `
 
-const Input = styled.input`
+const Input = styled.input<{ theme: ITheme }>`
   display: none;
 
   &:checked + ${StyledSwitch} {

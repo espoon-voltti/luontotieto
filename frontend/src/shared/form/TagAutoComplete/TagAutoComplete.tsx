@@ -172,8 +172,8 @@ interface Props {
   onChange: (selected: Tag[]) => void
 }
 
-export const TagAutoComplete = (props: Props) => {
-  const [selected, setSelected] = useState<Tag[]>(props.data ?? [])
+export const TagAutoComplete = ({ onChange, suggestions, data }: Props) => {
+  const [selected, setSelected] = useState<Tag[]>(data ?? [])
 
   const onAdd = useCallback(
     (newTag: Tag) => {
@@ -190,8 +190,8 @@ export const TagAutoComplete = (props: Props) => {
   )
 
   useEffect(() => {
-    props.onChange(selected)
-  }, [selected])
+    onChange(selected)
+  }, [selected, onChange])
 
   return (
     <Wrapper>
@@ -200,7 +200,7 @@ export const TagAutoComplete = (props: Props) => {
         newOptionText="Lisää %value%"
         allowNew={true}
         selected={selected}
-        suggestions={props.suggestions}
+        suggestions={suggestions}
         onAdd={onAdd}
         onDelete={onDelete}
         noOptionsText="Ei hakutuloksia"

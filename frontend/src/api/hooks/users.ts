@@ -6,17 +6,17 @@ import { useQuery } from '@tanstack/react-query'
 import { apiGetUser, apiGetUsers } from 'api/users-api'
 
 export function useGetUsersQuery() {
-    return useQuery({
-        queryKey: ['users'],
-        queryFn: () => apiGetUsers()
-    })
+  return useQuery({
+    queryKey: ['users'],
+    queryFn: () => apiGetUsers()
+  })
 }
 
 export function useGetAssigneeUsersQuery() {
-    return useQuery({
-        queryKey: ['assignee-users'],
-        queryFn: () => apiGetUsers().then(users => [undefined, ...users]),
-    })
+  return useQuery({
+    queryKey: ['assignee-users'],
+    queryFn: () => apiGetUsers().then((users) => [undefined, ...users])
+  })
 }
 
 export function useGetUserQuery(id: string) {

@@ -3,8 +3,9 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { apiClient } from 'api-client'
-import { JsonOf } from 'shared/api-utils'
+import { AxiosHeaders, AxiosResponse } from 'axios'
 import FileSaver from 'file-saver'
+import { JsonOf } from 'shared/api-utils'
 
 import { Order, OrderFileDocumentType } from './order-api'
 
@@ -149,13 +150,15 @@ const apiPostReportFile = async (
   formData.append('description', file.description)
   formData.append('documentType', ReportFileDocumentType[file.documentType])
 
-  await apiClient.postForm(`/reports/${id}/files`, formData).catch((error) => {
-    const errorResponse = {
-      documentType: file.documentType,
-      errors: error.response.data as FileValidationError
-    }
-    return Promise.reject(errorResponse)
-  })
+  await apiClient
+    .postForm(`/reports/${id}/files`, formData)
+    .catch((error: { response: { data: FileValidationError } }) => {
+      const errorResponse = {
+        documentType: file.documentType,
+        errors: error.response.data
+      }
+      return Promise.reject(errorResponse)
+    })
   return Promise.resolve()
 }
 
@@ -180,15 +183,17 @@ export const apiGetReportFileUrl = (
 
 export const apiGetReportDocumentTypeFileTemplate = (
   documentType: ReportFileDocumentType
-): Promise<unknown> =>
+): Promise<void> =>
   apiClient
     .get<Blob>(`/reports/template/${documentType}.gpkg`, {
       responseType: 'blob'
     })
-    .then((res) => {
-      const fileName = res.headers['content-disposition']
-        .split('filename=')[1]
-        .replace(/"/g, '')
-
-      FileSaver.saveAs(res.data, fileName)
+    .then((res: AxiosResponse<Blob, AxiosHeaders>) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const dispositionHeader: string = res.headers['content-disposition'] ?? ''
+      const fileParameter = dispositionHeader.split('filename=')[1] ?? ''
+      const fileName = fileParameter.replace(/"/g, '')
+      if (fileName.length > 0) {
+        FileSaver.saveAs(res.data, fileName)
+      }
     })
