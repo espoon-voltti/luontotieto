@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "description": "Frontend for luontotieto",
   "private": true,
-  "type": "module",
   "scripts": {
     "clean": "rm -rf dist node_modules/.cache",
     "dev": "concurrently -n tsc,esbuild -c blue,green 'yarn type-check:watch' 'yarn build:serve'",
