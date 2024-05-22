@@ -43,7 +43,9 @@ export const ReportList = React.memo(function ReportList() {
 
   const reportAssignees = useMemo(() => {
     const assignees = (reports ?? [])
-      .flatMap(r => r.order?.assignee !== undefined ? r.order?.assignee : [])
+      .flatMap((r) =>
+        r.order?.assignee !== undefined ? r.order?.assignee : []
+      )
       .sort()
 
     return [null, ...new Set(assignees)]
@@ -72,10 +74,10 @@ export const ReportList = React.memo(function ReportList() {
       return sortBy === null
         ? filtered
         : orderBy(
-          filtered,
-          [sortBy],
-          [sortDirection === 'ASC' ? 'asc' : 'desc']
-        )
+            filtered,
+            [sortBy],
+            [sortDirection === 'ASC' ? 'asc' : 'desc']
+          )
     },
     [sortBy, sortDirection, filterByReportAssignee, filterBySearchQuery]
   )
@@ -88,7 +90,7 @@ export const ReportList = React.memo(function ReportList() {
   return (
     <PageContainer>
       <SectionContainer>
-        <VerticalGap $size="m"/>
+        <VerticalGap $size="m" />
         <FlexLeftRight>
           <FlexRowWithGaps $gapSize="s">
             <InputField
@@ -187,17 +189,27 @@ const filterReports = (
   return reports.filter((report) => {
     if (searchQueryToLower) {
       return (
-        report.name.toLowerCase().includes(searchQueryToLower) ||
-        report.description.toLowerCase().includes(searchQueryToLower) ||
-        (report.order && report.order.assignee.toLowerCase().includes(searchQueryToLower)) ||
-        (report.order && searchQueryToLower &&
-          report.order.planNumber
-            ?.toString()
-            .toLowerCase()
-            .includes(searchQueryToLower))
-      ) && (assigneeLower ? (report.order && report.order.assignee.toLowerCase().includes(assigneeLower)) : true)
+        (report.name.toLowerCase().includes(searchQueryToLower) ||
+          report.description.toLowerCase().includes(searchQueryToLower) ||
+          (report.order &&
+            report.order.assignee.toLowerCase().includes(searchQueryToLower)) ||
+          (report.order &&
+            searchQueryToLower &&
+            report.order.planNumber
+              ?.toString()
+              .toLowerCase()
+              .includes(searchQueryToLower))) &&
+        (assigneeLower
+          ? report.order &&
+            report.order.assignee.toLowerCase().includes(assigneeLower)
+          : true)
+      )
     } else if (assigneeLower) {
-      return (report.order && assigneeLower && report.order.assignee.toLowerCase().includes(assigneeLower))
+      return (
+        report.order &&
+        assigneeLower &&
+        report.order.assignee.toLowerCase().includes(assigneeLower)
+      )
     }
     return true
   })

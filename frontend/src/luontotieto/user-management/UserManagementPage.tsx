@@ -29,8 +29,8 @@ export const UserManagementPage = React.memo(function UserManagementPage() {
         destination={'/luontotieto/käyttäjät/'}
       />
 
-      <UserManagementForm user={user}/>
-      <VerticalGap $size="XL"/>
+      <UserManagementForm user={user} />
+      <VerticalGap $size="XL" />
     </PageContainer>
   )
 })

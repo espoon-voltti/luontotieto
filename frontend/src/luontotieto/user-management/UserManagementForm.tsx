@@ -4,7 +4,12 @@
 
 import React, { useMemo, useState } from 'react'
 
-import { FlexRowWithGaps, GroupOfInputRows, LabeledInput, SectionContainer } from '../../shared/layout'
+import {
+  FlexRowWithGaps,
+  GroupOfInputRows,
+  LabeledInput,
+  SectionContainer
+} from '../../shared/layout'
 import { InputField } from 'shared/form/InputField'
 import { H3, Label } from 'shared/typography'
 import { InlineButton } from 'shared/buttons/InlineButton'
@@ -34,8 +39,8 @@ const roles = [
 ]
 
 export const UserManagementForm = React.memo(function UserManagementForm({
-                                                                           user
-                                                                         }: {
+  user
+}: {
   user: User
 }) {
   const userEditableFields = {
@@ -73,9 +78,9 @@ export const UserManagementForm = React.memo(function UserManagementForm({
   const invalidEmailInfo = useMemo(() => {
     return enableEdit && userInput.email && !userInput.email.match(emailRegex)
       ? {
-        text: 'Syötä oikeaa muotoa oleva sähköposti',
-        status: 'warning' as const
-      }
+          text: 'Syötä oikeaa muotoa oleva sähköposti',
+          status: 'warning' as const
+        }
       : undefined
   }, [userInput.email])
 
@@ -110,9 +115,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
                   key={r.role}
                   label={getUserRole(r.role)}
                   checked={userInput.role === r.role}
-                  onChange={() =>
-                    setUserInput({ ...userInput, role: r.role })
-                  }
+                  onChange={() => setUserInput({ ...userInput, role: r.role })}
                   disabled={!enableEdit}
                   small={true}
                 />
@@ -120,7 +123,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
             </FlexRowWithGaps>
 
             {enableEdit && userSelectedRoleInfo && (
-              <InfoBox message={userSelectedRoleInfo.info}/>
+              <InfoBox message={userSelectedRoleInfo.info} />
             )}
           </LabeledInput>
         )}
@@ -137,7 +140,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
           />
         </LabeledInput>
 
-        {errorMessage && <AlertBox title="Virhe" message={errorMessage}/>}
+        {errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
 
         {enableEdit ? (
           <FlexRowWithGaps>

@@ -113,36 +113,36 @@ export const UserMenu = React.memo(function LanguageMenu({
       </DropDownButton>
       {open ? (
         <DropDown $align="right">
-          {user.role === UserRole.ADMIN && 
-          <DropDownItemButton
-            ref={firstButtonRef}
-            key={'user-management'}
-            className={classNames({ active: true })}
-            onClick={() => {
-              navigate(`/luontotieto/käyttäjät`)
-              setOpen(false)
-            }}
-            role="menuitemradio"
-            aria-checked={true}
-          >
-            Käyttäjänhallinta
-          </DropDownItemButton>
-          }
-          {user.role === UserRole.CUSTOMER && 
-          <DropDownItemButton
-            ref={firstButtonRef}
-            key={'user-settings'}
-            className={classNames({ active: true })}
-            onClick={() => {
-              navigate(`/luontotieto/omat-asetukset`)
-              setOpen(false)
-            }}
-            role="menuitemradio"
-            aria-checked={true}
-          >
-            Asetukset
-          </DropDownItemButton>
-          }
+          {user.role === UserRole.ADMIN && (
+            <DropDownItemButton
+              ref={firstButtonRef}
+              key={'user-management'}
+              className={classNames({ active: true })}
+              onClick={() => {
+                navigate(`/luontotieto/käyttäjät`)
+                setOpen(false)
+              }}
+              role="menuitemradio"
+              aria-checked={true}
+            >
+              Käyttäjänhallinta
+            </DropDownItemButton>
+          )}
+          {user.role === UserRole.CUSTOMER && (
+            <DropDownItemButton
+              ref={firstButtonRef}
+              key={'user-settings'}
+              className={classNames({ active: true })}
+              onClick={() => {
+                navigate(`/luontotieto/omat-asetukset`)
+                setOpen(false)
+              }}
+              role="menuitemradio"
+              aria-checked={true}
+            >
+              Asetukset
+            </DropDownItemButton>
+          )}
           <DropDownItemButton
             ref={firstButtonRef}
             key={'logout'}

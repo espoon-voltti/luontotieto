@@ -38,7 +38,7 @@ export const StaticChip = styled.div<{
   ${(p) => (p.$fitContent ? 'width: fit-content;' : '')}
 `
 
-type SelectionChipProps = {
+interface SelectionChipProps {
   text: string
   selected: boolean
   onChange: (selected: boolean) => void

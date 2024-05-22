@@ -18,7 +18,13 @@ import {
 import { H3, Label } from '../../shared/typography'
 import { Checkbox } from 'shared/form/Checkbox'
 import { FileInput, FileInputData } from 'shared/form/File/FileInput'
-import { Order, OrderFile, OrderFileDocumentType, OrderFormInput, OrderReportDocumentInput } from 'api/order-api'
+import {
+  Order,
+  OrderFile,
+  OrderFileDocumentType,
+  OrderFormInput,
+  OrderReportDocumentInput
+} from 'api/order-api'
 import { getDocumentTypeTitle, ReportFileDocumentType } from 'api/report-api'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
 import { TagAutoComplete } from 'shared/form/TagAutoComplete/TagAutoComplete'
@@ -176,12 +182,14 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     setPlanNumbers(selected.map((s) => s.label))
   }
 
-  const {data: assigneeUsers} = useGetAssigneeUsersQuery()
+  const { data: assigneeUsers } = useGetAssigneeUsersQuery()
   const [assignee, setAssignee] = useState<User | undefined>()
 
   useEffect(() => {
     if (props.mode === 'EDIT') {
-      const assignee = assigneeUsers?.find((u) => u?.id === props.order.assigneeId)
+      const assignee = assigneeUsers?.find(
+        (u) => u?.id === props.order.assigneeId
+      )
       setAssignee(assignee)
     }
   }, [assigneeUsers, props])

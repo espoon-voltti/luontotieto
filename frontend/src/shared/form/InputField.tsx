@@ -144,7 +144,7 @@ export const InputFieldUnderRow = styled.div`
   }
 `
 
-export type InputInfo = {
+export interface InputInfo {
   text: string | string[]
   status?: InfoStatus
 }

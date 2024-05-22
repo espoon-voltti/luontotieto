@@ -24,7 +24,10 @@ import { useNavigate } from 'react-router-dom'
 import { LinkFileDownload } from 'shared/buttons/LinkFileDownload'
 import { useGetOrderFilesQuery } from 'api/hooks/orders'
 
-type Props = { order: Order; reportId: string }
+interface Props {
+  order: Order
+  reportId: string
+}
 
 const StyledLi = styled.li`
   &::marker {
@@ -68,7 +71,7 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
           />
         </FlexRowWithGaps>
 
-        <VerticalGap $size="m"/>
+        <VerticalGap $size="m" />
         <GroupOfInputRows>
           <RowOfInputs>
             <LabeledInput>

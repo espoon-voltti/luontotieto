@@ -13,8 +13,6 @@ const yargs = require('yargs')
 const outdir = `dist/esbuild/luontotieto`
 const publicPath = '/'
 
-/* eslint-disable no-console */
-
 async function main() {
   const args = yargs
     .option('--dev', {
