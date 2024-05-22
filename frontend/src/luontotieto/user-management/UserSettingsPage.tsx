@@ -92,7 +92,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
   const { mutateAsync: changePassword, isPending } = useMutation({
     mutationFn: apiChangeUserPassword,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users', userId] })
+      void queryClient.invalidateQueries({ queryKey: ['users', userId] })
       onClose()
     },
     onError: (e: AxiosError<{ errorCode: ChangePasswordErrorCode }>) => {
@@ -125,7 +125,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
             status: 'warning' as const
           }
         : undefined,
-    [newPassword2]
+    [newPassword, newPassword2]
   )
 
   const onSubmit = useCallback(

@@ -11,8 +11,9 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.response.use(
   (res) => res,
-  (err) => {
+  (err: AxiosError) => {
     if (err instanceof AxiosError) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const request: XMLHttpRequest | undefined = err.request
       const responseURL = request?.responseURL
       if (

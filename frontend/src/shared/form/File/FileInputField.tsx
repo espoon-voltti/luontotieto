@@ -60,8 +60,6 @@ export const FileInputField = React.memo(function FileInputField({
   autoComplete,
   'data-qa': dataQa,
   className,
-  icon,
-  symbol,
   maxLength,
   step,
   hideErrorsBeforeTouched,
@@ -117,7 +115,7 @@ export const FileInputField = React.memo(function FileInputField({
         <InputFieldUnderRow className={classNames(infoStatus)}>
           <span data-qa={dataQa ? `${dataQa}-info` : undefined}>
             {Array.isArray(infoText)
-              ? infoText.map((i) => <li>{i}</li>)
+              ? infoText.map((i) => <li key={i}>{i}</li>)
               : infoText}
           </span>
           <UnderRowStatusIcon status={info?.status} />

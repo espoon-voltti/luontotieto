@@ -61,29 +61,31 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
     useMutation({
       mutationFn: apiPostReport,
       onSuccess: (report) => {
-        queryClient.invalidateQueries({ queryKey: ['report', id] })
-        queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+        void queryClient.invalidateQueries({ queryKey: ['report', id] })
+        void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
         navigate(`/luontotieto/selvitys/${report.id}`)
       },
-      onError: (error: any) => setReportFileErrors([error])
+      onError: (error: FileValidationErrorResponse) =>
+        setReportFileErrors([error])
     })
 
   const { mutateAsync: updateReportMutation, isPending: updatingReport } =
     useMutation({
       mutationFn: apiPutReport,
       onSuccess: (report) => {
-        queryClient.invalidateQueries({ queryKey: ['report', id] })
-        queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+        void queryClient.invalidateQueries({ queryKey: ['report', id] })
+        void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
         navigate(`/luontotieto/selvitys/${report.id}`)
       },
-      onError: (error: any) => setReportFileErrors([error])
+      onError: (error: FileValidationErrorResponse) =>
+        setReportFileErrors([error])
     })
 
   const { mutateAsync: approveReport, isPending: approving } = useMutation({
     mutationFn: apiApproveReport,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['report', id] })
-      queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+      void queryClient.invalidateQueries({ queryKey: ['report', id] })
+      void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
       alert('Hyväksytty ja tiedostot lähetetty PostGIS kantaan.')
     }
   })
@@ -146,7 +148,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
             }
             onClick={() => {
               if (!reportInput) return
-              onSubmit(reportInput)
+              void onSubmit(reportInput)
             }}
           />
 

@@ -87,10 +87,7 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
               disabled={!email || !password || isPending}
               type="submit"
             />
-            <InlineButton
-              text="Unohdin salasanan"
-              onClick={() => console.log('Forgot pw')}
-            />
+            <InlineButton text="Unohdin salasanan" onClick={() => true} />
           </GroupOfInputRows>
         </SectionContainer>
       </form>

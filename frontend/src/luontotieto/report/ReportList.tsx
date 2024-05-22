@@ -5,7 +5,7 @@
 import { faSearch } from '@fortawesome/free-solid-svg-icons'
 import { useGetReportsQuery } from 'api/hooks/reports'
 import { getDocumentTypeTitle, ReportDetails } from 'api/report-api'
-import { orderBy } from 'lodash'
+import orderBy from 'lodash/orderBy'
 import React, { useCallback, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { SortableTh, Th } from 'shared/Table'

@@ -58,7 +58,7 @@ export const FileInput = <
 
   useEffect(() => {
     onChange({ file, description, documentType: data.documentType })
-  }, [file, description])
+  }, [onChange, file, description, data.documentType])
 
   const errorMessage =
     errors && errors.length > 0
@@ -102,7 +102,7 @@ export const FileInput = <
           <InputFieldUnderRow className={classNames('warning')}>
             <span>
               {errorMessage.text.map((i) => (
-                <li>{i}</li>
+                <li key={i}>{i}</li>
               ))}
             </span>
             <UnderRowStatusIcon status="warning" />

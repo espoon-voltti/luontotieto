@@ -92,9 +92,9 @@ export const UserMenu = React.memo(function LanguageMenu({
 
   const { mutateAsync: logout } = useMutation({
     mutationFn: apiPostLogout,
-    onSuccess: async (success: boolean) => {
+    onSuccess: (success: boolean) => {
       if (success) {
-        await queryClient.removeQueries()
+        queryClient.removeQueries()
         navigate('/kirjaudu')
       }
     }
@@ -150,7 +150,7 @@ export const UserMenu = React.memo(function LanguageMenu({
             onClick={async () => {
               setOpen(false)
               if (user.externalId) {
-                await queryClient.removeQueries()
+                queryClient.removeQueries()
                 location.href = logoutUrl
               } else {
                 await logout()

@@ -6,11 +6,12 @@ import { faCheck } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import classNames from 'classnames'
 import React, { ReactNode, useRef } from 'react'
+import { ITheme } from 'shared/theme'
 import styled from 'styled-components'
 
 const diameter = '36px'
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ theme: ITheme }>`
   display: inline-flex;
   align-items: flex-start;
   width: fit-content;
@@ -47,6 +48,7 @@ const LabelContainer = styled.div<SizeProps>`
 
 interface SizeProps {
   small?: boolean
+  theme: ITheme
 }
 
 const Circle = styled.div<SizeProps>`

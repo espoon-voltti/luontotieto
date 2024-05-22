@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React from 'react'
 import styled from 'styled-components'
 
-import { colors } from './theme'
+import { ITheme, colors } from './theme'
 
 interface ThProps {
   sticky?: boolean
@@ -16,6 +16,7 @@ interface ThProps {
   hidden?: boolean
   align?: 'left' | 'right' | 'center'
   minimalWidth?: boolean
+  theme: ITheme
 }
 
 export const Th = styled.th<ThProps>`
@@ -65,7 +66,7 @@ interface SortableProps {
   width?: string
 }
 
-const CustomButton = styled.button`
+const CustomButton = styled.button<{ theme: ITheme }>`
   display: flex;
   font-size: 14px;
   color: ${(p) => p.theme.colors.grayscale.g70};

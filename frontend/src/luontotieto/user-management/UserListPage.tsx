@@ -5,7 +5,7 @@
 import { faSearch } from '@fortawesome/free-solid-svg-icons'
 import { useGetUsersQuery } from 'api/hooks/users'
 import { getUserRole, User } from 'api/users-api'
-import { orderBy } from 'lodash'
+import orderBy from 'lodash/orderBy'
 import React, { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { SortableTh, Th } from 'shared/Table'

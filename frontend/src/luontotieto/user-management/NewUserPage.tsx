@@ -37,7 +37,7 @@ export const NewUserPage = React.memo(function NewUserPage() {
   const { mutateAsync: createUser, isPending } = useMutation({
     mutationFn: apiPostUser,
     onSuccess: (user) => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
+      void queryClient.invalidateQueries({ queryKey: ['users'] })
       navigate(`/luontotieto/käyttäjät/${user.id}`)
     },
     onError: (e: AxiosError<{ errorCode: string }>) => {

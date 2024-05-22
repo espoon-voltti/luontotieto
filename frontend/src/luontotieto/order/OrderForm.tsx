@@ -230,7 +230,15 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       ),
       assigneeId: assignee.id
     }
-  }, [name, description, planNumbers, reportDocuments, orderFiles, assignee])
+  }, [
+    name,
+    description,
+    planNumbers,
+    reportDocuments,
+    orderFiles,
+    assignee,
+    originalFileInputs
+  ])
 
   useEffect(() => {
     props.onChange(validInput)
@@ -336,8 +344,9 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               <Label>Kerättävät dokumentit</Label>
               <VerticalGap $size="s" />
 
-              {reportDocuments.map((rd) => (
+              {reportDocuments.map((rd, index) => (
                 <Checkbox
+                  key={index}
                   label={getDocumentTypeTitle(rd.documentType)}
                   checked={rd.checked}
                   onChange={(checked) =>

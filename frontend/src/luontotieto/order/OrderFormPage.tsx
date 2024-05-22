@@ -30,9 +30,14 @@ interface EditProps {
 }
 type Props = CreateProps | EditProps
 
-export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
-  const { state } = useLocation()
+interface LocationState {
+  state: {
+    referer: string
+  }
+}
 
+export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
+  const location: LocationState = useLocation()
   const queryClient = useQueryClient()
 
   const navigate = useNavigate()
@@ -50,9 +55,9 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
     useMutation({
       mutationFn: apiPostOrder,
       onSuccess: (reportId) => {
-        queryClient.invalidateQueries({ queryKey: ['order', id] })
-        queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
-        queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
+        void queryClient.invalidateQueries({ queryKey: ['order', id] })
+        void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
+        void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
         navigate(`/luontotieto/selvitys/${reportId}/muokkaa`)
       }
     })
@@ -60,10 +65,10 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   const { mutateAsync: updateOrderMutation, isPending: updatingOrder } =
     useMutation({
       mutationFn: apiPutOrder,
-      onSuccess: (order) => {
-        queryClient.invalidateQueries({ queryKey: ['order', id] })
-        queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
-        queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
+      onSuccess: (order): void => {
+        void queryClient.invalidateQueries({ queryKey: ['order', id] })
+        void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
+        void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
         navigate(`/luontotieto/selvitys/${order.id}`)
       }
     })
@@ -84,7 +89,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
           navigationText={
             props.mode === 'EDIT' ? 'Takaisin selvitykseen' : 'Etusivulle'
           }
-          destination={state?.referer ?? undefined}
+          destination={location.state?.referer ?? undefined}
         />
         <VerticalGap $size="s" />
         {props.mode == 'CREATE' && (

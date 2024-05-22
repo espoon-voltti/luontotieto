@@ -11,6 +11,8 @@ import { AlertBox, InfoBox } from 'shared/MessageBoxes'
 import { Button } from 'shared/buttons/Button'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { InputField } from 'shared/form/InputField'
+import Radio from 'shared/form/Radio'
+import Switch from 'shared/form/Switch'
 import { H3, Label } from 'shared/typography'
 
 import {
@@ -19,9 +21,6 @@ import {
   LabeledInput,
   SectionContainer
 } from '../../shared/layout'
-
-import Radio from 'shared/form/Radio'
-import Switch from 'shared/form/Switch'
 
 import { emailRegex } from './common'
 
@@ -61,8 +60,8 @@ export const UserManagementForm = React.memo(function UserManagementForm({
     useMutation({
       mutationFn: apiPutUser,
       onSuccess: (user) => {
-        queryClient.invalidateQueries({ queryKey: ['users'] })
-        queryClient.invalidateQueries({ queryKey: ['user', user.id] })
+        void queryClient.invalidateQueries({ queryKey: ['users'] })
+        void queryClient.invalidateQueries({ queryKey: ['user', user.id] })
         setEnableEdit(false)
       },
       onError: (e: AxiosError<{ errorCode: string }>) => {
@@ -85,7 +84,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
             status: 'warning' as const
           }
         : undefined,
-    [userInput.email]
+    [userInput.email, enableEdit]
   )
 
   return (
@@ -174,10 +173,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
           />
         )}
         {userInput.role === UserRole.CUSTOMER && (
-          <InlineButton
-            text="Resetoi salasana"
-            onClick={() => console.log('Resetoi salasana')}
-          />
+          <InlineButton text="Resetoi salasana" onClick={() => true} />
         )}
       </GroupOfInputRows>
     </SectionContainer>
