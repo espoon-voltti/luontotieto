@@ -7,21 +7,21 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useGetOrderFilesQuery } from 'api/hooks/orders'
 import { apiGetOrderFileUrl, Order } from 'api/order-api'
 import { getDocumentTypeTitle } from 'api/report-api'
-import React from 'react'
+import { UserRole } from 'api/users-api'
+import { UserContext } from 'auth/UserContext'
+import React, { useContext, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LinkFileDownload } from 'shared/buttons/LinkFileDownload'
+import { formatDate, parseDate } from 'shared/dates'
 import styled from 'styled-components'
 
 import {
   FlexCol,
   FlexRowWithGaps,
-  GroupOfInputRows,
-  LabeledInput,
-  RowOfInputs,
   SectionContainer,
   VerticalGap
 } from '../../shared/layout'
-import { H3, Label } from '../../shared/typography'
+import { H3, Label, P } from '../../shared/typography'
 
 type Props = { order: Order; reportId: string }
 
@@ -36,8 +36,25 @@ const StyledIcon = styled(FontAwesomeIcon)`
   cursor: pointer;
 `
 
+const GridLayout = styled.div<{ $cols: number }>`
+  display: grid;
+  grid-template-columns: repeat(${(props) => props.$cols});
+  gap: 24px;
+  grid-auto-rows: minmax(100px, auto);
+`
+
+const GridItem = styled.div<{ $col: number; $row: number }>`
+  grid-column: ${(props) => props.$col};
+  grid-row: ${(props) => props.$row};
+
+  label + p {
+    margin-top: 4px;
+  }
+`
+
 export const OrderDetails = React.memo(function OrderDetails(props: Props) {
   const navigate = useNavigate()
+  const { user } = useContext(UserContext)
   const { order } = props
 
   const { data: orderFiles } = useGetOrderFilesQuery(order.id)
@@ -50,60 +67,89 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
     }
   }
 
+  const showEditBtn = useMemo(
+    () => user?.role === UserRole.ADMIN || user?.role === UserRole.ORDERER,
+    [user]
+  )
+
+  const returnDateStr = useMemo(() => {
+    const date = parseDate(order.returnDate, 'yyyy-MM-dd')
+    return date && formatDate(date)
+  }, [order])
+
   return (
     <SectionContainer>
       <FlexCol>
         <FlexRowWithGaps $gapSize="m">
           <H3>Tilauksen tiedot</H3>
-          <StyledIcon
-            icon={faPen}
-            onClick={() =>
-              navigate(`/luontotieto/tilaus/${order.id}/muokkaa`, {
-                state: {
-                  referer: `/luontotieto/selvitys/${props.reportId}/muokkaa`
-                }
-              })
-            }
-          />
+          {showEditBtn && (
+            <StyledIcon
+              icon={faPen}
+              onClick={() =>
+                navigate(`/luontotieto/tilaus/${order.id}/muokkaa`, {
+                  state: {
+                    referer: `/luontotieto/selvitys/${props.reportId}/muokkaa`
+                  }
+                })
+              }
+            />
+          )}
         </FlexRowWithGaps>
-
         <VerticalGap $size="m" />
-        <GroupOfInputRows>
-          <RowOfInputs>
-            <LabeledInput>
-              <Label>Otsikko</Label>
-              {order.name}
-            </LabeledInput>
-            <LabeledInput>
-              <Label>Tilauksen kaavanumero</Label>
-              {order.planNumber}
-            </LabeledInput>
-            <LabeledInput>
-              <Label>Tilauksen kuvaus</Label>
-              {order.description}
-            </LabeledInput>
-            <LabeledInput>
-              <Label>Selvityksen tekijä</Label>
-              {order.assignee}
-            </LabeledInput>
-          </RowOfInputs>
-          <RowOfInputs>
-            <LabeledInput>
-              <Label>Tilauksen liitteet</Label>
-              {!!orderFiles &&
-                orderFiles.map((rf) => (
-                  <StyledLi key={rf.id}>
-                    <LinkFileDownload
-                      fileName={rf.fileName}
-                      fileId={rf.id}
-                      onClick={(fileId) => handleOrderFileClick(fileId)}
-                    />
-                    {`, ${getDocumentTypeTitle(rf.documentType)}`}
-                  </StyledLi>
-                ))}
-            </LabeledInput>
-          </RowOfInputs>
-        </GroupOfInputRows>
+        <GridLayout $cols={4}>
+          <GridItem $col={1} $row={1}>
+            <Label>Otsikko</Label>
+            <P>{order.name}</P>
+          </GridItem>
+          <GridItem $col={2} $row={1}>
+            <Label>Tilauksen kaavanumero</Label>
+            <P>{order.planNumber?.join(', ')}</P>
+          </GridItem>
+          <GridItem $col={3} $row={1}>
+            <Label>Selvitys palautettava viimeistään</Label>
+            <P>{returnDateStr}</P>
+          </GridItem>
+          <GridItem $col={4} $row={1}>
+            <Label>Selvityksen kuvaus</Label>
+            <P>{order.description}</P>
+          </GridItem>
+          <GridItem $col={1} $row={2}>
+            <Label>Selvityksen tekijä</Label>
+            <P>{order.assignee}</P>
+          </GridItem>
+          <GridItem $col={2} $row={2}>
+            <Label>Tilaajan yhteyshenkilö</Label>
+            <P>
+              {order.contactPerson}
+              <br />
+              {order.contactEmail}
+              <br />
+              {order.contactPhone}
+            </P>
+          </GridItem>
+          <GridItem $col={3} $row={2}>
+            <Label>Selvityksen tekijän yhteyshenkilö</Label>
+            <P>
+              {order.assigneeContactPerson}
+              <br />
+              {order.assigneeContactEmail}
+            </P>
+          </GridItem>
+          <GridItem $col={4} $row={2}>
+            <Label>Tilauksen liitteet</Label>
+            {!!orderFiles &&
+              orderFiles.map((rf) => (
+                <StyledLi key={rf.id}>
+                  <LinkFileDownload
+                    fileName={rf.fileName}
+                    fileId={rf.id}
+                    onClick={(fileId) => handleOrderFileClick(fileId)}
+                  />
+                  {` ${getDocumentTypeTitle(rf.documentType)}`}
+                </StyledLi>
+              ))}
+          </GridItem>
+        </GridLayout>
       </FlexCol>
     </SectionContainer>
   )

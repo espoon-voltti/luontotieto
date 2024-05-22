@@ -18,6 +18,7 @@ import { FileInput, FileInputData } from 'shared/form/File/FileInput'
 import { TextArea } from 'shared/form/TextArea'
 import { useDebouncedState } from 'shared/useDebouncedState'
 import styled from 'styled-components'
+import { v4 as uuidv4 } from 'uuid'
 
 import {
   FlexCol,
@@ -44,6 +45,7 @@ interface EditProps {
   onChange: (validInput: ReportFormInput | null) => void
   saveErrors?: FileValidationErrorResponse[]
 }
+
 type Props = CreateProps | EditProps
 
 interface ReportFileInputElementNew {
@@ -51,6 +53,7 @@ interface ReportFileInputElementNew {
   userDescription: string
   documentType: ReportFileDocumentType
   file: File | null
+  id: string
 }
 
 interface ReportFileInputElementExisting {
@@ -83,7 +86,8 @@ function createFileInputs(
           type: 'NEW' as const,
           userDescription: '',
           documentType: required.documentType,
-          file: null
+          file: null,
+          id: uuidv4()
         }
   })
   const otherFiles = reportFiles
@@ -161,7 +165,8 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
             type: 'NEW',
             file: null,
             userDescription: '',
-            documentType: fi.documentType
+            documentType: fi.documentType,
+            id: uuidv4()
           }
         }
         return fi
@@ -176,7 +181,8 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
         type: 'NEW',
         file: null,
         userDescription: '',
-        documentType: documentType
+        documentType: documentType,
+        id: uuidv4()
       }
     ])
   }
@@ -218,7 +224,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
 
   return (
     <FlexCol>
-      <H3>Selvitettävät asiat</H3>
+      <H3>Selvityksen tiedot</H3>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
         {fileInputs.map((fInput, index) => {
@@ -236,7 +242,8 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
                   key={fInput.documentType + index}
                   data={{
                     description: fInput.userDescription,
-                    file: fInput.file
+                    file: fInput.file,
+                    id: fInput.id
                   }}
                   onChange={(data) => {
                     updateFileInput({
@@ -255,7 +262,8 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
                     type: 'REPORT',
                     file: fInput.details,
                     readonly: reportIsAlreadyApproved,
-                    documentType: fInput.documentType
+                    documentType: fInput.documentType,
+                    updated: fInput.details.updated
                   }}
                   onRemove={(id) => {
                     removeCreatedFileInput(id)

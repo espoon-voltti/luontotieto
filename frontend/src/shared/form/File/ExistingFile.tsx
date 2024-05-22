@@ -3,18 +3,24 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import {
+  apiGetOrderFileUrl,
   OrderFile,
-  OrderFileDocumentType,
-  apiGetOrderFileUrl
+  OrderFileDocumentType
 } from 'api/order-api'
 import {
+  apiGetReportFileUrl,
   ReportFileDetails,
-  ReportFileDocumentType,
-  apiGetReportFileUrl
+  ReportFileDocumentType
 } from 'api/report-api'
-import React from 'react'
-import { FlexRowWithGaps, LabeledInput, VerticalGap } from 'shared/layout'
-import { Label } from 'shared/typography'
+import React, { useMemo } from 'react'
+import { formatDate } from 'shared/dates'
+import {
+  FlexColWithGaps,
+  FlexRowWithGaps,
+  LabeledInput,
+  VerticalGap
+} from 'shared/layout'
+import { I, Label } from 'shared/typography'
 
 import { InputField } from '../InputField'
 
@@ -28,17 +34,25 @@ interface Props {
         file: OrderFile
         readonly: boolean
         documentType: OrderFileDocumentType
+        updated: Date
       }
     | {
         type: 'REPORT'
         file: ReportFileDetails
         readonly: boolean
         documentType: ReportFileDocumentType
+        updated: Date
       }
   onRemove: (id: string) => void
+  showTitle?: boolean
 }
 
-export const ExistingFile = React.memo(function ExistingFile(props: Props) {
+export const ExistingFile = React.memo(function ExistingFile({
+  showTitle = true,
+  ...props
+}: Props) {
+  const updatedStr = useMemo(() => formatDate(props.data.updated), [props])
+
   const handleClick = async (fileId: string) => {
     let url = ''
     if (props.data.type === 'ORDER') {
@@ -52,20 +66,29 @@ export const ExistingFile = React.memo(function ExistingFile(props: Props) {
     }
   }
   return (
-    <FlexRowWithGaps>
-      <LabeledInput $cols={5}>
-        <FileTitle documentType={props.data.documentType} required={true} />
-        <VerticalGap $size="s" />
-        <FileDownloadButton
-          file={props.data.file}
-          onClick={handleClick}
-          onDelete={(fileId) => props.onRemove(fileId)}
-        />
-      </LabeledInput>
-      <LabeledInput $cols={5}>
-        <Label>Liitteen kuvaus</Label>
-        <InputField value={props.data.file.description} />
-      </LabeledInput>
-    </FlexRowWithGaps>
+    <FlexColWithGaps>
+      <FlexRowWithGaps>
+        <LabeledInput $cols={5}>
+          {showTitle && (
+            <FileTitle documentType={props.data.documentType} required={true} />
+          )}
+
+          <VerticalGap $size="s" />
+          <FileDownloadButton
+            file={props.data.file}
+            onClick={handleClick}
+            onDelete={(fileId) => props.onRemove(fileId)}
+          />
+        </LabeledInput>
+        <LabeledInput $cols={5}>
+          {showTitle && <VerticalGap $size="L" />}
+          <Label>Liitteen kuvaus</Label>
+          <InputField value={props.data.file.description} />
+        </LabeledInput>
+      </FlexRowWithGaps>
+      <FlexRowWithGaps>
+        <I>{`Lisätty ${updatedStr}`}</I>
+      </FlexRowWithGaps>
+    </FlexColWithGaps>
   )
 })

@@ -4,11 +4,8 @@
 
 package fi.espoo.luontotieto
 
-import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.OrderController
 import fi.espoo.luontotieto.domain.OrderDocumentType
-import fi.espoo.luontotieto.domain.OrderInput
-import fi.espoo.luontotieto.domain.OrderReportDocument
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mock.web.MockMultipartFile
 import kotlin.test.Test
@@ -20,21 +17,7 @@ class OrderFileTests : FullApplicationTest() {
 
     @Test
     fun `create order files and fetch and delete`() {
-        val createdOrder =
-            controller.createOrderFromScratch(
-                user = adminUser,
-                body =
-                    OrderInput(
-                        name = "Test order",
-                        description = "Test description",
-                        planNumber = listOf("12345"),
-                        assigneeId = customerUser.id,
-                        reportDocuments =
-                            listOf(
-                                OrderReportDocument("Description", DocumentType.LIITO_ORAVA_PISTEET)
-                            )
-                    )
-            )
+        val createdOrder = createOrderAndReport(controller = controller)
 
         controller.uploadOrderFile(
             user = adminUser,

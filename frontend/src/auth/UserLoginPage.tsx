@@ -60,7 +60,7 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
   return (
     <PageContainer>
       <form onSubmit={onSubmit}>
-        <SectionContainer $sidePadding="62px">
+        <SectionContainer>
           <H2>Kirjaudu sisään</H2>
           <VerticalGap $size="L" />
           <GroupOfInputRows>
