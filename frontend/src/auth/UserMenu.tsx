@@ -2,19 +2,19 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { apiPostLogout } from 'api/auth-api'
+import { UserRole } from 'api/users-api'
 import classNames from 'classnames'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import { colors } from 'shared/theme'
+import useCloseOnOutsideClick from 'shared/useCloseOnOutsideClick'
 import styled, { css } from 'styled-components'
 
-import useCloseOnOutsideClick from 'shared/useCloseOnOutsideClick'
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
-import { colors } from 'shared/theme'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { apiPostLogout } from 'api/auth-api'
 import { AppUser } from './UserContext'
-import { UserRole } from 'api/users-api'
 
 const dropDownButtonStyles = css`
   display: inline-flex;
@@ -113,39 +113,39 @@ export const UserMenu = React.memo(function LanguageMenu({
       </DropDownButton>
       {open ? (
         <DropDown $align="right">
-          {user.role === UserRole.ADMIN && 
+          {user.role === UserRole.ADMIN && (
+            <DropDownItemButton
+              ref={firstButtonRef}
+              key="user-management"
+              className={classNames({ active: true })}
+              onClick={() => {
+                navigate(`/luontotieto/käyttäjät`)
+                setOpen(false)
+              }}
+              role="menuitemradio"
+              aria-checked={true}
+            >
+              Käyttäjänhallinta
+            </DropDownItemButton>
+          )}
+          {user.role === UserRole.CUSTOMER && (
+            <DropDownItemButton
+              ref={firstButtonRef}
+              key="user-settings"
+              className={classNames({ active: true })}
+              onClick={() => {
+                navigate(`/luontotieto/omat-asetukset`)
+                setOpen(false)
+              }}
+              role="menuitemradio"
+              aria-checked={true}
+            >
+              Asetukset
+            </DropDownItemButton>
+          )}
           <DropDownItemButton
             ref={firstButtonRef}
-            key={'user-management'}
-            className={classNames({ active: true })}
-            onClick={() => {
-              navigate(`/luontotieto/käyttäjät`)
-              setOpen(false)
-            }}
-            role="menuitemradio"
-            aria-checked={true}
-          >
-            Käyttäjänhallinta
-          </DropDownItemButton>
-          }
-          {user.role === UserRole.CUSTOMER && 
-          <DropDownItemButton
-            ref={firstButtonRef}
-            key={'user-settings'}
-            className={classNames({ active: true })}
-            onClick={() => {
-              navigate(`/luontotieto/omat-asetukset`)
-              setOpen(false)
-            }}
-            role="menuitemradio"
-            aria-checked={true}
-          >
-            Asetukset
-          </DropDownItemButton>
-          }
-          <DropDownItemButton
-            ref={firstButtonRef}
-            key={'logout'}
+            key="logout"
             className={classNames({ active: true })}
             onClick={async () => {
               setOpen(false)

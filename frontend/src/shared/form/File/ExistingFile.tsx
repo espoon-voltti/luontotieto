@@ -7,16 +7,18 @@ import {
   OrderFileDocumentType,
   apiGetOrderFileUrl
 } from 'api/order-api'
-import React from 'react'
-import { FlexRowWithGaps, LabeledInput, VerticalGap } from 'shared/layout'
-import FileDownloadButton from './FileDownloadButton'
-import { Label } from 'shared/typography'
-import { InputField } from '../InputField'
 import {
   ReportFileDetails,
   ReportFileDocumentType,
   apiGetReportFileUrl
 } from 'api/report-api'
+import React from 'react'
+import { FlexRowWithGaps, LabeledInput, VerticalGap } from 'shared/layout'
+import { Label } from 'shared/typography'
+
+import { InputField } from '../InputField'
+
+import FileDownloadButton from './FileDownloadButton'
 import { FileTitle } from './FileTitle'
 
 interface Props {
@@ -52,10 +54,7 @@ export const ExistingFile = React.memo(function ExistingFile(props: Props) {
   return (
     <FlexRowWithGaps>
       <LabeledInput $cols={5}>
-        <FileTitle
-          documentType={props.data.documentType}
-          required={true}
-        ></FileTitle>
+        <FileTitle documentType={props.data.documentType} required={true} />
         <VerticalGap $size="s" />
         <FileDownloadButton
           file={props.data.file}

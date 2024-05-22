@@ -2,21 +2,28 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { faPen } from '@fortawesome/free-solid-svg-icons'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { apiPutUser, getUserRole, User, UserRole } from 'api/users-api'
+import { AxiosError } from 'axios'
 import React, { useMemo, useState } from 'react'
-
-import { FlexRowWithGaps, GroupOfInputRows, LabeledInput, SectionContainer } from '../../shared/layout'
+import { AlertBox, InfoBox } from 'shared/MessageBoxes'
+import { Button } from 'shared/buttons/Button'
+import { InlineButton } from 'shared/buttons/InlineButton'
 import { InputField } from 'shared/form/InputField'
 import { H3, Label } from 'shared/typography'
-import { InlineButton } from 'shared/buttons/InlineButton'
-import { Button } from 'shared/buttons/Button'
+
+import {
+  FlexRowWithGaps,
+  GroupOfInputRows,
+  LabeledInput,
+  SectionContainer
+} from '../../shared/layout'
+
 import Radio from 'shared/form/Radio'
 import Switch from 'shared/form/Switch'
-import { faPen } from '@fortawesome/free-solid-svg-icons'
-import { AlertBox, InfoBox } from 'shared/MessageBoxes'
-import { apiPutUser, getUserRole, User, UserRole } from 'api/users-api'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+
 import { emailRegex } from './common'
-import { AxiosError } from 'axios'
 
 const roles = [
   {
@@ -34,8 +41,8 @@ const roles = [
 ]
 
 export const UserManagementForm = React.memo(function UserManagementForm({
-                                                                           user
-                                                                         }: {
+  user
+}: {
   user: User
 }) {
   const userEditableFields = {
@@ -70,14 +77,16 @@ export const UserManagementForm = React.memo(function UserManagementForm({
       }
     })
 
-  const invalidEmailInfo = useMemo(() => {
-    return enableEdit && userInput.email && !userInput.email.match(emailRegex)
-      ? {
-        text: 'Syötä oikeaa muotoa oleva sähköposti',
-        status: 'warning' as const
-      }
-      : undefined
-  }, [userInput.email])
+  const invalidEmailInfo = useMemo(
+    () =>
+      enableEdit && userInput.email && !userInput.email.match(emailRegex)
+        ? {
+            text: 'Syötä oikeaa muotoa oleva sähköposti',
+            status: 'warning' as const
+          }
+        : undefined,
+    [userInput.email]
+  )
 
   return (
     <SectionContainer>
@@ -110,9 +119,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
                   key={r.role}
                   label={getUserRole(r.role)}
                   checked={userInput.role === r.role}
-                  onChange={() =>
-                    setUserInput({ ...userInput, role: r.role })
-                  }
+                  onChange={() => setUserInput({ ...userInput, role: r.role })}
                   disabled={!enableEdit}
                   small={true}
                 />
@@ -120,7 +127,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
             </FlexRowWithGaps>
 
             {enableEdit && userSelectedRoleInfo && (
-              <InfoBox message={userSelectedRoleInfo.info}/>
+              <InfoBox message={userSelectedRoleInfo.info} />
             )}
           </LabeledInput>
         )}
@@ -137,30 +144,30 @@ export const UserManagementForm = React.memo(function UserManagementForm({
           />
         </LabeledInput>
 
-        {errorMessage && <AlertBox title="Virhe" message={errorMessage}/>}
+        {!!errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
 
         {enableEdit ? (
           <FlexRowWithGaps>
             <Button
               disabled={updatingUser}
-              text={'Peruuta'}
+              text="Peruuta"
               onClick={() => setEnableEdit(!enableEdit)}
-            ></Button>
+            />
             <Button
               disabled={updatingUser || !!invalidEmailInfo}
               primary
-              text={'Tallenna'}
+              text="Tallenna"
               onClick={async () =>
                 await updateReportMutation({
                   ...userInput,
                   userId: user.id
                 })
               }
-            ></Button>
+            />
           </FlexRowWithGaps>
         ) : (
           <InlineButton
-            text={'Muokkaa tietoja'}
+            text="Muokkaa tietoja"
             onClick={() => setEnableEdit(!enableEdit)}
             icon={faPen}
             iconRight={true}
@@ -168,7 +175,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
         )}
         {userInput.role === UserRole.CUSTOMER && (
           <InlineButton
-            text={'Resetoi salasana'}
+            text="Resetoi salasana"
             onClick={() => console.log('Resetoi salasana')}
           />
         )}

@@ -3,12 +3,12 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { useQuery } from '@tanstack/react-query'
+
 import { getAuthStatus } from '../auth-api'
 
-
 export function useAuthStatusQuery() {
-    return useQuery({
-        queryFn: getAuthStatus,
-        queryKey: ['auth-status']
-    })
+  return useQuery({
+    queryFn: getAuthStatus,
+    queryKey: ['auth-status']
+  })
 }

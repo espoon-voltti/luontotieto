@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { OrderReportDocumentInput } from 'api/order-api'
 import {
   FileValidationErrorResponse,
@@ -11,9 +12,12 @@ import {
   ReportFormInput
 } from 'api/report-api'
 import React, { useEffect, useMemo, useState } from 'react'
+import { InlineButton } from 'shared/buttons/InlineButton'
+import { ExistingFile } from 'shared/form/File/ExistingFile'
 import { FileInput, FileInputData } from 'shared/form/File/FileInput'
 import { TextArea } from 'shared/form/TextArea'
 import { useDebouncedState } from 'shared/useDebouncedState'
+import styled from 'styled-components'
 
 import {
   FlexCol,
@@ -22,11 +26,6 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H3, Label } from '../../shared/typography'
-
-import { ExistingFile } from 'shared/form/File/ExistingFile'
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
-import { InlineButton } from 'shared/buttons/InlineButton'
-import styled from 'styled-components'
 
 const StyledInlineButton = styled(InlineButton)`
   font-size: 0.9rem;
@@ -260,7 +259,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
           }
         })}
         <StyledInlineButton
-          text={'Lisää muu liite'}
+          text="Lisää muu liite"
           icon={faPlus}
           onClick={() => addFileInput(ReportFileDocumentType.OTHER)}
         />

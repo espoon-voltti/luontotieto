@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { apiClient } from 'api-client'
-import { JsonOf } from 'shared/api-utils'
 import FileSaver from 'file-saver'
+import { JsonOf } from 'shared/api-utils'
 
 import { Order, OrderFileDocumentType } from './order-api'
 

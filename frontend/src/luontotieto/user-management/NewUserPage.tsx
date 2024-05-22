@@ -2,7 +2,16 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { apiPostUser } from 'api/users-api'
+import { AxiosError } from 'axios'
 import React, { FormEvent, useCallback, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { AlertBox, InfoBox } from 'shared/MessageBoxes'
+import { BackNavigation } from 'shared/buttons/BackNavigation'
+import { Button } from 'shared/buttons/Button'
+import { InputField } from 'shared/form/InputField'
+import { H3, Label } from 'shared/typography'
 
 import {
   FixedWidthDiv,
@@ -13,16 +22,8 @@ import {
   SectionContainer,
   VerticalGap
 } from '../../shared/layout'
-import { InputField } from 'shared/form/InputField'
-import { BackNavigation } from 'shared/buttons/BackNavigation'
-import { H3, Label } from 'shared/typography'
-import { Button } from 'shared/buttons/Button'
-import { AlertBox, InfoBox } from 'shared/MessageBoxes'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { apiPostUser } from 'api/users-api'
-import { useNavigate } from 'react-router-dom'
+
 import { emailRegex } from './common'
-import { AxiosError } from 'axios'
 
 export const NewUserPage = React.memo(function NewUserPage() {
   const navigate = useNavigate()
@@ -54,14 +55,16 @@ export const NewUserPage = React.memo(function NewUserPage() {
   const isValid =
     userInput.name && userInput.email && userInput.email.match(emailRegex)
 
-  const invalidEmailInfo = useMemo(() => {
-    return userInput.email && !userInput.email.match(emailRegex)
-      ? {
-          text: 'Syötä oikeaa muotoa oleva sähköposti',
-          status: 'warning' as const
-        }
-      : undefined
-  }, [userInput.email])
+  const invalidEmailInfo = useMemo(
+    () =>
+      userInput.email && !userInput.email.match(emailRegex)
+        ? {
+            text: 'Syötä oikeaa muotoa oleva sähköposti',
+            status: 'warning' as const
+          }
+        : undefined,
+    [userInput.email]
+  )
 
   const onSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -74,9 +77,9 @@ export const NewUserPage = React.memo(function NewUserPage() {
   return (
     <PageContainer>
       <BackNavigation
-        text={'Lisää yrityskäyttäjä'}
+        text="Lisää yrityskäyttäjä"
         navigationText="Käyttäjänhallinta"
-        destination={'/luontotieto/käyttäjät'}
+        destination="/luontotieto/käyttäjät"
       />
 
       <SectionContainer>
@@ -102,21 +105,23 @@ export const NewUserPage = React.memo(function NewUserPage() {
                 info={invalidEmailInfo}
               />
             </LabeledInput>
-            {errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
+            {!!errorMessage && (
+              <AlertBox title="Virhe" message={errorMessage} />
+            )}
             <FlexRowWithGaps>
               <Button
                 primary
                 type="submit"
-                text={'Luo yrityskäyttäjä'}
+                text="Luo yrityskäyttäjä"
                 disabled={!isValid || isPending}
-              ></Button>
+              />
             </FlexRowWithGaps>
 
             <FixedWidthDiv $cols={8}>
               <InfoBox
                 message={`Kun käyttäjä on luotu lähetetään käyttäjälle automaattisesti sähköposti,
                joka sisältää luontotietoportaalin osoitteen sekä kirjautumiseen vaadittavat tunnukset.`}
-              ></InfoBox>
+              />
             </FixedWidthDiv>
           </GroupOfInputRows>
         </form>

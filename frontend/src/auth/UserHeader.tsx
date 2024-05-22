@@ -16,7 +16,7 @@ export const UserHeader = React.memo(function UserHeader() {
 
   return (
     <FlexRowWithGaps>
-      <UserMenu user={user}></UserMenu>
+      <UserMenu user={user} />
     </FlexRowWithGaps>
   )
 })

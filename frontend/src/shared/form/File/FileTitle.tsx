@@ -2,18 +2,17 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { faDownload } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { OrderFileDocumentType } from 'api/order-api'
-import React from 'react'
-
-import { Label } from 'shared/typography'
 import {
   ReportFileDocumentType,
   apiGetReportDocumentTypeFileTemplate,
   getDocumentTypeTitle
 } from 'api/report-api'
+import React from 'react'
+import { Label } from 'shared/typography'
 import styled from 'styled-components'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faDownload } from '@fortawesome/free-solid-svg-icons'
 
 interface Props {
   documentType: ReportFileDocumentType | OrderFileDocumentType
@@ -22,11 +21,10 @@ interface Props {
 
 const isReportFileDocumentType = (
   documentType: ReportFileDocumentType | OrderFileDocumentType
-): documentType is ReportFileDocumentType => {
-  return Object.values(ReportFileDocumentType).includes(
+): documentType is ReportFileDocumentType =>
+  Object.values(ReportFileDocumentType).includes(
     documentType as ReportFileDocumentType
   )
-}
 
 export const StyledLink = styled.a`
   font-weight: 600;

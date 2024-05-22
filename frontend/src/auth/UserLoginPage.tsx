@@ -2,10 +2,17 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { FormEvent, useCallback, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Button } from 'shared/buttons/Button'
+import { InlineButton } from 'shared/buttons/InlineButton'
 import { InputField } from 'shared/form/InputField'
+import { PageContainer } from 'shared/layout'
 import { useDebouncedState } from 'shared/useDebouncedState'
+import styled from 'styled-components'
 
+import { apiPostLogin } from '../api/auth-api'
 import {
   GroupOfInputRows,
   LabeledInput,
@@ -13,16 +20,8 @@ import {
   SectionContainer,
   VerticalGap
 } from '../shared/layout'
-import { H2, Label } from '../shared/typography'
-
-import { PageContainer } from 'shared/layout'
-import { Button } from 'shared/buttons/Button'
-import { InlineButton } from 'shared/buttons/InlineButton'
-import { useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import styled from 'styled-components'
 import { colors } from '../shared/theme'
-import { apiPostLogin } from '../api/auth-api'
+import { H2, Label } from '../shared/typography'
 
 const LoginMessage = styled.label`
   color: ${colors.status.danger};
@@ -81,7 +80,7 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
                 />
               </LabeledInput>
             </RowOfInputs>
-            {errorMsg && <LoginMessage>{errorMsg}</LoginMessage>}
+            {!!errorMsg && <LoginMessage>{errorMsg}</LoginMessage>}
             <Button
               text="Kirjaudu sisään"
               primary
@@ -89,7 +88,7 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
               type="submit"
             />
             <InlineButton
-              text={'Unohdin salasanan'}
+              text="Unohdin salasanan"
               onClick={() => console.log('Forgot pw')}
             />
           </GroupOfInputRows>

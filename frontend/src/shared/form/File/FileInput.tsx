@@ -2,6 +2,9 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { OrderFileDocumentType } from 'api/order-api'
+import { FileValidationError, ReportFileDocumentType } from 'api/report-api'
+import classNames from 'classnames'
 import React, { useEffect, useState } from 'react'
 import { InputField, InputFieldUnderRow } from 'shared/form/InputField'
 import { useDebouncedState } from 'shared/useDebouncedState'
@@ -13,12 +16,10 @@ import {
   VerticalGap
 } from '../../../shared/layout'
 import { Label } from '../../typography'
-import { FileInputField } from './FileInputField'
-import { FileValidationError, ReportFileDocumentType } from 'api/report-api'
-import { OrderFileDocumentType } from 'api/order-api'
-import { FileTitle } from './FileTitle'
-import classNames from 'classnames'
 import { UnderRowStatusIcon } from '../StatusIcon'
+
+import { FileInputField } from './FileInputField'
+import { FileTitle } from './FileTitle'
 
 export interface ValidFileInputData<T> {
   description: string
@@ -77,7 +78,7 @@ export const FileInput = <
           <FileTitle
             documentType={data.documentType}
             required={data.documentType !== ReportFileDocumentType.OTHER}
-          ></FileTitle>
+          />
           <VerticalGap $size="s" />
           <FileInputField
             onChange={(fileList) => {
@@ -104,7 +105,7 @@ export const FileInput = <
                 <li>{i}</li>
               ))}
             </span>
-            <UnderRowStatusIcon status={'warning'} />
+            <UnderRowStatusIcon status="warning" />
           </InputFieldUnderRow>
         </FlexRowWithGaps>
       )}
