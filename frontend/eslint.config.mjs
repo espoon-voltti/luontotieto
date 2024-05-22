@@ -4,7 +4,6 @@
 
 import eslint from '@eslint/js'
 import typescriptEslint from 'typescript-eslint'
-import reactHooks from 'eslint-plugin-react-hooks'
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 
 export default [
@@ -20,7 +19,6 @@ export default [
         project: './tsconfig.eslint.json'
       }
     },
-    plugins: { 'react-hooks': reactHooks },
     rules: {
       '@typescript-eslint/no-misused-promises': [
         'error',
