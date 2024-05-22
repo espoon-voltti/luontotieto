@@ -10,7 +10,7 @@ import {
   OrderReportDocumentInput
 } from 'api/order-api'
 import { getDocumentTypeTitle, ReportFileDocumentType } from 'api/report-api'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Tag } from 'react-tag-autocomplete'
 import { Checkbox } from 'shared/form/Checkbox'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
@@ -147,21 +147,6 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     setReportDocuments(newArray)
   }
 
-  const updateOrderFiles = (modified: FileInputData<OrderFileDocumentType>) => {
-    setOrderFiles(
-      orderFiles.map((fi) => {
-        if (fi.documentType === modified.documentType) {
-          return {
-            ...fi,
-            description: modified.description,
-            file: modified.file
-          }
-        }
-        return fi
-      })
-    )
-  }
-
   const removeCreatedFileInput = (id: string) => {
     setOrderFiles(
       orderFiles.map((fi) => {
@@ -177,10 +162,34 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       })
     )
   }
+  const updateOrderFiles = useCallback(
+    (
+      modified: FileInputData & {
+        documentType: OrderFileDocumentType
+      }
+    ) => {
+      setOrderFiles(
+        orderFiles.map((fi) => {
+          if (fi.documentType === modified.documentType) {
+            return {
+              ...fi,
+              description: modified.description,
+              file: modified.file
+            }
+          }
+          return fi
+        })
+      )
+    },
+    [setOrderFiles, orderFiles]
+  )
 
-  const updatePlanNumbers = (selected: Tag[]) => {
-    setPlanNumbers(selected.map((s) => s.label))
-  }
+  const updatePlanNumbers = useCallback(
+    (selected: Tag[]) => {
+      setPlanNumbers(selected.map((s) => s.label))
+    },
+    [setPlanNumbers]
+  )
 
   const { data: assigneeUsers } = useGetAssigneeUsersQuery()
   const [assignee, setAssignee] = useState<User | undefined>()
@@ -310,9 +319,13 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 return (
                   <FileInput
                     key={fInput.documentType}
+                    documentType={fInput.documentType}
                     data={fInput}
                     onChange={(data) => {
-                      updateOrderFiles(data)
+                      updateOrderFiles({
+                        ...data,
+                        documentType: fInput.documentType
+                      })
                     }}
                   />
                 )

@@ -11,7 +11,7 @@ import {
   ReportFileDocumentType,
   ReportFormInput
 } from 'api/report-api'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
 import { FileInput, FileInputData } from 'shared/form/File/FileInput'
@@ -135,20 +135,23 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
 
   const [fileInputs, setFileInputs] = useState(originalFileInputs)
 
-  const updateFileInput = (modified: FileInputData<ReportFileDocumentType>) => {
-    setFileInputs(
-      fileInputs.map((fi) => {
-        if (fi.documentType === modified.documentType) {
-          return {
-            ...fi,
-            userDescription: modified.description,
-            file: modified.file
+  const updateFileInput = useCallback(
+    (modified: FileInputData & { documentType: ReportFileDocumentType }) => {
+      setFileInputs(
+        fileInputs.map((fi) => {
+          if (fi.documentType === modified.documentType) {
+            return {
+              ...fi,
+              userDescription: modified.description,
+              file: modified.file
+            }
           }
-        }
-        return fi
-      })
-    )
-  }
+          return fi
+        })
+      )
+    },
+    [setFileInputs, fileInputs]
+  )
 
   const removeCreatedFileInput = (id: string) => {
     setFileInputs(
@@ -229,14 +232,17 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
             case 'NEW':
               return (
                 <FileInput
+                  documentType={fInput.documentType}
                   key={fInput.documentType + index}
                   data={{
                     description: fInput.userDescription,
-                    file: fInput.file,
-                    documentType: fInput.documentType
+                    file: fInput.file
                   }}
                   onChange={(data) => {
-                    updateFileInput(data)
+                    updateFileInput({
+                      ...data,
+                      documentType: fInput.documentType
+                    })
                   }}
                   errors={documentSaveError?.errors}
                 />

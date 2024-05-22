@@ -27,16 +27,16 @@ export interface ValidFileInputData<T> {
   documentType: T
 }
 
-export interface FileInputData<T> {
+export interface FileInputData {
   description: string
   file: File | null
-  documentType: T
 }
 
 interface FileInputProps<T> {
-  data: FileInputData<T>
+  documentType: T
+  data: FileInputData
   errors?: FileValidationError[]
-  onChange: (data: FileInputData<T>) => void
+  onChange: (data: FileInputData) => void
 }
 
 const fileValidationErrorToMessage = (error: FileValidationError): string => {
@@ -50,6 +50,7 @@ export const FileInput = <
   T extends ReportFileDocumentType | OrderFileDocumentType
 >({
   data,
+  documentType,
   onChange,
   errors
 }: FileInputProps<T>) => {
@@ -57,8 +58,9 @@ export const FileInput = <
   const [description, setDescription] = useDebouncedState(data.description)
 
   useEffect(() => {
-    onChange({ file, description, documentType: data.documentType })
-  }, [onChange, file, description, data.documentType])
+    onChange({ file, description })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [file, description])
 
   const errorMessage =
     errors && errors.length > 0
@@ -76,8 +78,8 @@ export const FileInput = <
       <FlexRowWithGaps $gapSize="s" style={{ marginBottom: '5px' }}>
         <LabeledInput $cols={5}>
           <FileTitle
-            documentType={data.documentType}
-            required={data.documentType !== ReportFileDocumentType.OTHER}
+            documentType={documentType}
+            required={documentType !== ReportFileDocumentType.OTHER}
           />
           <VerticalGap $size="s" />
           <FileInputField
