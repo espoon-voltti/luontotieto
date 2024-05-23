@@ -9,7 +9,7 @@ import * as redis from 'redis'
 import { configFromEnv, httpPort, toRedisClientOpts } from './config.js'
 import { fallbackErrorHandler } from './middleware/errors.js'
 import { createRouter } from './router.js'
-import { logError, loggingMiddleware } from './logging/index.js'
+import { logInfo, logError, loggingMiddleware } from './logging/index.js'
 import { assertRedisConnection } from './clients/redis-client.js'
 import passport from 'passport'
 import { trustReverseProxy } from './utils/express.js'
@@ -55,7 +55,7 @@ app.use('/api', createRouter(config, redisClient))
 app.use(fallbackErrorHandler)
 
 const server = app.listen(httpPort, () => {
-  console.log(`luontotieto API Gateway listening on port ${httpPort}`)
+  logInfo(`luontotieto API Gateway listening on port ${httpPort}`)
 })
 
 server.keepAliveTimeout = 70 * 1000

@@ -4,7 +4,11 @@
 
 import _ from 'lodash'
 import { Request, Router, urlencoded } from 'express'
-import { assertStringProp, AsyncRequestHandler, toRequestHandler } from '../utils/express.js'
+import {
+  assertStringProp,
+  AsyncRequestHandler,
+  toRequestHandler
+} from '../utils/express.js'
 import { AdUser, userLogin } from '../clients/service-client.js'
 import { Sessions } from './session.js'
 import passport, { Strategy } from 'passport'
@@ -18,7 +22,7 @@ class DevStrategy extends Strategy {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  authenticate(req: Request, _options?: any): any {
+  authenticate(req: Request): any {
     this.verifyUser(req)
       .then((user) => this.success(user))
       .catch((err) => this.error(err))

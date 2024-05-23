@@ -7,7 +7,8 @@
   "scripts": {
     "clean": "rm -rf ./build ./dist",
     "build": "yarn clean && yarn install && tsc --build .",
-    "lint": "eslint --ext .ts,.tsx --max-warnings 0 .",
+    "lint": "eslint --max-warnings 0 .",
+    "lint:fix": "eslint . --fix",
     "dev": "tsc --build . && concurrently --prefix '[{name}]' --names 'tsc,nodemon' 'tsc --build --preserveWatchOutput -w .' 'NODE_ENV=local nodemon dist/index.js'"
   },
   "dependencies": {
@@ -55,7 +56,7 @@
     "@typescript-eslint/eslint-plugin": "^7.10.0",
     "@typescript-eslint/parser": "^7.10.0",
     "concurrently": "^8.2.2",
-    "eslint": "^9.3.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.2",
     "nodemon": "^3.1.0",
@@ -69,35 +70,6 @@
     "semi": false,
     "singleQuote": true,
     "trailingComma": "none"
-  },
-  "eslintConfig": {
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:@typescript-eslint/stylistic",
-      "plugin:prettier/recommended"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "ecmaVersion": 2018,
-      "sourceType": "module",
-      "project": "./tsconfig.json",
-      "ecmaFeatures": {
-        "modules": true
-      }
-    },
-    "plugins": [
-      "@typescript-eslint"
-    ],
-    "rules": {
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        {
-          "argsIgnorePattern": "^_",
-          "varsIgnorePattern": "^_"
-        }
-      ]
-    }
   },
   "engines": {
     "node": ">= 20.11.0"
