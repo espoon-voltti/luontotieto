@@ -30,6 +30,12 @@ export function getDocumentTypeTitle<
       return 'Liito-orava pisteet'
     case ReportFileDocumentType.LIITO_ORAVA_VIIVAT:
       return 'Liito-orava viivat'
+    case ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET:
+      return 'Muut huomioitavat lajit pisteet'
+    case ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT:
+      return 'Muut huomioitavat lajit viivat'
+    case ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET:
+      return 'Muut huomioitavat lajit alueet'
     case ReportFileDocumentType.OTHER:
       return 'Muu liite'
     case ReportFileDocumentType.REPORT:
@@ -47,15 +53,12 @@ export enum ReportFileDocumentType {
   LIITO_ORAVA_PISTEET = 'LIITO_ORAVA_PISTEET',
   LIITO_ORAVA_ALUEET = 'LIITO_ORAVA_ALUEET',
   LIITO_ORAVA_VIIVAT = 'LIITO_ORAVA_VIIVAT',
+  MUUT_HUOMIOITAVAT_LAJIT_PISTEET = 'MUUT_HUOMIOITAVAT_LAJIT_PISTEET',
+  MUUT_HUOMIOITAVAT_LAJIT_VIIVAT = 'MUUT_HUOMIOITAVAT_LAJIT_VIIVAT',
+  MUUT_HUOMIOITAVAT_LAJIT_ALUEET = 'MUUT_HUOMIOITAVAT_LAJIT_ALUEET',
   OTHER = 'OTHER',
   REPORT = 'REPORT'
 }
-
-export const reportFileDocumentTypes = [
-  ReportFileDocumentType.LIITO_ORAVA_ALUEET,
-  ReportFileDocumentType.LIITO_ORAVA_PISTEET,
-  ReportFileDocumentType.LIITO_ORAVA_VIIVAT
-]
 
 export interface ReportFileInput {
   description: string
@@ -139,6 +142,7 @@ export interface FileValidationError {
   value: null
   reason: string
 }
+
 export interface FileValidationErrorResponse {
   documentType: ReportFileDocumentType
   errors: FileValidationError[]

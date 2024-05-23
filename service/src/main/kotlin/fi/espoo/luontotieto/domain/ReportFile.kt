@@ -7,6 +7,7 @@ package fi.espoo.luontotieto.domain
 import fi.espoo.luontotieto.common.DatabaseEnum
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuthenticatedUser
+import fi.espoo.paikkatieto.domain.TableDefinition
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.enums.DatabaseValue
 import org.jdbi.v3.core.kotlin.mapTo
@@ -14,15 +15,24 @@ import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
-enum class DocumentType : DatabaseEnum {
+enum class DocumentType(val tableDefinition: TableDefinition? = null) : DatabaseEnum {
     @DatabaseValue("paikkatieto:liito_orava_pisteet")
-    LIITO_ORAVA_PISTEET,
+    LIITO_ORAVA_PISTEET(TableDefinition.LiitoOravaPisteet),
 
     @DatabaseValue("paikkatieto:liito_orava_alueet")
-    LIITO_ORAVA_ALUEET,
+    LIITO_ORAVA_ALUEET(TableDefinition.LiitoOravaAlueet),
 
     @DatabaseValue("paikkatieto:liito_orava_yhteysviivat")
-    LIITO_ORAVA_VIIVAT,
+    LIITO_ORAVA_VIIVAT(TableDefinition.LiitoOravaYhteysviivat),
+
+    @DatabaseValue("paikkatieto:muut_huomioitavat_lajit_pisteet")
+    MUUT_HUOMIOITAVAT_LAJIT_PISTEET(TableDefinition.MuutHuomioitavatLajitPisteet),
+
+    @DatabaseValue("paikkatieto:muut_huomioitavat_lajit_alueet")
+    MUUT_HUOMIOITAVAT_LAJIT_ALUEET(TableDefinition.MuutHuomioitavatLajitAlueet),
+
+    @DatabaseValue("paikkatieto:muut_huomioitavat_lajit_viivat")
+    MUUT_HUOMIOITAVAT_LAJIT_VIIVAT(TableDefinition.MuutHuomioitavatLajitViivat),
 
     @DatabaseValue("luontotieto:report")
     REPORT,
