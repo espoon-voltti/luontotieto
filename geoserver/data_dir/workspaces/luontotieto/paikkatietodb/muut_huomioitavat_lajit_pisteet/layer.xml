@@ -1,0 +1,16 @@
+<layer>
+  <name>muut_huomioitavat_lajit_pisteet</name>
+  <id>LayerInfoImpl-14efa08a:18fa3dd6279:-7ffc</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--3bd8cec9:18ef552d955:-8000</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl-14efa08a:18fa3dd6279:-7ffd</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-05-23 12:03:46.709 UTC</dateCreated>
+</layer>
