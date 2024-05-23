@@ -273,7 +273,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
           }
         })}
         <StyledInlineButton
-          text="Lisää muu liite"
+          text="Lisää liite"
           icon={faPlus}
           onClick={() => addFileInput(ReportFileDocumentType.OTHER)}
         />
