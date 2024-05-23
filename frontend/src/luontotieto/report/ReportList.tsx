@@ -15,8 +15,7 @@ import { InputField } from 'shared/form/InputField'
 import { Select } from 'shared/form/Select'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
-import { UserRole } from '../../api/users-api'
-import { UserContext } from '../../auth/UserContext'
+import { hasOrdererRole, UserContext } from '../../auth/UserContext'
 import {
   FlexLeftRight,
   FlexRowWithGaps,
@@ -44,10 +43,7 @@ export const ReportList = React.memo(function ReportList() {
     string | null
   >(null)
 
-  const showAddButton = useMemo(
-    () => user?.role === UserRole.ADMIN || user?.role === UserRole.ORDERER,
-    [user]
-  )
+  const showAddButton = useMemo(() => hasOrdererRole(user), [user])
 
   const reportAssignees = useMemo(() => {
     const assignees = (reports ?? [])

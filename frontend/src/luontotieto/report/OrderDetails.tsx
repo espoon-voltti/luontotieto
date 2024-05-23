@@ -7,8 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useGetOrderFilesQuery } from 'api/hooks/orders'
 import { apiGetOrderFileUrl, Order } from 'api/order-api'
 import { getDocumentTypeTitle } from 'api/report-api'
-import { UserRole } from 'api/users-api'
-import { UserContext } from 'auth/UserContext'
+import { hasOrdererRole, UserContext } from 'auth/UserContext'
 import React, { useContext, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LinkFileDownload } from 'shared/buttons/LinkFileDownload'
@@ -67,10 +66,7 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
     }
   }
 
-  const showEditBtn = useMemo(
-    () => user?.role === UserRole.ADMIN || user?.role === UserRole.ORDERER,
-    [user]
-  )
+  const showEditBtn = useMemo(() => hasOrdererRole(user), [user])
 
   const returnDateStr = useMemo(() => {
     const date = parseDate(order.returnDate, 'yyyy-MM-dd')
