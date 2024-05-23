@@ -79,7 +79,7 @@ class ReportTests : FullApplicationTest() {
             reportController.updateReport(
                 adminUser,
                 report.id,
-                Report.Companion.ReportInput("New name")
+                Report.Companion.ReportInput("New name", null)
             )
         assertEquals("New name", updatedReport.name)
         assertNotEquals(report.updated, updatedReport.updated)

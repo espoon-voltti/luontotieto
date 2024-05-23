@@ -5,6 +5,7 @@
 package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.NotFound
+import fi.espoo.luontotieto.common.databaseValue
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.paikkatieto.domain.TableDefinition
 import org.jdbi.v3.core.Handle
@@ -23,13 +24,13 @@ data class Report(
     val updated: OffsetDateTime,
     val createdBy: String,
     val updatedBy: String,
-    val noObservations: List<String>?,
+    val noObservations: List<DocumentType>?,
     @Nested("o_") val order: Order?
 ) {
     companion object {
         data class ReportInput(
             val name: String,
-            val noObservations: List<String>?
+            val noObservations: List<DocumentType>?
         )
     }
 }
@@ -119,6 +120,7 @@ fun Handle.putReport(
     report: Report.Companion.ReportInput,
     user: AuthenticatedUser
 ): Report {
+    val noObservations = report.noObservations?.map{dt -> dt.databaseValue()}?.toTypedArray()
     return createQuery(
         """
             WITH report AS (
@@ -131,7 +133,8 @@ fun Handle.putReport(
             $SELECT_REPORT_SQL
             """
     )
-        .bindKotlin(report)
+        .bind("name", report.name)
+        .bind("noObservations", noObservations)
         .bind("id", id)
         .bind("updatedBy", user.id)
         .mapTo<Report>()
