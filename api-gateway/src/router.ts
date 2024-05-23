@@ -23,62 +23,62 @@ import { createServiceRequestHeaders } from './clients/service-client.js'
 import { createPasswordAuthRouter } from './auth/password/index.js'
 
 export function createRouter(config: Config, redisClient: RedisClient): Router {
-    const router = Router()
+  const router = Router()
 
-    const sessions = sessionSupport(redisClient, config.session)
+  const sessions = sessionSupport(redisClient, config.session)
 
-    router.use(sessions.middleware)
-    router.use(passport.session())
-    router.use(cookieParser(config.session.cookieSecret))
+  router.use(sessions.middleware)
+  router.use(passport.session())
+  router.use(cookieParser(config.session.cookieSecret))
 
-    router.use(cacheControl(() => 'forbid-cache'))
+  router.use(cacheControl(() => 'forbid-cache'))
 
-    router.all('/system/*', (_, res) => res.sendStatus(404))
+  router.all('/system/*', (_, res) => res.sendStatus(404))
 
-    if (config.ad.type === 'mock') {
-        router.use('/auth/saml', createDevAdRouter(sessions))
-    } else if (config.ad.type === 'saml') {
-        router.use(
-            '/auth/saml',
-            createSamlRouter({
-                sessions,
-                strategyName: 'ead',
-                strategy: createAdSamlStrategy(
-                    sessions,
-                    config.ad,
-                    createSamlConfig(
-                        config.ad.saml,
-                        redisCacheProvider(redisClient, {keyPrefix: 'ad-saml-resp:'})
-                    )
-                )
-            })
-        )
-    }
-
-    router.use('/auth/password', createPasswordAuthRouter())
-
-    router.get('/auth/status', csrf, csrfCookie(), authStatus(sessions))
-
-    router.get('/version', (_, res) => {
-        res.send({commitId: appCommit})
-    })
-    router.use(requireAuthentication)
-    router.use(csrf)
-
+  if (config.ad.type === 'mock') {
+    router.use('/auth/saml', createDevAdRouter(sessions))
+  } else if (config.ad.type === 'saml') {
     router.use(
-        expressHttpProxy(serviceUrl, {
-            parseReqBody: false,
-            proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
-                const headers = createServiceRequestHeaders(srcReq)
-                proxyReqOpts.headers = {
-                    ...proxyReqOpts.headers,
-                    ...headers
-                }
-                return proxyReqOpts
-            }
-        })
+      '/auth/saml',
+      createSamlRouter({
+        sessions,
+        strategyName: 'ead',
+        strategy: createAdSamlStrategy(
+          sessions,
+          config.ad,
+          createSamlConfig(
+            config.ad.saml,
+            redisCacheProvider(redisClient, { keyPrefix: 'ad-saml-resp:' })
+          )
+        )
+      })
     )
-    router.use(errorHandler)
+  }
 
-    return router
+  router.use('/auth/password', createPasswordAuthRouter())
+
+  router.get('/auth/status', csrf, csrfCookie(), authStatus(sessions))
+
+  router.get('/version', (_, res) => {
+    res.send({ commitId: appCommit })
+  })
+  router.use(requireAuthentication)
+  router.use(csrf)
+
+  router.use(
+    expressHttpProxy(serviceUrl, {
+      parseReqBody: false,
+      proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+        const headers = createServiceRequestHeaders(srcReq)
+        proxyReqOpts.headers = {
+          ...proxyReqOpts.headers,
+          ...headers
+        }
+        return proxyReqOpts
+      }
+    })
+  )
+  router.use(errorHandler)
+
+  return router
 }

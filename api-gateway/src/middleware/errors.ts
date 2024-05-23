@@ -27,12 +27,7 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
   return fallbackErrorHandler(error, req, res, next)
 }
 
-export const fallbackErrorHandler: ErrorRequestHandler = (
-  error,
-  req,
-  res,
-  _next
-) => {
+export const fallbackErrorHandler: ErrorRequestHandler = (error, req, res) => {
   logError(
     `Internal server error: ${error.message || error || 'No error object'}`,
     req,
