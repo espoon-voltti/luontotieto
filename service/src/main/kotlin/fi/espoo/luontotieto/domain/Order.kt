@@ -11,6 +11,7 @@ import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.PropagateNull
 import org.jdbi.v3.json.Json
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
@@ -28,6 +29,12 @@ data class Order(
     val updatedBy: String,
     val assignee: String,
     val assigneeId: UUID,
+    val assigneeContactPerson: String,
+    val assigneeContactEmail: String,
+    val returnDate: LocalDate,
+    val contactPerson: String,
+    val contactPhone: String,
+    val contactEmail: String,
     @Json val reportDocuments: List<OrderReportDocument>
 )
 
@@ -36,7 +43,13 @@ data class OrderInput(
     val description: String,
     val planNumber: List<String>? = null,
     val assigneeId: UUID,
-    @Json val reportDocuments: List<OrderReportDocument>
+    val assigneeContactPerson: String,
+    val assigneeContactEmail: String,
+    @Json val reportDocuments: List<OrderReportDocument>,
+    val returnDate: LocalDate,
+    val contactPerson: String,
+    val contactPhone: String,
+    val contactEmail: String
 )
 
 private const val SELECT_ORDER_SQL =
@@ -48,6 +61,12 @@ private const val SELECT_ORDER_SQL =
            o.report_documents as "reportDocuments",
            o.created,
            o.updated,
+           o.assignee_contact_person AS "assigneeContactPerson",
+           o.assignee_contact_email AS "assigneeContactEmail",
+           o.return_date AS "returnDate",
+           o.contact_person AS "contactPerson",
+           o.contact_phone AS "contactPhone",
+           o.contact_email AS "contactEmail",
            uc.name AS "createdBy",
            uu.name AS "updatedBy",
            ua.name AS "assignee",
@@ -64,8 +83,8 @@ fun Handle.insertOrder(
 ): UUID {
     return createUpdate(
         """
-            INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents, assignee_id) 
-            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments, :assigneeId)
+            INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents, assignee_id, assignee_contact_person, assignee_contact_email, return_date, contact_person, contact_phone, contact_email) 
+            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments, :assigneeId, :assigneeContactPerson, :assigneeContactEmail, :returnDate, :contactPerson, :contactPhone, :contactEmail)
             RETURNING id
             """
     )
@@ -87,7 +106,10 @@ fun Handle.putOrder(
             WITH "order" AS (
                 UPDATE "order" 
                  SET name = :name, description = :description, updated_by = :updatedBy,
-                  plan_number = :planNumber, report_documents = :reportDocuments, assignee_id = :assigneeId
+                  plan_number = :planNumber, report_documents = :reportDocuments, assignee_id = :assigneeId,
+                  assignee_contact_person = :assigneeContactPerson, assignee_contact_email = :assigneeContactEmail,
+                  return_date = :returnDate, contact_person = :contactPerson, contact_phone = :contactPhone,
+                  contact_email = :contactEmail
                  WHERE id = :id
                 RETURNING *
             ) 

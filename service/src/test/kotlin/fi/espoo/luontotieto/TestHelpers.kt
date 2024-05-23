@@ -9,6 +9,7 @@ import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.OrderController
 import fi.espoo.luontotieto.domain.OrderInput
 import fi.espoo.luontotieto.domain.OrderReportDocument
+import java.time.LocalDate
 
 fun createOrderAndReport(
     controller: OrderController,
@@ -17,7 +18,13 @@ fun createOrderAndReport(
     planNumber: List<String> = listOf("Plan 1", "Plan 2"),
     assignee: AuthenticatedUser = customerUser,
     reportDocuments: List<OrderReportDocument> =
-        listOf(OrderReportDocument("Description", DocumentType.LIITO_ORAVA_PISTEET))
+        listOf(OrderReportDocument("Description", DocumentType.LIITO_ORAVA_PISTEET)),
+    assigneeContactPerson: String = "Person Name",
+    assigneeContactEmail: String = "person.name@example.com",
+    returnDate: LocalDate = LocalDate.of(2030, 1, 1),
+    contactEmail: String = "contact@example.com",
+    contactPerson: String = "Contact Person",
+    contactPhone: String = "04012345678"
 ): OrderController.CreateOrderResponse {
     return controller.createOrderFromScratch(
         user = adminUser,
@@ -27,7 +34,13 @@ fun createOrderAndReport(
                 description = description,
                 planNumber = planNumber,
                 assigneeId = assignee.id,
-                reportDocuments = reportDocuments
+                reportDocuments = reportDocuments,
+                assigneeContactPerson = assigneeContactPerson,
+                assigneeContactEmail = assigneeContactEmail,
+                returnDate = returnDate,
+                contactEmail = contactEmail,
+                contactPhone = contactPhone,
+                contactPerson = contactPerson
             )
     )
 }

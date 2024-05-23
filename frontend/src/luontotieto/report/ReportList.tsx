@@ -6,7 +6,7 @@ import { faSearch } from '@fortawesome/free-solid-svg-icons'
 import { useGetReportsQuery } from 'api/hooks/reports'
 import { getDocumentTypeTitle, ReportDetails } from 'api/report-api'
 import orderBy from 'lodash/orderBy'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useContext, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { SortableTh, Th } from 'shared/Table'
 import { AddButton } from 'shared/buttons/AddButton'
@@ -15,6 +15,7 @@ import { InputField } from 'shared/form/InputField'
 import { Select } from 'shared/form/Select'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
+import { hasOrdererRole, UserContext } from '../../auth/UserContext'
 import {
   FlexLeftRight,
   FlexRowWithGaps,
@@ -29,6 +30,7 @@ export type SortDirection = 'ASC' | 'DESC'
 
 export const ReportList = React.memo(function ReportList() {
   const navigate = useNavigate()
+  const { user } = useContext(UserContext)
 
   const { data: reports, isLoading } = useGetReportsQuery()
 
@@ -40,6 +42,8 @@ export const ReportList = React.memo(function ReportList() {
   const [filterBySearchQuery, setFilterBySearchQuery] = useDebouncedState<
     string | null
   >(null)
+
+  const showAddButton = useMemo(() => hasOrdererRole(user), [user])
 
   const reportAssignees = useMemo(() => {
     const assignees = (reports ?? [])
@@ -103,11 +107,13 @@ export const ReportList = React.memo(function ReportList() {
             />
           </FlexRowWithGaps>
 
-          <AddButton
-            text="Lisää selvitys"
-            onClick={() => navigate('/luontotieto/tilaus/uusi')}
-            data-qa="create-report-button"
-          />
+          {showAddButton && (
+            <AddButton
+              text="Lisää selvitys"
+              onClick={() => navigate('/luontotieto/tilaus/uusi')}
+              data-qa="create-report-button"
+            />
+          )}
         </FlexLeftRight>
 
         <VerticalGap $size="L" />

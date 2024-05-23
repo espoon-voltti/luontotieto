@@ -24,6 +24,12 @@ export interface OrderFormInput {
   filesToAdd: OrderFileInput[]
   filesToRemove: string[]
   assigneeId: string
+  contactPerson: string
+  contactEmail: string
+  contactPhone: string
+  assigneeContactPerson: string
+  assigneeContactEmail: string
+  returnDate: string
 }
 
 export interface OrderInput {
@@ -31,6 +37,12 @@ export interface OrderInput {
   description: string
   planNumber?: string[]
   assigneeId: string
+  contactPerson: string
+  contactEmail: string
+  contactPhone: string
+  assigneeContactPerson: string
+  assigneeContactEmail: string
+  returnDate: string
   reportDocuments: OrderReportDocumentInput[]
 }
 
@@ -50,7 +62,6 @@ export type OrderReportDocumentInput = Pick<OrderReportDocument, 'documentType'>
 export const apiPostOrder = async (data: OrderFormInput): Promise<string> => {
   const body: JsonOf<OrderInput> = {
     ...data,
-    //TODO: The description is to be removed (but for the moment a bit hesitant to remove it, lets clean it up later)
     reportDocuments: data.reportDocuments.map((rd) => ({
       ...rd,
       description: ''

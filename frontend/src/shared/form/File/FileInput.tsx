@@ -14,7 +14,7 @@ import {
   FlexRowWithGaps,
   LabeledInput,
   VerticalGap
-} from '../../../shared/layout'
+} from '../../layout'
 import { Label } from '../../typography'
 import { UnderRowStatusIcon } from '../StatusIcon'
 
@@ -30,6 +30,7 @@ export interface ValidFileInputData<T> {
 export interface FileInputData {
   description: string
   file: File | null
+  id: string
 }
 
 interface FileInputProps<T> {
@@ -37,6 +38,7 @@ interface FileInputProps<T> {
   data: FileInputData
   errors?: FileValidationError[]
   onChange: (data: FileInputData) => void
+  showTitle?: boolean
 }
 
 const fileValidationErrorToMessage = (error: FileValidationError): string => {
@@ -52,15 +54,20 @@ export const FileInput = <
   data,
   documentType,
   onChange,
-  errors
+  errors,
+  showTitle = true
 }: FileInputProps<T>) => {
   const [file, setFile] = useState(data.file ?? null)
   const [description, setDescription] = useDebouncedState(data.description)
 
   useEffect(() => {
-    onChange({ file, description })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [file, description])
+    onChange({
+      file,
+      description,
+      id: data.id
+    })
+  }, [file, description, onChange, data.id])
 
   const errorMessage =
     errors && errors.length > 0
@@ -75,13 +82,17 @@ export const FileInput = <
 
   return (
     <FlexCol>
-      <FlexRowWithGaps $gapSize="s" style={{ marginBottom: '5px' }}>
+      <FlexRowWithGaps $gapSize="m" style={{ marginBottom: '5px' }}>
         <LabeledInput $cols={5}>
-          <FileTitle
-            documentType={documentType}
-            required={documentType !== ReportFileDocumentType.OTHER}
-          />
-          <VerticalGap $size="s" />
+          {showTitle && (
+            <>
+              <FileTitle
+                documentType={documentType}
+                required={documentType !== ReportFileDocumentType.OTHER}
+              />
+              <VerticalGap $size="s" />
+            </>
+          )}
           <FileInputField
             onChange={(fileList) => {
               const file = fileList?.[0]
@@ -89,7 +100,9 @@ export const FileInput = <
             }}
           />
         </LabeledInput>
+
         <LabeledInput $cols={5}>
+          {showTitle && <VerticalGap $size="L" />}
           <Label>Liitteen kuvaus</Label>
           <InputField
             onChange={(value) => {

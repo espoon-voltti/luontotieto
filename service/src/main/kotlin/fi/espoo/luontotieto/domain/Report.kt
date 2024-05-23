@@ -54,7 +54,13 @@ private const val SELECT_REPORT_SQL =
            oua.name                                   AS "o_assignee",
            o.assignee_id                              AS "o_assigneeId",
            ouc.name                                   AS "o_createdBy",
-           ouu.name                                   AS "o_updatedBy"
+           ouu.name                                   AS "o_updatedBy",
+           o.assignee_contact_person                  AS "o_assigneeContactPerson",
+           o.assignee_contact_email                   AS "o_assigneeContactEmail",
+           o.return_date                              AS "o_returnDate",
+           o.contact_person                           AS "o_contactPerson",
+           o.contact_phone                            AS "o_contactPhone",
+           o.contact_email                            AS "o_contactEmail"
     FROM report r
              LEFT JOIN users uc ON r.created_by = uc.id
              LEFT JOIN users uu ON r.updated_by = uu.id

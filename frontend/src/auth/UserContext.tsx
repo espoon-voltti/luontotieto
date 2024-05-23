@@ -17,6 +17,10 @@ export interface UserState {
   user: AppUser | null
 }
 
+export function hasOrdererRole(user: AppUser | null) {
+  return user?.role === UserRole.ADMIN || user?.role === UserRole.ORDERER
+}
+
 export const UserContext = createContext<UserState>({
   user: null
 })

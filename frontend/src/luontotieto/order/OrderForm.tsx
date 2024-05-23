@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import {
   Order,
   OrderFile,
@@ -10,8 +11,10 @@ import {
   OrderReportDocumentInput
 } from 'api/order-api'
 import { getDocumentTypeTitle, ReportFileDocumentType } from 'api/report-api'
+import { emailRegex } from 'luontotieto/user-management/common'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Tag } from 'react-tag-autocomplete'
+import { InlineButton } from 'shared/buttons/InlineButton'
 import { Checkbox } from 'shared/form/Checkbox'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
 import { FileInput, FileInputData } from 'shared/form/File/FileInput'
@@ -19,9 +22,10 @@ import { InputField } from 'shared/form/InputField'
 import { TagAutoComplete } from 'shared/form/TagAutoComplete/TagAutoComplete'
 import { TextArea } from 'shared/form/TextArea'
 import { useDebouncedState } from 'shared/useDebouncedState'
+import { v4 as uuidv4 } from 'uuid'
 
 import { useGetAssigneeUsersQuery } from '../../api/hooks/users'
-import { User } from '../../api/users-api'
+import { DATE_PATTERN } from '../../shared/dates'
 import { Select } from '../../shared/form/Select'
 import {
   FlexCol,
@@ -50,8 +54,8 @@ interface EditProps {
 type Props = CreateProps | EditProps
 
 const orderFileTypes = [
-  OrderFileDocumentType.ORDER_INFO,
-  OrderFileDocumentType.ORDER_AREA
+  OrderFileDocumentType.ORDER_AREA,
+  OrderFileDocumentType.ORDER_INFO
 ]
 
 interface OrderFileInputElementNew {
@@ -59,6 +63,7 @@ interface OrderFileInputElementNew {
   description: string
   documentType: OrderFileDocumentType
   file: File | null
+  id: string
 }
 
 interface OrderFileInputElementExisting {
@@ -72,24 +77,61 @@ type OrderFileInputElement =
   | OrderFileInputElementExisting
 
 function createFileInputs(orderFiles: OrderFile[]): OrderFileInputElement[] {
+  if (orderFiles.length > 0) {
+    return orderFiles.map((orderFile) => ({
+      documentType: orderFile.documentType,
+      type: 'EXISTING',
+      orderFile
+    }))
+  }
+
   return orderFileTypes.map((documentType) => {
     const orderFile = orderFiles.find(
       (file) => file.documentType === documentType
     )
     return orderFile
       ? { documentType, type: 'EXISTING', orderFile }
-      : { documentType, type: 'NEW', description: '', file: null }
+      : { documentType, type: 'NEW', description: '', file: null, id: uuidv4() }
   })
 }
 
 function filesAreValid(fileInputs: OrderFileInputElement[]): boolean {
-  return orderFileTypes.every((documentType) => {
-    const fileInput = fileInputs.find((fi) => fi.documentType === documentType)
-    return (
-      fileInput?.type === 'EXISTING' ||
-      (fileInput?.file && fileInput.description.trim() !== '')
+  return orderFileTypes.every((documentType) =>
+    fileInputs.some(
+      (fileInput) =>
+        fileInput.documentType === documentType &&
+        (fileInput?.type === 'EXISTING' ||
+          (fileInput?.file && fileInput.description.trim() !== ''))
     )
-  })
+  )
+}
+
+const defaultReportDocuments = [
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.LIITO_ORAVA_PISTEET
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.LIITO_ORAVA_ALUEET
+  }
+]
+
+function createOrderFormInput(order: Order | undefined): OrderFormInput {
+  return {
+    name: order?.name ?? '',
+    description: order?.description ?? '',
+    returnDate: order?.returnDate ?? '',
+    assigneeId: order?.assigneeId ?? '',
+    assigneeContactEmail: order?.assigneeContactEmail ?? '',
+    assigneeContactPerson: order?.assigneeContactPerson ?? '',
+    contactPhone: order?.contactPhone ?? '',
+    contactPerson: order?.contactPerson ?? '',
+    contactEmail: order?.contactEmail ?? '',
+    filesToAdd: [],
+    filesToRemove: [],
+    reportDocuments: []
+  }
 }
 
 export const OrderForm = React.memo(function OrderForm(props: Props) {
@@ -98,31 +140,55 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     [props]
   )
 
-  const defaultReportDocuments = [
-    {
-      checked: false,
-      documentType: ReportFileDocumentType.LIITO_ORAVA_PISTEET
-    },
-    {
-      checked: false,
-      documentType: ReportFileDocumentType.LIITO_ORAVA_ALUEET
-    }
-  ]
-
-  const [name, setName] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.name
+  const [orderInput, setOrderInput] = useDebouncedState<OrderFormInput>(
+    createOrderFormInput(props.mode === 'EDIT' ? props?.order : undefined)
   )
 
   const [planNumbers, setPlanNumbers] = useDebouncedState(
     props.mode === 'CREATE' ? [] : props.order.planNumber ?? []
   )
 
-  const [description, setDescription] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.description
+  const invalidContactEmailInfo = useMemo(
+    () =>
+      orderInput.contactEmail && !orderInput.contactEmail.match(emailRegex)
+        ? {
+            text: 'Syötä oikeaa muotoa oleva sähköposti',
+            status: 'warning' as const
+          }
+        : undefined,
+    [orderInput.contactEmail]
+  )
+
+  const invalidAssigneeContactEmailInfo = useMemo(
+    () =>
+      orderInput.assigneeContactEmail &&
+      !orderInput.assigneeContactEmail.match(emailRegex)
+        ? {
+            text: 'Syötä oikeaa muotoa oleva sähköposti',
+            status: 'warning' as const
+          }
+        : undefined,
+    [orderInput.assigneeContactEmail]
   )
 
   const [orderFiles, setOrderFiles] = useState<OrderFileInputElement[]>(
     createFileInputs(props.mode === 'EDIT' ? props.orderFiles : [])
+  )
+
+  const orderAreaFile = useMemo(
+    () =>
+      orderFiles.find(
+        (f) => f.documentType === OrderFileDocumentType.ORDER_AREA
+      ),
+    [orderFiles]
+  )
+
+  const orderInfoFiles = useMemo(
+    () =>
+      orderFiles.filter(
+        (f) => f.documentType === OrderFileDocumentType.ORDER_INFO
+      ),
+    [orderFiles]
   )
 
   const [reportDocuments, setReportDocuments] = useState(
@@ -155,13 +221,15 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
             type: 'NEW',
             file: null,
             description: '',
-            documentType: fi.documentType
+            documentType: fi.documentType,
+            id: uuidv4()
           }
         }
         return fi
       })
     )
   }
+
   const updateOrderFiles = useCallback(
     (
       modified: FileInputData & {
@@ -170,7 +238,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     ) => {
       setOrderFiles(
         orderFiles.map((fi) => {
-          if (fi.documentType === modified.documentType) {
+          if (fi.type === 'NEW' && fi.id === modified.id) {
             return {
               ...fi,
               description: modified.description,
@@ -192,26 +260,33 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   )
 
   const { data: assigneeUsers } = useGetAssigneeUsersQuery()
-  const [assignee, setAssignee] = useState<User | undefined>()
 
-  useEffect(() => {
-    if (props.mode === 'EDIT') {
-      const assignee = assigneeUsers?.find(
-        (u) => u?.id === props.order.assigneeId
-      )
-      setAssignee(assignee)
-    }
-  }, [assigneeUsers, props])
+  const assignee = useMemo(
+    () => assigneeUsers?.find((u) => u?.id === orderInput.assigneeId),
+    [orderInput, assigneeUsers]
+  )
 
   const validInput: OrderFormInput | null = useMemo(() => {
-    if (name.trim() === '') return null
-    if (description.trim() === '') return null
+    if (orderInput.name.trim() === '') return null
+    if (orderInput.description.trim() === '') return null
     if (!filesAreValid(orderFiles)) return null
     if (!assignee) return null
+    if (!orderInput.returnDate.trim().match(DATE_PATTERN)) return null
+    if (orderInput.contactPerson.trim() === '') return null
+    if (orderInput.contactPhone.trim() === '') return null
+    if (!orderInput.contactEmail.trim().match(emailRegex)) return null
+    if (orderInput.assigneeContactPerson.trim() === '') return null
+    if (!orderInput.assigneeContactEmail.trim().match(emailRegex)) return null
 
     return {
-      name: name.trim(),
-      description: description.trim(),
+      name: orderInput.name.trim(),
+      description: orderInput.description.trim(),
+      returnDate: orderInput.returnDate,
+      contactEmail: orderInput.contactEmail.trim(),
+      contactPhone: orderInput.contactPhone.trim(),
+      contactPerson: orderInput.contactPerson.trim(),
+      assigneeContactEmail: orderInput.assigneeContactEmail.trim(),
+      assigneeContactPerson: orderInput.assigneeContactPerson.trim(),
       planNumber: planNumbers,
       reportDocuments: reportDocuments
         .filter((rd) => rd.checked)
@@ -240,8 +315,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       assigneeId: assignee.id
     }
   }, [
-    name,
-    description,
+    orderInput,
     planNumbers,
     reportDocuments,
     orderFiles,
@@ -261,23 +335,16 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
 
   return (
     <FlexCol>
-      <SectionContainer $sidePadding="62px">
+      <SectionContainer>
         <H3>Tilauksen tiedot</H3>
         <VerticalGap $size="L" />
         <GroupOfInputRows>
           <RowOfInputs>
             <LabeledInput $cols={4}>
               <Label>Tilauksen nimi</Label>
-              <InputField onChange={setName} value={name} />
-            </LabeledInput>
-          </RowOfInputs>
-          <RowOfInputs>
-            <LabeledInput $cols={4}>
-              <Label>Tilauksen kuvaus</Label>
-              <TextArea
-                onChange={setDescription}
-                value={description}
-                rows={2}
+              <InputField
+                onChange={(name) => setOrderInput({ ...orderInput, name })}
+                value={orderInput.name}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -298,29 +365,168 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={4}>
+              <Label>Selvitys palautettava viimeistään</Label>
+              <InputField
+                width="m"
+                onChange={(returnDate) =>
+                  setOrderInput({ ...orderInput, returnDate })
+                }
+                value={orderInput.returnDate}
+                type="date"
+              />
+            </LabeledInput>
+          </RowOfInputs>
+          <RowOfInputs>
+            <LabeledInput $cols={10}>
+              <Label>Selvityksen kuvaus</Label>
+              <TextArea
+                onChange={(description) =>
+                  setOrderInput({
+                    ...orderInput,
+                    description
+                  })
+                }
+                value={orderInput.description}
+                rows={2}
+              />
+            </LabeledInput>
+          </RowOfInputs>
+          <H3>Tilaajan tiedot</H3>
+          <RowOfInputs>
+            <LabeledInput $cols={4}>
+              <Label>Yhteyshenkilö</Label>
+              <InputField
+                onChange={(contactPerson) =>
+                  setOrderInput({
+                    ...orderInput,
+                    contactPerson
+                  })
+                }
+                value={orderInput.contactPerson}
+              />
+            </LabeledInput>
+          </RowOfInputs>
+          <RowOfInputs>
+            <LabeledInput $cols={4}>
+              <Label>Yhteyshenkilön sähköposti</Label>
+              <InputField
+                onChange={(contactEmail) =>
+                  setOrderInput({
+                    ...orderInput,
+                    contactEmail
+                  })
+                }
+                value={orderInput.contactEmail}
+                info={invalidContactEmailInfo}
+              />
+            </LabeledInput>
+          </RowOfInputs>
+          <RowOfInputs>
+            <LabeledInput $cols={4}>
+              <Label>Yhteyshenkilön puhelinnumero</Label>
+              <InputField
+                onChange={(contactPhone) =>
+                  setOrderInput({
+                    ...orderInput,
+                    contactPhone
+                  })
+                }
+                value={orderInput.contactPhone}
+              />
+            </LabeledInput>
+          </RowOfInputs>
+          <H3>Selvityksen tekijä</H3>
+          <RowOfInputs>
+            <LabeledInput $cols={4}>
               <Label>Selvityksen tekijä</Label>
               <Select
                 selectedItem={assignee}
                 items={assigneeUsers ?? []}
-                onChange={setAssignee}
+                onChange={(assignee) =>
+                  setOrderInput({
+                    ...orderInput,
+                    assigneeId: assignee?.id ?? ''
+                  })
+                }
                 getItemLabel={(u) => u?.name ?? '-'}
                 getItemValue={(u) => u?.id ?? '-'}
               />
             </LabeledInput>
           </RowOfInputs>
+          <RowOfInputs>
+            <LabeledInput $cols={4}>
+              <Label>Yhteyshenkilö</Label>
+              <InputField
+                onChange={(assigneeContactPerson) =>
+                  setOrderInput({
+                    ...orderInput,
+                    assigneeContactPerson
+                  })
+                }
+                value={orderInput.assigneeContactPerson}
+              />
+            </LabeledInput>
+          </RowOfInputs>
+          <RowOfInputs>
+            <LabeledInput $cols={4}>
+              <Label>Yhteyshenkilön sähköposti</Label>
+              <InputField
+                onChange={(assigneeContactEmail) =>
+                  setOrderInput({
+                    ...orderInput,
+                    assigneeContactEmail
+                  })
+                }
+                value={orderInput.assigneeContactEmail}
+                info={invalidAssigneeContactEmailInfo}
+              />
+            </LabeledInput>
+          </RowOfInputs>
+        </GroupOfInputRows>
+        <VerticalGap $size="L" />
+        <H3>Tilauksen liitteet</H3>
+        <VerticalGap $size="L" />
+        <GroupOfInputRows>
+          {orderAreaFile && orderAreaFile.type === 'NEW' && (
+            <FileInput
+              documentType={orderAreaFile.documentType}
+              key={orderAreaFile.id}
+              data={orderAreaFile}
+              onChange={(data) => {
+                updateOrderFiles({
+                  ...data,
+                  documentType: orderAreaFile.documentType
+                })
+              }}
+            />
+          )}
+          {orderAreaFile && orderAreaFile.type === 'EXISTING' && (
+            <ExistingFile
+              key={orderAreaFile.orderFile.id}
+              data={{
+                type: 'ORDER',
+                file: orderAreaFile.orderFile,
+                readonly: false,
+                documentType: orderAreaFile.documentType,
+                updated: orderAreaFile.orderFile.updated
+              }}
+              onRemove={(id) => {
+                removeCreatedFileInput(id)
+              }}
+            />
+          )}
         </GroupOfInputRows>
         <VerticalGap $size="L" />
         <GroupOfInputRows>
-          <Label>Tilauksen liitteet</Label>
-
-          {orderFiles.map((fInput) => {
+          {orderInfoFiles.map((fInput, idx) => {
             switch (fInput.type) {
               case 'NEW':
                 return (
                   <FileInput
-                    key={fInput.documentType}
                     documentType={fInput.documentType}
+                    key={fInput.id}
                     data={fInput}
+                    showTitle={idx === 0}
                     onChange={(data) => {
                       updateOrderFiles({
                         ...data,
@@ -332,12 +538,14 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               case 'EXISTING':
                 return (
                   <ExistingFile
-                    key={fInput.documentType}
+                    key={fInput.orderFile.id}
+                    showTitle={idx === 0}
                     data={{
                       type: 'ORDER',
                       file: fInput.orderFile,
                       readonly: false,
-                      documentType: fInput.documentType
+                      documentType: fInput.documentType,
+                      updated: fInput.orderFile.updated
                     }}
                     onRemove={(id) => {
                       removeCreatedFileInput(id)
@@ -347,10 +555,26 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
             }
           })}
         </GroupOfInputRows>
+        <VerticalGap $size="L" />
+        <InlineButton
+          text="Lisää liite"
+          icon={faPlus}
+          onClick={() =>
+            setOrderFiles([
+              ...orderFiles,
+              {
+                id: uuidv4(),
+                documentType: OrderFileDocumentType.ORDER_INFO,
+                type: 'NEW',
+                description: '',
+                file: null
+              }
+            ])
+          }
+        />
       </SectionContainer>
       <VerticalGap $size="m" />
-
-      <SectionContainer $sidePadding="62px">
+      <SectionContainer>
         <GroupOfInputRows>
           <RowOfInputs>
             <LabeledInput $cols={8}>

@@ -7,7 +7,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FlexColWithGaps, SectionContainer, VerticalGap } from 'shared/layout'
 import { BaseProps } from 'shared/theme'
-import { H3 } from 'shared/typography'
+import { H2 } from 'shared/typography'
 
 import { InlineButton } from './InlineButton'
 
@@ -33,7 +33,7 @@ export const BackNavigation = React.memo(function BackNavigation({
             text={props.navigationText ?? 'Takaisin'}
             onClick={() => navigate(props.destination ?? '/luontotieto')}
           />
-          <H3>{props.text}</H3>
+          <H2>{props.text}</H2>
         </FlexColWithGaps>
       </SectionContainer>
       <VerticalGap $size="m" />

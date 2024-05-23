@@ -12,6 +12,7 @@ import fi.espoo.luontotieto.domain.OrderReportDocument
 import fi.espoo.luontotieto.domain.ReportController
 import fi.espoo.luontotieto.domain.UserRole
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -30,17 +31,7 @@ class OrderTests : FullApplicationTest() {
                 OrderReportDocument("Test description 2", DocumentType.LIITO_ORAVA_ALUEET)
             )
         val createdOrder =
-            controller.createOrderFromScratch(
-                user = adminUser,
-                body =
-                    OrderInput(
-                        name = "Test order",
-                        description = "Test description",
-                        planNumber = listOf("12345"),
-                        assigneeId = customerUser.id,
-                        reportDocuments = orderReportDocuments
-                    ),
-            )
+            createOrderAndReport(controller = controller, reportDocuments = orderReportDocuments)
 
         val orderResponse = controller.getOrderById(adminUser, createdOrder.orderId)
 
@@ -57,27 +48,18 @@ class OrderTests : FullApplicationTest() {
             )
         )
         assertEquals("Yritys Oy", orderResponse.assignee)
+        assertEquals("Person Name", orderResponse.assigneeContactPerson)
+        assertEquals("person.name@example.com", orderResponse.assigneeContactEmail)
+        assertEquals(LocalDate.of(2030, 1, 1), orderResponse.returnDate)
+        assertEquals("contact@example.com", orderResponse.contactEmail)
+        assertEquals("Contact Person", orderResponse.contactPerson)
+        assertEquals("04012345678", orderResponse.contactPhone)
         assertEquals(customerUser.id, orderResponse.assigneeId)
     }
 
     @Test
     fun `create order report and populate it with order fields`() {
-        val orderReportDocuments =
-            listOf(
-                OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_PISTEET),
-            )
-        val createdOrder =
-            controller.createOrderFromScratch(
-                user = adminUser,
-                body =
-                    OrderInput(
-                        name = "Test order",
-                        description = "Test description",
-                        planNumber = listOf("12345"),
-                        assigneeId = customerUser.id,
-                        reportDocuments = orderReportDocuments
-                    ),
-            )
+        val createdOrder = createOrderAndReport(controller = controller)
 
         val orderReportResponse = reportController.getReportById(adminUser, createdOrder.reportId)
 
@@ -94,17 +76,7 @@ class OrderTests : FullApplicationTest() {
 
     @Test
     fun `get all reports - no reports`() {
-        controller.createOrderFromScratch(
-            user = adminUser,
-            body =
-                OrderInput(
-                    name = "Test order",
-                    description = "Test description",
-                    planNumber = listOf("12345"),
-                    assigneeId = customerUser.id,
-                    reportDocuments = listOf()
-                ),
-        )
+        createOrderAndReport(controller = controller)
 
         val ordersResponse =
             reportController.getReports(AuthenticatedUser(UUID.randomUUID(), UserRole.CUSTOMER))
@@ -113,24 +85,7 @@ class OrderTests : FullApplicationTest() {
 
     @Test
     fun `update existing order`() {
-        val createdOrder =
-            controller.createOrderFromScratch(
-                user = adminUser,
-                body =
-                    OrderInput(
-                        name = "Test order",
-                        description = "Test description",
-                        planNumber = listOf("12345"),
-                        assigneeId = customerUser.id,
-                        reportDocuments =
-                            listOf(
-                                OrderReportDocument(
-                                    "Test description",
-                                    DocumentType.LIITO_ORAVA_PISTEET
-                                )
-                            )
-                    ),
-            )
+        val createdOrder = createOrderAndReport(controller = controller)
         val updatedReportDocuments =
             listOf(OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_ALUEET))
         val updatedOrder =
@@ -142,7 +97,13 @@ class OrderTests : FullApplicationTest() {
                     description = "New description",
                     planNumber = listOf("12345"),
                     assigneeId = customerUser.id,
-                    reportDocuments = updatedReportDocuments
+                    reportDocuments = updatedReportDocuments,
+                    assigneeContactEmail = "email@example.com",
+                    assigneeContactPerson = "Person Name",
+                    contactEmail = "contact@example.com",
+                    contactPerson = "Contact Person",
+                    contactPhone = "040123456789",
+                    returnDate = LocalDate.of(2026, 1, 1)
                 )
             )
 
