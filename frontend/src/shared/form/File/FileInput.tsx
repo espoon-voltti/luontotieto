@@ -16,6 +16,7 @@ import {
   VerticalGap
 } from '../../layout'
 import { Label } from '../../typography'
+import { Checkbox } from '../Checkbox'
 import { UnderRowStatusIcon } from '../StatusIcon'
 
 import { FileInputField } from './FileInputField'
@@ -36,8 +37,9 @@ export interface FileInputData {
 interface FileInputProps<T> {
   documentType: T
   data: FileInputData
+  noObservation: boolean
   errors?: FileValidationError[]
-  onChange: (data: FileInputData) => void
+  onChange: (data: FileInputData & { noObservation: boolean }) => void
   showTitle?: boolean
 }
 
@@ -48,10 +50,18 @@ const fileValidationErrorToMessage = (error: FileValidationError): string => {
   return `${error.column}:  ${error.reason}`
 }
 
+const isReportFileNatureDocument = (
+  dt: ReportFileDocumentType | OrderFileDocumentType
+) =>
+  dt === ReportFileDocumentType.LIITO_ORAVA_ALUEET ||
+  dt === ReportFileDocumentType.LIITO_ORAVA_PISTEET ||
+  dt === ReportFileDocumentType.LIITO_ORAVA_VIIVAT
+
 export const FileInput = <
   T extends ReportFileDocumentType | OrderFileDocumentType
 >({
   data,
+  noObservation,
   documentType,
   onChange,
   errors,
@@ -59,15 +69,17 @@ export const FileInput = <
 }: FileInputProps<T>) => {
   const [file, setFile] = useState(data.file ?? null)
   const [description, setDescription] = useDebouncedState(data.description)
+  const [noObs, setNoObs] = useState(noObservation)
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     onChange({
       file,
       description,
-      id: data.id
+      id: data.id,
+      noObservation: noObs
     })
-  }, [file, description, onChange, data.id])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [file, description, noObs])
 
   const errorMessage =
     errors && errors.length > 0
@@ -80,6 +92,8 @@ export const FileInput = <
         }
       : undefined
 
+  const showNoObservationCheckBox = isReportFileNatureDocument(documentType)
+
   return (
     <FlexCol>
       <FlexRowWithGaps $gapSize="m" style={{ marginBottom: '5px' }}>
@@ -90,10 +104,18 @@ export const FileInput = <
                 documentType={documentType}
                 required={documentType !== ReportFileDocumentType.OTHER}
               />
-              <VerticalGap $size="s" />
             </>
           )}
+          {showNoObservationCheckBox && (
+            <Checkbox
+              label="Ei havaintoa"
+              checked={noObs}
+              onChange={(checked) => setNoObs(checked)}
+              className={classNames({ dimmed: !noObs })}
+            />
+          )}
           <FileInputField
+            readonly={noObservation}
             onChange={(fileList) => {
               const file = fileList?.[0]
               file && setFile(file)
@@ -103,8 +125,9 @@ export const FileInput = <
 
         <LabeledInput $cols={5}>
           {showTitle && <VerticalGap $size="L" />}
-          <Label>Liitteen kuvaus</Label>
+          <Label>Lisätiedot tarvittaessa</Label>
           <InputField
+            readonly={noObservation}
             onChange={(value) => {
               setDescription(value)
             }}

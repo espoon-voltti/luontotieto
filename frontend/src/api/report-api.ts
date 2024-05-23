@@ -11,6 +11,7 @@ import { Order, OrderFileDocumentType } from './order-api'
 
 export interface ReportFormInput {
   name: string
+  noObservations: string[] | null
   filesToAdd: ReportFileInput[]
   filesToRemove: string[]
 }
@@ -67,6 +68,7 @@ export interface ReportDetails extends ReportInput {
   createdBy: string
   updatedBy: string
   approved: boolean
+  noObservations: string[] | null
   order?: Order
 }
 

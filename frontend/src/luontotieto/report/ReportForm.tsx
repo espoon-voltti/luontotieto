@@ -48,6 +48,7 @@ interface ReportFileInputElementNew {
   documentType: ReportFileDocumentType
   file: File | null
   id: string
+  noObservation: boolean
 }
 
 interface ReportFileInputElementExisting {
@@ -55,6 +56,7 @@ interface ReportFileInputElementExisting {
   userDescription: string
   documentType: ReportFileDocumentType
   details: ReportFileDetails
+  noObservation: boolean
 }
 
 type ReportFileInputElement =
@@ -63,25 +65,29 @@ type ReportFileInputElement =
 
 function createFileInputs(
   reportFiles: ReportFileDetails[],
-  requiredFiles: OrderReportDocumentInput[]
+  requiredFiles: OrderReportDocumentInput[],
+  noObservations: string[]
 ): ReportFileInputElement[] {
   const requiredFileInputs = requiredFiles.map((required) => {
     const reportFile = reportFiles.find(
       (reportFile) => reportFile.documentType === required.documentType
     )
+    const noObservation = noObservations.includes(required.documentType)
     return reportFile
       ? {
           type: 'EXISTING' as const,
           userDescription: reportFile.description,
           documentType: required.documentType,
-          details: reportFile
+          details: reportFile,
+          noObservation
         }
       : {
           type: 'NEW' as const,
           userDescription: '',
           documentType: required.documentType,
           file: null,
-          id: uuidv4()
+          id: uuidv4(),
+          noObservation
         }
   })
   const otherFiles = reportFiles
@@ -90,7 +96,8 @@ function createFileInputs(
       type: 'EXISTING' as const,
       userDescription: rf.description,
       documentType: rf.documentType,
-      details: rf
+      details: rf,
+      noObservation: false
     }))
 
   return [...requiredFileInputs, ...otherFiles]
@@ -104,7 +111,9 @@ function filesAreValid(
     const fileInput = fileInputs.find(
       (fi) => fi.documentType === required.documentType
     )
+
     return (
+      fileInput?.noObservation ||
       fileInput?.type === 'EXISTING' ||
       (fileInput?.file && fileInput.userDescription.trim() !== '')
     )
@@ -118,10 +127,14 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
       props.mode === 'EDIT' ? props.report.order?.reportDocuments ?? [] : [],
     [props]
   )
+  const [noObservations, _setNoObservations] = useState<string[] | null>(
+    props.mode === 'CREATE' ? null : props.report.noObservations
+  )
+
   const originalFileInputs = useMemo(() => {
     const reportFiles = props.mode === 'EDIT' ? props.reportFiles : []
-    return createFileInputs(reportFiles, requiredFiles)
-  }, [requiredFiles, props])
+    return createFileInputs(reportFiles, requiredFiles, noObservations ?? [])
+  }, [requiredFiles, props, noObservations])
 
   const [name, _] = useDebouncedState(
     props.mode === 'CREATE' ? '' : props.report.name
@@ -130,14 +143,19 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
   const [fileInputs, setFileInputs] = useState(originalFileInputs)
 
   const updateFileInput = useCallback(
-    (modified: FileInputData & { documentType: ReportFileDocumentType }) => {
+    (
+      modified: FileInputData & { noObservation: boolean } & {
+        documentType: ReportFileDocumentType
+      }
+    ) => {
       setFileInputs(
         fileInputs.map((fi) => {
           if (fi.documentType === modified.documentType) {
             return {
               ...fi,
               userDescription: modified.description,
-              file: modified.file
+              file: modified.file,
+              noObservation: modified.noObservation
             }
           }
           return fi
@@ -156,7 +174,8 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
             file: null,
             userDescription: '',
             documentType: fi.documentType,
-            id: uuidv4()
+            id: uuidv4(),
+            noObservation: false
           }
         }
         return fi
@@ -172,18 +191,22 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
         file: null,
         userDescription: '',
         documentType: documentType,
-        id: uuidv4()
+        id: uuidv4(),
+        noObservation: false
       }
     ])
   }
 
   const validInput: ReportFormInput | null = useMemo(() => {
     if (name.trim() === '') return null
-
     if (!filesAreValid(requiredFiles, fileInputs)) return null
 
+    const noObs = fileInputs.flatMap((input) =>
+      input.noObservation ? [input.documentType] : []
+    )
     return {
       name: name.trim(),
+      noObservations: noObs,
       filesToAdd: fileInputs.flatMap((e) =>
         e.type === 'NEW' && e.file !== null
           ? [
@@ -221,7 +244,6 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
                 (error) => error.documentType === fInput.documentType
               )
             : undefined
-
           switch (fInput.type) {
             case 'NEW':
               return (
@@ -233,6 +255,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
                     file: fInput.file,
                     id: fInput.id
                   }}
+                  noObservation={fInput.noObservation}
                   onChange={(data) => {
                     updateFileInput({
                       ...data,

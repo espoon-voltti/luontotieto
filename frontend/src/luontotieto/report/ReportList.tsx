@@ -196,7 +196,6 @@ const filterReports = (
     if (searchQueryToLower) {
       return (
         (report.name.toLowerCase().includes(searchQueryToLower) ||
-          report.description.toLowerCase().includes(searchQueryToLower) ||
           (report.order &&
             report.order.assignee.toLowerCase().includes(searchQueryToLower)) ||
           (report.order &&

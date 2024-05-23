@@ -85,7 +85,7 @@ class OrderController {
                 val orderId = tx.insertOrder(data = body, user = user)
                 val report =
                     tx.insertReport(
-                        Report.Companion.ReportInput(body.name),
+                        Report.Companion.ReportInput(body.name, null),
                         user,
                         orderId
                     )

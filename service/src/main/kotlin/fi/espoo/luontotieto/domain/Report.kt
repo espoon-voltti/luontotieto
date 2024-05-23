@@ -7,37 +7,41 @@ package fi.espoo.luontotieto.domain
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.paikkatieto.domain.TableDefinition
+import org.jdbi.v3.core.Handle
+import org.jdbi.v3.core.kotlin.bindKotlin
+import org.jdbi.v3.core.kotlin.mapTo
+import org.jdbi.v3.core.mapper.Nested
 import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
-import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.kotlin.mapTo
-import org.jdbi.v3.core.mapper.Nested
 
 data class Report(
-        val id: UUID,
-        val name: String,
-        val approved: Boolean,
-        val created: OffsetDateTime,
-        val updated: OffsetDateTime,
-        val createdBy: String,
-        val updatedBy: String,
-        @Nested("o_") val order: Order?
+    val id: UUID,
+    val name: String,
+    val approved: Boolean,
+    val created: OffsetDateTime,
+    val updated: OffsetDateTime,
+    val createdBy: String,
+    val updatedBy: String,
+    val noObservations: List<String>?,
+    @Nested("o_") val order: Order?
 ) {
     companion object {
         data class ReportInput(
-                val name: String,
+            val name: String,
+            val noObservations: List<String>?
         )
     }
 }
 
 private const val SELECT_REPORT_SQL =
-        """
+    """
     SELECT r.id                                       AS "id",
            r.name                                     AS "name",
            r.created                                  AS "created",
            r.updated                                  AS "updated",
            r.approved                                 AS "approved",
+           r.no_observations                          AS "noObservations",
            uc.name                                    AS "createdBy",
            uu.name                                    AS "updatedBy",
            r.order_id                                 AS "orderId",
@@ -68,12 +72,12 @@ private const val SELECT_REPORT_SQL =
 """
 
 fun Handle.insertReport(
-        data: Report.Companion.ReportInput,
-        user: AuthenticatedUser,
-        orderI: UUID? = null
+    data: Report.Companion.ReportInput,
+    user: AuthenticatedUser,
+    orderI: UUID? = null
 ): Report {
     return createQuery(
-                    """
+        """
             WITH report AS (
                 INSERT INTO report (name, created_by, updated_by, order_id) 
                 VALUES (:name, :createdBy, :updatedBy, :orderId)
@@ -81,92 +85,98 @@ fun Handle.insertReport(
             ) 
             $SELECT_REPORT_SQL
             """
-            )
-            .bind("name", data.name)
-            .bind("orderId", orderI)
-            .bind("createdBy", user.id)
-            .bind("updatedBy", user.id)
-            .mapTo<Report>()
-            .one()
+    )
+        .bind("name", data.name)
+        .bind("orderId", orderI)
+        .bind("createdBy", user.id)
+        .bind("updatedBy", user.id)
+        .mapTo<Report>()
+        .one()
 }
 
-fun Handle.approveReport(reportId: UUID, user: AuthenticatedUser): Report {
+fun Handle.approveReport(
+    reportId: UUID,
+    user: AuthenticatedUser
+): Report {
     return createUpdate(
-                    """
+        """
             UPDATE report 
               SET
                 approved = TRUE,
                 updated_by = :updatedBy
             WHERE id = :reportId
             """
-            )
-            .bind("reportId", reportId)
-            .bind("updatedBy", user.id)
-            .executeAndReturnGeneratedKeys()
-            .mapTo<Report>()
-            .one()
+    )
+        .bind("reportId", reportId)
+        .bind("updatedBy", user.id)
+        .executeAndReturnGeneratedKeys()
+        .mapTo<Report>()
+        .one()
 }
 
 fun Handle.putReport(
-        id: UUID,
-        report: Report.Companion.ReportInput,
-        user: AuthenticatedUser
+    id: UUID,
+    report: Report.Companion.ReportInput,
+    user: AuthenticatedUser
 ): Report {
     return createQuery(
-                    """
+        """
             WITH report AS (
                 UPDATE report r
-                 SET name = :name, updated_by = :updatedBy
+                 SET name = :name, updated_by = :updatedBy, no_observations = :noObservations
                  FROM "order" o, users u
                 WHERE r.id = :id AND u.id = :updatedBy AND (o.assignee_id = u.id OR u.role != 'yrityskäyttäjä')
                 RETURNING r.*
             ) 
             $SELECT_REPORT_SQL
             """
-            )
-            .bind("id", id)
-            .bind("name", report.name)
-            .bind("updatedBy", user.id)
-            .mapTo<Report>()
-            .findOne()
-            .getOrNull()
-            ?: throw NotFound()
+    )
+        .bindKotlin(report)
+        .bind("id", id)
+        .bind("updatedBy", user.id)
+        .mapTo<Report>()
+        .findOne()
+        .getOrNull()
+        ?: throw NotFound()
 }
 
-fun Handle.getReport(id: UUID, user: AuthenticatedUser): Report {
+fun Handle.getReport(
+    id: UUID,
+    user: AuthenticatedUser
+): Report {
     return createQuery(
-                    """ 
+        """ 
                 $SELECT_REPORT_SQL
                 JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
                 WHERE r.id = :id
             """
-            )
-            .bind("id", id)
-            .bind("userId", user.id)
-            .mapTo<Report>()
-            .findOne()
-            .getOrNull()
-            ?: throw NotFound()
+    )
+        .bind("id", id)
+        .bind("userId", user.id)
+        .mapTo<Report>()
+        .findOne()
+        .getOrNull()
+        ?: throw NotFound()
 }
 
 fun Handle.getReports(user: AuthenticatedUser): List<Report> {
     return createQuery(
-                    """
+        """
                 $SELECT_REPORT_SQL
                 JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
                 ORDER BY r.created DESC
             """
-            )
-            .bind("userId", user.id)
-            .mapTo<Report>()
-            .list()
-            ?: emptyList()
+    )
+        .bind("userId", user.id)
+        .mapTo<Report>()
+        .list()
+        ?: emptyList()
 }
 
 fun getTableDefinitionByDocumentType(documentType: DocumentType) =
-        when (documentType) {
-            DocumentType.LIITO_ORAVA_PISTEET -> TableDefinition.LiitoOravaPisteet
-            DocumentType.LIITO_ORAVA_ALUEET -> TableDefinition.LiitoOravaAlueet
-            DocumentType.LIITO_ORAVA_VIIVAT -> TableDefinition.LiitoOravaYhteysviivat
-            else -> null
-        }
+    when (documentType) {
+        DocumentType.LIITO_ORAVA_PISTEET -> TableDefinition.LiitoOravaPisteet
+        DocumentType.LIITO_ORAVA_ALUEET -> TableDefinition.LiitoOravaAlueet
+        DocumentType.LIITO_ORAVA_VIIVAT -> TableDefinition.LiitoOravaYhteysviivat
+        else -> null
+    }
