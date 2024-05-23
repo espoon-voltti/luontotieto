@@ -88,7 +88,7 @@ COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.yksikko IS 'Havaittujen yksik�
 COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.lisatieto IS 'Mahdollisia lisätietoja havainnoista tai lyhyt kuvaus havainnosta. Mahdollisia tarkempia mainintoja esiintymän laadusta tai muu arvoperuste (hot spot, lisääntymiskolonia, ruokailualue tms.)';
 COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.viite IS 'Viite; viittaus selvitykseen tai vastaavaan, jonka yhteydessä havainto on tehty. Selvityksen täydellinen nimi, ei päivämääriä.';
 COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.havaitsija IS 'Havainnon tekijän yrityksen virallinen nimi (Oy:t mukaan).';
-COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.selvitys_id IS 'TODO';
+COMMENT ON COLUMN muut_huomioitavat_lajit_pisteet.selvitys_id IS 'Selvityksen tunniste';
 
 -- ************************
 -- Muut huomioitavat lajit, viivat
@@ -104,7 +104,7 @@ CREATE TABLE muut_huomioitavat_lajit_viivat
     direktiivi            TEXT                                  NOT NULL DEFAULT '-' CHECK ( direktiivi <> '' ),
     havaintopaikan_kuvaus TEXT,
     laji_luokitus         TEXT                                  NOT NULL DEFAULT '-' CHECK ( laji_luokitus <> '' ), -- esim. lepakoille eurobat luokka
-    lisatieto             TEXT,                                                                          -- Yhdistä havainnon_kuvaus ja lisätieto
+    lisatieto             TEXT,                                                                                     -- Yhdistä havainnon_kuvaus ja lisätieto
     pituus                REAL                                  NOT NULL GENERATED ALWAYS AS ( st_length(geom)) STORED,
     viite                 TEXT                                  NOT NULL,                                           -- vanha nimi: Tietolähteen selite. Jatkossa luontotietosovellus kirjoittaa tämän arvon
     havaitsija            TEXT                                  NOT NULL DEFAULT '-' CHECK ( havaitsija <> '' ),
@@ -125,10 +125,10 @@ COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.direktiivi IS 'Jos kyseinen laj
 COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.havaintopaikan_kuvaus IS 'Lyhyt, vapaamuotoinen kuvaus havaintopaikasta.';
 COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.laji_luokitus IS 'TODO';
 COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.lisatieto IS 'Mahdollisia lisätietoja havainnoista tai lyhyt kuvaus havainnosta. Mahdollisia tarkempia mainintoja esiintymän laadusta tai muu arvoperuste (hot spot, lisääntymiskolonia, ruokailualue tms.)';
-COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.pituus IS 'TODO';
+COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.pituus IS 'Kulkuyhteyden/liikkumisyhteyden pituus metreinä';
 COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.viite IS 'Viite; viittaus selvitykseen tai vastaavaan, jonka yhteydessä havainto on tehty. Selvityksen täydellinen nimi, ei päivämääriä.';
 COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.havaitsija IS 'Havainnon tekijän yrityksen virallinen nimi (Oy:t mukaan).';
-COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.selvitys_id IS 'TODO';
+COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.selvitys_id IS 'Selvityksen tunniste';
 
 -- ************************
 -- Muut huomioitavat lajit, aluetaulu
@@ -136,22 +136,22 @@ COMMENT ON COLUMN muut_huomioitavat_lajit_viivat.selvitys_id IS 'TODO';
 CREATE TABLE muut_huomioitavat_lajit_alueet
 (
     id                    INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    pvm                   DATE                    NOT NULL,                                                    -- Oletus 1.1.yyyy
+    pvm                   DATE                                  NOT NULL,                                                    -- Oletus 1.1.yyyy
     elioryhma             muut_huomioitavat_lajit_elioryhma     NOT NULL,
     tieteellinen_nimi     TEXT                                  NOT NULL,
     suomenkielinen_nimi   TEXT                                  NOT NULL,
     "IUCN_luokka"         "muut_huomioitavat_lajit_IUCN_luokka" NOT NULL,
-    direktiivi            TEXT                    NOT NULL DEFAULT '-' CHECK ( direktiivi <> '' ),
+    direktiivi            TEXT                                  NOT NULL DEFAULT '-' CHECK ( direktiivi <> '' ),
     havaintopaikan_kuvaus TEXT,
-    laji_luokitus         TEXT                    NOT NULL DEFAULT '-' CHECK ( laji_luokitus <> '' ),          -- esim. lepakoille eurobat luokka
+    laji_luokitus         TEXT                                  NOT NULL DEFAULT '-' CHECK ( laji_luokitus <> '' ),          -- esim. lepakoille eurobat luokka
     yksilo_maara          INTEGER,
-    yksikko               TEXT,                                                                                -- Onko havaittu 15 protoneemaa, yksilöä, itiö jne.
-    lisatieto             TEXT,                                                                                -- Yhdistä havainnon_kuvaus ja lisätieto
-    pinta_ala             REAL                    NOT NULL GENERATED ALWAYS AS (st_area(geom) / 10000) STORED, -- Lasketaan automaattisesti: alueen pinta-ala (ha). Korjaa myös liito-oraville. Pinta-alat aina (ha)
-    viite                 TEXT                    NOT NULL,                                                    -- vanha nimi: Tietolähteen selite. Jatkossa luontotietosovellus kirjoittaa tämän arvon
-    havaitsija            TEXT                    NOT NULL DEFAULT '-' CHECK ( havaitsija <> '' ),
-    selvitys_id           UUID                    NULL,
-    geom                  geometry(POLYGON, 3879) NOT NULL
+    yksikko               TEXT,                                                                                              -- Onko havaittu 15 protoneemaa, yksilöä, itiö jne.
+    lisatieto             TEXT,                                                                                              -- Yhdistä havainnon_kuvaus ja lisätieto
+    pinta_ala             REAL                                  NOT NULL GENERATED ALWAYS AS (st_area(geom) / 10000) STORED, -- Lasketaan automaattisesti: alueen pinta-ala (ha). Korjaa myös liito-oraville. Pinta-alat aina (ha)
+    viite                 TEXT                                  NOT NULL,                                                    -- vanha nimi: Tietolähteen selite. Jatkossa luontotietosovellus kirjoittaa tämän arvon
+    havaitsija            TEXT                                  NOT NULL DEFAULT '-' CHECK ( havaitsija <> '' ),
+    selvitys_id           UUID                                  NULL,
+    geom                  geometry(POLYGON, 3879)               NOT NULL
 );
 
 CREATE INDEX muut_huomioitavat_lajit_alueet_idx ON muut_huomioitavat_lajit_alueet USING gist (geom);
@@ -171,6 +171,6 @@ COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.lisatieto IS 'Mahdollisia lisä
 COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.pinta_ala IS 'Alueen koko hehtaareina';
 COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.viite IS 'Viite; viittaus selvitykseen tai vastaavaan, jonka yhteydessä havainto on tehty. Selvityksen täydellinen nimi, ei päivämääriä.';
 COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.havaitsija IS 'Havainnon tekijän yrityksen virallinen nimi (Oy:t mukaan).';
-COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.selvitys_id IS 'TODO';
+COMMENT ON COLUMN muut_huomioitavat_lajit_alueet.selvitys_id IS 'Selvityksen tunniste';
 
 
