@@ -11,14 +11,12 @@ import { Order, OrderFileDocumentType } from './order-api'
 
 export interface ReportFormInput {
   name: string
-  description: string
   filesToAdd: ReportFileInput[]
   filesToRemove: string[]
 }
 
 export interface ReportInput {
   name: string
-  description: string
 }
 
 export function getDocumentTypeTitle<

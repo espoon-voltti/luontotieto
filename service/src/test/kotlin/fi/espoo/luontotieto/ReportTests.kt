@@ -29,7 +29,6 @@ class ReportTests : FullApplicationTest() {
 
         assertNotNull(reportResponse)
         assertEquals("Test report", reportResponse.name)
-        assertEquals("Test description", reportResponse.description)
         assertEquals("Teija Testaaja", reportResponse.createdBy)
         assertEquals("Teija Testaaja", reportResponse.updatedBy)
     }
@@ -80,10 +79,9 @@ class ReportTests : FullApplicationTest() {
             reportController.updateReport(
                 adminUser,
                 report.id,
-                Report.Companion.ReportInput("New name", "New description")
+                Report.Companion.ReportInput("New name")
             )
         assertEquals("New name", updatedReport.name)
-        assertEquals("New description", updatedReport.description)
         assertNotEquals(report.updated, updatedReport.updated)
         assertEquals(report.created, updatedReport.created)
     }

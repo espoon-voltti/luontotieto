@@ -15,18 +15,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
 import { FileInput, FileInputData } from 'shared/form/File/FileInput'
-import { TextArea } from 'shared/form/TextArea'
 import { useDebouncedState } from 'shared/useDebouncedState'
 import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 
-import {
-  FlexCol,
-  GroupOfInputRows,
-  LabeledInput,
-  VerticalGap
-} from '../../shared/layout'
-import { H3, Label } from '../../shared/typography'
+import { FlexCol, GroupOfInputRows, VerticalGap } from '../../shared/layout'
+import { H3 } from '../../shared/typography'
 
 const StyledInlineButton = styled(InlineButton)`
   font-size: 0.9rem;
@@ -133,10 +127,6 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
     props.mode === 'CREATE' ? '' : props.report.name
   )
 
-  const [description, setDescription] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.report.description
-  )
-
   const [fileInputs, setFileInputs] = useState(originalFileInputs)
 
   const updateFileInput = useCallback(
@@ -189,13 +179,11 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
 
   const validInput: ReportFormInput | null = useMemo(() => {
     if (name.trim() === '') return null
-    if (description.trim() === '') return null
 
     if (!filesAreValid(requiredFiles, fileInputs)) return null
 
     return {
       name: name.trim(),
-      description: description.trim(),
       filesToAdd: fileInputs.flatMap((e) =>
         e.type === 'NEW' && e.file !== null
           ? [
@@ -216,7 +204,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
           : []
       )
     }
-  }, [name, description, fileInputs, requiredFiles, originalFileInputs])
+  }, [name, fileInputs, requiredFiles, originalFileInputs])
 
   useEffect(() => {
     props.onChange(validInput)
@@ -278,16 +266,6 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
           onClick={() => addFileInput(ReportFileDocumentType.OTHER)}
         />
       </GroupOfInputRows>
-      <VerticalGap $size="m" />
-      <LabeledInput $cols={4}>
-        <Label>Yhteenveto</Label>
-        <TextArea
-          onChange={setDescription}
-          value={description}
-          rows={2}
-          readonly={reportIsAlreadyApproved}
-        />
-      </LabeledInput>
       <VerticalGap $size="m" />
     </FlexCol>
   )
