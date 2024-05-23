@@ -25,7 +25,6 @@ import { useDebouncedState } from 'shared/useDebouncedState'
 import { v4 as uuidv4 } from 'uuid'
 
 import { useGetAssigneeUsersQuery } from '../../api/hooks/users'
-import { User } from '../../api/users-api'
 import { DATE_PATTERN } from '../../shared/dates'
 import { Select } from '../../shared/form/Select'
 import {
@@ -107,79 +106,69 @@ function filesAreValid(fileInputs: OrderFileInputElement[]): boolean {
   )
 }
 
+const defaultReportDocuments = [
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.LIITO_ORAVA_PISTEET
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.LIITO_ORAVA_ALUEET
+  }
+]
+
+function createOrderFormInput(order: Order | undefined): OrderFormInput {
+  return {
+    name: order?.name ?? '',
+    description: order?.description ?? '',
+    returnDate: order?.returnDate ?? '',
+    assigneeId: order?.assigneeId ?? '',
+    assigneeContactEmail: order?.assigneeContactEmail ?? '',
+    assigneeContactPerson: order?.assigneeContactPerson ?? '',
+    contactPhone: order?.contactPhone ?? '',
+    contactPerson: order?.contactPerson ?? '',
+    contactEmail: order?.contactEmail ?? '',
+    filesToAdd: [],
+    filesToRemove: [],
+    reportDocuments: []
+  }
+}
+
 export const OrderForm = React.memo(function OrderForm(props: Props) {
   const originalFileInputs = useMemo(
     () => createFileInputs(props.mode === 'EDIT' ? props.orderFiles : []),
     [props]
   )
 
-  const defaultReportDocuments = [
-    {
-      checked: false,
-      documentType: ReportFileDocumentType.LIITO_ORAVA_PISTEET
-    },
-    {
-      checked: false,
-      documentType: ReportFileDocumentType.LIITO_ORAVA_ALUEET
-    }
-  ]
-
-  const [name, setName] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.name
-  )
-
-  const [returnDate, setReturnDate] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.returnDate
+  const [orderInput, setOrderInput] = useDebouncedState<OrderFormInput>(
+    createOrderFormInput(props.mode === 'EDIT' ? props?.order : undefined)
   )
 
   const [planNumbers, setPlanNumbers] = useDebouncedState(
     props.mode === 'CREATE' ? [] : props.order.planNumber ?? []
   )
 
-  const [description, setDescription] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.description
-  )
-
-  const [contactPerson, setContactPerson] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.contactPerson
-  )
-
-  const [contactEmail, setContactEmail] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.contactEmail
-  )
-
   const invalidContactEmailInfo = useMemo(
     () =>
-      contactEmail && !contactEmail.match(emailRegex)
+      orderInput.contactEmail && !orderInput.contactEmail.match(emailRegex)
         ? {
             text: 'Syötä oikeaa muotoa oleva sähköposti',
             status: 'warning' as const
           }
         : undefined,
-    [contactEmail]
-  )
-
-  const [contactPhone, setContactPhone] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.contactPhone
-  )
-
-  const [assigneeContactPerson, setAssigneeContactPerson] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.assigneeContactPerson
-  )
-
-  const [assigneeContactEmail, setAssigneeContactEmail] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.order.assigneeContactEmail
+    [orderInput.contactEmail]
   )
 
   const invalidAssigneeContactEmailInfo = useMemo(
     () =>
-      assigneeContactEmail && !assigneeContactEmail.match(emailRegex)
+      orderInput.assigneeContactEmail &&
+      !orderInput.assigneeContactEmail.match(emailRegex)
         ? {
             text: 'Syötä oikeaa muotoa oleva sähköposti',
             status: 'warning' as const
           }
         : undefined,
-    [assigneeContactEmail]
+    [orderInput.assigneeContactEmail]
   )
 
   const [orderFiles, setOrderFiles] = useState<OrderFileInputElement[]>(
@@ -271,42 +260,39 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   )
 
   const { data: assigneeUsers } = useGetAssigneeUsersQuery()
-  const [assignee, setAssignee] = useState<User | undefined>()
 
-  useEffect(() => {
-    if (props.mode === 'EDIT') {
-      const assignee = assigneeUsers?.find(
-        (u) => u?.id === props.order.assigneeId
-      )
-      setAssignee(assignee)
-    }
-  }, [assigneeUsers, props])
+  const assignee = useMemo(
+    () => assigneeUsers?.find((u) => u?.id === orderInput.assigneeId),
+    [orderInput, assigneeUsers]
+  )
 
   const validInput: OrderFormInput | null = useMemo(() => {
-    if (name.trim() === '') return null
-    if (description.trim() === '') return null
+    if (orderInput.name.trim() === '') return null
+    if (orderInput.description.trim() === '') return null
     if (!filesAreValid(orderFiles)) return null
     if (!assignee) return null
-    if (!returnDate.trim().match(DATE_PATTERN)) return null
-    if (contactPerson.trim() === '') return null
-    if (contactPhone.trim() === '') return null
-    if (!contactEmail.trim().match(emailRegex)) return null
-    if (assigneeContactPerson.trim() === '') return null
-    if (!assigneeContactEmail.trim().match(emailRegex)) return null
+    if (!orderInput.returnDate.trim().match(DATE_PATTERN)) return null
+    if (orderInput.contactPerson.trim() === '') return null
+    if (orderInput.contactPhone.trim() === '') return null
+    if (!orderInput.contactEmail.trim().match(emailRegex)) return null
+    if (orderInput.assigneeContactPerson.trim() === '') return null
+    if (!orderInput.assigneeContactEmail.trim().match(emailRegex)) return null
 
     return {
-      name: name.trim(),
-      description: description.trim(),
+      name: orderInput.name.trim(),
+      description: orderInput.description.trim(),
+      returnDate: orderInput.returnDate,
+      contactEmail: orderInput.contactEmail.trim(),
+      contactPhone: orderInput.contactPhone.trim(),
+      contactPerson: orderInput.contactPerson.trim(),
+      assigneeContactEmail: orderInput.assigneeContactEmail.trim(),
+      assigneeContactPerson: orderInput.assigneeContactPerson.trim(),
       planNumber: planNumbers,
       reportDocuments: reportDocuments
         .filter((rd) => rd.checked)
         .map((rd) => ({
           documentType: rd.documentType
         })),
-      returnDate: returnDate,
-      contactPerson: contactPerson.trim(),
-      contactPhone: contactPhone.trim(),
-      contactEmail: contactEmail.trim(),
       filesToAdd: orderFiles.flatMap((e) =>
         e.type === 'NEW' && e.file !== null
           ? [
@@ -326,24 +312,15 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           ? [e.orderFile.id]
           : []
       ),
-      assigneeId: assignee.id,
-      assigneeContactPerson: assigneeContactPerson.trim(),
-      assigneeContactEmail: assigneeContactEmail.trim()
+      assigneeId: assignee.id
     }
   }, [
-    name,
-    description,
+    orderInput,
     planNumbers,
     reportDocuments,
     orderFiles,
     assignee,
-    originalFileInputs,
-    returnDate,
-    contactPerson,
-    contactPhone,
-    contactEmail,
-    assigneeContactPerson,
-    assigneeContactEmail
+    originalFileInputs
   ])
 
   useEffect(() => {
@@ -365,7 +342,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           <RowOfInputs>
             <LabeledInput $cols={4}>
               <Label>Tilauksen nimi</Label>
-              <InputField onChange={setName} value={name} />
+              <InputField
+                onChange={(name) => setOrderInput({ ...orderInput, name })}
+                value={orderInput.name}
+              />
             </LabeledInput>
           </RowOfInputs>
           <RowOfInputs>
@@ -388,8 +368,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               <Label>Selvitys palautettava viimeistään</Label>
               <InputField
                 width="m"
-                onChange={setReturnDate}
-                value={returnDate}
+                onChange={(returnDate) =>
+                  setOrderInput({ ...orderInput, returnDate })
+                }
+                value={orderInput.returnDate}
                 type="date"
               />
             </LabeledInput>
@@ -398,8 +380,13 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
             <LabeledInput $cols={10}>
               <Label>Selvityksen kuvaus</Label>
               <TextArea
-                onChange={setDescription}
-                value={description}
+                onChange={(description) =>
+                  setOrderInput({
+                    ...orderInput,
+                    description
+                  })
+                }
+                value={orderInput.description}
                 rows={2}
               />
             </LabeledInput>
@@ -408,15 +395,28 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           <RowOfInputs>
             <LabeledInput $cols={4}>
               <Label>Yhteyshenkilö</Label>
-              <InputField onChange={setContactPerson} value={contactPerson} />
+              <InputField
+                onChange={(contactPerson) =>
+                  setOrderInput({
+                    ...orderInput,
+                    contactPerson
+                  })
+                }
+                value={orderInput.contactPerson}
+              />
             </LabeledInput>
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={4}>
               <Label>Yhteyshenkilön sähköposti</Label>
               <InputField
-                onChange={setContactEmail}
-                value={contactEmail}
+                onChange={(contactEmail) =>
+                  setOrderInput({
+                    ...orderInput,
+                    contactEmail
+                  })
+                }
+                value={orderInput.contactEmail}
                 info={invalidContactEmailInfo}
               />
             </LabeledInput>
@@ -424,7 +424,15 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           <RowOfInputs>
             <LabeledInput $cols={4}>
               <Label>Yhteyshenkilön puhelinnumero</Label>
-              <InputField onChange={setContactPhone} value={contactPhone} />
+              <InputField
+                onChange={(contactPhone) =>
+                  setOrderInput({
+                    ...orderInput,
+                    contactPhone
+                  })
+                }
+                value={orderInput.contactPhone}
+              />
             </LabeledInput>
           </RowOfInputs>
           <H3>Selvityksen tekijä</H3>
@@ -434,7 +442,12 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               <Select
                 selectedItem={assignee}
                 items={assigneeUsers ?? []}
-                onChange={setAssignee}
+                onChange={(assignee) =>
+                  setOrderInput({
+                    ...orderInput,
+                    assigneeId: assignee?.id ?? ''
+                  })
+                }
                 getItemLabel={(u) => u?.name ?? '-'}
                 getItemValue={(u) => u?.id ?? '-'}
               />
@@ -444,8 +457,13 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
             <LabeledInput $cols={4}>
               <Label>Yhteyshenkilö</Label>
               <InputField
-                onChange={setAssigneeContactPerson}
-                value={assigneeContactPerson}
+                onChange={(assigneeContactPerson) =>
+                  setOrderInput({
+                    ...orderInput,
+                    assigneeContactPerson
+                  })
+                }
+                value={orderInput.assigneeContactPerson}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -453,8 +471,13 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
             <LabeledInput $cols={4}>
               <Label>Yhteyshenkilön sähköposti</Label>
               <InputField
-                onChange={setAssigneeContactEmail}
-                value={assigneeContactEmail}
+                onChange={(assigneeContactEmail) =>
+                  setOrderInput({
+                    ...orderInput,
+                    assigneeContactEmail
+                  })
+                }
+                value={orderInput.assigneeContactEmail}
                 info={invalidAssigneeContactEmailInfo}
               />
             </LabeledInput>
