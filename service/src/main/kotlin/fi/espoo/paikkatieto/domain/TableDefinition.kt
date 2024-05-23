@@ -49,7 +49,7 @@ enum class TableDefinition(
     val sqlInsertStatement: String,
     val columns: List<Column>
 ) {
-    LiitoOravaPisteet(
+    LIITO_ORAVA_PISTEET(
         layerName = "liito_orava_pisteet",
         sqlInsertStatement = SQL_INSERT_LIITO_ORAVA_PISTEET,
         columns =
@@ -77,7 +77,7 @@ enum class TableDefinition(
                 )
             )
     ),
-    LiitoOravaAlueet(
+    LIITO_ORAVA_ALUEET(
         layerName = "liito_orava_alueet",
         sqlInsertStatement = SQL_INSERT_LIITO_ORAVA_ALUEET,
         columns =
@@ -101,7 +101,7 @@ enum class TableDefinition(
                 )
             )
     ),
-    LiitoOravaYhteysviivat(
+    LIITO_ORAVA_YHTEYSTIEDOT(
         layerName = "liito_orava_yhteysviivat",
         sqlInsertStatement = SQL_INSERT_LIITO_ORAVA_YHTEYSVIIVAT,
         columns =
@@ -120,7 +120,7 @@ enum class TableDefinition(
                 )
             )
     ),
-    MuutHuomioitavatLajitPisteet(
+    MUUT_HUOMIOITAVAT_LAJIT_PISTEET(
         layerName = "muut_huomioitavat_lajit_pisteet",
         sqlInsertStatement = SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_PISTEET,
         columns =
@@ -155,7 +155,7 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class)
             )
     ),
-    MuutHuomioitavatLajitViivat(
+    MUUT_HUOMIOITAVAT_LAJIT_VIIVAT(
         layerName = "muut_huomioitavat_lajit_viivat",
         sqlInsertStatement = SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_VIIVAT,
         columns =
@@ -182,7 +182,7 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class)
             )
     ),
-    MuutHuomioitavatLajitAlueet(
+    MUUT_HUOMIOITAVAT_LAJIT_ALUEET(
         layerName = "muut_huomioitavat_lajit_alueet",
         sqlInsertStatement = SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_ALUEET,
         columns =

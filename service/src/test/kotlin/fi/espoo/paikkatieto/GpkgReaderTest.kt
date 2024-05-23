@@ -65,7 +65,7 @@ class GpkgReaderTest {
                     errors = emptyList()
                 )
             )
-        GpkgReader(file, TableDefinition.LiitoOravaPisteet).use { reader ->
+        GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
         }
@@ -102,7 +102,7 @@ class GpkgReaderTest {
                     errors = emptyList()
                 )
             )
-        GpkgReader(file, TableDefinition.LiitoOravaAlueet).use { reader ->
+        GpkgReader(file, TableDefinition.LIITO_ORAVA_ALUEET).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
         }
@@ -151,7 +151,7 @@ class GpkgReaderTest {
                         )
                 )
             )
-        GpkgReader(file, TableDefinition.LiitoOravaAlueet).use { reader ->
+        GpkgReader(file, TableDefinition.LIITO_ORAVA_ALUEET).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
         }

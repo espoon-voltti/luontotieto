@@ -17,22 +17,22 @@ import kotlin.jvm.optionals.getOrNull
 
 enum class DocumentType(val tableDefinition: TableDefinition? = null) : DatabaseEnum {
     @DatabaseValue("paikkatieto:liito_orava_pisteet")
-    LIITO_ORAVA_PISTEET(TableDefinition.LiitoOravaPisteet),
+    LIITO_ORAVA_PISTEET(TableDefinition.LIITO_ORAVA_PISTEET),
 
     @DatabaseValue("paikkatieto:liito_orava_alueet")
-    LIITO_ORAVA_ALUEET(TableDefinition.LiitoOravaAlueet),
+    LIITO_ORAVA_ALUEET(TableDefinition.LIITO_ORAVA_ALUEET),
 
     @DatabaseValue("paikkatieto:liito_orava_yhteysviivat")
-    LIITO_ORAVA_VIIVAT(TableDefinition.LiitoOravaYhteysviivat),
+    LIITO_ORAVA_VIIVAT(TableDefinition.LIITO_ORAVA_YHTEYSTIEDOT),
 
     @DatabaseValue("paikkatieto:muut_huomioitavat_lajit_pisteet")
-    MUUT_HUOMIOITAVAT_LAJIT_PISTEET(TableDefinition.MuutHuomioitavatLajitPisteet),
+    MUUT_HUOMIOITAVAT_LAJIT_PISTEET(TableDefinition.MUUT_HUOMIOITAVAT_LAJIT_PISTEET),
 
     @DatabaseValue("paikkatieto:muut_huomioitavat_lajit_alueet")
-    MUUT_HUOMIOITAVAT_LAJIT_ALUEET(TableDefinition.MuutHuomioitavatLajitAlueet),
+    MUUT_HUOMIOITAVAT_LAJIT_ALUEET(TableDefinition.MUUT_HUOMIOITAVAT_LAJIT_ALUEET),
 
     @DatabaseValue("paikkatieto:muut_huomioitavat_lajit_viivat")
-    MUUT_HUOMIOITAVAT_LAJIT_VIIVAT(TableDefinition.MuutHuomioitavatLajitViivat),
+    MUUT_HUOMIOITAVAT_LAJIT_VIIVAT(TableDefinition.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT),
 
     @DatabaseValue("luontotieto:report")
     REPORT,
