@@ -102,7 +102,42 @@ function createFileInputs(
       noObservation: false
     }))
 
-  return [...requiredFileInputs, ...otherFiles]
+  const reportInfo = reportFiles.find(
+    (rf) => rf.documentType === ReportFileDocumentType.REPORT
+  )
+
+  const mappedReportInfo = reportInfo
+    ? {
+        type: 'EXISTING' as const,
+        userDescription: reportInfo.description,
+        documentType: reportInfo.documentType,
+        details: reportInfo,
+        noObservation: false
+      }
+    : {
+        type: 'NEW' as const,
+        userDescription: '',
+        documentType: ReportFileDocumentType.REPORT,
+        file: null,
+        id: uuidv4(),
+        noObservation: false
+      }
+
+  return [...requiredFileInputs, ...otherFiles, mappedReportInfo]
+}
+
+function hasReportDocument(fileInputs: ReportFileInputElement[]): boolean {
+  const reportDocument = fileInputs.find(
+    (input) => input.documentType === ReportFileDocumentType.REPORT
+  )
+  if (!reportDocument) {
+    return false
+  } else {
+    return (
+      reportDocument?.type === 'EXISTING' ||
+      (!!reportDocument?.file && reportDocument.userDescription.trim() !== '')
+    )
+  }
 }
 
 function filesAreValid(
@@ -203,6 +238,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
   const validInput: ReportFormInput | null = useMemo(() => {
     if (name.trim() === '') return null
     if (!filesAreValid(requiredFiles, fileInputs)) return null
+    if (!hasReportDocument(fileInputs)) return null
 
     const noObs = fileInputs.flatMap((input) =>
       input.noObservation ? [input.documentType] : []

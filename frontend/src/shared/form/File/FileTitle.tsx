@@ -36,7 +36,8 @@ export const FileTitle = React.memo(function FileTitle(props: Props) {
     <Label>
       {getDocumentTypeTitle(props.documentType)}
       {isReportFileDocumentType(props.documentType) &&
-        props.documentType !== ReportFileDocumentType.OTHER && (
+        props.documentType !== ReportFileDocumentType.OTHER &&
+        props.documentType !== ReportFileDocumentType.REPORT && (
           <StyledLink
             onClick={() =>
               apiGetReportDocumentTypeFileTemplate(
