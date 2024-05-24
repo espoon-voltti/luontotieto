@@ -11,7 +11,8 @@ import {
   apiApproveReport,
   FileValidationErrorResponse
 } from 'api/report-api'
-import React, { useState } from 'react'
+import { UserContext, hasOrdererRole } from 'auth/UserContext'
+import React, { useContext, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
@@ -42,9 +43,12 @@ const StyledButton = styled(Button)`
 `
 
 export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
+  const { user } = useContext(UserContext)
+
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { id } = useParams()
+  const showApproveButton = useMemo(() => hasOrdererRole(user), [user])
 
   if (!id && props.mode === 'EDIT') throw Error('Id not found in path')
 
@@ -151,17 +155,18 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
               void onSubmit(reportInput)
             }}
           />
-
-          <Button
-            text="Hyväksy"
-            data-qa="approve-button"
-            primary
-            disabled={!report || !reportInput || approving || report.approved}
-            onClick={async () => {
-              if (!report) return
-              await approveReport(report.id)
-            }}
-          />
+          {showApproveButton && (
+            <Button
+              text="Hyväksy selvitys"
+              data-qa="approve-button"
+              primary
+              disabled={!report || !reportInput || approving || report.approved}
+              onClick={async () => {
+                if (!report) return
+                await approveReport(report.id)
+              }}
+            />
+          )}
         </FlexRight>
       </Footer>
     </>
