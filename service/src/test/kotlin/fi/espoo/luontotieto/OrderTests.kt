@@ -65,7 +65,6 @@ class OrderTests : FullApplicationTest() {
 
         assertNotNull(orderReportResponse)
         assertEquals("Test order", orderReportResponse.name)
-        assertEquals("Test description", orderReportResponse.description)
         assertEquals("Teija Testaaja", orderReportResponse.createdBy)
         assertEquals("Teija Testaaja", orderReportResponse.updatedBy)
         assertEquals("Test order", orderReportResponse.order?.name)

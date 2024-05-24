@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { OrderFile } from 'api/order-api'
 import { ReportFileDetails } from 'api/report-api'
 import React from 'react'
+import { InlineButton } from 'shared/buttons/InlineButton'
 import styled from 'styled-components'
 
 export interface SavedFile {
@@ -75,12 +76,13 @@ export default React.memo(function FileDownloadButton({
     <DownloadButton onClick={() => onClick(file.id)} data-qa={dataQa}>
       {icon && <FontAwesomeIcon icon={icon === true ? fileIcon(file) : icon} />}
       <div>{text ?? file.fileName}</div>
-      <FontAwesomeIcon
+      <InlineButton
+        text="Poista"
         icon={faX}
-        onClick={(event) => {
-          event.stopPropagation()
+        onClick={() => {
           onDelete(file.id)
         }}
+        stopPropagation={true}
       />
     </DownloadButton>
   )

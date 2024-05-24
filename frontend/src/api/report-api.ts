@@ -11,14 +11,13 @@ import { Order, OrderFileDocumentType } from './order-api'
 
 export interface ReportFormInput {
   name: string
-  description: string
+  noObservations: string[] | null
   filesToAdd: ReportFileInput[]
   filesToRemove: string[]
 }
 
 export interface ReportInput {
   name: string
-  description: string
 }
 
 export function getDocumentTypeTitle<
@@ -33,6 +32,8 @@ export function getDocumentTypeTitle<
       return 'Liito-orava viivat'
     case ReportFileDocumentType.OTHER:
       return 'Muu liite'
+    case ReportFileDocumentType.REPORT:
+      return 'Selvitysraportti'
     case OrderFileDocumentType.ORDER_INFO:
       return 'Tilauksen esitiedot'
     case OrderFileDocumentType.ORDER_AREA:
@@ -46,7 +47,8 @@ export enum ReportFileDocumentType {
   LIITO_ORAVA_PISTEET = 'LIITO_ORAVA_PISTEET',
   LIITO_ORAVA_ALUEET = 'LIITO_ORAVA_ALUEET',
   LIITO_ORAVA_VIIVAT = 'LIITO_ORAVA_VIIVAT',
-  OTHER = 'OTHER'
+  OTHER = 'OTHER',
+  REPORT = 'REPORT'
 }
 
 export const reportFileDocumentTypes = [
@@ -69,6 +71,7 @@ export interface ReportDetails extends ReportInput {
   createdBy: string
   updatedBy: string
   approved: boolean
+  noObservations: ReportFileDocumentType[] | null
   order?: Order
 }
 

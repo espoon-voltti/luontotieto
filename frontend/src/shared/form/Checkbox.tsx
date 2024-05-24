@@ -27,6 +27,10 @@ const Wrapper = styled.div`
     }
   }
 
+  &.dimmed {
+    opacity: 0.5;
+  }
+
   @media (hover: hover) {
     &:hover:not(.disabled) {
       input:checked {

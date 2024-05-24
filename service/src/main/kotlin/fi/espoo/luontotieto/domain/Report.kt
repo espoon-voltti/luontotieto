@@ -5,6 +5,7 @@
 package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.NotFound
+import fi.espoo.luontotieto.common.databaseValue
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.paikkatieto.domain.TableDefinition
 import org.jdbi.v3.core.Handle
@@ -17,18 +18,18 @@ import kotlin.jvm.optionals.getOrNull
 data class Report(
     val id: UUID,
     val name: String,
-    val description: String,
     val approved: Boolean,
     val created: OffsetDateTime,
     val updated: OffsetDateTime,
     val createdBy: String,
     val updatedBy: String,
+    val noObservations: List<DocumentType>?,
     @Nested("o_") val order: Order?
 ) {
     companion object {
         data class ReportInput(
             val name: String,
-            val description: String,
+            val noObservations: List<DocumentType>?
         )
     }
 }
@@ -37,10 +38,10 @@ private const val SELECT_REPORT_SQL =
     """
     SELECT r.id                                       AS "id",
            r.name                                     AS "name",
-           r.description                              AS "description",
            r.created                                  AS "created",
            r.updated                                  AS "updated",
            r.approved                                 AS "approved",
+           r.no_observations                          AS "noObservations",
            uc.name                                    AS "createdBy",
            uu.name                                    AS "updatedBy",
            r.order_id                                 AS "orderId",
@@ -78,15 +79,14 @@ fun Handle.insertReport(
     return createQuery(
         """
             WITH report AS (
-                INSERT INTO report (name, description, created_by, updated_by, order_id) 
-                VALUES (:name, :description, :createdBy, :updatedBy, :orderId)
+                INSERT INTO report (name, created_by, updated_by, order_id) 
+                VALUES (:name, :createdBy, :updatedBy, :orderId)
                 RETURNING *
             ) 
             $SELECT_REPORT_SQL
             """
     )
         .bind("name", data.name)
-        .bind("description", data.description)
         .bind("orderId", orderI)
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
@@ -119,11 +119,12 @@ fun Handle.putReport(
     report: Report.Companion.ReportInput,
     user: AuthenticatedUser
 ): Report {
+    val noObservations = report.noObservations?.map { dt -> dt.databaseValue() }?.toTypedArray()
     return createQuery(
         """
             WITH report AS (
                 UPDATE report r
-                 SET name = :name, description = :description, updated_by = :updatedBy
+                 SET name = :name, updated_by = :updatedBy, no_observations = :noObservations
                  FROM "order" o, users u
                 WHERE r.id = :id AND u.id = :updatedBy AND (o.assignee_id = u.id OR u.role != 'yrityskäyttäjä')
                 RETURNING r.*
@@ -131,13 +132,14 @@ fun Handle.putReport(
             $SELECT_REPORT_SQL
             """
     )
-        .bind("id", id)
         .bind("name", report.name)
-        .bind("description", report.description)
+        .bind("noObservations", noObservations)
+        .bind("id", id)
         .bind("updatedBy", user.id)
         .mapTo<Report>()
         .findOne()
-        .getOrNull() ?: throw NotFound()
+        .getOrNull()
+        ?: throw NotFound()
 }
 
 fun Handle.getReport(
@@ -155,7 +157,8 @@ fun Handle.getReport(
         .bind("userId", user.id)
         .mapTo<Report>()
         .findOne()
-        .getOrNull() ?: throw NotFound()
+        .getOrNull()
+        ?: throw NotFound()
 }
 
 fun Handle.getReports(user: AuthenticatedUser): List<Report> {
@@ -168,7 +171,8 @@ fun Handle.getReports(user: AuthenticatedUser): List<Report> {
     )
         .bind("userId", user.id)
         .mapTo<Report>()
-        .list() ?: emptyList()
+        .list()
+        ?: emptyList()
 }
 
 fun getTableDefinitionByDocumentType(documentType: DocumentType) =

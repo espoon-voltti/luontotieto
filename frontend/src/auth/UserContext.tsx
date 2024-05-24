@@ -17,6 +17,9 @@ export interface UserState {
   user: AppUser | null
 }
 
+export function hasViewerRole(user: AppUser | null) {
+  return user?.role === UserRole.VIEWER
+}
 export function hasOrdererRole(user: AppUser | null) {
   return user?.role === UserRole.ADMIN || user?.role === UserRole.ORDERER
 }

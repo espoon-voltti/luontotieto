@@ -11,7 +11,8 @@ import {
   apiApproveReport,
   FileValidationErrorResponse
 } from 'api/report-api'
-import React, { useState } from 'react'
+import { UserContext, hasOrdererRole, hasViewerRole } from 'auth/UserContext'
+import React, { useContext, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
@@ -42,9 +43,13 @@ const StyledButton = styled(Button)`
 `
 
 export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
+  const { user } = useContext(UserContext)
+
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { id } = useParams()
+  const userIsViewer = useMemo(() => hasViewerRole(user), [user])
+  const showApproveButton = useMemo(() => hasOrdererRole(user), [user])
 
   if (!id && props.mode === 'EDIT') throw Error('Id not found in path')
 
@@ -122,6 +127,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
         <SectionContainer>
           {props.mode === 'EDIT' && report && reportFiles && (
             <ReportForm
+              readOnly={userIsViewer}
               mode={props.mode}
               onChange={setReportInput}
               report={report}
@@ -131,7 +137,11 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
           )}
 
           {props.mode === 'CREATE' && (
-            <ReportForm mode={props.mode} onChange={setReportInput} />
+            <ReportForm
+              readOnly={userIsViewer}
+              mode={props.mode}
+              onChange={setReportInput}
+            />
           )}
         </SectionContainer>
       </PageContainer>
@@ -139,29 +149,48 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
       <VerticalGap $size="XL" />
       <Footer>
         <FlexRight style={{ height: '100%' }}>
-          <StyledButton
-            text="Tallenna"
-            data-qa="save-button"
-            primary
-            disabled={
-              !reportInput || savingReport || updatingReport || report?.approved
-            }
-            onClick={() => {
-              if (!reportInput) return
-              void onSubmit(reportInput)
-            }}
-          />
-
-          <Button
-            text="Hyväksy"
-            data-qa="approve-button"
-            primary
-            disabled={!report || !reportInput || approving || report.approved}
-            onClick={async () => {
-              if (!report) return
-              await approveReport(report.id)
-            }}
-          />
+          {userIsViewer ? (
+            <StyledButton
+              text="Takaisin etusivulle"
+              onClick={() => navigate(`/luontotieto`)}
+            />
+          ) : (
+            <>
+              <StyledButton
+                text="Peruuta"
+                onClick={() => navigate(`/luontotieto`)}
+              />
+              <StyledButton
+                text="Tallenna muutokset"
+                data-qa="save-button"
+                primary
+                disabled={
+                  !reportInput ||
+                  savingReport ||
+                  updatingReport ||
+                  report?.approved
+                }
+                onClick={() => {
+                  if (!reportInput) return
+                  void onSubmit(reportInput)
+                }}
+              />
+              {showApproveButton && (
+                <Button
+                  text="Hyväksy selvitys"
+                  data-qa="approve-button"
+                  primary
+                  disabled={
+                    !report || !reportInput || approving || report.approved
+                  }
+                  onClick={async () => {
+                    if (!report) return
+                    await approveReport(report.id)
+                  }}
+                />
+              )}
+            </>
+          )}
         </FlexRight>
       </Footer>
     </>
