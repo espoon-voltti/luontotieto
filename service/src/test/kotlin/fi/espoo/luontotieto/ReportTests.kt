@@ -5,6 +5,7 @@
 package fi.espoo.luontotieto
 
 import fi.espoo.luontotieto.config.AuthenticatedUser
+import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.OrderController
 import fi.espoo.luontotieto.domain.Report
 import fi.espoo.luontotieto.domain.ReportController
@@ -79,9 +80,10 @@ class ReportTests : FullApplicationTest() {
             reportController.updateReport(
                 adminUser,
                 report.id,
-                Report.Companion.ReportInput("New name", null)
+                Report.Companion.ReportInput("New name", listOf(DocumentType.LIITO_ORAVA_VIIVAT))
             )
         assertEquals("New name", updatedReport.name)
+        assertEquals(listOf(DocumentType.LIITO_ORAVA_VIIVAT), updatedReport.noObservations)
         assertNotEquals(report.updated, updatedReport.updated)
         assertEquals(report.created, updatedReport.created)
     }

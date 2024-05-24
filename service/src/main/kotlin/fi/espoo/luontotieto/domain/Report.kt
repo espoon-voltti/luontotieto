@@ -9,7 +9,6 @@ import fi.espoo.luontotieto.common.databaseValue
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.paikkatieto.domain.TableDefinition
 import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
 import java.time.OffsetDateTime
@@ -120,7 +119,7 @@ fun Handle.putReport(
     report: Report.Companion.ReportInput,
     user: AuthenticatedUser
 ): Report {
-    val noObservations = report.noObservations?.map{dt -> dt.databaseValue()}?.toTypedArray()
+    val noObservations = report.noObservations?.map { dt -> dt.databaseValue() }?.toTypedArray()
     return createQuery(
         """
             WITH report AS (
