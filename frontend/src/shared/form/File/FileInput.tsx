@@ -37,10 +37,11 @@ export interface FileInputData {
 interface FileInputProps<T> {
   documentType: T
   data: FileInputData
-  noObservation: boolean
   errors?: FileValidationError[]
   onChange: (data: FileInputData & { noObservation: boolean }) => void
   showTitle?: boolean
+  readOnly?: boolean
+  noObservation?: boolean
 }
 
 const fileValidationErrorToMessage = (error: FileValidationError): string => {
@@ -61,11 +62,12 @@ export const FileInput = <
   T extends ReportFileDocumentType | OrderFileDocumentType
 >({
   data,
-  noObservation,
   documentType,
   onChange,
   errors,
-  showTitle = true
+  noObservation = false,
+  showTitle = true,
+  readOnly = false
 }: FileInputProps<T>) => {
   const [file, setFile] = useState(data.file ?? null)
   const [description, setDescription] = useDebouncedState(data.description)
@@ -108,6 +110,7 @@ export const FileInput = <
           )}
           {showNoObservationCheckBox && (
             <Checkbox
+              disabled={readOnly}
               label="Ei havaintoa"
               checked={noObs}
               onChange={(checked) => setNoObs(checked)}
@@ -127,7 +130,7 @@ export const FileInput = <
           {showTitle && <VerticalGap $size="L" />}
           <Label>Lisätiedot tarvittaessa</Label>
           <InputField
-            readonly={noObservation}
+            readonly={readOnly || noObservation}
             onChange={(value) => {
               setDescription(value)
             }}

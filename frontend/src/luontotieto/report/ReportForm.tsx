@@ -30,6 +30,7 @@ interface CreateProps {
   mode: 'CREATE'
   onChange: (validInput: ReportFormInput | null) => void
   saveErrors?: FileValidationErrorResponse[]
+  readOnly: boolean
 }
 
 interface EditProps {
@@ -38,6 +39,7 @@ interface EditProps {
   reportFiles: ReportFileDetails[]
   onChange: (validInput: ReportFormInput | null) => void
   saveErrors?: FileValidationErrorResponse[]
+  readOnly: boolean
 }
 
 type Props = CreateProps | EditProps
@@ -121,7 +123,8 @@ function filesAreValid(
 }
 
 export const ReportForm = React.memo(function ReportForm(props: Props) {
-  const reportIsAlreadyApproved = props.mode === 'EDIT' && props.report.approved
+  const readOnly =
+    props.readOnly || (props.mode === 'EDIT' && props.report.approved)
   const requiredFiles = useMemo(
     () =>
       props.mode === 'EDIT' ? props.report.order?.reportDocuments ?? [] : [],
@@ -248,6 +251,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
             case 'NEW':
               return (
                 <FileInput
+                  readOnly={readOnly}
                   documentType={fInput.documentType}
                   key={fInput.documentType + index}
                   data={{
@@ -272,7 +276,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
                   data={{
                     type: 'REPORT',
                     file: fInput.details,
-                    readonly: reportIsAlreadyApproved,
+                    readonly: readOnly,
                     documentType: fInput.documentType,
                     updated: fInput.details.updated
                   }}
@@ -283,11 +287,13 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
               )
           }
         })}
-        <StyledInlineButton
-          text="Lisää liite"
-          icon={faPlus}
-          onClick={() => addFileInput(ReportFileDocumentType.OTHER)}
-        />
+        {!readOnly && (
+          <StyledInlineButton
+            text="Lisää liite"
+            icon={faPlus}
+            onClick={() => addFileInput(ReportFileDocumentType.OTHER)}
+          />
+        )}
       </GroupOfInputRows>
       <VerticalGap $size="m" />
     </FlexCol>
