@@ -59,6 +59,7 @@ export interface InlineButtonProps extends BaseProps {
   disabled?: boolean
   icon?: IconDefinition
   iconRight?: boolean
+  stopPropagation?: boolean
 }
 
 export const InlineButton = React.memo(function InlineButton({
@@ -69,13 +70,21 @@ export const InlineButton = React.memo(function InlineButton({
   icon,
   disabled = false,
   color,
-  iconRight
+  iconRight,
+  stopPropagation = false
 }: InlineButtonProps) {
   return (
     <StyledButton
       className={classNames(className, { disabled })}
       data-qa={dataQa}
-      onClick={disabled ? undefined : onClick}
+      onClick={(event) => {
+        if (!disabled) {
+          if (stopPropagation) {
+            event.stopPropagation()
+          }
+          onClick()
+        }
+      }}
       disabled={disabled}
       color={color}
       type="button"
