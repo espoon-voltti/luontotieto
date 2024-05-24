@@ -177,6 +177,8 @@ enum class TableDefinition(
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
                 Column(name = "laji_luokitus", kClass = String::class),
+                // Do not write pituus to DB. Keep it only in the template.
+                Column(name = "pituus", kClass = Double::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
                 Column(name = "viite", kClass = String::class),
                 Column(name = "havaitsija", kClass = String::class)
@@ -206,6 +208,8 @@ enum class TableDefinition(
                 Column(name = "laji_luokitus", kClass = String::class),
                 Column(name = "yksilo_maara", kClass = Int::class, isNullable = true),
                 Column(name = "yksikko", kClass = String::class, isNullable = true),
+                // Do not write pinta_ala to DB. Keep it only in the template.
+                Column(name = "pinta_ala", kClass = Double::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
                 Column(name = "viite", kClass = String::class),
                 Column(name = "havaitsija", kClass = String::class)
