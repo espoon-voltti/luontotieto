@@ -68,7 +68,7 @@ export interface ReportDetails extends ReportInput {
   createdBy: string
   updatedBy: string
   approved: boolean
-  noObservations: string[] | null
+  noObservations: ReportFileDocumentType[] | null
   order?: Order
 }
 

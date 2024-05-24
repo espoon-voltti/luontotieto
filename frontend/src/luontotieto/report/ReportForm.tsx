@@ -127,9 +127,9 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
       props.mode === 'EDIT' ? props.report.order?.reportDocuments ?? [] : [],
     [props]
   )
-  const [noObservations, _setNoObservations] = useState<string[] | null>(
-    props.mode === 'CREATE' ? null : props.report.noObservations
-  )
+  const [noObservations, _setNoObservations] = useState<
+    ReportFileDocumentType[] | null
+  >(props.mode === 'CREATE' ? null : props.report.noObservations)
 
   const originalFileInputs = useMemo(() => {
     const reportFiles = props.mode === 'EDIT' ? props.reportFiles : []
