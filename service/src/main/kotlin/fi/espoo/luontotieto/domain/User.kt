@@ -195,6 +195,7 @@ fun Handle.getUsers() =
         """
                 $SELECT_USER_SQL
                 WHERE NOT u.system_user
+                ORDER BY u.name
             """
     )
         .mapTo<User>()
