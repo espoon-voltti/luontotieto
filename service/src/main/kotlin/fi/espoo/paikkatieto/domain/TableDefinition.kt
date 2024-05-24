@@ -447,6 +447,31 @@ fun Handle.getEnumRange(column: Column): List<String>? {
     }
 }
 
+fun Handle.getColumnDescriptions(tableDefinition: TableDefinition): Map<String, String?> {
+    return createQuery(
+        """
+            SELECT c.column_name AS "column", pgd.description
+            FROM pg_catalog.pg_statio_all_tables AS stat
+            JOIN pg_catalog.pg_description pgd ON (pgd.objoid = stat.relid)
+            JOIN information_schema.columns c
+            ON (pgd.objsubid = c.ordinal_position
+                AND c.table_schema = stat.schemaname
+                AND c.table_name = stat.relname
+                AND c.table_name = '${tableDefinition.layerName}'
+                AND c.table_schema = 'public'
+            )
+        """
+    )
+        .reduceRows(emptyMap()) { map, rowView ->
+            map.plus(
+                Pair(
+                    rowView.getColumn("column", String::class.javaObjectType),
+                    rowView.getColumn("description", String::class.javaObjectType),
+                )
+            )
+        }
+}
+
 private fun convertColumnsWithGeometry(map: Map<String, Any?>): Map<String, Any?> {
     return map.mapValues { (_, value) ->
         when (value) {

@@ -13,6 +13,7 @@ import fi.espoo.luontotieto.s3.Document
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
 import fi.espoo.luontotieto.s3.getAndCheckFileName
+import fi.espoo.paikkatieto.domain.getColumnDescriptions
 import fi.espoo.paikkatieto.domain.getEnumRange
 import fi.espoo.paikkatieto.domain.insertPaikkatieto
 import fi.espoo.paikkatieto.reader.GpkgReader
@@ -234,8 +235,12 @@ class ReportController {
         @PathVariable documentType: DocumentType
     ): ResponseEntity<Resource> {
         val tableDefinition = documentType.tableDefinition ?: throw NotFound()
+        val columnDescriptions =
+            paikkatietoJdbi.inTransactionUnchecked { tx ->
+                tx.getColumnDescriptions(tableDefinition)
+            }
         val file =
-            GpkgWriter.write(tableDefinition) { column ->
+            GpkgWriter.write(tableDefinition, columnDescriptions) { column ->
                 paikkatietoJdbi.inTransactionUnchecked { tx -> tx.getEnumRange(column) }
             }
                 ?.takeIf { Files.size(it) > 0 } ?: throw NotFound()
