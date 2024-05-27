@@ -364,10 +364,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     label: pn
   }))
 
-  const uniqueOrderUnits = [
+  const uniqueOrderingUnits = [
     ...new Set([...orderingUnit, ...props.orderingUnits])
   ]
-  const orderUnitSuggestions = uniqueOrderUnits.map((pn) => ({
+  const orderingUnitSuggestions = uniqueOrderingUnits.map((pn) => ({
     value: pn,
     label: pn
   }))
@@ -390,7 +390,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
             <LabeledInput $cols={4}>
               <Label>Tilaajan yksikkö</Label>
               <TagAutoComplete
-                suggestions={orderUnitSuggestions}
+                suggestions={orderingUnitSuggestions}
                 data={
                   orderingUnit?.map((pn) => ({
                     value: pn,
