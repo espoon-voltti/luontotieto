@@ -2,7 +2,12 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 import { useQuery } from '@tanstack/react-query'
-import { apiGetOrder, apiGetOrderFiles, apiGetPlanNumbers } from 'api/order-api'
+import {
+  apiGetOrder,
+  apiGetOrderFiles,
+  apiGetOrdererUnits,
+  apiGetPlanNumbers
+} from 'api/order-api'
 
 export function useGetOrderQuery(id?: string) {
   return useQuery({
@@ -34,5 +39,12 @@ export function useGetOrderPlanNumbersQuery() {
   return useQuery({
     queryKey: ['plan-numbers'],
     queryFn: () => apiGetPlanNumbers()
+  })
+}
+
+export function useGetOrdererUnitsQuery() {
+  return useQuery({
+    queryKey: ['orderer-units'],
+    queryFn: () => apiGetOrdererUnits()
   })
 }

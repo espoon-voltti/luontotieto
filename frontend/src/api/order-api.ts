@@ -30,6 +30,7 @@ export interface OrderFormInput {
   assigneeContactPerson: string
   assigneeContactEmail: string
   returnDate: string
+  ordererUnit?: string[]
 }
 
 export interface OrderInput {
@@ -44,6 +45,7 @@ export interface OrderInput {
   assigneeContactEmail: string
   returnDate: string
   reportDocuments: OrderReportDocumentInput[]
+  ordererUnit?: string[]
 }
 
 export interface OrderReportDocument {
@@ -159,3 +161,6 @@ export const apiGetOrderFileUrl = (
 
 export const apiGetPlanNumbers = (): Promise<string[]> =>
   apiClient.get<string[]>(`/orders/plan-numbers`).then((res) => res.data)
+
+export const apiGetOrdererUnits = (): Promise<string[]> =>
+  apiClient.get<string[]>(`/orders/orderer-units`).then((res) => res.data)
