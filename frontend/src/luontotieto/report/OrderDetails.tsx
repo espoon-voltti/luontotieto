@@ -121,6 +121,8 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
               {order.contactEmail}
               <br />
               {order.contactPhone}
+              <br />
+              {order.orderingUnit?.join(', ')}
             </P>
           </GridItem>
           <GridItem $col={3} $row={2}>

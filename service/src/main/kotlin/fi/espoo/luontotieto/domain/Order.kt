@@ -23,6 +23,7 @@ data class Order(
     val name: String,
     val description: String,
     val planNumber: List<String>?,
+    val orderingUnit: List<String>?,
     val created: OffsetDateTime,
     val updated: OffsetDateTime,
     val createdBy: String,
@@ -42,6 +43,7 @@ data class OrderInput(
     val name: String,
     val description: String,
     val planNumber: List<String>? = null,
+    val orderingUnit: List<String>? = null,
     val assigneeId: UUID,
     val assigneeContactPerson: String,
     val assigneeContactEmail: String,
@@ -67,6 +69,7 @@ private const val SELECT_ORDER_SQL =
            o.contact_person AS "contactPerson",
            o.contact_phone AS "contactPhone",
            o.contact_email AS "contactEmail",
+           o.ordering_unit as "orderingUnit",
            uc.name AS "createdBy",
            uu.name AS "updatedBy",
            ua.name AS "assignee",
@@ -83,8 +86,8 @@ fun Handle.insertOrder(
 ): UUID {
     return createUpdate(
         """
-            INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents, assignee_id, assignee_contact_person, assignee_contact_email, return_date, contact_person, contact_phone, contact_email) 
-            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments, :assigneeId, :assigneeContactPerson, :assigneeContactEmail, :returnDate, :contactPerson, :contactPhone, :contactEmail)
+            INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents, assignee_id, assignee_contact_person, assignee_contact_email, return_date, contact_person, contact_phone, contact_email, ordering_unit) 
+            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments, :assigneeId, :assigneeContactPerson, :assigneeContactEmail, :returnDate, :contactPerson, :contactPhone, :contactEmail, :orderingUnit)
             RETURNING id
             """
     )
@@ -109,7 +112,7 @@ fun Handle.putOrder(
                   plan_number = :planNumber, report_documents = :reportDocuments, assignee_id = :assigneeId,
                   assignee_contact_person = :assigneeContactPerson, assignee_contact_email = :assigneeContactEmail,
                   return_date = :returnDate, contact_person = :contactPerson, contact_phone = :contactPhone,
-                  contact_email = :contactEmail
+                  contact_email = :contactEmail, ordering_unit = :orderingUnit
                  WHERE id = :id
                 RETURNING *
             ) 
@@ -121,7 +124,8 @@ fun Handle.putOrder(
         .bind("updatedBy", user.id)
         .mapTo<Order>()
         .findOne()
-        .getOrNull() ?: throw NotFound()
+        .getOrNull()
+        ?: throw NotFound()
 }
 
 fun Handle.getOrder(id: UUID): Order =
@@ -134,12 +138,22 @@ fun Handle.getOrder(id: UUID): Order =
         .bind("id", id)
         .mapTo<Order>()
         .findOne()
-        .getOrNull() ?: throw NotFound()
+        .getOrNull()
+        ?: throw NotFound()
 
 fun Handle.getPlanNumbers(): List<String> =
     createQuery(
         """
             SELECT DISTINCT (unnest(plan_number)) FROM "order"
+            """
+    )
+        .mapTo<String>()
+        .sorted()
+
+fun Handle.getorderingUnits(): List<String> =
+    createQuery(
+        """
+            SELECT DISTINCT (unnest(ordering_unit)) FROM "order"
             """
     )
         .mapTo<String>()

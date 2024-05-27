@@ -31,7 +31,10 @@ class OrderTests : FullApplicationTest() {
                 OrderReportDocument("Test description 2", DocumentType.LIITO_ORAVA_ALUEET)
             )
         val createdOrder =
-            createOrderAndReport(controller = controller, reportDocuments = orderReportDocuments)
+            createOrderAndReport(
+                controller = controller,
+                reportDocuments = orderReportDocuments
+            )
 
         val orderResponse = controller.getOrderById(adminUser, createdOrder.orderId)
 
@@ -54,6 +57,8 @@ class OrderTests : FullApplicationTest() {
         assertEquals("contact@example.com", orderResponse.contactEmail)
         assertEquals("Contact Person", orderResponse.contactPerson)
         assertEquals("04012345678", orderResponse.contactPhone)
+        assertEquals(listOf("Plan 1", "Plan 2"), orderResponse.planNumber)
+        assertEquals(listOf("Orava yksikkö", "Karhuryhmä"), orderResponse.orderingUnit)
         assertEquals(customerUser.id, orderResponse.assigneeId)
     }
 
@@ -102,6 +107,7 @@ class OrderTests : FullApplicationTest() {
                     contactEmail = "contact@example.com",
                     contactPerson = "Contact Person",
                     contactPhone = "040123456789",
+                    orderingUnit = listOf("Orava yksikkö"),
                     returnDate = LocalDate.of(2026, 1, 1)
                 )
             )

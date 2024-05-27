@@ -26,10 +26,7 @@ data class Report(
     @Nested("o_") val order: Order?
 ) {
     companion object {
-        data class ReportInput(
-            val name: String,
-            val noObservations: List<DocumentType>?
-        )
+        data class ReportInput(val name: String, val noObservations: List<DocumentType>?)
     }
 }
 
@@ -60,7 +57,8 @@ private const val SELECT_REPORT_SQL =
            o.return_date                              AS "o_returnDate",
            o.contact_person                           AS "o_contactPerson",
            o.contact_phone                            AS "o_contactPhone",
-           o.contact_email                            AS "o_contactEmail"
+           o.contact_email                            AS "o_contactEmail",
+           o.ordering_unit                             AS "o_orderingUnit"
     FROM report r
              LEFT JOIN users uc ON r.created_by = uc.id
              LEFT JOIN users uu ON r.updated_by = uu.id
