@@ -54,6 +54,8 @@ class OrderTests : FullApplicationTest() {
         assertEquals("contact@example.com", orderResponse.contactEmail)
         assertEquals("Contact Person", orderResponse.contactPerson)
         assertEquals("04012345678", orderResponse.contactPhone)
+        assertEquals(listOf("Plan 1", "Plan 2"), orderResponse.planNumber)
+        assertEquals(listOf("Orava yksikkö", "Karhuryhmä"), orderResponse.ordererUnit)
         assertEquals(customerUser.id, orderResponse.assigneeId)
     }
 
@@ -102,6 +104,7 @@ class OrderTests : FullApplicationTest() {
                     contactEmail = "contact@example.com",
                     contactPerson = "Contact Person",
                     contactPhone = "040123456789",
+                    ordererUnit = listOf("Orava yksikkö"),
                     returnDate = LocalDate.of(2026, 1, 1)
                 )
             )

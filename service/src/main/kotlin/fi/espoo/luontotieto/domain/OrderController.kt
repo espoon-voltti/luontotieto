@@ -59,6 +59,12 @@ class OrderController {
         return jdbi.inTransactionUnchecked { tx -> tx.getPlanNumbers() }
     }
 
+    @GetMapping("/orderer-units")
+    fun getOrdererUnits(user: AuthenticatedUser): List<String> {
+        user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
+        return jdbi.inTransactionUnchecked { tx -> tx.getOrdererUnits() }
+    }
+
     @GetMapping("/{id}")
     fun getOrderById(
         user: AuthenticatedUser,

@@ -24,7 +24,8 @@ fun createOrderAndReport(
     returnDate: LocalDate = LocalDate.of(2030, 1, 1),
     contactEmail: String = "contact@example.com",
     contactPerson: String = "Contact Person",
-    contactPhone: String = "04012345678"
+    contactPhone: String = "04012345678",
+    ordererUnit: List<String> = listOf("Orava yksikkö", "Karhuryhmä"),
 ): OrderController.CreateOrderResponse {
     return controller.createOrderFromScratch(
         user = adminUser,
@@ -40,7 +41,8 @@ fun createOrderAndReport(
                 returnDate = returnDate,
                 contactEmail = contactEmail,
                 contactPhone = contactPhone,
-                contactPerson = contactPerson
+                contactPerson = contactPerson,
+                ordererUnit = ordererUnit
             )
     )
 }
