@@ -1,2 +1,2 @@
 ALTER TABLE "order"
-    ADD COLUMN orderer_unit TEXT[];
+    ADD COLUMN ordering_unit TEXT[];

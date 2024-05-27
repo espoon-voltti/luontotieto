@@ -60,9 +60,9 @@ class OrderController {
     }
 
     @GetMapping("/orderer-units")
-    fun getOrdererUnits(user: AuthenticatedUser): List<String> {
+    fun getorderingUnits(user: AuthenticatedUser): List<String> {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
-        return jdbi.inTransactionUnchecked { tx -> tx.getOrdererUnits() }
+        return jdbi.inTransactionUnchecked { tx -> tx.getorderingUnits() }
     }
 
     @GetMapping("/{id}")
@@ -107,9 +107,9 @@ class OrderController {
         @RequestBody order: OrderInput
     ): Order {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
-        return jdbi
-            .inTransactionUnchecked { tx -> tx.putOrder(id, order, user) }
-            .also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
+        return jdbi.inTransactionUnchecked { tx -> tx.putOrder(id, order, user) }.also {
+            logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id"))
+        }
     }
 
     @PostMapping("/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -130,7 +130,13 @@ class OrderController {
         val id =
             jdbi.inTransactionUnchecked { tx ->
                 tx.insertOrderFile(
-                    OrderFileInput(orderId, description, contentType, fileName, documentType),
+                    OrderFileInput(
+                        orderId,
+                        description,
+                        contentType,
+                        fileName,
+                        documentType
+                    ),
                     user
                 )
             }
@@ -167,15 +173,13 @@ class OrderController {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         val dataBucket = bucketEnv.data
         documentClient.delete(dataBucket, "$orderId/$fileId")
-        jdbi
-            .inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, fileId) }
-            .also {
-                logger.audit(
-                    user,
-                    AuditEvent.DELETE_ORDER_FILE,
-                    mapOf("id" to "$orderId", "file" to "$fileId")
-                )
-            }
+        jdbi.inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, fileId) }.also {
+            logger.audit(
+                user,
+                AuditEvent.DELETE_ORDER_FILE,
+                mapOf("id" to "$orderId", "file" to "$fileId")
+            )
+        }
     }
 
     @GetMapping("/{orderId}/files/{fileId}")

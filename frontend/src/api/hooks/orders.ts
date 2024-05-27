@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import {
   apiGetOrder,
   apiGetOrderFiles,
-  apiGetOrdererUnits,
+  apiGetorderingUnits,
   apiGetPlanNumbers
 } from 'api/order-api'
 
@@ -42,9 +42,9 @@ export function useGetOrderPlanNumbersQuery() {
   })
 }
 
-export function useGetOrdererUnitsQuery() {
+export function useGetorderingUnitsQuery() {
   return useQuery({
     queryKey: ['orderer-units'],
-    queryFn: () => apiGetOrdererUnits()
+    queryFn: () => apiGetorderingUnits()
   })
 }

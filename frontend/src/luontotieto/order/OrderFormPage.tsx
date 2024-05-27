@@ -7,7 +7,7 @@ import {
   useGetOrderFilesQuery,
   useGetOrderPlanNumbersQuery,
   useGetOrderQuery,
-  useGetOrdererUnitsQuery
+  useGetorderingUnitsQuery
 } from 'api/hooks/orders'
 import { OrderFormInput, apiPostOrder, apiPutOrder } from 'api/order-api'
 import React, { useState } from 'react'
@@ -49,7 +49,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   const { data: orderFiles, isLoading: isLoadingOrderFiles } =
     useGetOrderFilesQuery(id)
   const { data: planNumbers } = useGetOrderPlanNumbersQuery()
-  const { data: ordererUnits } = useGetOrdererUnitsQuery()
+  const { data: orderingUnits } = useGetorderingUnitsQuery()
 
   const [orderInput, setOrderInput] = useState<OrderFormInput | null>(null)
 
@@ -99,7 +99,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             mode="CREATE"
             onChange={setOrderInput}
             planNumbers={planNumbers ?? []}
-            ordererUnits={ordererUnits ?? []}
+            orderingUnits={orderingUnits ?? []}
           />
         )}
 
@@ -110,7 +110,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             orderFiles={orderFiles}
             onChange={setOrderInput}
             planNumbers={planNumbers ?? []}
-            ordererUnits={ordererUnits ?? []}
+            orderingUnits={orderingUnits ?? []}
           />
         )}
       </PageContainer>

@@ -41,7 +41,7 @@ interface CreateProps {
   mode: 'CREATE'
   onChange: (validInput: OrderFormInput | null) => void
   planNumbers: string[]
-  ordererUnits: string[]
+  orderingUnits: string[]
 }
 
 interface EditProps {
@@ -50,7 +50,7 @@ interface EditProps {
   orderFiles: OrderFile[]
   onChange: (validInput: OrderFormInput | null) => void
   planNumbers: string[]
-  ordererUnits: string[]
+  orderingUnits: string[]
 }
 
 type Props = CreateProps | EditProps
@@ -166,8 +166,8 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     props.mode === 'CREATE' ? [] : props.order.planNumber ?? []
   )
 
-  const [ordererUnit, setOrdererUnit] = useDebouncedState(
-    props.mode === 'CREATE' ? [] : props.order.ordererUnit ?? []
+  const [orderingUnit, setorderingUnit] = useDebouncedState(
+    props.mode === 'CREATE' ? [] : props.order.orderingUnit ?? []
   )
 
   const invalidContactEmailInfo = useMemo(
@@ -283,9 +283,9 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
 
   const updateOrderUnits = useCallback(
     (selected: Tag[]) => {
-      setOrdererUnit(selected.map((s) => s.label))
+      setorderingUnit(selected.map((s) => s.label))
     },
-    [setOrdererUnit]
+    [setorderingUnit]
   )
 
   const { data: assigneeUsers } = useGetAssigneeUsersQuery()
@@ -317,7 +317,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       assigneeContactEmail: orderInput.assigneeContactEmail.trim(),
       assigneeContactPerson: orderInput.assigneeContactPerson.trim(),
       planNumber: planNumbers,
-      ordererUnit: ordererUnit,
+      orderingUnit: orderingUnit,
       reportDocuments: reportDocuments
         .filter((rd) => rd.checked)
         .map((rd) => ({
@@ -347,7 +347,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   }, [
     orderInput,
     planNumbers,
-    ordererUnit,
+    orderingUnit,
     reportDocuments,
     orderFiles,
     assignee,
@@ -364,7 +364,9 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     label: pn
   }))
 
-  const uniqueOrderUnits = [...new Set([...ordererUnit, ...props.ordererUnits])]
+  const uniqueOrderUnits = [
+    ...new Set([...orderingUnit, ...props.orderingUnits])
+  ]
   const orderUnitSuggestions = uniqueOrderUnits.map((pn) => ({
     value: pn,
     label: pn
@@ -390,7 +392,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               <TagAutoComplete
                 suggestions={orderUnitSuggestions}
                 data={
-                  ordererUnit?.map((pn) => ({
+                  orderingUnit?.map((pn) => ({
                     value: pn,
                     label: pn
                   })) ?? []
