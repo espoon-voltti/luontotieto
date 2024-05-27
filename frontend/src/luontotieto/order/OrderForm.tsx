@@ -114,6 +114,22 @@ const defaultReportDocuments = [
   {
     checked: false,
     documentType: ReportFileDocumentType.LIITO_ORAVA_ALUEET
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.LIITO_ORAVA_VIIVAT
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET
   }
 ]
 

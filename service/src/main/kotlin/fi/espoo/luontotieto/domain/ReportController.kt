@@ -13,11 +13,8 @@ import fi.espoo.luontotieto.s3.Document
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
 import fi.espoo.luontotieto.s3.getAndCheckFileName
-import fi.espoo.paikkatieto.domain.TableDefinition
 import fi.espoo.paikkatieto.domain.getEnumRange
-import fi.espoo.paikkatieto.domain.insertLiitoOravaAlueet
-import fi.espoo.paikkatieto.domain.insertLiitoOravaPisteet
-import fi.espoo.paikkatieto.domain.insertLiitoOravaYhteysviivat
+import fi.espoo.paikkatieto.domain.insertPaikkatieto
 import fi.espoo.paikkatieto.reader.GpkgReader
 import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.writer.GpkgWriter
@@ -81,7 +78,7 @@ class ReportController {
         val fileName = getAndCheckFileName(file)
         val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
 
-        val tableDefinition = getTableDefinitionByDocumentType(documentType)
+        val tableDefinition = documentType.tableDefinition
 
         val errors =
             tableDefinition?.let { td ->
@@ -173,14 +170,7 @@ class ReportController {
         paikkatietoJdbi.inTransactionUnchecked { tx ->
             readers.forEach {
                 it.use { reader ->
-                    when (reader.tableDefinition) {
-                        TableDefinition.LiitoOravaPisteet ->
-                            tx.insertLiitoOravaPisteet(reportId, reader.asSequence())
-                        TableDefinition.LiitoOravaAlueet ->
-                            tx.insertLiitoOravaAlueet(reportId, reader.asSequence())
-                        TableDefinition.LiitoOravaYhteysviivat ->
-                            tx.insertLiitoOravaYhteysviivat(reportId, reader.asSequence())
-                    }
+                    tx.insertPaikkatieto(reader.tableDefinition, reportId, reader.asSequence())
                 }
             }
         }
@@ -243,7 +233,7 @@ class ReportController {
     fun getGpkgTemplate(
         @PathVariable documentType: DocumentType
     ): ResponseEntity<Resource> {
-        val tableDefinition = getTableDefinitionByDocumentType(documentType) ?: throw NotFound()
+        val tableDefinition = documentType.tableDefinition ?: throw NotFound()
         val file =
             GpkgWriter.write(tableDefinition) { column ->
                 paikkatietoJdbi.inTransactionUnchecked { tx -> tx.getEnumRange(column) }
@@ -266,8 +256,7 @@ class ReportController {
         fileName: String,
         reportFile: ReportFile
     ): GpkgReader? {
-        val tableDefinition =
-            getTableDefinitionByDocumentType(reportFile.documentType) ?: return null
+        val tableDefinition = reportFile.documentType.tableDefinition ?: return null
 
         val document = documentClient.get(bucketName, fileName)
 

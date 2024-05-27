@@ -43,4 +43,18 @@ Copy the hash and provide it either in `GEOSERVER_ADMIN_PASSWORD` or `GEOSERVER_
 
 ### Layer configuration
 
-To be declared later!
+1. Navigate to GeoServer Admin UI in `http://localhost:8000`. Username is `admin` and password can be found from `compose/docker-compose.yml`
+
+2. Open *Layers* view and click *+ Add a new layer*
+   ![Add a new layer](docs/add-layer-1.png "Add a new layer")
+
+3. Publish the layer
+   ![Publish layer](docs/add-layer-2.png "Publish")
+
+4. Configure the layer.
+   * *Compute from SRS bounds* (calculates layer bounds)
+   * *Compute from native bounds* (calculate native layer bounds)
+   * *Save* after bounds have been calculated.
+      ![Configure the layer](docs/add-layer-3.png "Configure the layer")
+
+5. Commit changes in `geoserver/*` to Git.

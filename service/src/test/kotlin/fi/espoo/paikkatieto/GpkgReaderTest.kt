@@ -65,7 +65,7 @@ class GpkgReaderTest {
                     errors = emptyList()
                 )
             )
-        GpkgReader(file, TableDefinition.LiitoOravaPisteet).use { reader ->
+        GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
         }
@@ -94,7 +94,6 @@ class GpkgReaderTest {
                             "havaitsija" to "Harri Havaitsija",
                             "aluetyyppi" to "Elinalue",
                             "aluekuvaus" to "Alue oravalle",
-                            "koko" to 1234.0,
                             "lisatieto" to null,
                             "viite" to "Espoo 4/2024",
                             "kunta" to 79,
@@ -103,7 +102,7 @@ class GpkgReaderTest {
                     errors = emptyList()
                 )
             )
-        GpkgReader(file, TableDefinition.LiitoOravaAlueet).use { reader ->
+        GpkgReader(file, TableDefinition.LIITO_ORAVA_ALUEET).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
         }
@@ -132,17 +131,16 @@ class GpkgReaderTest {
                             "havaitsija" to "Harri Havaitsija",
                             "aluetyyppi" to "Elinalue",
                             "aluekuvaus" to "Alue oravalle",
-                            "koko" to "123",
                             "lisatieto" to null,
                             "viite" to "Espoo 4/2024",
-                            "kunta" to 79,
+                            "kunta" to "79",
                             "tarkkuus" to null
                         ),
                     errors =
                         listOf(
                             GpkgValidationError(
-                                column = "koko",
-                                value = "123",
+                                column = "kunta",
+                                value = "79",
                                 reason = GpkgValidationErrorReason.WRONG_TYPE
                             ),
                             GpkgValidationError(
@@ -153,7 +151,7 @@ class GpkgReaderTest {
                         )
                 )
             )
-        GpkgReader(file, TableDefinition.LiitoOravaAlueet).use { reader ->
+        GpkgReader(file, TableDefinition.LIITO_ORAVA_ALUEET).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
         }

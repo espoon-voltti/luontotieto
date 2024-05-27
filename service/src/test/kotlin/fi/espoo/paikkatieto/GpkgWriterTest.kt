@@ -5,7 +5,6 @@
 package fi.espoo.paikkatieto
 
 import fi.espoo.paikkatieto.domain.TableDefinition
-import fi.espoo.paikkatieto.domain.tableDefinitions
 import fi.espoo.paikkatieto.writer.GpkgWriter
 import org.geotools.api.data.DataStoreFinder
 import org.geotools.geopkg.GeoPkgDataStoreFactory
@@ -31,13 +30,14 @@ class GpkgWriterTest {
 
         return tableDefinition.columns.all { column ->
             val type = schema.getType(column.name)
-            column.kClass == type.binding.kotlin
+            val descriptor = schema.getDescriptor(column.name)
+            (column.kClass == type.binding.kotlin && column.isNullable == descriptor.isNillable)
         }
     }
 
     @Test
     fun testAndValidateFiles() {
-        for (tableDefinition in tableDefinitions) {
+        for (tableDefinition in TableDefinition.entries.toTypedArray()) {
             val file = GpkgWriter.write(tableDefinition) { listOf("OPTION 1", "OPTION 2") }
             assertNotNull(file)
             assertTrue(file.exists())
