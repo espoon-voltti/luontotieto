@@ -281,7 +281,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     [setPlanNumbers]
   )
 
-  const updateOrderUnits = useCallback(
+  const updateOrderingUnits = useCallback(
     (selected: Tag[]) => {
       setorderingUnit(selected.map((s) => s.label))
     },
@@ -397,7 +397,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                     label: pn
                   })) ?? []
                 }
-                onChange={updateOrderUnits}
+                onChange={updateOrderingUnits}
               />
             </LabeledInput>
           </RowOfInputs>
