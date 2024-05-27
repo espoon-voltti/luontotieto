@@ -163,4 +163,4 @@ export const apiGetPlanNumbers = (): Promise<string[]> =>
   apiClient.get<string[]>(`/orders/plan-numbers`).then((res) => res.data)
 
 export const apiGetorderingUnits = (): Promise<string[]> =>
-  apiClient.get<string[]>(`/orders/orderer-units`).then((res) => res.data)
+  apiClient.get<string[]>(`/orders/ordering-units`).then((res) => res.data)

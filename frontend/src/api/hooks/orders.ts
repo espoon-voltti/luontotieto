@@ -44,7 +44,7 @@ export function useGetOrderPlanNumbersQuery() {
 
 export function useGetorderingUnitsQuery() {
   return useQuery({
-    queryKey: ['orderer-units'],
+    queryKey: ['ordering-units'],
     queryFn: () => apiGetorderingUnits()
   })
 }
