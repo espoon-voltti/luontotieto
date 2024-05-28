@@ -154,9 +154,16 @@ class ReportController {
             @PathVariable id: UUID,
             @RequestBody report: Report.Companion.ReportInput
     ): Report {
-        return jdbi.inTransactionUnchecked { tx -> tx.putReport(id, report, user) }.also {
-            logger.audit(user, AuditEvent.UPDATE_REPORT, mapOf("id" to "$id"))
+        val reportResponse =
+                jdbi.inTransactionUnchecked { tx -> tx.putReport(id, report, user) }.also {
+                    logger.audit(user, AuditEvent.UPDATE_REPORT, mapOf("id" to "$id"))
+                }
+
+        if (emailEnv.enabled) {
+            val reportApprovedEmail = Emails.getReportUpdatedEmail(reportResponse.id)
+            sendReportEmails(reportApprovedEmail, reportId = reportResponse.id)
         }
+        return reportResponse
     }
 
     @PostMapping("/{reportId}/approve")
@@ -284,16 +291,14 @@ class ReportController {
     private fun sendReportEmails(email: EmailContent, reportId: UUID) {
         jdbi.inTransactionUnchecked { tx ->
             val report = tx.getReportById(reportId)
-            val emails = listOf<String?>()
+            val emails = mutableListOf<String?>()
             if (report.order !== null) {
                 val assigneeUser = tx.getUser(report.order.assigneeId)
-                emails.addLast(assigneeUser.email)
-                emails.addLast(report.order.contactEmail)
-                emails.addLast(report.order.assigneeContactEmail)
+                emails.add(assigneeUser.email)
+                emails.add(report.order.contactEmail)
+                emails.add(report.order.assigneeContactEmail)
             }
-            emails.filterNotNull().forEach { e ->
-                sesEmailClient.send(Email(e, email.title, email.content))
-            }
+            emails.filterNotNull().distinct().forEach { e -> sesEmailClient.send(Email(e, email)) }
         }
     }
 

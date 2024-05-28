@@ -4,6 +4,7 @@
 
 package fi.espoo.luontotieto.ses
 
+import fi.espoo.luontotieto.common.EmailContent
 import fi.espoo.luontotieto.config.EmailEnv
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
@@ -22,8 +23,7 @@ private val logger = KotlinLogging.logger {}
 
 data class Email(
     val toAddress: String,
-    val title: String,
-    val content: String,
+    val content: EmailContent,
 )
 
 @Service
@@ -40,7 +40,7 @@ class SESEmailClient(
         }
         val fromAddress = env.senderAddress
         val arn = env.senderArn
-        val title = "Luontotietoportaali: ${email.title}"
+        val title = "Luontotietoportaali: ${email.content.title}"
         val content = email.content
         val toAddress = email.toAddress
 
@@ -49,10 +49,10 @@ class SESEmailClient(
 <!DOCTYPE html>
 <html>
 <head>
-<title>Luontotietoportaali: $title</title>
+<title>$title</title>
 </head>
 <body>
-$content
+${content.html}
 </body>
 </html>
 """
@@ -70,7 +70,7 @@ $content
                                     .text(
                                         Content.builder()
                                             .charset(charset)
-                                            .data(content)
+                                            .data(content.text)
                                             .build()
                                     )
                                     .build()

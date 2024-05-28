@@ -54,12 +54,10 @@ class UserController {
         return jdbi
             .inTransactionUnchecked { tx ->
                 val createdUser = tx.insertUser(data = body, user = user, passwordHash)
-                val userCreatedEmail = Emails.getUserCreatedEmail(generatedString)
                 sesEmailClient.send(
                     Email(
                         body.email,
-                        userCreatedEmail.title,
-                        userCreatedEmail.content
+                        Emails.getUserCreatedEmail(generatedString)
                     )
                 )
 
