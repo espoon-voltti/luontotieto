@@ -5,20 +5,27 @@
 package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.BadRequest
+import fi.espoo.luontotieto.common.Emails
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.BucketEnv
+import fi.espoo.luontotieto.config.EmailEnv
 import fi.espoo.luontotieto.config.LuontotietoHost
 import fi.espoo.luontotieto.config.audit
 import fi.espoo.luontotieto.s3.Document
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
 import fi.espoo.luontotieto.s3.getAndCheckFileName
+import fi.espoo.luontotieto.ses.Email
+import fi.espoo.luontotieto.ses.SESEmailClient
 import fi.espoo.paikkatieto.domain.TableDefinition
 import fi.espoo.paikkatieto.domain.deleteAluerajausLuontoselvitystilaus
 import fi.espoo.paikkatieto.domain.insertPaikkatieto
 import fi.espoo.paikkatieto.reader.GpkgReader
+import java.io.File
+import java.net.URL
+import java.util.UUID
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
@@ -39,24 +46,19 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.io.File
-import java.net.URL
-import java.util.UUID
 
 @RestController
 @RequestMapping("/orders")
 class OrderController {
-    @Qualifier("jdbi-luontotieto")
-    @Autowired
-    lateinit var jdbi: Jdbi
+    @Qualifier("jdbi-luontotieto") @Autowired lateinit var jdbi: Jdbi
 
-    @Qualifier("jdbi-paikkatieto")
-    @Autowired
-    lateinit var paikkatietoJdbi: Jdbi
+    @Autowired lateinit var sesEmailClient: SESEmailClient
 
     @Autowired lateinit var documentClient: S3DocumentService
 
     @Autowired lateinit var bucketEnv: BucketEnv
+
+    @Autowired lateinit var emailEnv: EmailEnv
 
     @Autowired lateinit var luontotietoHost: LuontotietoHost
 
@@ -75,56 +77,69 @@ class OrderController {
     }
 
     @GetMapping("/{id}")
-    fun getOrderById(
-        user: AuthenticatedUser,
-        @PathVariable id: UUID
-    ): Order {
+    fun getOrderById(user: AuthenticatedUser, @PathVariable id: UUID): Order {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         return jdbi.inTransactionUnchecked { tx -> tx.getOrder(id) }
     }
 
     data class CreateOrderResponse(
-        val orderId: UUID,
-        val reportId: UUID,
+            val orderId: UUID,
+            val reportId: UUID,
     )
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     fun createOrderFromScratch(
-        user: AuthenticatedUser,
-        @RequestBody body: OrderInput
+            user: AuthenticatedUser,
+            @RequestBody body: OrderInput
     ): CreateOrderResponse {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
-        return jdbi
-            .inTransactionUnchecked { tx ->
-                val orderId = tx.insertOrder(data = body, user = user)
-                val report =
-                    tx.insertReport(Report.Companion.ReportInput(body.name, null), user, orderId)
-                CreateOrderResponse(orderId, report.id)
-            }
-            .also { logger.audit(user, AuditEvent.CREATE_ORDER, mapOf("id" to "$it")) }
+        val response =
+                jdbi
+                        .inTransactionUnchecked { tx ->
+                            val orderId = tx.insertOrder(data = body, user = user)
+                            val report =
+                                    tx.insertReport(
+                                            Report.Companion.ReportInput(body.name, null),
+                                            user,
+                                            orderId
+                                    )
+                            CreateOrderResponse(orderId, report.id)
+                        }
+                        .also {
+                            logger.audit(
+                                    user,
+                                    AuditEvent.CREATE_ORDER,
+                                    mapOf("id" to "${it.orderId}")
+                            )
+                        }
+
+        if (emailEnv.enabled) {
+            sendReportCreatedEmail(response.reportId, body.assigneeId, body.assigneeContactEmail)
+        }
+        return response
     }
 
     @PutMapping("/{id}")
     fun updateOrder(
-        user: AuthenticatedUser,
-        @PathVariable id: UUID,
-        @RequestBody order: OrderInput
+            user: AuthenticatedUser,
+            @PathVariable id: UUID,
+            @RequestBody order: OrderInput
     ): Order {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
-        return jdbi
-            .inTransactionUnchecked { tx -> tx.putOrder(id, order, user) }
-            .also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
+        return jdbi.inTransactionUnchecked { tx -> tx.putOrder(id, order, user) }.also {
+            logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id"))
+        }
     }
 
     @PostMapping("/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @ResponseStatus(HttpStatus.CREATED)
     fun uploadOrderFile(
-        user: AuthenticatedUser,
-        @PathVariable orderId: UUID,
-        @RequestPart("file") file: MultipartFile,
-        @RequestPart("description") description: String,
-        @RequestParam("documentType") documentType: OrderDocumentType
+            user: AuthenticatedUser,
+            @PathVariable orderId: UUID,
+            @RequestPart("file") file: MultipartFile,
+            @RequestPart("description") description: String,
+            @RequestParam("documentType") documentType: OrderDocumentType
     ) {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
 
@@ -133,17 +148,23 @@ class OrderController {
         val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
 
         val id =
-            jdbi.inTransactionUnchecked { tx ->
-                tx.insertOrderFile(
-                    OrderFileInput(orderId, description, contentType, fileName, documentType),
-                    user
-                )
-            }
+                jdbi.inTransactionUnchecked { tx ->
+                    tx.insertOrderFile(
+                            OrderFileInput(
+                                    orderId,
+                                    description,
+                                    contentType,
+                                    fileName,
+                                    documentType
+                            ),
+                            user
+                    )
+                }
 
         try {
             documentClient.upload(
-                dataBucket,
-                Document(name = "$orderId/$id", bytes = file.bytes, contentType = contentType)
+                    dataBucket,
+                    Document(name = "$orderId/$id", bytes = file.bytes, contentType = contentType)
             )
 
             if (documentType == OrderDocumentType.ORDER_AREA) {
@@ -161,21 +182,21 @@ class OrderController {
                     jdbi.inTransactionUnchecked { tx ->
                         val report = tx.getReportByOrderId(orderId, user)
                         val params =
-                            tx.getAluerajausLuontoselvitysTilausParams(
-                                user,
-                                report,
-                                luontotietoHost.getReportUrl(report.id)
-                            )
+                                tx.getAluerajausLuontoselvitysTilausParams(
+                                        user,
+                                        report,
+                                        luontotietoHost.getReportUrl(report.id)
+                                )
                         val reportId =
-                            params["reportId"]?.let { UUID.fromString(it.toString()) }
-                                ?: throw NotFound("")
+                                params["reportId"]?.let { UUID.fromString(it.toString()) }
+                                        ?: throw NotFound("")
 
                         paikkatietoJdbi.inTransactionUnchecked { ptx ->
                             ptx.insertPaikkatieto(
-                                reader.tableDefinition,
-                                reportId,
-                                data.asSequence(),
-                                params
+                                    reader.tableDefinition,
+                                    reportId,
+                                    data.asSequence(),
+                                    params
                             )
                         }
                     }
@@ -183,9 +204,9 @@ class OrderController {
             }
 
             logger.audit(
-                user,
-                AuditEvent.ADD_ORDER_FILE,
-                mapOf("id" to "$orderId", "file" to "$id")
+                    user,
+                    AuditEvent.ADD_ORDER_FILE,
+                    mapOf("id" to "$orderId", "file" to "$id")
             )
         } catch (e: Exception) {
             logger.error("Error uploading file: ", e)
@@ -195,52 +216,63 @@ class OrderController {
     }
 
     @GetMapping("/{orderId}/files")
-    fun getOrderFiles(
-        user: AuthenticatedUser,
-        @PathVariable orderId: UUID
-    ) = jdbi.inTransactionUnchecked { tx -> tx.getOrderFiles(orderId, user) }
+    fun getOrderFiles(user: AuthenticatedUser, @PathVariable orderId: UUID) =
+            jdbi.inTransactionUnchecked { tx -> tx.getOrderFiles(orderId, user) }
 
     @DeleteMapping("/{orderId}/files/{fileId}")
     fun deleteOrderFile(
-        user: AuthenticatedUser,
-        @PathVariable orderId: UUID,
-        @PathVariable fileId: UUID
+            user: AuthenticatedUser,
+            @PathVariable orderId: UUID,
+            @PathVariable fileId: UUID
     ) {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         val dataBucket = bucketEnv.data
         documentClient.delete(dataBucket, "$orderId/$fileId")
         jdbi
-            .inTransactionUnchecked { tx ->
-                val report = tx.getReportByOrderId(orderId, user)
-                tx.deleteOrderFile(orderId, fileId)
-                paikkatietoJdbi.inTransactionUnchecked { ptx ->
-                    ptx.deleteAluerajausLuontoselvitystilaus(report.id)
+                .inTransactionUnchecked { tx ->
+                    val report = tx.getReportByOrderId(orderId, user)
+                    tx.deleteOrderFile(orderId, fileId)
+                    paikkatietoJdbi.inTransactionUnchecked { ptx ->
+                        ptx.deleteAluerajausLuontoselvitystilaus(report.id)
+                    }
                 }
-            }
-            .also {
-                logger.audit(
-                    user,
-                    AuditEvent.DELETE_ORDER_FILE,
-                    mapOf("id" to "$orderId", "file" to "$fileId")
-                )
-            }
+                .also {
+                    logger.audit(
+                            user,
+                            AuditEvent.DELETE_ORDER_FILE,
+                            mapOf("id" to "$orderId", "file" to "$fileId")
+                    )
+                }
     }
 
     @GetMapping("/{orderId}/files/{fileId}")
     fun getOrderFileById(
-        user: AuthenticatedUser,
-        @PathVariable orderId: UUID,
-        @PathVariable fileId: UUID
+            user: AuthenticatedUser,
+            @PathVariable orderId: UUID,
+            @PathVariable fileId: UUID
     ): URL {
         val dataBucket = bucketEnv.data
 
         val orderFile =
-            jdbi.inTransactionUnchecked { tx -> tx.getOrderFileById(orderId, fileId, user) }
+                jdbi.inTransactionUnchecked { tx -> tx.getOrderFileById(orderId, fileId, user) }
         val contentDisposition =
-            ContentDisposition.attachment().filename(orderFile.fileName).build()
+                ContentDisposition.attachment().filename(orderFile.fileName).build()
 
         val fileUrl =
-            documentClient.presignedGetUrl(dataBucket, "$orderId/$fileId", contentDisposition)
+                documentClient.presignedGetUrl(dataBucket, "$orderId/$fileId", contentDisposition)
         return fileUrl
+    }
+
+    private fun sendReportCreatedEmail(reportId: UUID, assigneeId: UUID, contactEmail: String?) {
+        jdbi.inTransactionUnchecked { tx ->
+            val user = tx.getUser(assigneeId)
+            val emails = listOf(user.email, contactEmail).filterNotNull()
+            val reportCreatedEmail = Emails.getReportCreatedEmail(reportId)
+            emails.forEach { email ->
+                sesEmailClient.send(
+                        Email(email, reportCreatedEmail.title, reportCreatedEmail.content)
+                )
+            }
+        }
     }
 }

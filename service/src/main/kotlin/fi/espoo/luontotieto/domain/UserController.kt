@@ -5,6 +5,7 @@
 package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.BadRequest
+import fi.espoo.luontotieto.common.Emails
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
@@ -53,17 +54,14 @@ class UserController {
         return jdbi
             .inTransactionUnchecked { tx ->
                 val createdUser = tx.insertUser(data = body, user = user, passwordHash)
-
-                val email =
+                val userCreatedEmail = Emails.getUserCreatedEmail(generatedString)
+                sesEmailClient.send(
                     Email(
                         body.email,
-                        "Käyttäjä luotu",
-                        """Teille on luotu uusi käyttäjä luontotietoportaaliin.
-                                     Voitte kirjautua portaaliin osoitteessa luontotietoportaali.fi käyttämällä salasanaa: $generatedString . 
-                                     Olkaa hyvä ja vaihtakaa salasana kirjautumisen jälkeen.
-                        """.trimMargin()
+                        userCreatedEmail.title,
+                        userCreatedEmail.content
                     )
-                sesEmailClient.send(email)
+                )
 
                 createdUser
             }
