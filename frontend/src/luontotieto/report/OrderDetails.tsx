@@ -84,7 +84,7 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
               onClick={() =>
                 navigate(`/luontotieto/tilaus/${order.id}/muokkaa`, {
                   state: {
-                    referer: `/luontotieto/selvitys/${props.reportId}/muokkaa`
+                    referer: `/luontotieto/selvitys/${props.reportId}`
                   }
                 })
               }

@@ -122,7 +122,7 @@ export const appRouter = createBrowserRouter([
         )
       },
       {
-        path: '/luontotieto/selvitys/:id/muokkaa',
+        path: '/luontotieto/selvitys/:id',
         element: (
           <AuthGuard allow="AUTHENTICATED_ONLY">
             <ReportFormPage mode="EDIT" />

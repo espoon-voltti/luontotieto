@@ -34,6 +34,9 @@ enum class DocumentType(val tableDefinition: TableDefinition? = null) : Database
     @DatabaseValue("paikkatieto:muut_huomioitavat_lajit_viivat")
     MUUT_HUOMIOITAVAT_LAJIT_VIIVAT(TableDefinition.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT),
 
+    @DatabaseValue("paikkatieto:aluerajaus_luontoselvitys")
+    ALUERAJAUS_LUONTOSELVITYS(TableDefinition.ALUERAJAUS_LUONTOSELVITYS),
+
     @DatabaseValue("luontotieto:report")
     REPORT,
 

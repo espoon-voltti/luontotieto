@@ -9,7 +9,7 @@ import {
   useGetOrderQuery,
   useGetorderingUnitsQuery
 } from 'api/hooks/orders'
-import { OrderFormInput, apiPostOrder, apiPutOrder } from 'api/order-api'
+import { apiPostOrder, apiPutOrder, OrderFormInput } from 'api/order-api'
 import React, { useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
@@ -29,6 +29,7 @@ interface EditProps {
   mode: 'EDIT'
   referer?: string
 }
+
 type Props = CreateProps | EditProps
 
 interface LocationState {
@@ -60,7 +61,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
         void queryClient.invalidateQueries({ queryKey: ['order', id] })
         void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
         void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
-        navigate(`/luontotieto/selvitys/${reportId}/muokkaa`)
+        navigate(`/luontotieto/selvitys/${reportId}`)
       }
     })
 
@@ -71,7 +72,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
         void queryClient.invalidateQueries({ queryKey: ['order', id] })
         void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
         void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
-        navigate(`/luontotieto/selvitys/${order.id}`)
+        navigate(`/`)
       }
     })
 

@@ -135,8 +135,7 @@ fun Handle.putReport(
         .bind("updatedBy", user.id)
         .mapTo<Report>()
         .findOne()
-        .getOrNull()
-        ?: throw NotFound()
+        .getOrNull() ?: throw NotFound()
 }
 
 fun Handle.getReport(
@@ -154,8 +153,25 @@ fun Handle.getReport(
         .bind("userId", user.id)
         .mapTo<Report>()
         .findOne()
-        .getOrNull()
-        ?: throw NotFound()
+        .getOrNull() ?: throw NotFound()
+}
+
+fun Handle.getReportByOrderId(
+    orderId: UUID,
+    user: AuthenticatedUser
+): Report {
+    return createQuery(
+        """ 
+                $SELECT_REPORT_SQL
+                JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
+                WHERE o.id = :id
+            """
+    )
+        .bind("id", orderId)
+        .bind("userId", user.id)
+        .mapTo<Report>()
+        .findOne()
+        .getOrNull() ?: throw NotFound()
 }
 
 fun Handle.getReports(user: AuthenticatedUser): List<Report> {
@@ -168,6 +184,34 @@ fun Handle.getReports(user: AuthenticatedUser): List<Report> {
     )
         .bind("userId", user.id)
         .mapTo<Report>()
-        .list()
-        ?: emptyList()
+        .list() ?: emptyList()
+}
+
+fun Handle.getAluerajausLuontoselvitysTilausParams(
+    user: AuthenticatedUser,
+    report: Report,
+    reportLink: String
+): Map<String, Any?> {
+    return mapOf(
+        "name" to report.order?.name,
+        "contactPerson" to report.order?.contactPerson,
+        "unit" to report.order?.contactPerson,
+        "reportId" to report.id,
+        "reportLink" to reportLink
+    )
+}
+
+fun Handle.getAluerajausLuontoselvitysParams(
+    user: AuthenticatedUser,
+    id: UUID,
+    reportLink: String
+): Map<String, Any?> {
+    val report = this.getReport(id, user)
+    return mapOf(
+        "name" to report.name,
+        "year" to report.order?.returnDate?.year,
+        "contactPerson" to report.order?.assigneeContactPerson,
+        "unit" to report.order?.contactPerson,
+        "reportLink" to reportLink
+    )
 }

@@ -123,7 +123,33 @@ function createFileInputs(
         noObservation: false
       }
 
-  return [...requiredFileInputs, ...otherFiles, mappedReportInfo]
+  const aluerajaus = reportFiles.find(
+    (rf) => rf.documentType === ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS
+  )
+
+  const mappedAluerajaus = aluerajaus
+    ? {
+        type: 'EXISTING' as const,
+        userDescription: aluerajaus.description,
+        documentType: aluerajaus.documentType,
+        details: aluerajaus,
+        noObservation: false
+      }
+    : {
+        type: 'NEW' as const,
+        userDescription: '',
+        documentType: ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS,
+        file: null,
+        id: uuidv4(),
+        noObservation: false
+      }
+
+  return [
+    ...requiredFileInputs,
+    ...otherFiles,
+    mappedReportInfo,
+    mappedAluerajaus
+  ]
 }
 
 function hasReportDocument(fileInputs: ReportFileInputElement[]): boolean {

@@ -8,11 +8,13 @@ import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.BucketEnv
+import fi.espoo.luontotieto.config.LuontotietoHost
 import fi.espoo.luontotieto.config.audit
 import fi.espoo.luontotieto.s3.Document
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
 import fi.espoo.luontotieto.s3.getAndCheckFileName
+import fi.espoo.paikkatieto.domain.TableDefinition
 import fi.espoo.paikkatieto.domain.getEnumRange
 import fi.espoo.paikkatieto.domain.insertPaikkatieto
 import fi.espoo.paikkatieto.reader.GpkgReader
@@ -61,6 +63,8 @@ class ReportController {
     @Autowired lateinit var documentClient: S3DocumentService
 
     @Autowired lateinit var bucketEnv: BucketEnv
+
+    @Autowired lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -167,10 +171,28 @@ class ReportController {
                 getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf)
             }
 
-        paikkatietoJdbi.inTransactionUnchecked { tx ->
+        paikkatietoJdbi.inTransactionUnchecked { ptx ->
             readers.forEach {
                 it.use { reader ->
-                    tx.insertPaikkatieto(reader.tableDefinition, reportId, reader.asSequence())
+                    val params =
+                        when (reader.tableDefinition) {
+                            TableDefinition.ALUERAJAUS_LUONTOSELVITYS -> {
+                                jdbi.inTransactionUnchecked { tx ->
+                                    tx.getAluerajausLuontoselvitysParams(
+                                        user,
+                                        reportId,
+                                        luontotietoHost.getReportUrl(reportId)
+                                    )
+                                }
+                            }
+                            else -> emptyMap()
+                        }
+                    ptx.insertPaikkatieto(
+                        reader.tableDefinition,
+                        reportId,
+                        reader.asSequence(),
+                        params
+                    )
                 }
             }
         }

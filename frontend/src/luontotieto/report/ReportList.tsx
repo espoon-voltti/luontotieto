@@ -159,7 +159,7 @@ export const ReportList = React.memo(function ReportList() {
 
                 <td>{report.approved ? 'Hyväksytty' : 'Lähetetty'}</td>
                 <td>
-                  <Link to={`/luontotieto/selvitys/${report.id}/muokkaa`}>
+                  <Link to={`/luontotieto/selvitys/${report.id}`}>
                     {report.order?.name ?? report.name}
                   </Link>
                 </td>
