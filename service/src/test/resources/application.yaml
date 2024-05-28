@@ -15,6 +15,7 @@ luontotieto:
     region: "fake"
     sender_address: "fake"
     sender_arn: "fake"
+  host: "http://localhost:9000"
 
 app:
   jwt:
