@@ -4,16 +4,21 @@
 
 package fi.espoo.luontotieto.domain
 
+import fi.espoo.luontotieto.common.EmailContent
+import fi.espoo.luontotieto.common.Emails
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.BucketEnv
+import fi.espoo.luontotieto.config.EmailEnv
 import fi.espoo.luontotieto.config.LuontotietoHost
 import fi.espoo.luontotieto.config.audit
 import fi.espoo.luontotieto.s3.Document
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
 import fi.espoo.luontotieto.s3.getAndCheckFileName
+import fi.espoo.luontotieto.ses.Email
+import fi.espoo.luontotieto.ses.SESEmailClient
 import fi.espoo.paikkatieto.domain.TableDefinition
 import fi.espoo.paikkatieto.domain.getEnumRange
 import fi.espoo.paikkatieto.domain.insertPaikkatieto
@@ -62,9 +67,13 @@ class ReportController {
 
     @Autowired lateinit var documentClient: S3DocumentService
 
+    @Autowired lateinit var sesEmailClient: SESEmailClient
+
     @Autowired lateinit var bucketEnv: BucketEnv
 
     @Autowired lateinit var luontotietoHost: LuontotietoHost
+
+    @Autowired lateinit var emailEnv: EmailEnv
 
     private val logger = KotlinLogging.logger {}
 
@@ -91,7 +100,8 @@ class ReportController {
                 GpkgReader(File(tmpGpkgFile.toUri()), td).use { reader ->
                     reader.asSequence().flatMap { it.errors }.toList()
                 }
-            } ?: emptyList()
+            }
+                ?: emptyList()
 
         if (errors.isEmpty()) {
             val id =
@@ -113,7 +123,11 @@ class ReportController {
             try {
                 documentClient.upload(
                     dataBucket,
-                    Document(name = "$reportId/$id", bytes = file.bytes, contentType = contentType)
+                    Document(
+                        name = "$reportId/$id",
+                        bytes = file.bytes,
+                        contentType = contentType
+                    )
                 )
                 logger.audit(
                     user,
@@ -145,9 +159,21 @@ class ReportController {
         @PathVariable id: UUID,
         @RequestBody report: Report.Companion.ReportInput
     ): Report {
-        return jdbi
-            .inTransactionUnchecked { tx -> tx.putReport(id, report, user) }
-            .also { logger.audit(user, AuditEvent.UPDATE_REPORT, mapOf("id" to "$id")) }
+        val reportResponse =
+            jdbi.inTransactionUnchecked { tx -> tx.putReport(id, report, user) }.also {
+                logger.audit(user, AuditEvent.UPDATE_REPORT, mapOf("id" to "$id"))
+            }
+
+        if (emailEnv.enabled) {
+            val reportApprovedEmail =
+                Emails.getReportUpdatedEmail(
+                    reportResponse.name,
+                    reportResponse.order?.assignee ?: "",
+                    luontotietoHost.getReportUrl(reportResponse.id)
+                )
+            sendReportEmails(reportApprovedEmail, reportId = reportResponse.id)
+        }
+        return reportResponse
     }
 
     @PostMapping("/{reportId}/approve")
@@ -197,9 +223,16 @@ class ReportController {
             }
         }
 
-        jdbi
-            .inTransactionUnchecked { tx -> tx.approveReport(reportId, user) }
-            .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
+        jdbi.inTransactionUnchecked { tx -> tx.approveReport(reportId, user) }.also {
+            logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId"))
+        }
+
+        if (emailEnv.enabled) {
+            val report = jdbi.inTransactionUnchecked { tx -> tx.getReportById(reportId) }
+            val userResponse = jdbi.inTransactionUnchecked { tx -> tx.getUser(user.id) }
+            val reportApprovedEmail = Emails.getReportApprovedEmail(report.name, userResponse.name, luontotietoHost.getReportUrl(report.id))
+            sendReportEmails(reportApprovedEmail, reportId)
+        }
     }
 
     @GetMapping("/{reportId}/files")
@@ -208,6 +241,7 @@ class ReportController {
         @PathVariable reportId: UUID
     ): List<ReportFile> {
         return jdbi.inTransactionUnchecked { tx ->
+            // This is done to check that user has access to the report
             val report = tx.getReport(reportId, user)
             tx.getReportFiles(reportId)
         }
@@ -240,15 +274,13 @@ class ReportController {
 
         documentClient.delete(dataBucket, "$reportId/$fileId")
 
-        jdbi
-            .inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }
-            .also {
-                logger.audit(
-                    user,
-                    AuditEvent.DELETE_REPORT_FILE,
-                    mapOf("id" to "$reportId", "file" to "$fileId")
-                )
-            }
+        jdbi.inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }.also {
+            logger.audit(
+                user,
+                AuditEvent.DELETE_REPORT_FILE,
+                mapOf("id" to "$reportId", "file" to "$fileId")
+            )
+        }
     }
 
     @GetMapping("/template/{documentType}.gpkg")
@@ -260,7 +292,8 @@ class ReportController {
             GpkgWriter.write(tableDefinition) { column ->
                 paikkatietoJdbi.inTransactionUnchecked { tx -> tx.getEnumRange(column) }
             }
-                ?.takeIf { Files.size(it) > 0 } ?: throw NotFound()
+                ?.takeIf { Files.size(it) > 0 }
+                ?: throw NotFound()
 
         val resource = UrlResource(file.toUri())
 
@@ -271,6 +304,27 @@ class ReportController {
             )
             .header(HttpHeaders.CONTENT_TYPE, "application/geopackage+sqlite3")
             .body(resource)
+    }
+
+    private fun sendReportEmails(
+        email: EmailContent,
+        reportId: UUID
+    ) {
+        try {
+            jdbi.inTransactionUnchecked { tx ->
+                val report = tx.getReportById(reportId)
+                val emails = mutableListOf<String?>()
+                if (report.order !== null) {
+                    val assigneeUser = tx.getUser(report.order.assigneeId)
+                    emails.add(assigneeUser.email)
+                    emails.add(report.order.contactEmail)
+                    emails.add(report.order.assigneeContactEmail)
+                }
+                emails.filterNotNull().distinct().forEach { e -> sesEmailClient.send(Email(e, email)) }
+            }
+        } catch (e: Exception) {
+            logger.error("Error sending email: ", e)
+        }
     }
 
     private fun getPaikkatietoReader(

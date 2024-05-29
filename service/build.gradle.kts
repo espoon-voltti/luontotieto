@@ -88,6 +88,8 @@ dependencies {
     testImplementation("com.microsoft.playwright:playwright:1.44.0")
 
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
+
+    api("org.jsoup:jsoup:1.17.1")
 }
 
 tasks.withType<KotlinCompile> {

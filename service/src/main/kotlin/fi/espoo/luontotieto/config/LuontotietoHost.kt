@@ -15,6 +15,12 @@ data class LuontotietoHost(val host: String) {
         return builder.build().toString()
     }
 
+    fun getCustomerUserLoginUrl(): String {
+        val builder = URIBuilder(host)
+        builder.path = "/kirjaudu/yrityskayttaja"
+        return builder.build().toString()
+    }
+
     companion object {
         fun fromEnvironment(env: Environment): LuontotietoHost {
             return LuontotietoHost(env.lookup("luontotieto.host"))

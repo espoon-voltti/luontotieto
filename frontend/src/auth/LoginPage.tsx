@@ -56,7 +56,7 @@ export const LoginPage = React.memo(function LoginPage() {
               >
                 Espoo AD
               </LinkStyledAsButton>
-              <LinkStyledAsButton href="/kirjaudu/yrityskäyttäjä">
+              <LinkStyledAsButton href="/kirjaudu/yrityskayttaja">
                 Yrityskäyttäjä
               </LinkStyledAsButton>
             </FlexRowWithGaps>
