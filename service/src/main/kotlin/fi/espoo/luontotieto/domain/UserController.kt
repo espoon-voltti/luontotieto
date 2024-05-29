@@ -42,7 +42,6 @@ class UserController {
 
     @Autowired lateinit var luontotietoHost: LuontotietoHost
 
-
     private val logger = KotlinLogging.logger {}
 
     @PostMapping("")
