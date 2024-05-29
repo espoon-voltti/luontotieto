@@ -50,7 +50,13 @@ import org.springframework.web.multipart.MultipartFile
 @RestController
 @RequestMapping("/orders")
 class OrderController {
-    @Qualifier("jdbi-luontotieto") @Autowired lateinit var jdbi: Jdbi
+    @Qualifier("jdbi-luontotieto")
+    @Autowired
+    lateinit var jdbi: Jdbi
+
+    @Qualifier("jdbi-paikkatieto")
+    @Autowired
+    lateinit var paikkatietoJdbi: Jdbi
 
     @Autowired lateinit var sesEmailClient: SESEmailClient
 
@@ -279,7 +285,7 @@ class OrderController {
                                 Emails.getReportCreatedEmail(
                                         report.name,
                                         report.order?.description ?: "",
-                                        "link"
+                                        luontotietoHost.getReportUrl(report.id)
                                 )
                         )
                 )

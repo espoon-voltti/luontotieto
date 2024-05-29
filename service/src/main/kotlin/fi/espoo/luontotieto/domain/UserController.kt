@@ -9,6 +9,7 @@ import fi.espoo.luontotieto.common.Emails
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
+import fi.espoo.luontotieto.config.LuontotietoHost
 import fi.espoo.luontotieto.config.audit
 import fi.espoo.luontotieto.ses.Email
 import fi.espoo.luontotieto.ses.SESEmailClient
@@ -39,6 +40,9 @@ class UserController {
 
     @Autowired lateinit var sesEmailClient: SESEmailClient
 
+    @Autowired lateinit var luontotietoHost: LuontotietoHost
+
+
     private val logger = KotlinLogging.logger {}
 
     @PostMapping("")
@@ -57,7 +61,7 @@ class UserController {
                 sesEmailClient.send(
                     Email(
                         body.email,
-                        Emails.getUserCreatedEmail("link", createdUser.email ?: "", generatedString)
+                        Emails.getUserCreatedEmail(luontotietoHost.getCustomerUserLoginUrl(), createdUser.email ?: "", generatedString)
                     )
                 )
 

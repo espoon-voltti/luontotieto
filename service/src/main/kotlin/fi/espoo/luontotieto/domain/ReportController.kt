@@ -160,7 +160,7 @@ class ReportController {
                 }
 
         if (emailEnv.enabled) {
-            val reportApprovedEmail = Emails.getReportUpdatedEmail(reportResponse.name, reportResponse.order?.assignee ?: "", "link")
+            val reportApprovedEmail = Emails.getReportUpdatedEmail(reportResponse.name, reportResponse.order?.assignee ?: "", luontotietoHost.getReportUrl(reportResponse.id))
             sendReportEmails(reportApprovedEmail, reportId = reportResponse.id)
         }
         return reportResponse
@@ -220,7 +220,7 @@ class ReportController {
         if (emailEnv.enabled) {
             val report = jdbi.inTransactionUnchecked { tx -> tx.getReportById(reportId) }
             val userResponse = jdbi.inTransactionUnchecked { tx -> tx.getUser(user.id) }
-            val reportApprovedEmail = Emails.getReportApprovedEmail(report.name, userResponse.name, "link")
+            val reportApprovedEmail = Emails.getReportApprovedEmail(report.name, userResponse.name, luontotietoHost.getReportUrl(report.id))
             sendReportEmails(reportApprovedEmail, reportId)
         }
     }
