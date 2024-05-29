@@ -1,7 +1,11 @@
 package fi.espoo.luontotieto.common
 
 import org.jsoup.Jsoup
-import java.util.UUID
+
+val DO_NOT_REPLY_MESSAGE =
+    """Ethän vastaa tähän viestiin. Mikäli kirjautumisessa 
+    tai tunnusten kanssa ilmenee haasteita, olethan yhteydessä ymparisto@espoo.fi.
+    """.trimMargin()
 
 data class EmailContent(
     val title: String,
@@ -44,42 +48,72 @@ data class EmailContent(
 
 class Emails {
     companion object {
-        fun getUserCreatedEmail(password: String) =
-            EmailContent.fromHtml(
-                "Käyttäjä luotu",
-                """
-<p>Teille on luotu uusi käyttäjä luontotietoportaaliin,</p>
-<p>Voitte kirjautua portaaliin osoitteessa luontotietoportaali.fi käyttämällä salasanaa: $password</p>
-<p>Olkaa hyvä ja vaihtakaa salasana kirjautumisen jälkeen.</p>
+        fun getUserCreatedEmail(
+            link: String,
+            email: String,
+            password: String
+        ) = EmailContent.fromHtml(
+            "Käyttäjätunnukset luotu Espoon Luontotietoportaaliin",
+            """
+<p>Teille on luotu käyttäjätunnukset Espoon Luontotietoportaaliin.</p>
+<p>Voitte kirjautua palveluun osoitteessa $link.</p>
+<hr>
+<p>Käyttäjätunnus: $email</p>
+<p>Salasana: $password</p>
+<hr>
+<p>Vaihtakaa salasana ensimmäisen kirjautumisen yhteydessä.</p>
+<p>$DO_NOT_REPLY_MESSAGE</p>
 """
-            )
+        )
 
-        fun getReportApprovedEmail(reportId: UUID) =
-            EmailContent.fromHtml(
-                "Luontotietoselvitys on hyväksytty",
+        fun getReportApprovedEmail(
+            reportName: String,
+            approverName: String,
+            link: String
+        ) = EmailContent.fromHtml(
+            "Hyväksytty selvitys: $reportName",
+            """
+<p>$approverName on hyväksynyt selvityksen $reportName.</p>
+<hr>
+<p>Selvityksen nimi: $reportName</p>
+<p>Linkki selvitykseen: $link</p>
+<hr>
+<p>Kirjaudu järjestelmään nähdäksesi kaikki selvityksen tiedot. Luontotietoportaaliin kirjaudutaan yrityksen yhteiskäyttötunnuksilla.</p>
+<p>$DO_NOT_REPLY_MESSAGE</p> 
                 """
-<p>Luontotietoselvitys on hyväksytty.</p>
-<p>Tiedot on nyt lähetetty ja tallennettu paikkatietokantaan.</p>
-<p>Selvityksen löydätte luontotietoportaalista tunnisteella: $reportId .</p> 
-                """
-            )
+        )
 
-        fun getReportCreatedEmail(reportId: UUID) =
-            EmailContent.fromHtml(
-                "Luontotieto selvityspyyntö",
+        fun getReportCreatedEmail(
+            reportName: String,
+            reportDescription: String,
+            link: String
+        ) = EmailContent.fromHtml(
+            "Uusi luontoselvitys",
+            """
+<p>Teille on avattu uusi selvitys Espoon Luontotietoportaalissa.</p>
+<hr>
+<p>Selvityksen nimi: $reportName</p>
+<p>Selvityksen kuvaus: $reportDescription</p>
+<p>Linkki selvitykseen: $link</p>
+<hr>
+<p>Kirjaudu järjestelmään nähdäksesi kaikki selvitystilauksen tiedot ja täydentääksesi selvitystä. Luontotietoportaaliin kirjaudutaan yrityksen yhteiskäyttötunnuksilla.</p>
+<p>$DO_NOT_REPLY_MESSAGE</p>
                 """
-<p>Teille on luotu uusi luontoselvitys.</p>
-<p>Selvityksen löydätte luontotietoportaalista tunnisteella: $reportId .</p> 
-                """
-            )
+        )
 
-        fun getReportUpdatedEmail(reportId: UUID) =
-            EmailContent.fromHtml(
-                "Luontotietoselvitystä päivitetty",
-                """
-<p>Luntotietoselvitystä $reportId on päivitetty.</p>
-<p>Selvityksen löydätte luontotietoportaalista tunnisteella: $reportId .</p> 
-                """
-            )
+        fun getReportUpdatedEmail(
+            reportName: String,
+            reportAssignee: String,
+            link: String
+        ) = EmailContent.fromHtml(
+            "Päivitys selvitykseen $reportName",
+            """
+<p>Tilaamaasi selvitystä $reportName on päivitetty. Pääset tarkastelemaan muutoksia Luontotietoportaalista.</p>
+<hr>
+<p>Selvityksen nimi: $reportName</p>
+<p>Selvityksen tekijä: $reportAssignee</p>
+<p>Linkki selvitykseen: $link</p>
+"""
+        )
     }
 }

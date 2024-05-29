@@ -57,7 +57,7 @@ class UserController {
                 sesEmailClient.send(
                     Email(
                         body.email,
-                        Emails.getUserCreatedEmail(generatedString)
+                        Emails.getUserCreatedEmail("link", createdUser.email ?: "", generatedString)
                     )
                 )
 

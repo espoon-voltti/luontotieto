@@ -87,6 +87,11 @@ class OrderController {
             val reportId: UUID,
     )
 
+    data class OrderIdAndReport(
+            val orderId: UUID,
+            val report: Report,
+    )
+
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     fun createOrderFromScratch(
@@ -104,7 +109,7 @@ class OrderController {
                                             user,
                                             orderId
                                     )
-                            CreateOrderResponse(orderId, report.id)
+                            OrderIdAndReport(orderId, report)
                         }
                         .also {
                             logger.audit(
@@ -115,9 +120,9 @@ class OrderController {
                         }
 
         if (emailEnv.enabled) {
-            sendReportCreatedEmail(response.reportId, body.assigneeId, body.assigneeContactEmail)
+            sendReportCreatedEmail(response.report, body.assigneeId, body.assigneeContactEmail)
         }
-        return response
+        return CreateOrderResponse(response.orderId, response.report.id)
     }
 
     @PutMapping("/{id}")
@@ -263,14 +268,20 @@ class OrderController {
         return fileUrl
     }
 
-    private fun sendReportCreatedEmail(reportId: UUID, assigneeId: UUID, contactEmail: String?) {
+    private fun sendReportCreatedEmail(report: Report, assigneeId: UUID, contactEmail: String?) {
         jdbi.inTransactionUnchecked { tx ->
             val user = tx.getUser(assigneeId)
-            val emails = listOf(user.email, contactEmail).filterNotNull()
-            val reportCreatedEmail = Emails.getReportCreatedEmail(reportId)
+            val emails = listOf(user.email, contactEmail).filterNotNull().distinct()
             emails.forEach { email ->
                 sesEmailClient.send(
-                        Email(email, reportCreatedEmail.title, reportCreatedEmail.content)
+                        Email(
+                                email,
+                                Emails.getReportCreatedEmail(
+                                        report.name,
+                                        report.order?.description ?: "",
+                                        "link"
+                                )
+                        )
                 )
             }
         }
