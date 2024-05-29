@@ -174,7 +174,7 @@ fun Handle.getReportByOrderId(
         .getOrNull() ?: throw NotFound()
 }
 
-fun Handle.getReportById(id: UUID,): Report {
+fun Handle.getReportById(id: UUID): Report {
     return createQuery(
         """ 
                 $SELECT_REPORT_SQL
