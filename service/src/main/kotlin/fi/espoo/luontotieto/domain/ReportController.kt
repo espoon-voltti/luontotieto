@@ -309,16 +309,20 @@ class ReportController {
         email: EmailContent,
         reportId: UUID
     ) {
-        jdbi.inTransactionUnchecked { tx ->
-            val report = tx.getReportById(reportId)
-            val emails = mutableListOf<String?>()
-            if (report.order !== null) {
-                val assigneeUser = tx.getUser(report.order.assigneeId)
-                emails.add(assigneeUser.email)
-                emails.add(report.order.contactEmail)
-                emails.add(report.order.assigneeContactEmail)
+        try {
+            jdbi.inTransactionUnchecked { tx ->
+                val report = tx.getReportById(reportId)
+                val emails = mutableListOf<String?>()
+                if (report.order !== null) {
+                    val assigneeUser = tx.getUser(report.order.assigneeId)
+                    emails.add(assigneeUser.email)
+                    emails.add(report.order.contactEmail)
+                    emails.add(report.order.assigneeContactEmail)
+                }
+                emails.filterNotNull().distinct().forEach { e -> sesEmailClient.send(Email(e, email)) }
             }
-            emails.filterNotNull().distinct().forEach { e -> sesEmailClient.send(Email(e, email)) }
+        } catch (e: Exception) {
+            logger.error("Error sending email: ", e)
         }
     }
 

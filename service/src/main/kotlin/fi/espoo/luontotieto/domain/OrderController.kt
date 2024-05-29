@@ -284,21 +284,25 @@ class OrderController {
         assigneeId: UUID,
         contactEmail: String?
     ) {
-        jdbi.inTransactionUnchecked { tx ->
-            val user = tx.getUser(assigneeId)
-            val emails = listOf(user.email, contactEmail).filterNotNull().distinct()
-            emails.forEach { email ->
-                sesEmailClient.send(
-                    Email(
-                        email,
-                        Emails.getReportCreatedEmail(
-                            report.name,
-                            report.order?.description ?: "",
-                            luontotietoHost.getReportUrl(report.id)
+        try {
+            jdbi.inTransactionUnchecked { tx ->
+                val user = tx.getUser(assigneeId)
+                val emails = listOf(user.email, contactEmail).filterNotNull().distinct()
+                emails.forEach { email ->
+                    sesEmailClient.send(
+                        Email(
+                            email,
+                            Emails.getReportCreatedEmail(
+                                report.name,
+                                report.order?.description ?: "",
+                                luontotietoHost.getReportUrl(report.id)
+                            )
                         )
                     )
-                )
+                }
             }
+        } catch (e: Exception) {
+            logger.error("Error sending email: ", e)
         }
     }
 }

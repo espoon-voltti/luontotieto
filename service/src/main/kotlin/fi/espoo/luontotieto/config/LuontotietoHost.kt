@@ -17,7 +17,7 @@ data class LuontotietoHost(val host: String) {
 
     fun getCustomerUserLoginUrl(): String {
         val builder = URIBuilder(host)
-        builder.path = "/luontotieto/kirjaudu/yrityskayttaja"
+        builder.path = "/kirjaudu/yrityskayttaja"
         return builder.build().toString()
     }
 
