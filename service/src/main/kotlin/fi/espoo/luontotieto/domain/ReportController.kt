@@ -241,6 +241,7 @@ class ReportController {
         @PathVariable reportId: UUID
     ): List<ReportFile> {
         return jdbi.inTransactionUnchecked { tx ->
+            // This is done to check that user has access to the report
             val report = tx.getReport(reportId, user)
             tx.getReportFiles(reportId)
         }
