@@ -57,10 +57,8 @@ class Emails {
             """
 <p>Teille on luotu käyttäjätunnukset Espoon Luontotietoportaaliin.</p>
 <p>Voitte kirjautua palveluun osoitteessa $link.</p>
-<hr>
 <p>Käyttäjätunnus: $email</p>
 <p>Salasana: $password</p>
-<hr>
 <p>Vaihtakaa salasana ensimmäisen kirjautumisen yhteydessä.</p>
 <p>$DO_NOT_REPLY_MESSAGE</p>
 """
@@ -74,10 +72,8 @@ class Emails {
             "Hyväksytty selvitys: $reportName",
             """
 <p>$approverName on hyväksynyt selvityksen $reportName.</p>
-<hr>
 <p>Selvityksen nimi: $reportName</p>
 <p>Linkki selvitykseen: $link</p>
-<hr>
 <p>Kirjaudu järjestelmään nähdäksesi kaikki selvityksen tiedot. Luontotietoportaaliin kirjaudutaan yrityksen yhteiskäyttötunnuksilla.</p>
 <p>$DO_NOT_REPLY_MESSAGE</p> 
                 """
@@ -91,11 +87,9 @@ class Emails {
             "Uusi luontoselvitys",
             """
 <p>Teille on avattu uusi selvitys Espoon Luontotietoportaalissa.</p>
-<hr>
 <p>Selvityksen nimi: $reportName</p>
 <p>Selvityksen kuvaus: $reportDescription</p>
 <p>Linkki selvitykseen: $link</p>
-<hr>
 <p>Kirjaudu järjestelmään nähdäksesi kaikki selvitystilauksen tiedot ja täydentääksesi selvitystä. Luontotietoportaaliin kirjaudutaan yrityksen yhteiskäyttötunnuksilla.</p>
 <p>$DO_NOT_REPLY_MESSAGE</p>
                 """
@@ -109,7 +103,6 @@ class Emails {
             "Päivitys selvitykseen $reportName",
             """
 <p>Tilaamaasi selvitystä $reportName on päivitetty. Pääset tarkastelemaan muutoksia Luontotietoportaalista.</p>
-<hr>
 <p>Selvityksen nimi: $reportName</p>
 <p>Selvityksen tekijä: $reportAssignee</p>
 <p>Linkki selvitykseen: $link</p>
