@@ -192,6 +192,8 @@ class ReportController {
                 )
             }
 
+        val report = jdbi.inTransactionUnchecked { tx -> tx.getReport(reportId, user) }
+
         val readers =
             reportFiles.mapNotNull { rf ->
                 getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf)
@@ -215,7 +217,7 @@ class ReportController {
                         }
                     ptx.insertPaikkatieto(
                         reader.tableDefinition,
-                        reportId,
+                        report,
                         reader.asSequence(),
                         params
                     )

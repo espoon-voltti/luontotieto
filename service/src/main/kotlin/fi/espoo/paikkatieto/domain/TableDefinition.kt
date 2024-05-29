@@ -4,6 +4,7 @@
 
 package fi.espoo.paikkatieto.domain
 
+import fi.espoo.luontotieto.domain.Report
 import fi.espoo.paikkatieto.reader.GpkgFeature
 import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.reader.GpkgValidationErrorReason
@@ -78,7 +79,6 @@ enum class TableDefinition(
                 ),
                 Column(name = "pesankorkeus", kClass = Int::class),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(name = "viite", kClass = String::class),
                 Column(name = "kunta", kClass = Int::class, isNullable = true),
                 Column(
                     name = "tarkkuus",
@@ -102,7 +102,6 @@ enum class TableDefinition(
                 ),
                 Column(name = "aluekuvaus", kClass = String::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(name = "viite", kClass = String::class),
                 Column(name = "kunta", kClass = Int::class, isNullable = true),
                 Column(
                     name = "tarkkuus",
@@ -117,11 +116,10 @@ enum class TableDefinition(
         columns =
             listOf(
                 Column(name = "geom", kClass = LineString::class),
-                Column(name = "vuosi", kClass = Int::class),
+                Column(name = "pvm", kClass = Date::class),
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "laatu", kClass = String::class, sqlType = "liito_orava_aluetyyppi"),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(name = "viite", kClass = String::class),
                 Column(name = "kunta", kClass = Int::class, isNullable = true),
                 Column(
                     name = "tarkkuus",
@@ -161,7 +159,6 @@ enum class TableDefinition(
                 Column(name = "yksilo_maara", kClass = Int::class),
                 Column(name = "yksikko", kClass = String::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(name = "viite", kClass = String::class),
                 Column(name = "havaitsija", kClass = String::class)
             )
     ),
@@ -190,7 +187,6 @@ enum class TableDefinition(
                 // Do not write pituus to DB. Keep it only in the template.
                 Column(name = "pituus", kClass = Double::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(name = "viite", kClass = String::class),
                 Column(name = "havaitsija", kClass = String::class)
             )
     ),
@@ -221,22 +217,72 @@ enum class TableDefinition(
                 // Do not write pinta_ala to DB. Keep it only in the template.
                 Column(name = "pinta_ala", kClass = Double::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(name = "viite", kClass = String::class),
                 Column(name = "havaitsija", kClass = String::class)
+            )
+    ),
+    LEPAKKO_VIIVAT(
+        layerName = "lepakko_viivat",
+        sqlInsertStatement = SQL_INSERT_LEPAKKO_VIIVAT,
+        columns =
+            listOf(
+                Column(name = "geom", kClass = LineString::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "kuvaus", kClass = String::class),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+            )
+    ),
+    LEPAKKO_ALUEET(
+        layerName = "lepakko_alueet",
+        sqlInsertStatement = SQL_INSERT_LEPAKKO_ALUEET,
+        columns =
+            listOf(
+                Column(name = "geom", kClass = Polygon::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "luokka", kClass = String::class, sqlType = "lepakko_luokka"),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+            )
+    ),
+    LUMO_ALUEET(
+        layerName = "lepakko_alueet",
+        sqlInsertStatement = SQL_INSERT_LUMO_ALUEET,
+        columns =
+            listOf(
+                Column(name = "geom", kClass = Polygon::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "nimi", kClass = String::class, isNullable = true),
+                Column(name = "lumo_luokka", kClass = String::class, sqlType = "lumo_luokka"),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+            )
+    ),
+    NORO_VIIVAT(
+        layerName = "noro_viivat",
+        sqlInsertStatement = SQL_INSERT_NORO_VIIVAT,
+        columns =
+            listOf(
+                Column(name = "geom", kClass = LineString::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true)
             )
     )
 }
 
 fun Handle.insertPaikkatieto(
     tableDefinition: TableDefinition,
-    reportId: UUID,
+    report: Report,
     data: Sequence<GpkgFeature>,
     params: Map<String, Any?> = emptyMap()
 ): Array<Int> {
     val batchInsert = prepareBatch(tableDefinition.sqlInsertStatement)
     data.forEach {
         batchInsert.add(
-            convertColumnsWithGeometry(it.columns).plus(Pair("reportId", reportId)).plus(params)
+            convertColumnsWithGeometry(it.columns)
+                .plus("reportId" to report.id)
+                .plus("reportName" to report.name)
+                .plus(params)
         )
     }
     return batchInsert.execute().toTypedArray()
@@ -318,7 +364,7 @@ private const val SQL_INSERT_LIITO_ORAVA_PISTEET =
         :pesatyyppi::liito_orava_pesatyyppi,
         :pesankorkeus,
         :lisatieto,
-        :viite,
+        :reportName,
         :kunta,
         :tarkkuus::luontotieto_mittaustyyppi,
         ST_GeomFromWKB(:geom, 3879),
@@ -347,7 +393,7 @@ private const val SQL_INSERT_LIITO_ORAVA_ALUEET =
         :aluetyyppi::liito_orava_aluetyyppi,
         :aluekuvaus,
         :lisatieto,
-        :viite,
+        :reportName,
         :kunta,
         :tarkkuus::luontotieto_mittaustyyppi,
         ST_GeomFromWKB(:geom, 3879),
@@ -359,7 +405,7 @@ private const val SQL_INSERT_LIITO_ORAVA_ALUEET =
 private const val SQL_INSERT_LIITO_ORAVA_YHTEYSVIIVAT =
     """
     INSERT INTO liito_orava_yhteysviivat (
-        vuosi,
+        pvm,
         havaitsija,
         laatu,
         lisatieto,
@@ -370,11 +416,11 @@ private const val SQL_INSERT_LIITO_ORAVA_YHTEYSVIIVAT =
         selvitys_id
     ) 
     VALUES (
-        :vuosi,
+        :pvm,
         :havaitsija,
         :laatu,
         :lisatieto,
-        :viite,
+        :reportName,
         :kunta,
         :tarkkuus::luontotieto_mittaustyyppi,
         ST_GeomFromWKB(:geom, 3879),
@@ -418,7 +464,7 @@ private const val SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_PISTEET =
         :yksilo_maara,
         :yksikko,
         :lisatieto,
-        :viite,
+        :reportName,
         :havaitsija,
         ST_GeomFromWKB(:geom, 3879),
         :reportId
@@ -453,7 +499,7 @@ private const val SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_VIIVAT =
         :havaintopaikan_kuvaus,
         :laji_luokitus,
         :lisatieto,
-        :viite,
+        :reportName,
         :havaitsija,
         ST_GeomFromWKB(:geom, 3879),
         :reportId
@@ -492,8 +538,100 @@ private const val SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_ALUEET =
         :yksilo_maara,
         :yksikko,
         :lisatieto,
-        :viite,
+        :reportName,
         :havaitsija,
+        ST_GeomFromWKB(:geom, 3879),
+        :reportId
+    )
+    RETURNING id
+    """
+
+private const val SQL_INSERT_LEPAKKO_VIIVAT =
+    """
+    INSERT INTO lepakko_viivat (
+        pvm,
+        havaitsija,
+        kuvaus,
+        lisatieto,
+        viite,
+        geom,
+        selvitys_id
+    ) 
+    VALUES (
+        :pvm,
+        :havaitsija,
+        :laatu,
+        :lisatieto,
+        :reportName,
+        ST_GeomFromWKB(:geom, 3879),
+        :reportId
+    )
+    RETURNING id
+    """
+
+private const val SQL_INSERT_LEPAKKO_ALUEET =
+    """
+    INSERT INTO lepakko_alueet (
+        pvm,
+        havaitsija,
+        luokka,
+        lisatieto,
+        viite,
+        geom,
+        selvitys_id
+    ) 
+    VALUES (
+        :pvm,
+        :havaitsija,
+        :luokka::lepakko_luokka,
+        :lisatieto,
+        :reportName,
+        ST_GeomFromWKB(:geom, 3879),
+        :reportId
+    )
+    RETURNING id
+    """
+
+private const val SQL_INSERT_LUMO_ALUEET =
+    """
+    INSERT INTO lumo_alueet (
+        pvm,
+        havaitsija,
+        nimi,
+        lumo_luokka,
+        lisatieto,
+        viite,
+        geom,
+        selvitys_id
+    ) 
+    VALUES (
+        :pvm,
+        :havaitsija,
+        :nimi,
+        :lumo_luokka::lumo_luokka,
+        :lisatieto,
+        :reportName,
+        ST_GeomFromWKB(:geom, 3879),
+        :reportId
+    )
+    RETURNING id
+    """
+
+private const val SQL_INSERT_NORO_VIIVAT =
+    """
+    INSERT INTO noro_viivat (
+        pvm,
+        havaitsija,
+        lisatieto,
+        viite,
+        geom,
+        selvitys_id
+    ) 
+    VALUES (
+        :pvm,
+        :havaitsija,
+        :lisatieto,
+        :reportName,
         ST_GeomFromWKB(:geom, 3879),
         :reportId
     )

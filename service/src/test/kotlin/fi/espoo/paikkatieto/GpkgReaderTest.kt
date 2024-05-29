@@ -39,7 +39,6 @@ class GpkgReaderTest {
                             "pesatyyppi" to "Pönttö",
                             "pesankorkeus" to 2,
                             "lisatieto" to null,
-                            "viite" to "11",
                             "kunta" to 79,
                             "tarkkuus" to "GPS"
                         ),
@@ -58,7 +57,6 @@ class GpkgReaderTest {
                             "pesatyyppi" to "Kolo",
                             "pesankorkeus" to 11,
                             "lisatieto" to null,
-                            "viite" to "Espoo",
                             "kunta" to 79,
                             "tarkkuus" to "Muu"
                         ),
@@ -95,7 +93,6 @@ class GpkgReaderTest {
                             "aluetyyppi" to "Elinalue",
                             "aluekuvaus" to "Alue oravalle",
                             "lisatieto" to null,
-                            "viite" to "Espoo 4/2024",
                             "kunta" to 79,
                             "tarkkuus" to "Muu"
                         ),
@@ -132,7 +129,6 @@ class GpkgReaderTest {
                             "aluetyyppi" to "Elinalue",
                             "aluekuvaus" to "Alue oravalle",
                             "lisatieto" to null,
-                            "viite" to "Espoo 4/2024",
                             "kunta" to "79",
                             "tarkkuus" to null
                         ),
