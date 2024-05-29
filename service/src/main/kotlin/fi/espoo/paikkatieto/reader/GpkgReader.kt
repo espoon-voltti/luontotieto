@@ -8,9 +8,11 @@ import fi.espoo.paikkatieto.domain.TableDefinition
 import mu.KotlinLogging
 import org.geotools.api.data.SimpleFeatureReader
 import org.geotools.geopkg.GeoPackage
+import org.locationtech.jts.geom.Geometry
 import java.io.Closeable
 import java.io.File
 import java.io.IOException
+import kotlin.reflect.full.isSubclassOf
 
 private val logger = KotlinLogging.logger {}
 
@@ -56,12 +58,25 @@ class GpkgReader(file: File, val tableDefinition: TableDefinition) :
 
         val columns =
             tableDefinition.columns.associate { column ->
-                Pair(column.name, gpkgFeature.getAttribute(column.name))
+                val isGeometryColumn = column.kClass.isSubclassOf(Geometry::class)
+                if (isGeometryColumn) {
+                    val geom = gpkgFeature.getAttribute(column.name) ?: gpkgFeature.defaultGeometry
+                    Pair(column.name, geom)
+                } else {
+                    Pair(column.name, gpkgFeature.getAttribute(column.name))
+                }
             }
 
         val errors =
             tableDefinition.columns.mapNotNull { column ->
-                column.validate(gpkgFeature.getAttribute(column.name))
+                val isGeometryColumn = column.kClass.isSubclassOf(Geometry::class)
+                val attr =
+                    if (isGeometryColumn) {
+                        gpkgFeature.getAttribute(column.name) ?: gpkgFeature.defaultGeometry
+                    } else {
+                        gpkgFeature.getAttribute(column.name)
+                    }
+                column.validate(attr)
             }
 
         return GpkgFeature(columns = columns, errors = errors)

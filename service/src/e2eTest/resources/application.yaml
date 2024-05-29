@@ -6,6 +6,9 @@ app:
   jwt:
     public_keys_url: classpath:local-development/jwks.json
 
+luontotieto:
+  host: "http://localhost:9000"
+
 spring:
   datasource:
     luontotieto:

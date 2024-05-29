@@ -5,14 +5,20 @@
 package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.BadRequest
+import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.BucketEnv
+import fi.espoo.luontotieto.config.LuontotietoHost
 import fi.espoo.luontotieto.config.audit
 import fi.espoo.luontotieto.s3.Document
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
 import fi.espoo.luontotieto.s3.getAndCheckFileName
+import fi.espoo.paikkatieto.domain.TableDefinition
+import fi.espoo.paikkatieto.domain.deleteAluerajausLuontoselvitystilaus
+import fi.espoo.paikkatieto.domain.insertPaikkatieto
+import fi.espoo.paikkatieto.reader.GpkgReader
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
@@ -33,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import java.io.File
 import java.net.URL
 import java.util.UUID
 
@@ -50,6 +57,8 @@ class OrderController {
     @Autowired lateinit var documentClient: S3DocumentService
 
     @Autowired lateinit var bucketEnv: BucketEnv
+
+    @Autowired lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -90,11 +99,7 @@ class OrderController {
             .inTransactionUnchecked { tx ->
                 val orderId = tx.insertOrder(data = body, user = user)
                 val report =
-                    tx.insertReport(
-                        Report.Companion.ReportInput(body.name, null),
-                        user,
-                        orderId
-                    )
+                    tx.insertReport(Report.Companion.ReportInput(body.name, null), user, orderId)
                 CreateOrderResponse(orderId, report.id)
             }
             .also { logger.audit(user, AuditEvent.CREATE_ORDER, mapOf("id" to "$it")) }
@@ -107,9 +112,9 @@ class OrderController {
         @RequestBody order: OrderInput
     ): Order {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
-        return jdbi.inTransactionUnchecked { tx -> tx.putOrder(id, order, user) }.also {
-            logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id"))
-        }
+        return jdbi
+            .inTransactionUnchecked { tx -> tx.putOrder(id, order, user) }
+            .also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
     }
 
     @PostMapping("/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -130,13 +135,7 @@ class OrderController {
         val id =
             jdbi.inTransactionUnchecked { tx ->
                 tx.insertOrderFile(
-                    OrderFileInput(
-                        orderId,
-                        description,
-                        contentType,
-                        fileName,
-                        documentType
-                    ),
+                    OrderFileInput(orderId, description, contentType, fileName, documentType),
                     user
                 )
             }
@@ -146,6 +145,43 @@ class OrderController {
                 dataBucket,
                 Document(name = "$orderId/$id", bytes = file.bytes, contentType = contentType)
             )
+
+            if (documentType == OrderDocumentType.ORDER_AREA) {
+                val tableDefinition = TableDefinition.ALUERAJAUS_LUONTOSELVITYSTILAUS
+                val tmpGpkgFile = kotlin.io.path.createTempFile(fileName)
+                file.transferTo(tmpGpkgFile)
+                GpkgReader(File(tmpGpkgFile.toUri()), tableDefinition).use { reader ->
+                    val data = reader.asSequence().toList()
+                    val errors = data.flatMap { it.errors }.toList()
+                    if (errors.isNotEmpty()) {
+                        logger.error(errors.toString())
+                        throw BadRequest("File does not conform the schema.")
+                    }
+
+                    jdbi.inTransactionUnchecked { tx ->
+                        val report = tx.getReportByOrderId(orderId, user)
+                        val params =
+                            tx.getAluerajausLuontoselvitysTilausParams(
+                                user,
+                                report,
+                                luontotietoHost.getReportUrl(report.id)
+                            )
+                        val reportId =
+                            params["reportId"]?.let { UUID.fromString(it.toString()) }
+                                ?: throw NotFound("")
+
+                        paikkatietoJdbi.inTransactionUnchecked { ptx ->
+                            ptx.insertPaikkatieto(
+                                reader.tableDefinition,
+                                reportId,
+                                data.asSequence(),
+                                params
+                            )
+                        }
+                    }
+                }
+            }
+
             logger.audit(
                 user,
                 AuditEvent.ADD_ORDER_FILE,
@@ -173,13 +209,21 @@ class OrderController {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         val dataBucket = bucketEnv.data
         documentClient.delete(dataBucket, "$orderId/$fileId")
-        jdbi.inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, fileId) }.also {
-            logger.audit(
-                user,
-                AuditEvent.DELETE_ORDER_FILE,
-                mapOf("id" to "$orderId", "file" to "$fileId")
-            )
-        }
+        jdbi
+            .inTransactionUnchecked { tx ->
+                val report = tx.getReportByOrderId(orderId, user)
+                tx.deleteOrderFile(orderId, fileId)
+                paikkatietoJdbi.inTransactionUnchecked { ptx ->
+                    ptx.deleteAluerajausLuontoselvitystilaus(report.id)
+                }
+            }
+            .also {
+                logger.audit(
+                    user,
+                    AuditEvent.DELETE_ORDER_FILE,
+                    mapOf("id" to "$orderId", "file" to "$fileId")
+                )
+            }
     }
 
     @GetMapping("/{orderId}/files/{fileId}")

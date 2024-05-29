@@ -49,6 +49,16 @@ enum class TableDefinition(
     val sqlInsertStatement: String,
     val columns: List<Column>
 ) {
+    ALUERAJAUS_LUONTOSELVITYSTILAUS(
+        layerName = "aluerajaus_luontoselvitystilaus",
+        sqlInsertStatement = SQL_INSERT_ALUERAJAUS_LUONTOSELVITYSTILAUS,
+        columns = listOf(Column(name = "geom", kClass = Polygon::class))
+    ),
+    ALUERAJAUS_LUONTOSELVITYS(
+        layerName = "aluerajaus_luontoselvitys",
+        sqlInsertStatement = SQL_INSERT_ALUERAJAUS_LUONTOSELVITYS,
+        columns = listOf(Column(name = "geom", kClass = Polygon::class))
+    ),
     LIITO_ORAVA_PISTEET(
         layerName = "liito_orava_pisteet",
         sqlInsertStatement = SQL_INSERT_LIITO_ORAVA_PISTEET,
@@ -220,14 +230,65 @@ enum class TableDefinition(
 fun Handle.insertPaikkatieto(
     tableDefinition: TableDefinition,
     reportId: UUID,
-    data: Sequence<GpkgFeature>
+    data: Sequence<GpkgFeature>,
+    params: Map<String, Any?> = emptyMap()
 ): Array<Int> {
     val batchInsert = prepareBatch(tableDefinition.sqlInsertStatement)
     data.forEach {
-        batchInsert.add(convertColumnsWithGeometry(it.columns).plus(Pair("reportId", reportId)))
+        batchInsert.add(
+            convertColumnsWithGeometry(it.columns).plus(Pair("reportId", reportId)).plus(params)
+        )
     }
     return batchInsert.execute().toTypedArray()
 }
+
+fun Handle.deleteAluerajausLuontoselvitystilaus(reportId: UUID): Int {
+    return createUpdate("DELETE FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId")
+        .bind("reportId", reportId)
+        .execute()
+}
+
+private const val SQL_INSERT_ALUERAJAUS_LUONTOSELVITYSTILAUS =
+    """
+        INSERT INTO aluerajaus_luontoselvitystilaus (
+            tilauksen_nimi,
+            tilauksen_tekija,
+            tilausyksikko,
+            selvitys_id,
+            selvitys_linkki,
+            geom
+        ) VALUES (
+            :name,
+            :contactPerson,
+            :unit,
+            :reportId,
+            :reportLink,
+            ST_GeomFromWKB(:geom, 3879)
+        )
+        RETURNING id
+    """
+
+private const val SQL_INSERT_ALUERAJAUS_LUONTOSELVITYS =
+    """
+        INSERT INTO aluerajaus_luontoselvitys (
+            selvitys_nimi,
+            selvitys_vuosi,
+            selvitys_tekija,
+            tilausyksikko,
+            selvitys_id,
+            selvitys_linkki,
+            geom
+        ) VALUES (
+            :name,
+            :year,
+            :contactPerson,
+            :unit,
+            :reportId,
+            :reportLink,
+            ST_GeomFromWKB(:geom, 3879)
+        )
+        RETURNING id
+    """
 
 private const val SQL_INSERT_LIITO_ORAVA_PISTEET =
     """

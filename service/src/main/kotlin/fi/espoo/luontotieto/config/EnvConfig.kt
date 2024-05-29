@@ -15,4 +15,7 @@ class EnvConfig {
     @Bean fun bucketEnv(env: Environment): BucketEnv = BucketEnv.fromEnvironment(env)
 
     @Bean fun emailEnv(env: Environment): EmailEnv = EmailEnv.fromEnvironment(env)
+
+    @Bean
+    fun luontotietoHost(env: Environment): LuontotietoHost = LuontotietoHost.fromEnvironment(env)
 }

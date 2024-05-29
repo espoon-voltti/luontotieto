@@ -38,6 +38,8 @@ export function getDocumentTypeTitle<
       return 'Muut huomioitavat lajit alueet'
     case ReportFileDocumentType.OTHER:
       return 'Muu liite'
+    case ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS:
+      return 'Lopullinen aluerajaus'
     case ReportFileDocumentType.REPORT:
       return 'Selvitysraportti'
     case OrderFileDocumentType.ORDER_INFO:
@@ -56,6 +58,7 @@ export enum ReportFileDocumentType {
   MUUT_HUOMIOITAVAT_LAJIT_PISTEET = 'MUUT_HUOMIOITAVAT_LAJIT_PISTEET',
   MUUT_HUOMIOITAVAT_LAJIT_VIIVAT = 'MUUT_HUOMIOITAVAT_LAJIT_VIIVAT',
   MUUT_HUOMIOITAVAT_LAJIT_ALUEET = 'MUUT_HUOMIOITAVAT_LAJIT_ALUEET',
+  ALUERAJAUS_LUONTOSELVITYS = 'ALUERAJAUS_LUONTOSELVITYS',
   OTHER = 'OTHER',
   REPORT = 'REPORT'
 }
