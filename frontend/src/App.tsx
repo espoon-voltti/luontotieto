@@ -82,7 +82,7 @@ export const appRouter = createBrowserRouter([
         )
       },
       {
-        path: '/kirjaudu/yrityskäyttäjä',
+        path: '/kirjaudu/yrityskayttaja',
         element: (
           <AuthGuard allow="UNAUTHENTICATED_ONLY">
             <UserLoginPage />

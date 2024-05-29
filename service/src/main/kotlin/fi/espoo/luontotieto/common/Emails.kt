@@ -7,6 +7,8 @@ val DO_NOT_REPLY_MESSAGE =
     tai tunnusten kanssa ilmenee haasteita, olethan yhteydessä ymparisto@espoo.fi.
     """.trimMargin()
 
+fun linkElement(url: String) = """<a href="$url">$url</a>"""
+
 data class EmailContent(
     val title: String,
     val text: String,
@@ -56,7 +58,7 @@ class Emails {
             "Käyttäjätunnukset luotu Espoon Luontotietoportaaliin",
             """
 <p>Teille on luotu käyttäjätunnukset Espoon Luontotietoportaaliin.</p>
-<p>Voitte kirjautua palveluun osoitteessa $link.</p>
+<p>Voitte kirjautua palveluun osoitteessa ${linkElement(link)}.</p>
 <p>Käyttäjätunnus: $email</p>
 <p>Salasana: $password</p>
 <p>Vaihtakaa salasana ensimmäisen kirjautumisen yhteydessä.</p>
@@ -73,7 +75,7 @@ class Emails {
             """
 <p>$approverName on hyväksynyt selvityksen $reportName.</p>
 <p>Selvityksen nimi: $reportName</p>
-<p>Linkki selvitykseen: $link</p>
+<p>Linkki selvitykseen: ${linkElement(link)}</p>
 <p>Kirjaudu järjestelmään nähdäksesi kaikki selvityksen tiedot. Luontotietoportaaliin kirjaudutaan yrityksen yhteiskäyttötunnuksilla.</p>
 <p>$DO_NOT_REPLY_MESSAGE</p> 
                 """
@@ -89,7 +91,7 @@ class Emails {
 <p>Teille on avattu uusi selvitys Espoon Luontotietoportaalissa.</p>
 <p>Selvityksen nimi: $reportName</p>
 <p>Selvityksen kuvaus: $reportDescription</p>
-<p>Linkki selvitykseen: $link</p>
+<p>Linkki selvitykseen: ${linkElement(link)}</p>
 <p>Kirjaudu järjestelmään nähdäksesi kaikki selvitystilauksen tiedot ja täydentääksesi selvitystä. Luontotietoportaaliin kirjaudutaan yrityksen yhteiskäyttötunnuksilla.</p>
 <p>$DO_NOT_REPLY_MESSAGE</p>
                 """
@@ -105,7 +107,7 @@ class Emails {
 <p>Tilaamaasi selvitystä $reportName on päivitetty. Pääset tarkastelemaan muutoksia Luontotietoportaalista.</p>
 <p>Selvityksen nimi: $reportName</p>
 <p>Selvityksen tekijä: $reportAssignee</p>
-<p>Linkki selvitykseen: $link</p>
+<p>Linkki selvitykseen: ${linkElement(link)}</p>
 """
         )
     }
