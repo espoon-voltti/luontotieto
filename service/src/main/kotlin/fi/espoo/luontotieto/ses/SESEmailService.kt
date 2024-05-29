@@ -40,7 +40,7 @@ class SESEmailClient(
         }
         val fromAddress = env.senderAddress
         val arn = env.senderArn
-        val title = "Luontotietoportaali: ${email.content.title}"
+        val title = email.content.title
         val content = email.content
         val toAddress = email.toAddress
 
