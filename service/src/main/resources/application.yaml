@@ -13,7 +13,7 @@ luontotieto:
     region: ${EMAIL_AWS_REGION}
     sender_address: ${EMAIL_SENDER_ADDRESS}
     sender_arn: ${EMAIL_SENDER_ARN}
-  host: ${LUONTOTIETO_HOST}
+  host: ${BASE_URL}
 
 spring:
   main:
