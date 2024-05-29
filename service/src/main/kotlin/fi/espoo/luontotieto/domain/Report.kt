@@ -195,7 +195,7 @@ fun Handle.getAluerajausLuontoselvitysTilausParams(
     return mapOf(
         "name" to report.order?.name,
         "contactPerson" to report.order?.contactPerson,
-        "unit" to report.order?.orderingUnit,
+        "unit" to report.order?.orderingUnit?.joinToString(","),
         "reportId" to report.id,
         "reportLink" to reportLink
     )
@@ -211,7 +211,7 @@ fun Handle.getAluerajausLuontoselvitysParams(
         "name" to report.name,
         "year" to report.order?.returnDate?.year,
         "contactPerson" to report.order?.assigneeContactPerson,
-        "unit" to report.order?.orderingUnit,
+        "unit" to report.order?.orderingUnit?.joinToString(","),
         "reportLink" to reportLink
     )
 }
