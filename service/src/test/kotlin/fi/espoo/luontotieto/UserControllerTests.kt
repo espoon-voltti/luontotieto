@@ -69,7 +69,7 @@ class UserControllerTests : FullApplicationTest() {
 
     @Test
     fun getUsersUnauthorized() {
-        for (role in UserRole.entries.filter { it != UserRole.ADMIN }) {
+        for (role in UserRole.entries.filter { it != UserRole.ADMIN && it != UserRole.ORDERER }) {
             val user = AuthenticatedUser(id = UUID.randomUUID(), role = role)
             assertFailsWith(NotFound::class) { controller.getUsers(user) }
         }

@@ -83,7 +83,7 @@ class UserController {
 
     @GetMapping()
     fun getUsers(user: AuthenticatedUser): List<User> {
-        user.checkRoles(UserRole.ADMIN)
+        user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         return jdbi.inTransactionUnchecked { tx -> tx.getUsers() }
     }
 
