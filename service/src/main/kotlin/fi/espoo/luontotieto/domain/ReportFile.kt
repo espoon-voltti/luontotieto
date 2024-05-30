@@ -37,6 +37,18 @@ enum class DocumentType(val tableDefinition: TableDefinition? = null) : Database
     @DatabaseValue("paikkatieto:aluerajaus_luontoselvitys")
     ALUERAJAUS_LUONTOSELVITYS(TableDefinition.ALUERAJAUS_LUONTOSELVITYS),
 
+    @DatabaseValue("paikkatieto:lepakko_viivat")
+    LEPAKKO_VIIVAT(TableDefinition.LEPAKKO_VIIVAT),
+
+    @DatabaseValue("paikkatieto:lepakko_alueet")
+    LEPAKKO_ALUEET(TableDefinition.LEPAKKO_ALUEET),
+
+    @DatabaseValue("paikkatieto:lumo_alueet")
+    LUMO_ALUEET(TableDefinition.LUMO_ALUEET),
+
+    @DatabaseValue("paikkatieto:noro_viivat")
+    NORO_VIIVAT(TableDefinition.NORO_VIIVAT),
+
     @DatabaseValue("luontotieto:report")
     REPORT,
 

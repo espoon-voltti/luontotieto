@@ -208,7 +208,7 @@ class OrderController {
                         paikkatietoJdbi.inTransactionUnchecked { ptx ->
                             ptx.insertPaikkatieto(
                                 reader.tableDefinition,
-                                reportId,
+                                report,
                                 data.asSequence(),
                                 params
                             )

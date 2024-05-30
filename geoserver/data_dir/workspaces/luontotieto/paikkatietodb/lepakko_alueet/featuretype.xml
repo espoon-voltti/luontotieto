@@ -1,0 +1,65 @@
+<featureType>
+  <id>FeatureTypeInfoImpl--43edab60:18fc455d7ac:-7ffb</id>
+  <name>lepakko_alueet</name>
+  <nativeName>lepakko_alueet</nativeName>
+  <namespace>
+    <id>NamespaceInfoImpl-1ce6a5f8:18ef4cf334c:-7fe3</id>
+  </namespace>
+  <title>lepakko_alueet</title>
+  <keywords>
+    <string>features</string>
+    <string>lepakko_alueet</string>
+  </keywords>
+  <nativeCRS class="projected">PROJCS[&quot;ETRS89 / GK25FIN&quot;, 
+  GEOGCS[&quot;ETRS89&quot;, 
+    DATUM[&quot;European Terrestrial Reference System 1989&quot;, 
+      SPHEROID[&quot;GRS 1980&quot;, 6378137.0, 298.257222101, AUTHORITY[&quot;EPSG&quot;,&quot;7019&quot;]], 
+      TOWGS84[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 
+      AUTHORITY[&quot;EPSG&quot;,&quot;6258&quot;]], 
+    PRIMEM[&quot;Greenwich&quot;, 0.0, AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]], 
+    UNIT[&quot;degree&quot;, 0.017453292519943295], 
+    AXIS[&quot;Geodetic longitude&quot;, EAST], 
+    AXIS[&quot;Geodetic latitude&quot;, NORTH], 
+    AUTHORITY[&quot;EPSG&quot;,&quot;4258&quot;]], 
+  PROJECTION[&quot;Transverse_Mercator&quot;, AUTHORITY[&quot;EPSG&quot;,&quot;9807&quot;]], 
+  PARAMETER[&quot;central_meridian&quot;, 25.0], 
+  PARAMETER[&quot;latitude_of_origin&quot;, 0.0], 
+  PARAMETER[&quot;scale_factor&quot;, 1.0], 
+  PARAMETER[&quot;false_easting&quot;, 25500000.0], 
+  PARAMETER[&quot;false_northing&quot;, 0.0], 
+  UNIT[&quot;m&quot;, 1.0], 
+  AXIS[&quot;Easting&quot;, EAST], 
+  AXIS[&quot;Northing&quot;, NORTH], 
+  AUTHORITY[&quot;EPSG&quot;,&quot;3879&quot;]]</nativeCRS>
+  <srs>EPSG:3879</srs>
+  <nativeBoundingBox>
+    <minx>2.5472049671430413E7</minx>
+    <maxx>2.5527950328569587E7</maxx>
+    <miny>6647388.112726935</miny>
+    <maxy>7646352.070103317</maxy>
+    <crs class="projected">EPSG:3879</crs>
+  </nativeBoundingBox>
+  <latLonBoundingBox>
+    <minx>24.304587441282965</minx>
+    <maxx>25.69541255871703</maxx>
+    <miny>59.93905263271002</miny>
+    <maxy>68.90073338452288</maxy>
+    <crs>EPSG:4326</crs>
+  </latLonBoundingBox>
+  <projectionPolicy>FORCE_DECLARED</projectionPolicy>
+  <enabled>true</enabled>
+  <store class="dataStore">
+    <id>DataStoreInfoImpl-1ce6a5f8:18ef4cf334c:-7fe1</id>
+  </store>
+  <serviceConfiguration>false</serviceConfiguration>
+  <simpleConversionEnabled>false</simpleConversionEnabled>
+  <internationalTitle/>
+  <internationalAbstract/>
+  <maxFeatures>0</maxFeatures>
+  <numDecimals>0</numDecimals>
+  <padWithZeros>false</padWithZeros>
+  <forcedDecimal>false</forcedDecimal>
+  <overridingServiceSRS>false</overridingServiceSRS>
+  <skipNumberMatched>false</skipNumberMatched>
+  <circularArcPresent>false</circularArcPresent>
+</featureType>

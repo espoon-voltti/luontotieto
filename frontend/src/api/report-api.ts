@@ -36,6 +36,14 @@ export function getDocumentTypeTitle<
       return 'Muut huomioitavat lajit viivat'
     case ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET:
       return 'Muut huomioitavat lajit alueet'
+    case ReportFileDocumentType.LEPAKKO_ALUEET:
+      return 'Lepakko alueet'
+    case ReportFileDocumentType.LEPAKKO_VIIVAT:
+      return 'Lepakko viivat'
+    case ReportFileDocumentType.LUMO_ALUEET:
+      return 'Lumo alueet'
+    case ReportFileDocumentType.NORO_VIIVAT:
+      return 'Noro viivat'
     case ReportFileDocumentType.OTHER:
       return 'Muu liite'
     case ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS:
@@ -59,6 +67,10 @@ export enum ReportFileDocumentType {
   MUUT_HUOMIOITAVAT_LAJIT_VIIVAT = 'MUUT_HUOMIOITAVAT_LAJIT_VIIVAT',
   MUUT_HUOMIOITAVAT_LAJIT_ALUEET = 'MUUT_HUOMIOITAVAT_LAJIT_ALUEET',
   ALUERAJAUS_LUONTOSELVITYS = 'ALUERAJAUS_LUONTOSELVITYS',
+  LEPAKKO_VIIVAT = 'LEPAKKO_VIIVAT',
+  LEPAKKO_ALUEET = 'LEPAKKO_ALUEET',
+  LUMO_ALUEET = 'LUMO_ALUEET',
+  NORO_VIIVAT = 'NORO_VIIVAT',
   OTHER = 'OTHER',
   REPORT = 'REPORT'
 }
