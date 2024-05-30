@@ -245,7 +245,7 @@ enum class TableDefinition(
             )
     ),
     LUMO_ALUEET(
-        layerName = "lepakko_alueet",
+        layerName = "lumo_alueet",
         sqlInsertStatement = SQL_INSERT_LUMO_ALUEET,
         columns =
             listOf(
@@ -560,7 +560,7 @@ private const val SQL_INSERT_LEPAKKO_VIIVAT =
     VALUES (
         :pvm,
         :havaitsija,
-        :laatu,
+        :kuvaus,
         :lisatieto,
         :reportName,
         ST_GeomFromWKB(:geom, 3879),

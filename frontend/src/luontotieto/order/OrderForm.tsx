@@ -132,6 +132,22 @@ const defaultReportDocuments = [
   {
     checked: false,
     documentType: ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.LEPAKKO_VIIVAT
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.LEPAKKO_ALUEET
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.LUMO_ALUEET
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.NORO_VIIVAT
   }
 ]
 
