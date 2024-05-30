@@ -14,6 +14,7 @@ import java.io.File
 import java.sql.Date
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class GpkgReaderTest {
     @Test
@@ -150,6 +151,22 @@ class GpkgReaderTest {
         GpkgReader(file, TableDefinition.LIITO_ORAVA_ALUEET).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
+        }
+    }
+
+    @Test
+    fun `reads lepakko_alueet GeoPackage file`() {
+        val file = File("src/test/resources/test-data/lepakko_alueet.gpkg")
+        val geomHash = mutableSetOf<Int>()
+        GpkgReader(file, TableDefinition.LEPAKKO_ALUEET).use { reader ->
+            val actual = reader.asSequence().toList()
+            assertEquals(150, actual.size)
+            for (feat in actual) {
+                // Check that all geoms are unique
+                val geom = feat.columns["geom"]
+                assertFalse(geomHash.contains(geom.hashCode()))
+                geomHash.add(geom.hashCode())
+            }
         }
     }
 }
