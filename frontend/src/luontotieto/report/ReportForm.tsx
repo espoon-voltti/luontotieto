@@ -159,10 +159,7 @@ function hasReportDocument(fileInputs: ReportFileInputElement[]): boolean {
   if (!reportDocument) {
     return false
   } else {
-    return (
-      reportDocument?.type === 'EXISTING' ||
-      (!!reportDocument?.file && reportDocument.userDescription.trim() !== '')
-    )
+    return reportDocument?.type === 'EXISTING' || !!reportDocument?.file
   }
 }
 
@@ -178,7 +175,7 @@ function filesAreValid(
     return (
       fileInput?.noObservation ||
       fileInput?.type === 'EXISTING' ||
-      (fileInput?.file && fileInput.userDescription.trim() !== '')
+      fileInput?.file
     )
   })
 }

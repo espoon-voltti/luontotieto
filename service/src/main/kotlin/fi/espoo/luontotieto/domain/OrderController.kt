@@ -152,7 +152,7 @@ class OrderController {
         user: AuthenticatedUser,
         @PathVariable orderId: UUID,
         @RequestPart("file") file: MultipartFile,
-        @RequestPart("description") description: String,
+        @RequestPart("description") description: String?,
         @RequestParam("documentType") documentType: OrderDocumentType
     ) {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)

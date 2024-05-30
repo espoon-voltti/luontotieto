@@ -61,6 +61,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
         void queryClient.invalidateQueries({ queryKey: ['order', id] })
         void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
         void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
+        void queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
         navigate(`/luontotieto/selvitys/${reportId}`)
       }
     })
@@ -68,10 +69,12 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   const { mutateAsync: updateOrderMutation, isPending: updatingOrder } =
     useMutation({
       mutationFn: apiPutOrder,
-      onSuccess: (order): void => {
+      onSuccess: (_order): void => {
         void queryClient.invalidateQueries({ queryKey: ['order', id] })
         void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
         void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
+        void queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
+
         navigate(`/`)
       }
     })
