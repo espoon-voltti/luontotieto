@@ -48,7 +48,7 @@ enum class DocumentType(val tableDefinition: TableDefinition? = null) : Database
 
 data class ReportFile(
     val id: UUID,
-    val description: String,
+    val description: String?,
     val mediaType: String,
     val fileName: String,
     val documentType: DocumentType,
@@ -61,7 +61,7 @@ data class ReportFile(
 
 data class ReportFileInput(
     val reportId: UUID,
-    val description: String,
+    val description: String?,
     val mediaType: String,
     val fileName: String,
     val documentType: DocumentType

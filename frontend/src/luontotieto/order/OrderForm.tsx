@@ -102,8 +102,7 @@ function filesAreValid(fileInputs: OrderFileInputElement[]): boolean {
     fileInputs.some(
       (fileInput) =>
         fileInput.documentType === documentType &&
-        (fileInput?.type === 'EXISTING' ||
-          (fileInput?.file && fileInput.description.trim() !== ''))
+        (fileInput?.type === 'EXISTING' || fileInput?.file)
     )
   )
 }

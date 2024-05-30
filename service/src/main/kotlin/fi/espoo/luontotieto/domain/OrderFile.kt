@@ -26,7 +26,7 @@ enum class OrderDocumentType : DatabaseEnum {
 
 data class OrderFile(
     val id: UUID,
-    val description: String,
+    val description: String?,
     val mediaType: String,
     val fileName: String,
     val documentType: OrderDocumentType,
@@ -39,7 +39,7 @@ data class OrderFile(
 
 data class OrderFileInput(
     val orderId: UUID,
-    val description: String,
+    val description: String?,
     val mediaType: String,
     val fileName: String,
     val documentType: OrderDocumentType

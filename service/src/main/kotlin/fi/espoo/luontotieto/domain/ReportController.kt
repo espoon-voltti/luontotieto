@@ -83,7 +83,7 @@ class ReportController {
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
         @RequestPart("file") file: MultipartFile,
-        @RequestPart("description") description: String,
+        @RequestPart("description") description: String?,
         @RequestParam("documentType") documentType: DocumentType
     ): ResponseEntity<List<GpkgValidationError>> {
         val dataBucket = bucketEnv.data
