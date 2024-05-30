@@ -171,7 +171,7 @@ class ReportController {
                     reportResponse.order?.assignee ?: "",
                     luontotietoHost.getReportUrl(reportResponse.id)
                 )
-            sendReportEmails(reportApprovedEmail, reportId = reportResponse.id)
+            sendReportEmails(reportApprovedEmail, reportResponse)
         }
         return reportResponse
     }
@@ -228,10 +228,10 @@ class ReportController {
         }
 
         if (emailEnv.enabled) {
-            val report = jdbi.inTransactionUnchecked { tx -> tx.getReportById(reportId) }
+            val report = jdbi.inTransactionUnchecked { tx -> tx.getReport(reportId, user) }
             val userResponse = jdbi.inTransactionUnchecked { tx -> tx.getUser(user.id) }
             val reportApprovedEmail = Emails.getReportApprovedEmail(report.name, userResponse.name, luontotietoHost.getReportUrl(report.id))
-            sendReportEmails(reportApprovedEmail, reportId)
+            sendReportEmails(reportApprovedEmail, report)
         }
     }
 
@@ -308,11 +308,10 @@ class ReportController {
 
     private fun sendReportEmails(
         email: EmailContent,
-        reportId: UUID
+        report: Report
     ) {
         try {
             jdbi.inTransactionUnchecked { tx ->
-                val report = tx.getReportById(reportId)
                 val emails = mutableListOf<String?>()
                 if (report.order !== null) {
                     val assigneeUser = tx.getUser(report.order.assigneeId)
