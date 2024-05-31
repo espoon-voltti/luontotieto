@@ -466,15 +466,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/passport-anonymous@npm:^1":
-  version: 1.0.5
-  resolution: "@types/passport-anonymous@npm:1.0.5"
-  dependencies:
-    "@types/passport": "npm:*"
-  checksum: 73007058d185877fe06181a03f460cec4989005f80eccbabb71e83b8ab49437ea273e1937e87f54aac58f6c2c94e7bd9ab9632269199cc7bdb27efad32dd0af8
-  languageName: node
-  linkType: hard
-
 "@types/passport-local@npm:^1":
   version: 1.0.38
   resolution: "@types/passport-local@npm:1.0.38"
@@ -2665,7 +2656,6 @@ __metadata:
     "@types/lodash": "npm:^4.14.195"
     "@types/node": "npm:^20.12.2"
     "@types/passport": "npm:^1.0.12"
-    "@types/passport-anonymous": "npm:^1"
     "@types/passport-local": "npm:^1"
     "@types/passport-strategy": "npm:^0.2.35"
     "@types/pino-http": "npm:^5.8.1"
@@ -2694,7 +2684,6 @@ __metadata:
     nocache: "npm:^4.0.0"
     nodemon: "npm:^3.1.0"
     passport: "npm:^0.7.0"
-    passport-anonymous: "npm:^1.0.1"
     passport-local: "npm:^1.0.0"
     pino: "npm:^9.1.0"
     pino-http: "npm:^10.1.0"
@@ -3138,15 +3127,6 @@ __metadata:
   version: 1.3.3
   resolution: "parseurl@npm:1.3.3"
   checksum: 407cee8e0a3a4c5cd472559bca8b6a45b82c124e9a4703302326e9ab60fc1081442ada4e02628efef1eb16197ddc7f8822f5a91fd7d7c86b51f530aedb17dfa2
-  languageName: node
-  linkType: hard
-
-"passport-anonymous@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "passport-anonymous@npm:1.0.1"
-  dependencies:
-    passport-strategy: "npm:1.x.x"
-  checksum: 5c87aef294ffc3d9591e48495dcec0463c9664c4174041459ee44423cd3c75ba94b521b4b550acc938f22f2a2a7afc532027e48d8171149c5a22070a4741499f
   languageName: node
   linkType: hard
 

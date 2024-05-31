@@ -40,7 +40,6 @@ export function createAuthHeader(user: AppSessionUser): string {
   if (!user.id) {
     throw new Error('User is missing an id')
   }
-
   const jwtPayload = {
     sub: user.id
   }

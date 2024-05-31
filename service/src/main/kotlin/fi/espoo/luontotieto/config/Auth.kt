@@ -37,16 +37,18 @@ class JwtToAuthenticatedUser(val jdbi: Jdbi) : HttpFilter() {
         response: HttpServletResponse,
         chain: FilterChain
     ) {
-        val user =
-            request.getDecodedJwt()?.subject?.let { subject ->
-                jdbi.inTransactionUnchecked {
-                    val userId = UUID.fromString(subject)
-                    val user = it.getAuthUser(userId)
-                    AuthenticatedUser(id = user.id, role = user.role)
+        if (!request.requestURI.endsWith("/files/report")) {
+            val user =
+                request.getDecodedJwt()?.subject?.let { subject ->
+                    jdbi.inTransactionUnchecked {
+                        val userId = UUID.fromString(subject)
+                        val user = it.getAuthUser(userId)
+                        AuthenticatedUser(id = user.id, role = user.role)
+                    }
                 }
+            if (user != null) {
+                request.setAttribute(ATTR_USER, user)
             }
-        if (user != null) {
-            request.setAttribute(ATTR_USER, user)
         }
         chain.doFilter(request, response)
     }
@@ -79,7 +81,9 @@ class HttpAccessControl : HttpFilter() {
 
     private fun HttpServletRequest.requiresAuthentication(): Boolean =
         when {
-            requestURI == "/health" || requestURI == "/actuator/health" -> false
+            requestURI == "/health" ||
+                requestURI == "/actuator/health" ||
+                requestURI.endsWith("/files/report") -> false
             else -> true
         }
 
@@ -99,10 +103,9 @@ class JwtTokenDecoder(private val jwtVerifier: JWTVerifier) : HttpFilter() {
         chain: FilterChain
     ) {
         try {
-            request
-                .getBearerToken()
-                ?.takeIf { it.isNotEmpty() }
-                ?.let { request.setDecodedJwt(jwtVerifier.verify(it)) }
+            request.getBearerToken()?.takeIf { it.isNotEmpty() }?.let {
+                request.setDecodedJwt(jwtVerifier.verify(it))
+            }
         } catch (e: JWTVerificationException) {
             logger.error(e) { "JWT token verification failed" }
         }

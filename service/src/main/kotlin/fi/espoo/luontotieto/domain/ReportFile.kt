@@ -122,9 +122,7 @@ fun Handle.getReportFileById(
         .findOne()
         .getOrNull() ?: throw NotFound()
 
-fun Handle.getReportDocumentForReport(
-    reportId: UUID,
-): ReportFile =
+fun Handle.getReportDocumentForReport(reportId: UUID): ReportFile =
     createQuery(
         """
                 SELECT id, description, report_id AS "reportId", media_type AS "mediaType", 

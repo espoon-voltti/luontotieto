@@ -5,7 +5,6 @@
 import { Router } from 'express'
 import expressHttpProxy from 'express-http-proxy'
 
-import { Strategy as AnonymousStrategy } from 'passport-anonymous'
 import { errorHandler } from './middleware/errors.js'
 import { appCommit, Config, serviceUrl } from './config.js'
 import { RedisClient } from './clients/redis-client.js'
@@ -22,7 +21,6 @@ import createSamlRouter from './auth/saml/saml-routes.js'
 import authStatus from './auth/auth-status.js'
 import { createServiceRequestHeaders } from './clients/service-client.js'
 import { createPasswordAuthRouter } from './auth/password/index.js'
-import { createAnonymousAuthRouter } from './auth/anonymous/index.js'
 
 export function createRouter(config: Config, redisClient: RedisClient): Router {
   const router = Router()
@@ -59,7 +57,6 @@ export function createRouter(config: Config, redisClient: RedisClient): Router {
   }
 
   router.use('/auth/password', createPasswordAuthRouter())
-  router.use('/auth/anonymous', createAnonymousAuthRouter())
   router.get('/auth/status', csrf, csrfCookie(), authStatus(sessions))
 
   router.get('/version', (_, res) => {
