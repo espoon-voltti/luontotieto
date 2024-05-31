@@ -91,7 +91,7 @@ class S3DocumentService(
 
     override fun upload(
         bucketName: String,
-        document: Document
+        document: MultipartDocument
     ): DocumentLocation {
         val key = document.name
         val request =
@@ -101,7 +101,7 @@ class S3DocumentService(
                 .contentType(document.contentType)
                 .build()
 
-        val body = RequestBody.fromBytes(document.bytes)
+        val body = RequestBody.fromInputStream(document.file.inputStream, document.file.size)
 
         logger.info("Upload file to S3. bucketName=$bucketName key=$key")
 

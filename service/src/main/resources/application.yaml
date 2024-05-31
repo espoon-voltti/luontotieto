@@ -39,6 +39,10 @@ spring:
       hikari:
         data-source-properties:
           socketTimeout: 30000
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
   sql:
     init:
       continue-on-error: false

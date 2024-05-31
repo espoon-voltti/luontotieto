@@ -31,3 +31,7 @@ spring:
       jdbcUrl: "jdbc:postgresql://localhost:5433/paikkatietodb"
       username: "paikkatietodb"
       password: "postgres"
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
