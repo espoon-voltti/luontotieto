@@ -6,8 +6,11 @@ package fi.espoo.luontotieto.s3
 
 import org.springframework.http.ContentDisposition
 import org.springframework.http.ResponseEntity
+import org.springframework.web.multipart.MultipartFile
 
 data class Document(val name: String, val bytes: ByteArray, val contentType: String)
+
+data class MultipartDocument(val name: String, val file: MultipartFile, val contentType: String)
 
 data class DocumentLocation(val bucket: String, val key: String)
 
@@ -45,7 +48,7 @@ interface DocumentService {
 
     fun upload(
         bucketName: String,
-        document: Document
+        document: MultipartDocument
     ): DocumentLocation
 
     fun delete(

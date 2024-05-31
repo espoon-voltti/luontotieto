@@ -6,14 +6,13 @@ package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.BadRequest
 import fi.espoo.luontotieto.common.Emails
-import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.BucketEnv
 import fi.espoo.luontotieto.config.EmailEnv
 import fi.espoo.luontotieto.config.LuontotietoHost
 import fi.espoo.luontotieto.config.audit
-import fi.espoo.luontotieto.s3.Document
+import fi.espoo.luontotieto.s3.MultipartDocument
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
 import fi.espoo.luontotieto.s3.getAndCheckFileName
@@ -121,11 +120,7 @@ class OrderController {
                     OrderIdAndReport(orderId, report)
                 }
                 .also {
-                    logger.audit(
-                        user,
-                        AuditEvent.CREATE_ORDER,
-                        mapOf("id" to "${it.orderId}")
-                    )
+                    logger.audit(user, AuditEvent.CREATE_ORDER, mapOf("id" to "${it.orderId}"))
                 }
 
         if (emailEnv.enabled) {
@@ -141,9 +136,9 @@ class OrderController {
         @RequestBody order: OrderInput
     ): Order {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
-        return jdbi.inTransactionUnchecked { tx -> tx.putOrder(id, order, user) }.also {
-            logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id"))
-        }
+        return jdbi
+            .inTransactionUnchecked { tx -> tx.putOrder(id, order, user) }
+            .also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
     }
 
     @PostMapping("/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -164,13 +159,7 @@ class OrderController {
         val id =
             jdbi.inTransactionUnchecked { tx ->
                 tx.insertOrderFile(
-                    OrderFileInput(
-                        orderId,
-                        description,
-                        contentType,
-                        fileName,
-                        documentType
-                    ),
+                    OrderFileInput(orderId, description, contentType, fileName, documentType),
                     user
                 )
             }
@@ -178,7 +167,7 @@ class OrderController {
         try {
             documentClient.upload(
                 dataBucket,
-                Document(name = "$orderId/$id", bytes = file.bytes, contentType = contentType)
+                MultipartDocument(name = "$orderId/$id", file = file, contentType = contentType)
             )
 
             if (documentType == OrderDocumentType.ORDER_AREA) {
@@ -201,9 +190,6 @@ class OrderController {
                                 report,
                                 luontotietoHost.getReportUrl(report.id)
                             )
-                        val reportId =
-                            params["reportId"]?.let { UUID.fromString(it.toString()) }
-                                ?: throw NotFound("")
 
                         paikkatietoJdbi.inTransactionUnchecked { ptx ->
                             ptx.insertPaikkatieto(

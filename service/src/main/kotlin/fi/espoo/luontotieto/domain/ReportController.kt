@@ -13,7 +13,7 @@ import fi.espoo.luontotieto.config.BucketEnv
 import fi.espoo.luontotieto.config.EmailEnv
 import fi.espoo.luontotieto.config.LuontotietoHost
 import fi.espoo.luontotieto.config.audit
-import fi.espoo.luontotieto.s3.Document
+import fi.espoo.luontotieto.s3.MultipartDocument
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
 import fi.espoo.luontotieto.s3.getAndCheckFileName
@@ -100,8 +100,7 @@ class ReportController {
                 GpkgReader(File(tmpGpkgFile.toUri()), td).use { reader ->
                     reader.asSequence().flatMap { it.errors }.toList()
                 }
-            }
-                ?: emptyList()
+            } ?: emptyList()
 
         if (errors.isEmpty()) {
             val id =
@@ -123,9 +122,9 @@ class ReportController {
             try {
                 documentClient.upload(
                     dataBucket,
-                    Document(
+                    MultipartDocument(
                         name = "$reportId/$id",
-                        bytes = file.bytes,
+                        file = file,
                         contentType = contentType
                     )
                 )
@@ -160,9 +159,9 @@ class ReportController {
         @RequestBody report: Report.Companion.ReportInput
     ): Report {
         val reportResponse =
-            jdbi.inTransactionUnchecked { tx -> tx.putReport(id, report, user) }.also {
-                logger.audit(user, AuditEvent.UPDATE_REPORT, mapOf("id" to "$id"))
-            }
+            jdbi
+                .inTransactionUnchecked { tx -> tx.putReport(id, report, user) }
+                .also { logger.audit(user, AuditEvent.UPDATE_REPORT, mapOf("id" to "$id")) }
 
         if (emailEnv.enabled) {
             val reportApprovedEmail =
@@ -225,14 +224,19 @@ class ReportController {
             }
         }
 
-        jdbi.inTransactionUnchecked { tx -> tx.approveReport(reportId, user) }.also {
-            logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId"))
-        }
+        jdbi
+            .inTransactionUnchecked { tx -> tx.approveReport(reportId, user) }
+            .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
 
         if (emailEnv.enabled) {
             val report = jdbi.inTransactionUnchecked { tx -> tx.getReport(reportId, user) }
             val userResponse = jdbi.inTransactionUnchecked { tx -> tx.getUser(user.id) }
-            val reportApprovedEmail = Emails.getReportApprovedEmail(report.name, userResponse.name, luontotietoHost.getReportUrl(report.id))
+            val reportApprovedEmail =
+                Emails.getReportApprovedEmail(
+                    report.name,
+                    userResponse.name,
+                    luontotietoHost.getReportUrl(report.id)
+                )
             sendReportEmails(reportApprovedEmail, report)
         }
     }
@@ -276,13 +280,15 @@ class ReportController {
 
         documentClient.delete(dataBucket, "$reportId/$fileId")
 
-        jdbi.inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }.also {
-            logger.audit(
-                user,
-                AuditEvent.DELETE_REPORT_FILE,
-                mapOf("id" to "$reportId", "file" to "$fileId")
-            )
-        }
+        jdbi
+            .inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }
+            .also {
+                logger.audit(
+                    user,
+                    AuditEvent.DELETE_REPORT_FILE,
+                    mapOf("id" to "$reportId", "file" to "$fileId")
+                )
+            }
     }
 
     @GetMapping("/template/{documentType}.gpkg")
@@ -294,8 +300,7 @@ class ReportController {
             GpkgWriter.write(tableDefinition) { column ->
                 paikkatietoJdbi.inTransactionUnchecked { tx -> tx.getEnumRange(column) }
             }
-                ?.takeIf { Files.size(it) > 0 }
-                ?: throw NotFound()
+                ?.takeIf { Files.size(it) > 0 } ?: throw NotFound()
 
         val resource = UrlResource(file.toUri())
 
@@ -321,7 +326,9 @@ class ReportController {
                     emails.add(report.order.contactEmail)
                     emails.add(report.order.assigneeContactEmail)
                 }
-                emails.filterNotNull().distinct().forEach { e -> sesEmailClient.send(Email(e, email)) }
+                emails.filterNotNull().distinct().forEach { e ->
+                    sesEmailClient.send(Email(e, email))
+                }
             }
         } catch (e: Exception) {
             logger.error("Error sending email: ", e)
