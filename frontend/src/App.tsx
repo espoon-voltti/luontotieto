@@ -22,7 +22,7 @@ import { UserContextProvider } from './auth/UserContext'
 import { UserHeader } from './auth/UserHeader'
 import { FlexRowWithGaps } from './shared/layout'
 import { H1 } from './shared/typography'
-import { ReportDocumentPage } from 'luontotieto/ReportPage'
+import { ReportDocumentPage } from 'luontotieto/ReportDocumentPage'
 
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
@@ -165,9 +165,9 @@ export const appRouter = createBrowserRouter([
       {
         path: '/luontotieto/selvitys/:id/report-document',
         element: (
-          // <AuthGuard allow="ALL">
-          <ReportDocumentPage />
-          // </AuthGuard>
+          <AuthGuard allow="ALL">
+            <ReportDocumentPage />
+          </AuthGuard>
         )
       },
 

@@ -10,6 +10,7 @@ import fi.espoo.luontotieto.config.BucketEnv
 import mu.KotlinLogging
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
@@ -19,6 +20,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
+import java.io.IOException
 import java.net.URL
 import java.time.Duration
 
@@ -43,6 +45,22 @@ class S3DocumentService(
                 bytes = it.readAllBytes(),
                 contentType = it.response().contentType()
             )
+        }
+    }
+
+    @Throws(IOException::class)
+    fun download(
+        bucketName: String,
+        key: String,
+        contentDisposition: ContentDisposition
+    ): Any {
+        val request = GetObjectRequest.builder().bucket(bucketName).key(key).build()
+        val stream = s3Client.getObject(request) ?: throw NotFound("File not found")
+        return stream.use {
+            return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(it.response().contentType()))
+                .header("Content-Disposition", contentDisposition.toString())
+                .body(it.readAllBytes())
         }
     }
 
