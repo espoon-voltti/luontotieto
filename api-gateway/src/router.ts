@@ -5,6 +5,7 @@
 import { Router } from 'express'
 import expressHttpProxy from 'express-http-proxy'
 
+import { Strategy as AnonymousStrategy } from 'passport-anonymous'
 import { errorHandler } from './middleware/errors.js'
 import { appCommit, Config, serviceUrl } from './config.js'
 import { RedisClient } from './clients/redis-client.js'
@@ -29,6 +30,7 @@ export function createRouter(config: Config, redisClient: RedisClient): Router {
 
   router.use(sessions.middleware)
   router.use(passport.session())
+
   router.use(cookieParser(config.session.cookieSecret))
 
   router.use(cacheControl(() => 'forbid-cache'))
@@ -56,6 +58,12 @@ export function createRouter(config: Config, redisClient: RedisClient): Router {
   }
 
   router.use('/auth/password', createPasswordAuthRouter())
+
+  passport.use(new AnonymousStrategy())
+  router.use(
+    '/reports/:id/files/report',
+    passport.authenticate(['anonymous'], { session: false })
+  )
 
   router.get('/auth/status', csrf, csrfCookie(), authStatus(sessions))
 

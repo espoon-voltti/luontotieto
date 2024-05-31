@@ -122,6 +122,24 @@ fun Handle.getReportFileById(
         .findOne()
         .getOrNull() ?: throw NotFound()
 
+fun Handle.getReportDocumentForReport(
+    reportId: UUID,
+): ReportFile =
+    createQuery(
+        """
+                SELECT id, description, report_id AS "reportId", media_type AS "mediaType", 
+                file_name AS "fileName", document_type AS "documentType",
+                created, updated,  created_by AS "createdBy", updated_by AS "updatedBy"
+                FROM report_file
+                WHERE report_id = :reportId
+                AND document_type = 'luontotieto:report'
+            """
+    )
+        .bind("reportId", reportId)
+        .mapTo<ReportFile>()
+        .findOne()
+        .getOrNull() ?: throw NotFound()
+
 fun Handle.getReportFiles(reportId: UUID): List<ReportFile> =
     createQuery(
         """
