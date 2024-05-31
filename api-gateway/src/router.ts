@@ -22,6 +22,7 @@ import createSamlRouter from './auth/saml/saml-routes.js'
 import authStatus from './auth/auth-status.js'
 import { createServiceRequestHeaders } from './clients/service-client.js'
 import { createPasswordAuthRouter } from './auth/password/index.js'
+import { createAnonymousAuthRouter } from './auth/anonymous/index.js'
 
 export function createRouter(config: Config, redisClient: RedisClient): Router {
   const router = Router()
@@ -58,13 +59,7 @@ export function createRouter(config: Config, redisClient: RedisClient): Router {
   }
 
   router.use('/auth/password', createPasswordAuthRouter())
-
-  passport.use(new AnonymousStrategy())
-  router.use(
-    '/reports/:id/files/report',
-    passport.authenticate(['anonymous'], { session: false })
-  )
-
+  router.use('/auth/anonymous', createAnonymousAuthRouter())
   router.get('/auth/status', csrf, csrfCookie(), authStatus(sessions))
 
   router.get('/version', (_, res) => {

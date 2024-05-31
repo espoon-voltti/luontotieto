@@ -29,3 +29,6 @@ export const apiPostLogin = async (emailAndPassword: {
 
 export const apiPostLogout = async () =>
   apiClient.post(`/auth/password/logout`).then((res) => res.status === 200)
+
+export const apiPostAnonymousLogin = async () =>
+  apiClient.post(`/auth/anonymous/login`).then((res) => res.status === 200)
