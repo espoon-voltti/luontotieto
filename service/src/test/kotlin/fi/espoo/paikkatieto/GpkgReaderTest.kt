@@ -11,9 +11,11 @@ import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.reader.GpkgValidationErrorReason
 import org.locationtech.jts.io.WKTReader
 import java.io.File
+import java.io.IOException
 import java.sql.Date
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 
 class GpkgReaderTest {
@@ -166,6 +168,54 @@ class GpkgReaderTest {
                 val geom = feat.columns["geom"]
                 assertFalse(geomHash.contains(geom.hashCode()))
                 geomHash.add(geom.hashCode())
+            }
+        }
+    }
+
+    @Test
+    fun `throws exception when file does not exist`() {
+        val file = File("src/test/resources/test-data/non_existent_file.gpkg")
+        assertFailsWith(IOException::class) {
+            GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET).use { reader -> reader.hasNext() }
+        }
+    }
+
+    @Test
+    fun `throws exception when file is empty`() {
+        val file = File("src/test/resources/test-data/lumo_alueet_empty.gpkg")
+        GpkgReader(file, TableDefinition.LUMO_ALUEET).use { reader ->
+            assertFalse(reader.hasNext())
+        }
+    }
+
+    @Test
+    fun `throws exception when file is not a valid GeoPackage file`() {
+        val file = File("src/test/resources/test-data/broken_file.gpkg")
+        assertFailsWith(IOException::class) {
+            GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET).use { reader -> reader.hasNext() }
+        }
+    }
+
+    @Test
+    fun `hasNext returns false when there are no more features to read`() {
+        val file = File("src/test/resources/test-data/liito_orava_pisteet.gpkg")
+        GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET).use { reader ->
+            while (reader.hasNext()) {
+                reader.next()
+            }
+            assertFalse(reader.hasNext())
+        }
+    }
+
+    @Test
+    fun `next throws exception when there are no more features to read`() {
+        val file = File("src/test/resources/test-data/liito_orava_pisteet.gpkg")
+        assertFailsWith(NoSuchElementException::class) {
+            GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET).use { reader ->
+                while (reader.hasNext()) {
+                    reader.next()
+                }
+                reader.next()
             }
         }
     }
