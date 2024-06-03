@@ -33,7 +33,7 @@ data class GpkgFeature(val columns: Map<String, Any?>, val errors: List<GpkgVali
     fun isValid() = errors.isEmpty()
 }
 
-class GpkgReader(file: File, val tableDefinition: TableDefinition) :
+class GpkgReader(private val file: File, val tableDefinition: TableDefinition) :
     Iterator<GpkgFeature>, Closeable {
     private val gpkg: GeoPackage = GeoPackage(file)
     private val reader: SimpleFeatureReader
@@ -41,7 +41,8 @@ class GpkgReader(file: File, val tableDefinition: TableDefinition) :
     init {
         val featureEntry =
             gpkg.features().firstOrNull()
-                ?: throw GpkgReaderException("Unable to find feature table")
+                ?: throw GpkgReaderException("Unable to find feature table ${file.name}")
+        logger.debug("Found feature table ${featureEntry.tableName} in file ${file.name}")
         reader = gpkg.reader(featureEntry, null, null)
     }
 
@@ -85,6 +86,7 @@ class GpkgReader(file: File, val tableDefinition: TableDefinition) :
     override fun close() {
         try {
             reader.close()
+            logger.debug("Closed SimpleFeatureReader file {}", file.name)
         } catch (e: IOException) {
             logger.error("Unable to close SimpleFeatureReader", e)
         }
