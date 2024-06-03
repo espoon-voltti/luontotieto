@@ -13,7 +13,7 @@ import { jwtKid, jwtPrivateKey } from '../config.js'
 import { readFileSync } from 'node:fs'
 
 const UNAUTHORIZED_REPORT_DOCUMENT_PATH_PATTERN =
-  '/reports/([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})/files/report'
+  '^/reports/([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})/files/report$'
 export function requireAuthentication(
   req: Request,
   res: Response,
