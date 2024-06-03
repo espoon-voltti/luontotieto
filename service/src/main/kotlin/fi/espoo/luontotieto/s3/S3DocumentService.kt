@@ -48,7 +48,6 @@ class S3DocumentService(
         }
     }
 
-    @Throws(IOException::class)
     fun download(
         bucketName: String,
         key: String,
