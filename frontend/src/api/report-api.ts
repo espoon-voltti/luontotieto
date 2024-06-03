@@ -203,10 +203,6 @@ export const apiGetReportFileUrl = (
     .get<string>(`/reports/${reportId}/files/${fileId}`)
     .then((res) => res.data)
 
-export function apiReportDocumentFileUrl(reportId: string): string {
-  return `/api/reports/${reportId}/files/report`
-}
-
 export const apiGetReportDocumentTypeFileTemplate = (
   documentType: ReportFileDocumentType
 ): Promise<void> =>
