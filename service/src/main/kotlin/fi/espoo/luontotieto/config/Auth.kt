@@ -37,17 +37,17 @@ class JwtToAuthenticatedUser(val jdbi: Jdbi) : HttpFilter() {
         response: HttpServletResponse,
         chain: FilterChain
     ) {
-            val user =
-                request.getDecodedJwt()?.subject?.let { subject ->
-                    jdbi.inTransactionUnchecked {
-                        val userId = UUID.fromString(subject)
-                        val user = it.getAuthUser(userId)
-                        AuthenticatedUser(id = user.id, role = user.role)
-                    }
+        val user =
+            request.getDecodedJwt()?.subject?.let { subject ->
+                jdbi.inTransactionUnchecked {
+                    val userId = UUID.fromString(subject)
+                    val user = it.getAuthUser(userId)
+                    AuthenticatedUser(id = user.id, role = user.role)
                 }
-            if (user != null) {
-                request.setAttribute(ATTR_USER, user)
             }
+        if (user != null) {
+            request.setAttribute(ATTR_USER, user)
+        }
         chain.doFilter(request, response)
     }
 }
