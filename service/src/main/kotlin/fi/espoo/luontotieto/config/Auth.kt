@@ -37,7 +37,6 @@ class JwtToAuthenticatedUser(val jdbi: Jdbi) : HttpFilter() {
         response: HttpServletResponse,
         chain: FilterChain
     ) {
-        if (!request.requestURI.endsWith("/files/report")) {
             val user =
                 request.getDecodedJwt()?.subject?.let { subject ->
                     jdbi.inTransactionUnchecked {
@@ -49,7 +48,6 @@ class JwtToAuthenticatedUser(val jdbi: Jdbi) : HttpFilter() {
             if (user != null) {
                 request.setAttribute(ATTR_USER, user)
             }
-        }
         chain.doFilter(request, response)
     }
 }
