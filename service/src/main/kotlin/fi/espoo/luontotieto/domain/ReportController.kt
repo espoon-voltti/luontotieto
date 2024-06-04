@@ -30,6 +30,7 @@ import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
 import org.springframework.http.ContentDisposition
@@ -51,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.net.URL
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.UUID
 
@@ -263,7 +265,9 @@ class ReportController {
         val reportFile =
             jdbi.inTransactionUnchecked { tx -> tx.getReportFileById(reportId, fileId) }
         val contentDisposition =
-            ContentDisposition.attachment().filename(reportFile.fileName).build()
+            ContentDisposition.attachment()
+                .filename(reportFile.fileName, StandardCharsets.UTF_8)
+                .build()
         val fileUrl =
             documentClient.presignedGetUrl(dataBucket, "$reportId/$fileId", contentDisposition)
         return fileUrl
@@ -271,17 +275,25 @@ class ReportController {
 
     @GetMapping("/{reportId}/files/report")
     fun getReportFileById(
-        @PathVariable reportId: UUID,
-    ): ResponseEntity<ByteArray> {
+        @PathVariable reportId: UUID
+    ): ResponseEntity<Resource> {
         val dataBucket = bucketEnv.data
 
         val reportFile =
             jdbi.inTransactionUnchecked { tx -> tx.getReportDocumentForReport(reportId) }
 
         val contentDisposition =
-            ContentDisposition.attachment().filename(reportFile.fileName).build()
+            ContentDisposition.attachment()
+                .filename(reportFile.fileName, StandardCharsets.UTF_8)
+                .build()
 
-        return documentClient.download(dataBucket, "$reportId/${reportFile.id}", contentDisposition)
+        val res = documentClient.download(dataBucket, "$reportId/${reportFile.id}")
+        val inputStreamResource = InputStreamResource(res)
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+            .contentType(MediaType.parseMediaType(res.response().contentType()))
+            .contentLength(res.response().contentLength())
+            .body(inputStreamResource)
     }
 
     @DeleteMapping("/{reportId}/files/{fileId}")
