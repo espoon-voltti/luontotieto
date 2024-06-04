@@ -205,11 +205,15 @@ class ReportController {
                     val params =
                         when (reader.tableDefinition) {
                             TableDefinition.ALUERAJAUS_LUONTOSELVITYS -> {
+                                val observedSpecies = ptx.getObservedSpecies(reportId)
+
                                 jdbi.inTransactionUnchecked { tx ->
                                     tx.getAluerajausLuontoselvitysParams(
-                                        user,
-                                        reportId,
-                                        luontotietoHost.getReportDocumentDownloadUrl(reportId)
+                                        user = user,
+                                        id = reportId,
+                                        observedSpecies = observedSpecies,
+                                        reportLink =
+                                            luontotietoHost.getReportDocumentDownloadUrl(reportId)
                                     )
                                 }
                             }

@@ -201,17 +201,65 @@ fun Handle.getAluerajausLuontoselvitysTilausParams(
     )
 }
 
+fun Handle.getObservedSpecies(reportId: UUID): Set<String> {
+    return createQuery(
+        """
+            SELECT suomenkielinen_nimi
+            FROM muut_huomioitavat_lajit_alueet
+            WHERE selvitys_id = :reportId
+            UNION
+            SELECT suomenkielinen_nimi
+            FROM muut_huomioitavat_lajit_viivat
+            WHERE selvitys_id = :reportId
+            UNION
+            SELECT suomenkielinen_nimi
+            FROM muut_huomioitavat_lajit_pisteet
+            WHERE selvitys_id = :reportId
+            """
+    )
+        .bind("reportId", reportId)
+        .mapTo<String>()
+        .set()
+}
+
 fun Handle.getAluerajausLuontoselvitysParams(
     user: AuthenticatedUser,
     id: UUID,
+    observedSpecies: Set<String>,
     reportLink: String
 ): Map<String, Any?> {
     val report = this.getReport(id, user)
+    val reportFiles = this.getReportFiles(id)
+    val reportAreaFile =
+        reportFiles.firstOrNull { it.documentType === DocumentType.ALUERAJAUS_LUONTOSELVITYS }
+
+    val observations = reportFiles.mapNotNull { it.documentType.documentName }.toSet()
+    val noObservations =
+        (report.noObservations?.map { it.documentName }?.toSet() ?: emptySet()).subtract(
+            observations
+        )
+
+    val surveyedData =
+        observations
+            .map {
+                if (it == DocumentName.MUUT_LAJIT) {
+                    val species = observedSpecies.sorted().joinToString(", ")
+                    "$it (havaittu; $species)"
+                } else {
+                    "$it (havaittu)"
+                }
+            }
+            .plus(noObservations.map { "$it (ei havaittu)" })
+            .sorted()
+            .toTypedArray()
+
     return mapOf(
         "name" to report.name,
         "year" to report.order?.returnDate?.year,
         "contactPerson" to report.order?.assigneeContactPerson,
         "unit" to report.order?.orderingUnit?.joinToString(","),
-        "reportLink" to reportLink
+        "additionalInformation" to reportAreaFile?.description,
+        "reportLink" to reportLink,
+        "surveyedData" to surveyedData
     )
 }

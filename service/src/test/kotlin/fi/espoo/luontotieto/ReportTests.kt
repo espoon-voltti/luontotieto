@@ -7,15 +7,21 @@ package fi.espoo.luontotieto
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.OrderController
+import fi.espoo.luontotieto.domain.OrderReportDocument
 import fi.espoo.luontotieto.domain.Report
 import fi.espoo.luontotieto.domain.ReportController
 import fi.espoo.luontotieto.domain.UserRole
+import org.jdbi.v3.core.kotlin.inTransactionUnchecked
+import org.jdbi.v3.core.kotlin.mapTo
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.mock.web.MockMultipartFile
+import java.io.File
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class ReportTests : FullApplicationTest() {
     @Autowired lateinit var reportController: ReportController
@@ -86,5 +92,159 @@ class ReportTests : FullApplicationTest() {
         assertEquals(listOf(DocumentType.LIITO_ORAVA_VIIVAT), updatedReport.noObservations)
         assertNotEquals(report.updated, updatedReport.updated)
         assertEquals(report.created, updatedReport.created)
+    }
+
+    @Test
+    fun `create and approve report`() {
+        val createOrderResponse =
+            createOrderAndReport(
+                controller = orderController,
+                name = "Original name",
+                description = "Original description",
+                reportDocuments =
+                    listOf(
+                        OrderReportDocument(
+                            description = "Liito-orava viivat",
+                            DocumentType.LIITO_ORAVA_VIIVAT
+                        ),
+                        OrderReportDocument(
+                            description = "Muut huomioitavat lajit viivat",
+                            DocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT
+                        ),
+                        OrderReportDocument(
+                            description = "Muut huomioitavat lajit alueet",
+                            DocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET
+                        ),
+                        OrderReportDocument(
+                            description = "Muut huomioitavat lajit pisteet",
+                            DocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET
+                        )
+                    )
+            )
+
+        val reportInput =
+            Report.Companion.ReportInput(
+                name = "Test report",
+                noObservations = listOf(DocumentType.LIITO_ORAVA_VIIVAT)
+            )
+
+        reportController.updateReport(adminUser, createOrderResponse.reportId, reportInput)
+
+        File("src/test/resources/test-data/muut_huomioitavat_lajit_alueet_ilves.gpkg")
+            .inputStream()
+            .use { inStream ->
+                reportController.uploadReportFile(
+                    user = adminUser,
+                    reportId = createOrderResponse.reportId,
+                    file =
+                        MockMultipartFile(
+                            "muut_huomioitavat_lajit_alueet_ilves.gpkg",
+                            "muut_huomioitavat_lajit_alueet_ilves.gpkg",
+                            "application/geopackage+sqlite3",
+                            inStream
+                        ),
+                    description = null,
+                    documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET
+                )
+            }
+
+        File("src/test/resources/test-data/muut_huomioitavat_lajit_viivat_susi.gpkg")
+            .inputStream()
+            .use { inStream ->
+                reportController.uploadReportFile(
+                    user = adminUser,
+                    reportId = createOrderResponse.reportId,
+                    file =
+                        MockMultipartFile(
+                            "muut_huomioitavat_lajit_viivat_susi.gpkg",
+                            "muut_huomioitavat_lajit_viivat_susi.gpkg",
+                            "application/geopackage+sqlite3",
+                            inStream
+                        ),
+                    description = null,
+                    documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT
+                )
+            }
+
+        File("src/test/resources/test-data/muut_huomioitavat_lajit_pisteet_karhu.gpkg")
+            .inputStream()
+            .use { inStream ->
+                reportController.uploadReportFile(
+                    user = adminUser,
+                    reportId = createOrderResponse.reportId,
+                    file =
+                        MockMultipartFile(
+                            "muut_huomioitavat_lajit_pisteet_karhu.gpkg",
+                            "muut_huomioitavat_lajit_pisteet_karhu.gpkg",
+                            "application/geopackage+sqlite3",
+                            inStream
+                        ),
+                    description = null,
+                    documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET
+                )
+            }
+
+        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use {
+                inStream ->
+            reportController.uploadReportFile(
+                user = adminUser,
+                reportId = createOrderResponse.reportId,
+                file =
+                    MockMultipartFile(
+                        "aluerajaus_luontoselvitys.gpkg",
+                        "aluerajaus_luontoselvitys.gpkg",
+                        "application/geopackage+sqlite3",
+                        inStream
+                    ),
+                description = "Alueelta löytyi susi, karhu ja ilves.",
+                documentType = DocumentType.ALUERAJAUS_LUONTOSELVITYS
+            )
+        }
+
+        reportController.uploadReportFile(
+            user = adminUser,
+            reportId = createOrderResponse.reportId,
+            file =
+                MockMultipartFile(
+                    "luontoselvitysraportti.txt",
+                    "luontoselvitysraportti.txt",
+                    "plain/text",
+                    "LUONTOSELVITYSRAPORTTI".toByteArray()
+                ),
+            description = null,
+            documentType = DocumentType.REPORT
+        )
+
+        reportController.approveReport(adminUser, createOrderResponse.reportId)
+
+        val approvedReport = reportController.getReportById(adminUser, createOrderResponse.reportId)
+        assertTrue(approvedReport.approved)
+
+        val reportFiles = reportController.getReportFiles(adminUser, createOrderResponse.reportId)
+        assertEquals(5, reportFiles.size)
+
+        reportController.paikkatietoJdbi.inTransactionUnchecked { ptx ->
+            data class AluerajausResult(val lisatieto: String?, val selvitetytTiedot: List<String>)
+
+            val data =
+                ptx.createQuery(
+                    """
+                            SELECT lisatieto, selvitetyt_tiedot AS "selvitetytTiedot" FROM aluerajaus_luontoselvitys WHERE selvitys_id = :reportId
+                        """
+                        .trimIndent()
+                )
+                    .bind("reportId", createOrderResponse.reportId)
+                    .mapTo<AluerajausResult>()
+                    .one()
+
+            assertEquals("Alueelta löytyi susi, karhu ja ilves.", data.lisatieto)
+            assertEquals(
+                listOf(
+                    "Liito-orava (ei havaittu)",
+                    "Muut huomioitavat lajit (havaittu; Ilves, Karhu, Susi)"
+                ),
+                data.selvitetytTiedot
+            )
+        }
     }
 }
