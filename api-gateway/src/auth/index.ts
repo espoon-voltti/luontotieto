@@ -12,12 +12,17 @@ import jwt from 'jsonwebtoken'
 import { jwtKid, jwtPrivateKey } from '../config.js'
 import { readFileSync } from 'node:fs'
 
+const UNAUTHORIZED_REPORT_DOCUMENT_PATH_PATTERN =
+  '^/reports/([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})/files/report$'
 export function requireAuthentication(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   if (!req.user || !req.user.id) {
+    if (req.path.match(UNAUTHORIZED_REPORT_DOCUMENT_PATH_PATTERN)) {
+      return next()
+    }
     logInfo('Could not find user', req)
     res.sendStatus(401)
     return
@@ -35,7 +40,6 @@ export function createAuthHeader(user: AppSessionUser): string {
   if (!user.id) {
     throw new Error('User is missing an id')
   }
-
   const jwtPayload = {
     sub: user.id
   }

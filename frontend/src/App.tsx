@@ -161,7 +161,6 @@ export const appRouter = createBrowserRouter([
           </AuthGuard>
         )
       },
-
       {
         path: '/*',
         element: <Navigate replace to="/luontotieto" />

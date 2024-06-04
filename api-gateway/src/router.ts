@@ -29,6 +29,7 @@ export function createRouter(config: Config, redisClient: RedisClient): Router {
 
   router.use(sessions.middleware)
   router.use(passport.session())
+
   router.use(cookieParser(config.session.cookieSecret))
 
   router.use(cacheControl(() => 'forbid-cache'))
@@ -56,7 +57,6 @@ export function createRouter(config: Config, redisClient: RedisClient): Router {
   }
 
   router.use('/auth/password', createPasswordAuthRouter())
-
   router.get('/auth/status', csrf, csrfCookie(), authStatus(sessions))
 
   router.get('/version', (_, res) => {

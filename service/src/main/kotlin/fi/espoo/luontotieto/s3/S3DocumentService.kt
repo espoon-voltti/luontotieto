@@ -10,6 +10,7 @@ import fi.espoo.luontotieto.config.BucketEnv
 import mu.KotlinLogging
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.sync.RequestBody
@@ -43,6 +44,21 @@ class S3DocumentService(
                 bytes = it.readAllBytes(),
                 contentType = it.response().contentType()
             )
+        }
+    }
+
+    fun download(
+        bucketName: String,
+        key: String,
+        contentDisposition: ContentDisposition
+    ): ResponseEntity<ByteArray> {
+        val request = GetObjectRequest.builder().bucket(bucketName).key(key).build()
+        val stream = s3Client.getObject(request) ?: throw NotFound("File not found")
+        return stream.use {
+            return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(it.response().contentType()))
+                .header("Content-Disposition", contentDisposition.toString())
+                .body(it.readAllBytes())
         }
     }
 

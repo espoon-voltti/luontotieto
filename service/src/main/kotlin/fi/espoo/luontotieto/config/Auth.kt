@@ -79,7 +79,14 @@ class HttpAccessControl : HttpFilter() {
 
     private fun HttpServletRequest.requiresAuthentication(): Boolean =
         when {
-            requestURI == "/health" || requestURI == "/actuator/health" -> false
+            requestURI == "/health" ||
+                requestURI == "/actuator/health" ||
+                requestURI
+                    .matches(
+                        "^/reports/([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})/files/report$"
+                            .toRegex()
+                    )
+            -> false
             else -> true
         }
 
@@ -99,10 +106,9 @@ class JwtTokenDecoder(private val jwtVerifier: JWTVerifier) : HttpFilter() {
         chain: FilterChain
     ) {
         try {
-            request
-                .getBearerToken()
-                ?.takeIf { it.isNotEmpty() }
-                ?.let { request.setDecodedJwt(jwtVerifier.verify(it)) }
+            request.getBearerToken()?.takeIf { it.isNotEmpty() }?.let {
+                request.setDecodedJwt(jwtVerifier.verify(it))
+            }
         } catch (e: JWTVerificationException) {
             logger.error(e) { "JWT token verification failed" }
         }

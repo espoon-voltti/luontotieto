@@ -270,6 +270,21 @@ class ReportController {
         return fileUrl
     }
 
+    @GetMapping("/{reportId}/files/report")
+    fun getReportFileById(
+        @PathVariable reportId: UUID,
+    ): ResponseEntity<ByteArray> {
+        val dataBucket = bucketEnv.data
+
+        val reportFile =
+            jdbi.inTransactionUnchecked { tx -> tx.getReportDocumentForReport(reportId) }
+
+        val contentDisposition =
+            ContentDisposition.attachment().filename(reportFile.fileName).build()
+
+        return documentClient.download(dataBucket, "$reportId/${reportFile.id}", contentDisposition)
+    }
+
     @DeleteMapping("/{reportId}/files/{fileId}")
     fun deleteReportFile(
         user: AuthenticatedUser,
