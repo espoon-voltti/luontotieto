@@ -52,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.net.URL
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.UUID
 
@@ -264,7 +265,9 @@ class ReportController {
         val reportFile =
             jdbi.inTransactionUnchecked { tx -> tx.getReportFileById(reportId, fileId) }
         val contentDisposition =
-            ContentDisposition.attachment().filename(reportFile.fileName).build()
+            ContentDisposition.attachment()
+                .filename(reportFile.fileName, StandardCharsets.UTF_8)
+                .build()
         val fileUrl =
             documentClient.presignedGetUrl(dataBucket, "$reportId/$fileId", contentDisposition)
         return fileUrl
@@ -280,10 +283,11 @@ class ReportController {
             jdbi.inTransactionUnchecked { tx -> tx.getReportDocumentForReport(reportId) }
 
         val contentDisposition =
-            ContentDisposition.attachment().filename(reportFile.fileName).build()
+            ContentDisposition.attachment()
+                .filename(reportFile.fileName, StandardCharsets.UTF_8)
+                .build()
 
-        val res =
-            documentClient.download(dataBucket, "$reportId/${reportFile.id}", contentDisposition)
+        val res = documentClient.download(dataBucket, "$reportId/${reportFile.id}")
         val inputStreamResource = InputStreamResource(res)
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())

@@ -50,8 +50,7 @@ class S3DocumentService(
 
     fun download(
         bucketName: String,
-        key: String,
-        contentDisposition: ContentDisposition
+        key: String
     ): ResponseInputStream<GetObjectResponse> {
         val request = GetObjectRequest.builder().bucket(bucketName).key(key).build()
         return s3Client.getObject(request) ?: throw NotFound("File not found")
