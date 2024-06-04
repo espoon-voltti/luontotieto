@@ -25,13 +25,12 @@ import fi.espoo.paikkatieto.domain.insertPaikkatieto
 import fi.espoo.paikkatieto.reader.GpkgReader
 import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.writer.GpkgWriter
-import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
-import org.apache.commons.io.IOUtils
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
 import org.springframework.http.ContentDisposition
@@ -273,9 +272,8 @@ class ReportController {
 
     @GetMapping("/{reportId}/files/report")
     fun getReportFileById(
-        @PathVariable reportId: UUID,
-        response: HttpServletResponse
-    ) {
+        @PathVariable reportId: UUID
+    ): ResponseEntity<Resource> {
         val dataBucket = bucketEnv.data
 
         val reportFile =
@@ -287,11 +285,12 @@ class ReportController {
         val res =
             documentClient.download(dataBucket, "$reportId/${reportFile.id}", contentDisposition)
         res.use {
-            response.contentType = res.response().contentType()
-            response.setHeader("Content-Disposition", contentDisposition.toString())
-            response.setContentLength(res.response().contentLength().toInt())
-            IOUtils.copy(it, response.outputStream)
-            response.outputStream.flush()
+            val inputStreamResource = InputStreamResource(it)
+            return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+                .contentType(MediaType.parseMediaType(it.response().contentType()))
+                .contentLength(res.response().contentLength())
+                .body(inputStreamResource)
         }
     }
 
