@@ -15,39 +15,59 @@ import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
-enum class DocumentType(val tableDefinition: TableDefinition? = null) : DatabaseEnum {
+object DocumentName {
+    const val LIITO_ORAVA = "Liito-orava"
+    const val MUUT_LAJIT = "Muut huomioitavat lajit"
+    const val LEPAKKO = "Lepakko"
+    const val LUMO = "Lumo"
+    const val NORO = "Noro"
+}
+
+enum class DocumentType(
+    val tableDefinition: TableDefinition? = null,
+    val documentName: String? = null
+) : DatabaseEnum {
     @DatabaseValue("paikkatieto:liito_orava_pisteet")
-    LIITO_ORAVA_PISTEET(TableDefinition.LIITO_ORAVA_PISTEET),
+    LIITO_ORAVA_PISTEET(TableDefinition.LIITO_ORAVA_PISTEET, DocumentName.LIITO_ORAVA),
 
     @DatabaseValue("paikkatieto:liito_orava_alueet")
-    LIITO_ORAVA_ALUEET(TableDefinition.LIITO_ORAVA_ALUEET),
+    LIITO_ORAVA_ALUEET(TableDefinition.LIITO_ORAVA_ALUEET, DocumentName.LIITO_ORAVA),
 
     @DatabaseValue("paikkatieto:liito_orava_yhteysviivat")
-    LIITO_ORAVA_VIIVAT(TableDefinition.LIITO_ORAVA_YHTEYSTIEDOT),
+    LIITO_ORAVA_VIIVAT(TableDefinition.LIITO_ORAVA_YHTEYSVIIVAT, DocumentName.LIITO_ORAVA),
 
     @DatabaseValue("paikkatieto:muut_huomioitavat_lajit_pisteet")
-    MUUT_HUOMIOITAVAT_LAJIT_PISTEET(TableDefinition.MUUT_HUOMIOITAVAT_LAJIT_PISTEET),
+    MUUT_HUOMIOITAVAT_LAJIT_PISTEET(
+        TableDefinition.MUUT_HUOMIOITAVAT_LAJIT_PISTEET,
+        DocumentName.MUUT_LAJIT
+    ),
 
     @DatabaseValue("paikkatieto:muut_huomioitavat_lajit_alueet")
-    MUUT_HUOMIOITAVAT_LAJIT_ALUEET(TableDefinition.MUUT_HUOMIOITAVAT_LAJIT_ALUEET),
+    MUUT_HUOMIOITAVAT_LAJIT_ALUEET(
+        TableDefinition.MUUT_HUOMIOITAVAT_LAJIT_ALUEET,
+        DocumentName.MUUT_LAJIT
+    ),
 
     @DatabaseValue("paikkatieto:muut_huomioitavat_lajit_viivat")
-    MUUT_HUOMIOITAVAT_LAJIT_VIIVAT(TableDefinition.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT),
+    MUUT_HUOMIOITAVAT_LAJIT_VIIVAT(
+        TableDefinition.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT,
+        DocumentName.MUUT_LAJIT
+    ),
 
     @DatabaseValue("paikkatieto:aluerajaus_luontoselvitys")
     ALUERAJAUS_LUONTOSELVITYS(TableDefinition.ALUERAJAUS_LUONTOSELVITYS),
 
     @DatabaseValue("paikkatieto:lepakko_viivat")
-    LEPAKKO_VIIVAT(TableDefinition.LEPAKKO_VIIVAT),
+    LEPAKKO_VIIVAT(TableDefinition.LEPAKKO_VIIVAT, DocumentName.LEPAKKO),
 
     @DatabaseValue("paikkatieto:lepakko_alueet")
-    LEPAKKO_ALUEET(TableDefinition.LEPAKKO_ALUEET),
+    LEPAKKO_ALUEET(TableDefinition.LEPAKKO_ALUEET, DocumentName.LEPAKKO),
 
     @DatabaseValue("paikkatieto:lumo_alueet")
-    LUMO_ALUEET(TableDefinition.LUMO_ALUEET),
+    LUMO_ALUEET(TableDefinition.LUMO_ALUEET, DocumentName.LUMO),
 
     @DatabaseValue("paikkatieto:noro_viivat")
-    NORO_VIIVAT(TableDefinition.NORO_VIIVAT),
+    NORO_VIIVAT(TableDefinition.NORO_VIIVAT, DocumentName.NORO),
 
     @DatabaseValue("luontotieto:report")
     REPORT,

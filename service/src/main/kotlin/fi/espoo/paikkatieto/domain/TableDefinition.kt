@@ -110,7 +110,7 @@ enum class TableDefinition(
                 )
             )
     ),
-    LIITO_ORAVA_YHTEYSTIEDOT(
+    LIITO_ORAVA_YHTEYSVIIVAT(
         layerName = "liito_orava_yhteysviivat",
         sqlInsertStatement = SQL_INSERT_LIITO_ORAVA_YHTEYSVIIVAT,
         columns =
@@ -323,6 +323,8 @@ private const val SQL_INSERT_ALUERAJAUS_LUONTOSELVITYS =
             tilausyksikko,
             selvitys_id,
             selvitys_linkki,
+            lisatieto,
+            selvitetyt_tiedot,
             geom
         ) VALUES (
             :name,
@@ -331,6 +333,8 @@ private const val SQL_INSERT_ALUERAJAUS_LUONTOSELVITYS =
             :unit,
             :reportId,
             :reportLink,
+            :additionalInformation,
+            :surveyedData,
             ST_GeomFromWKB(:geom, 3879)
         )
         RETURNING id
