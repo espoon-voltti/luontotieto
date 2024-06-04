@@ -17,6 +17,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
+import InfoModal from 'shared/modals/InfoModal'
 import styled from 'styled-components'
 
 import {
@@ -62,13 +63,20 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const { data: reportFiles, isLoading: isLoadingReportFiles } =
     useGetReportFilesQuery(id)
 
+  const [showApproveModal, setShowApproveModal] = useState(false)
+  const [showApprovedModal, setShowApprovedModal] = useState(false)
+  const [showReportModal, setShowReportModal] = useState(false)
+
+  const [savedReportId, setSavedReportId] = useState<string | null>(null)
+
   const { mutateAsync: createReportMutation, isPending: savingReport } =
     useMutation({
       mutationFn: apiPostReport,
       onSuccess: (report) => {
         void queryClient.invalidateQueries({ queryKey: ['report', id] })
         void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-        navigate(`/luontotieto/selvitys/${report.id}`)
+        setSavedReportId(report.id)
+        setShowReportModal(true)
       },
       onError: (error: FileValidationErrorResponse) =>
         setReportFileErrors([error])
@@ -80,7 +88,8 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
       onSuccess: (report) => {
         void queryClient.invalidateQueries({ queryKey: ['report', id] })
         void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-        navigate(`/luontotieto/selvitys/${report.id}`)
+        setSavedReportId(report.id)
+        setShowReportModal(true)
       },
       onError: (error: FileValidationErrorResponse) =>
         setReportFileErrors([error])
@@ -91,7 +100,8 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['report', id] })
       void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-      alert('Hyväksytty ja tiedostot lähetetty PostGIS kantaan.')
+      setShowApproveModal(false)
+      setShowApprovedModal(true)
     }
   })
 
@@ -183,9 +193,9 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
                   disabled={
                     !report || !reportInput || approving || report.approved
                   }
-                  onClick={async () => {
+                  onClick={() => {
                     if (!report) return
-                    await approveReport(report.id)
+                    setShowApproveModal(true)
                   }}
                 />
               )}
@@ -193,6 +203,59 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
           )}
         </FlexRight>
       </Footer>
+      {showReportModal && (
+        <InfoModal
+          close={() => setShowReportModal(false)}
+          closeLabel="Sulje"
+          title="Muutokset tallennettu"
+          resolve={{
+            action: () => {
+              setShowReportModal(false)
+              navigate(`/luontotieto/selvitys/${savedReportId}`)
+            },
+            label: 'Ok'
+          }}
+        />
+      )}
+
+      {showApproveModal && (
+        <InfoModal
+          close={() => setShowReportModal(false)}
+          closeLabel="Sulje"
+          title="Hyväksy selvitys"
+          resolve={{
+            action: async () => {
+              await approveReport(report.id)
+            },
+            label: 'Hyväksy'
+          }}
+          reject={{
+            action: () => {
+              setShowApproveModal(false)
+            },
+            label: 'Peruuta'
+          }}
+        >
+          Selvityksen hyväksyminen lukitsee selvityksen ja tallentaa
+          paikkatiedot paikkatietokantaan
+        </InfoModal>
+      )}
+      {showApprovedModal && (
+        <InfoModal
+          close={() => setShowApprovedModal(false)}
+          closeLabel="Sulje"
+          title="Selvitys hyväksytty"
+          resolve={{
+            action: () => {
+              setShowApprovedModal(false)
+            },
+            label: 'Ok'
+          }}
+        >
+          Selvitys on hyväksytty ja paikkatiedot on tallennettu
+          paikkatietokantaan!
+        </InfoModal>
+      )}
     </>
   )
 })
