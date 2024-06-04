@@ -17,7 +17,10 @@ plugins {
     idea
 }
 
-java { sourceCompatibility = JavaVersion.VERSION_21 }
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
 
 repositories {
     maven { url = uri("https://repo.osgeo.org/repository/release/") }
