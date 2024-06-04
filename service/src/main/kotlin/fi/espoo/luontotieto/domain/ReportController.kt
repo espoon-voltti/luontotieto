@@ -197,7 +197,6 @@ class ReportController {
             reportFiles.mapNotNull { rf ->
                 getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf)
             }
-
         paikkatietoJdbi.inTransactionUnchecked { ptx ->
             readers.forEach {
                 it.use { reader ->
@@ -208,7 +207,7 @@ class ReportController {
                                     tx.getAluerajausLuontoselvitysParams(
                                         user,
                                         reportId,
-                                        luontotietoHost.getReportUrl(reportId)
+                                        luontotietoHost.getReportDocumentDownloadUrl(reportId)
                                     )
                                 }
                             }

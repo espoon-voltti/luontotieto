@@ -15,6 +15,12 @@ data class LuontotietoHost(val host: String) {
         return builder.build().toString()
     }
 
+    fun getReportDocumentDownloadUrl(id: UUID): String {
+        val builder = URIBuilder(host)
+        builder.path = "/api/reports/$id/files/report"
+        return builder.build().toString()
+    }
+
     fun getCustomerUserLoginUrl(): String {
         val builder = URIBuilder(host)
         builder.path = "/kirjaudu/yrityskayttaja"
