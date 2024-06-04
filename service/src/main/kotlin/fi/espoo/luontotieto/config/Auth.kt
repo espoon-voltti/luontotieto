@@ -81,7 +81,12 @@ class HttpAccessControl : HttpFilter() {
         when {
             requestURI == "/health" ||
                 requestURI == "/actuator/health" ||
-                requestURI.endsWith("/files/report") -> false
+                requestURI
+                    .matches(
+                        "^/reports/([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})/files/report$"
+                            .toRegex()
+                    )
+            -> false
             else -> true
         }
 
