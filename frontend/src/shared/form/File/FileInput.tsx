@@ -59,7 +59,11 @@ const isReportFileNatureDocument = (
   dt === ReportFileDocumentType.LIITO_ORAVA_VIIVAT ||
   dt === ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET ||
   dt === ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET ||
-  dt === ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT
+  dt === ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT ||
+  dt === ReportFileDocumentType.LEPAKKO_ALUEET ||
+  dt === ReportFileDocumentType.LEPAKKO_VIIVAT ||
+  dt === ReportFileDocumentType.NORO_VIIVAT ||
+  dt === ReportFileDocumentType.LUMO_ALUEET
 
 export const FileInput = <
   T extends ReportFileDocumentType | OrderFileDocumentType
