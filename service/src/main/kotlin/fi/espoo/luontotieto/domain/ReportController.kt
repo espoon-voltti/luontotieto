@@ -284,14 +284,12 @@ class ReportController {
 
         val res =
             documentClient.download(dataBucket, "$reportId/${reportFile.id}", contentDisposition)
-        res.use {
-            val inputStreamResource = InputStreamResource(it)
-            return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
-                .contentType(MediaType.parseMediaType(it.response().contentType()))
-                .contentLength(res.response().contentLength())
-                .body(inputStreamResource)
-        }
+        val inputStreamResource = InputStreamResource(res)
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+            .contentType(MediaType.parseMediaType(res.response().contentType()))
+            .contentLength(res.response().contentLength())
+            .body(inputStreamResource)
     }
 
     @DeleteMapping("/{reportId}/files/{fileId}")
