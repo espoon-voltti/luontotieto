@@ -8,21 +8,19 @@ import { VerticalGap } from 'shared/layout'
 
 import BaseModal, { ModalBaseProps, ModalButtons } from './BaseModal'
 
+export interface InfoModalActions {
+  resolve: {
+    action: () => void
+    label: string
+    disabled?: boolean
+  }
+  reject?: {
+    action: () => void
+    label: string
+  }
+}
 type Props = Omit<ModalBaseProps, 'mobileFullScreen'> &
-  (
-    | {
-        resolve: {
-          action: () => void
-          label: string
-          disabled?: boolean
-        }
-        reject?: {
-          action: () => void
-          label: string
-        }
-      }
-    | { close: () => void; closeLabel: string }
-  )
+  (InfoModalActions | { close: () => void; closeLabel: string })
 
 export default React.memo(function InfoModal({ children, ...props }: Props) {
   return (

@@ -17,7 +17,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
-import InfoModal from 'shared/modals/InfoModal'
+import InfoModal, { InfoModalActions } from 'shared/modals/InfoModal'
 import styled from 'styled-components'
 
 import {
@@ -42,6 +42,10 @@ type Props = CreateProps | EditProps
 const StyledButton = styled(Button)`
   margin-right: 20px;
 `
+interface ShowModal extends InfoModalActions {
+  title: string
+  text?: string
+}
 
 export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const { user } = useContext(UserContext)
@@ -63,20 +67,18 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const { data: reportFiles, isLoading: isLoadingReportFiles } =
     useGetReportFilesQuery(id)
 
-  const [showApproveModal, setShowApproveModal] = useState(false)
-  const [showApprovedModal, setShowApprovedModal] = useState(false)
-  const [showReportModal, setShowReportModal] = useState(false)
-
-  const [savedReportId, setSavedReportId] = useState<string | null>(null)
+  const [showModal, setShowModal] = useState<ShowModal | null>(null)
 
   const { mutateAsync: createReportMutation, isPending: savingReport } =
     useMutation({
       mutationFn: apiPostReport,
-      onSuccess: (report) => {
+      onSuccess: (_report) => {
         void queryClient.invalidateQueries({ queryKey: ['report', id] })
         void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-        setSavedReportId(report.id)
-        setShowReportModal(true)
+        setShowModal({
+          title: 'Selvitys luotu',
+          resolve: { action: () => setShowModal(null), label: 'Ok' }
+        })
       },
       onError: (error: FileValidationErrorResponse) =>
         setReportFileErrors([error])
@@ -85,11 +87,13 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const { mutateAsync: updateReportMutation, isPending: updatingReport } =
     useMutation({
       mutationFn: apiPutReport,
-      onSuccess: (report) => {
+      onSuccess: (_report) => {
         void queryClient.invalidateQueries({ queryKey: ['report', id] })
         void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-        setSavedReportId(report.id)
-        setShowReportModal(true)
+        setShowModal({
+          title: 'Tiedot tallennettu',
+          resolve: { action: () => setShowModal(null), label: 'Ok' }
+        })
       },
       onError: (error: FileValidationErrorResponse) =>
         setReportFileErrors([error])
@@ -100,8 +104,10 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['report', id] })
       void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-      setShowApproveModal(false)
-      setShowApprovedModal(true)
+      setShowModal({
+        title: 'Selvitys hyväksytty',
+        resolve: { action: () => setShowModal(null), label: 'Ok' }
+      })
     }
   })
 
@@ -195,7 +201,18 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
                   }
                   onClick={() => {
                     if (!report) return
-                    setShowApproveModal(true)
+                    setShowModal({
+                      title: 'Hyväksy selvitys',
+                      text: 'Selvityksen hyväksyminen lukitsee selvityksen ja tallentaa paikkatiedot paikkatietokantaan',
+                      resolve: {
+                        action: () => approveReport(report.id),
+                        label: 'Hyväksy'
+                      },
+                      reject: {
+                        action: () => setShowModal(null),
+                        label: 'Peruuta'
+                      }
+                    })
                   }}
                 />
               )}
@@ -203,57 +220,18 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
           )}
         </FlexRight>
       </Footer>
-      {showReportModal && (
+      {showModal && (
         <InfoModal
-          close={() => setShowReportModal(false)}
+          close={() => setShowModal(null)}
           closeLabel="Sulje"
-          title="Muutokset tallennettu"
+          title={showModal.title}
           resolve={{
-            action: () => {
-              setShowReportModal(false)
-              navigate(`/luontotieto/selvitys/${savedReportId}`)
-            },
+            action: () => showModal.resolve.action(),
             label: 'Ok'
           }}
-        />
-      )}
-
-      {showApproveModal && (
-        <InfoModal
-          close={() => setShowReportModal(false)}
-          closeLabel="Sulje"
-          title="Hyväksy selvitys"
-          resolve={{
-            action: async () => {
-              await approveReport(report.id)
-            },
-            label: 'Hyväksy'
-          }}
-          reject={{
-            action: () => {
-              setShowApproveModal(false)
-            },
-            label: 'Peruuta'
-          }}
+          reject={showModal.reject}
         >
-          Selvityksen hyväksyminen lukitsee selvityksen ja tallentaa
-          paikkatiedot paikkatietokantaan
-        </InfoModal>
-      )}
-      {showApprovedModal && (
-        <InfoModal
-          close={() => setShowApprovedModal(false)}
-          closeLabel="Sulje"
-          title="Selvitys hyväksytty"
-          resolve={{
-            action: () => {
-              setShowApprovedModal(false)
-            },
-            label: 'Ok'
-          }}
-        >
-          Selvitys on hyväksytty ja paikkatiedot on tallennettu
-          paikkatietokantaan!
+          {showModal.text}
         </InfoModal>
       )}
     </>
