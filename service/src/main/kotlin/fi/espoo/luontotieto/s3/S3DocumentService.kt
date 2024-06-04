@@ -51,7 +51,7 @@ class S3DocumentService(
         bucketName: String,
         key: String,
         contentDisposition: ContentDisposition
-    ): Any {
+    ): ResponseEntity<ByteArray> {
         val request = GetObjectRequest.builder().bucket(bucketName).key(key).build()
         val stream = s3Client.getObject(request) ?: throw NotFound("File not found")
         return stream.use {

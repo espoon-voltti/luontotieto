@@ -269,7 +269,7 @@ class ReportController {
     @GetMapping("/{reportId}/files/report")
     fun getReportFileById(
         @PathVariable reportId: UUID,
-    ): Any {
+    ): ResponseEntity<ByteArray> {
         val dataBucket = bucketEnv.data
 
         val reportFile =
