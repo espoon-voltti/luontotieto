@@ -37,10 +37,8 @@ export const NotFound = React.memo(function NotFound() {
           <VerticalGap $size="L" />
           <Button
             text="Palaa etusivulle"
-            primary={true}
-            onClick={() => {
-              navigate('/')
-            }}
+            primary
+            onClick={() => navigate('/')}
           />
           <VerticalGap $size="XL" />
         </CenteredDiv>
