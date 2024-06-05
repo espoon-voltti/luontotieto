@@ -145,8 +145,8 @@ fun Handle.getUserPasswordHash(id: UUID) =
         .findOne()
         .getOrNull()
 
-
 data class UpdatePasswordResult(val id: UUID, val email: String)
+
 fun Handle.putPassword(
     id: UUID,
     password: String,

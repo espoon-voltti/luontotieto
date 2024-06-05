@@ -136,18 +136,19 @@ class UserController {
                 logger.audit(user, AuditEvent.UPDATE_USER_PASSWORD, mapOf("id" to "${user.id}"))
             }
     }
+
     @PutMapping("/{id}/password/reset")
     fun updateUserPassword(
         user: AuthenticatedUser,
         @PathVariable id: UUID,
-        ): UUID {
+    ): UUID {
         user.checkRoles(UserRole.ADMIN)
         val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
         val generatedString = generatePassword()
         val passwordHash = encoder.encode(generatedString)
         return jdbi
             .inTransactionUnchecked { tx ->
-                val result  = tx.putPassword(id, passwordHash, user)
+                val result = tx.putPassword(id, passwordHash, user)
                 sesEmailClient.send(
                     Email(
                         result.email,
