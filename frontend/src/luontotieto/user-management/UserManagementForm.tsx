@@ -13,6 +13,7 @@ import { InlineButton } from 'shared/buttons/InlineButton'
 import { InputField } from 'shared/form/InputField'
 import Radio from 'shared/form/Radio'
 import Switch from 'shared/form/Switch'
+import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
 import { H3, Label } from 'shared/typography'
 
 import {
@@ -54,15 +55,25 @@ export const UserManagementForm = React.memo(function UserManagementForm({
   const [userInput, setUserInput] = useState(userEditableFields)
   const [enableEdit, setEnableEdit] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
 
   const userSelectedRoleInfo = roles.find((r) => r.role === userInput.role)
-  const { mutateAsync: updateReportMutation, isPending: updatingUser } =
+  const { mutateAsync: updateUserMutation, isPending: updatingUser } =
     useMutation({
       mutationFn: apiPutUser,
       onSuccess: (user) => {
         void queryClient.invalidateQueries({ queryKey: ['users'] })
         void queryClient.invalidateQueries({ queryKey: ['user', user.id] })
-        setEnableEdit(false)
+        setShowModal({
+          title: 'Käyttäjän tiedot päivitetty',
+          resolve: {
+            action: () => {
+              setShowModal(null)
+              setEnableEdit(false)
+            },
+            label: 'Ok'
+          }
+        })
       },
       onError: (e: AxiosError<{ errorCode: string }>) => {
         if (e instanceof AxiosError) {
@@ -157,7 +168,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
               primary
               text="Tallenna"
               onClick={async () =>
-                await updateReportMutation({
+                await updateUserMutation({
                   ...userInput,
                   userId: user.id
                 })
@@ -176,6 +187,17 @@ export const UserManagementForm = React.memo(function UserManagementForm({
           <InlineButton text="Resetoi salasana" onClick={() => true} />
         )}
       </GroupOfInputRows>
+      {showModal && (
+        <InfoModal
+          close={() => setShowModal(null)}
+          closeLabel="Sulje"
+          title={showModal.title}
+          resolve={showModal.resolve}
+          reject={showModal.reject}
+        >
+          {showModal.text}
+        </InfoModal>
+      )}
     </SectionContainer>
   )
 })

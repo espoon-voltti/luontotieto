@@ -15,6 +15,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
+import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
 
 import { FlexRight, PageContainer, VerticalGap } from '../../shared/layout'
 
@@ -52,6 +53,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   const { data: planNumbers } = useGetOrderPlanNumbersQuery()
   const { data: orderingUnits } = useGetorderingUnitsQuery()
 
+  const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
   const [orderInput, setOrderInput] = useState<OrderFormInput | null>(null)
 
   const { mutateAsync: createOrderMutation, isPending: savingOrder } =
@@ -62,7 +64,16 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
         void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
         void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
         void queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
-        navigate(`/luontotieto/selvitys/${reportId}`)
+        setShowModal({
+          title: 'Tilaus luotu',
+          resolve: {
+            action: () => {
+              setShowModal(null)
+              navigate(`/luontotieto/selvitys/${reportId}`)
+            },
+            label: 'Ok'
+          }
+        })
       }
     })
 
@@ -74,8 +85,15 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
         void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
         void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
         void queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
-
-        navigate(`/`)
+        setShowModal({
+          title: 'Tilaus päivitetty',
+          resolve: {
+            action: () => {
+              setShowModal(null)
+            },
+            label: 'Ok'
+          }
+        })
       }
     })
 
@@ -138,6 +156,17 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
           />
         </FlexRight>
       </Footer>
+      {showModal && (
+        <InfoModal
+          close={() => setShowModal(null)}
+          closeLabel="Sulje"
+          title={showModal.title}
+          resolve={showModal.resolve}
+          reject={showModal.reject}
+        >
+          {showModal.text}
+        </InfoModal>
+      )}
     </>
   )
 })

@@ -22,6 +22,7 @@ import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { InputField } from 'shared/form/InputField'
+import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
 import { Label } from 'shared/typography'
 
 import {
@@ -86,6 +87,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newPassword2, setNewPassword2] = useState('')
+  const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -93,7 +95,16 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
     mutationFn: apiChangeUserPassword,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['users', userId] })
-      onClose()
+      setShowModal({
+        title: 'Salasana muutettu',
+        resolve: {
+          action: () => {
+            setShowModal(null)
+            onClose()
+          },
+          label: 'Ok'
+        }
+      })
     },
     onError: (e: AxiosError<{ errorCode: ChangePasswordErrorCode }>) => {
       if (e instanceof AxiosError) {
@@ -183,6 +194,17 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
           />
         </FlexRowWithGaps>
       </GroupOfInputRows>
+      {showModal && (
+        <InfoModal
+          close={() => setShowModal(null)}
+          closeLabel="Sulje"
+          title={showModal.title}
+          resolve={showModal.resolve}
+          reject={showModal.reject}
+        >
+          {showModal.text}
+        </InfoModal>
+      )}
     </form>
   )
 })
