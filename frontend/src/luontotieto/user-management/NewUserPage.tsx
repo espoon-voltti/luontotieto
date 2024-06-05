@@ -11,6 +11,7 @@ import { AlertBox, InfoBox } from 'shared/MessageBoxes'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
 import { InputField } from 'shared/form/InputField'
+import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
 import { H3, Label } from 'shared/typography'
 
 import {
@@ -32,13 +33,23 @@ export const NewUserPage = React.memo(function NewUserPage() {
     name: '',
     email: ''
   })
+  const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const { mutateAsync: createUser, isPending } = useMutation({
     mutationFn: apiPostUser,
     onSuccess: (user) => {
       void queryClient.invalidateQueries({ queryKey: ['users'] })
-      navigate(`/luontotieto/käyttäjät/${user.id}`)
+      setShowModal({
+        title: 'Käyttäjän luotu',
+        resolve: {
+          action: () => {
+            setShowModal(null)
+            navigate(`/luontotieto/käyttäjät/${user.id}`)
+          },
+          label: 'Ok'
+        }
+      })
     },
     onError: (e: AxiosError<{ errorCode: string }>) => {
       if (e instanceof AxiosError) {
@@ -127,6 +138,17 @@ export const NewUserPage = React.memo(function NewUserPage() {
         </form>
       </SectionContainer>
       <VerticalGap $size="XL" />
+      {showModal && (
+        <InfoModal
+          close={() => setShowModal(null)}
+          closeLabel="Sulje"
+          title={showModal.title}
+          resolve={showModal.resolve}
+          reject={showModal.reject}
+        >
+          {showModal.text}
+        </InfoModal>
+      )}
     </PageContainer>
   )
 })
