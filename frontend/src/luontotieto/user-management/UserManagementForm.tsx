@@ -108,7 +108,8 @@ export const UserManagementForm = React.memo(function UserManagementForm({
             setShowModal(null)
           },
           label: 'Ok'
-        }
+        },
+        text: 'Uusi salasana on lähetetty käyttäjän sähköpostiin.'
       })
     }
   })
