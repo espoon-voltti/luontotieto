@@ -225,10 +225,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
           close={() => setShowModal(null)}
           closeLabel="Sulje"
           title={showModal.title}
-          resolve={{
-            action: () => showModal.resolve.action(),
-            label: 'Ok'
-          }}
+          resolve={showModal.resolve}
           reject={showModal.reject}
         >
           {showModal.text}
