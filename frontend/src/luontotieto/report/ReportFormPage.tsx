@@ -17,7 +17,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
-import InfoModal, { InfoModalActions } from 'shared/modals/InfoModal'
+import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
 import styled from 'styled-components'
 
 import {
@@ -42,10 +42,6 @@ type Props = CreateProps | EditProps
 const StyledButton = styled(Button)`
   margin-right: 20px;
 `
-interface ShowModal extends InfoModalActions {
-  title: string
-  text?: string
-}
 
 export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const { user } = useContext(UserContext)
@@ -67,7 +63,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const { data: reportFiles, isLoading: isLoadingReportFiles } =
     useGetReportFilesQuery(id)
 
-  const [showModal, setShowModal] = useState<ShowModal | null>(null)
+  const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
 
   const { mutateAsync: createReportMutation, isPending: savingReport } =
     useMutation({
