@@ -139,8 +139,8 @@ export const ReportList = React.memo(function ReportList() {
               >
                 TILAUKSEN NIMI
               </SortableTh>
-              <Th style={{ width: '300px' }}>TILAUKSEN KAAVANUMERO</Th>
-              <Th style={{ width: '160px' }}>Luontotyypit</Th>
+              <Th style={{ width: '160px' }}>TILAUKSEN KAAVANUMERO</Th>
+              <Th style={{ width: '300px' }}>Luontotyypit</Th>
               <Th style={{ width: '80px' }}>
                 SELVITYKSEN TEKIJÄ
                 <Select
@@ -156,7 +156,6 @@ export const ReportList = React.memo(function ReportList() {
             {orderReports(reports).map((report) => (
               <tr key={report.id}>
                 <td>{formatDateTime(report.updated)}</td>
-
                 <td>{report.approved ? 'Hyväksytty' : 'Lähetetty'}</td>
                 <td>
                   <Link to={`/luontotieto/selvitys/${report.id}`}>
@@ -164,8 +163,11 @@ export const ReportList = React.memo(function ReportList() {
                   </Link>
                 </td>
                 <td>{report.order?.planNumber?.toString() ?? '-'}</td>
-
-                <td>{report.order?.reportDocumentsString}</td>
+                <td>
+                  {report.order?.reportDocuments.map((r, index) => (
+                    <li key={index}>{getDocumentTypeTitle(r.documentType)}</li>
+                  ))}
+                </td>
                 <td>{report.order?.assignee}</td>
               </tr>
             ))}
