@@ -145,23 +145,25 @@ fun Handle.getUserPasswordHash(id: UUID) =
         .findOne()
         .getOrNull()
 
+data class UpdatePasswordResult(val id: UUID, val email: String)
+
 fun Handle.putPassword(
     id: UUID,
     password: String,
     user: AuthenticatedUser
-): UUID {
+): UpdatePasswordResult {
     return createQuery(
         """
                 UPDATE users 
                  SET password_hash = :password, updated_by = :updatedBy
                  WHERE id = :id
-                 RETURNING id
+                 RETURNING id, email
             """
     )
         .bind("id", id)
         .bind("updatedBy", user.id)
         .bind("password", password)
-        .mapTo<UUID>()
+        .mapTo<UpdatePasswordResult>()
         .findOne()
         .getOrNull() ?: throw NotFound()
 }

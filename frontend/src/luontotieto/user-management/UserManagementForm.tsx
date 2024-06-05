@@ -4,7 +4,13 @@
 
 import { faPen } from '@fortawesome/free-solid-svg-icons'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { apiPutUser, getUserRole, User, UserRole } from 'api/users-api'
+import {
+  apiPutUser,
+  apiResetUserPassword,
+  getUserRole,
+  User,
+  UserRole
+} from 'api/users-api'
 import { AxiosError } from 'axios'
 import React, { useMemo, useState } from 'react'
 import { AlertBox, InfoBox } from 'shared/MessageBoxes'
@@ -86,6 +92,27 @@ export const UserManagementForm = React.memo(function UserManagementForm({
         }
       }
     })
+
+  const {
+    mutateAsync: resetUserPasswordMutation,
+    isPending: resettingPassword
+  } = useMutation({
+    mutationFn: apiResetUserPassword,
+    onSuccess: (userId) => {
+      void queryClient.invalidateQueries({ queryKey: ['users'] })
+      void queryClient.invalidateQueries({ queryKey: ['user', userId] })
+      setShowModal({
+        title: 'Käyttäjän salasana resetoitu',
+        resolve: {
+          action: () => {
+            setShowModal(null)
+          },
+          label: 'Ok'
+        },
+        text: 'Uusi salasana on lähetetty käyttäjän sähköpostiin.'
+      })
+    }
+  })
 
   const invalidEmailInfo = useMemo(
     () =>
@@ -184,7 +211,24 @@ export const UserManagementForm = React.memo(function UserManagementForm({
           />
         )}
         {userInput.role === UserRole.CUSTOMER && (
-          <InlineButton text="Resetoi salasana" onClick={() => true} />
+          <InlineButton
+            disabled={resettingPassword}
+            text="Resetoi salasana"
+            onClick={() =>
+              setShowModal({
+                title: 'Resetoi salasana',
+                text: 'Oletko varma että haluat resetoida käyttäjän salasanan?',
+                resolve: {
+                  action: () => resetUserPasswordMutation({ userId: user.id }),
+                  label: 'Resetoi'
+                },
+                reject: {
+                  action: () => setShowModal(null),
+                  label: 'Peruuta'
+                }
+              })
+            }
+          />
         )}
       </GroupOfInputRows>
       {showModal && (

@@ -70,6 +70,20 @@ class Emails {
 """
         )
 
+        fun getPasswordResetedEmail(
+            link: String,
+            password: String
+        ) = EmailContent.fromHtml(
+            "Salasana resetoitu Espoon Luontotietoportaaliissa",
+            """
+<p>Teidän salasananne Espoon Luontotietoportaaliin on resetoitu.</p>
+<p>Voitte kirjautua palveluun osoitteessa ${linkElement(link)}.</p>
+<p>Uusi salasana: $password</p>
+<p>Vaihtakaa salasana ensimmäisen kirjautumisen yhteydessä.</p>
+<p>$DO_NOT_REPLY_MESSAGE</p>
+"""
+        )
+
         fun getReportApprovedEmail(
             reportName: String,
             approverName: String,
