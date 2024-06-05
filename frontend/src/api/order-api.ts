@@ -14,6 +14,7 @@ export interface Order extends OrderInput {
   assignee: string
   createdBy: string
   updatedBy: string
+  reportDocumentsString?: string
 }
 
 export interface OrderFormInput {

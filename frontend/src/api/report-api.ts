@@ -90,7 +90,7 @@ export interface ReportDetails extends ReportInput {
   updatedBy: string
   approved: boolean
   noObservations: ReportFileDocumentType[] | null
-  order?: Order
+  order: Order
 }
 
 export interface ReportFileDetails extends ReportFileInput {
@@ -188,7 +188,22 @@ export const apiGetReport = (id: string): Promise<ReportDetails> =>
   apiClient.get<ReportDetails>(`/reports/${id}`).then((res) => res.data)
 
 export const apiGetReports = (): Promise<ReportDetails[]> =>
-  apiClient.get<ReportDetails[]>(`/reports`).then((res) => res.data)
+  apiClient.get<ReportDetails[]>(`/reports`).then((res) =>
+    res.data.map((report) => {
+      const reportApiDocumentsString =
+        report.order.reportDocuments
+          .map((r) => getDocumentTypeTitle(r.documentType))
+          .join(', ') ?? ''
+
+      return {
+        ...report,
+        order: {
+          ...report.order,
+          reportDocumentsString: reportApiDocumentsString
+        }
+      }
+    })
+  )
 
 export const apiGetReportFiles = (id: string): Promise<ReportFileDetails[]> =>
   apiClient

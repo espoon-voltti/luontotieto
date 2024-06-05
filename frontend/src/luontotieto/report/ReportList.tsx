@@ -165,11 +165,7 @@ export const ReportList = React.memo(function ReportList() {
                 </td>
                 <td>{report.order?.planNumber?.toString() ?? '-'}</td>
 
-                <td>
-                  {report.order?.reportDocuments.map((r) =>
-                    getDocumentTypeTitle(r.documentType)
-                  )}
-                </td>
+                <td>{report.order?.reportDocumentsString}</td>
                 <td>{report.order?.assignee}</td>
               </tr>
             ))}
@@ -195,19 +191,24 @@ const filterReports = (
   return reports.filter((report) => {
     if (searchQueryToLower) {
       return (
-        (report.name.toLowerCase().includes(searchQueryToLower) ||
-          (report.order &&
-            report.order.assignee.toLowerCase().includes(searchQueryToLower)) ||
-          (report.order &&
-            searchQueryToLower &&
-            report.order.planNumber
-              ?.toString()
-              .toLowerCase()
-              .includes(searchQueryToLower))) &&
-        (assigneeLower
-          ? report.order &&
-            report.order.assignee.toLowerCase().includes(assigneeLower)
-          : true)
+        report.name.toLowerCase().includes(searchQueryToLower) ||
+        (report.order &&
+          report.order.assignee.toLowerCase().includes(searchQueryToLower)) ||
+        (report.order &&
+          searchQueryToLower &&
+          report.order.planNumber
+            ?.toString()
+            .toLowerCase()
+            .includes(searchQueryToLower)) ||
+        (report.order &&
+          searchQueryToLower &&
+          report.order.reportDocumentsString
+            ?.toLowerCase()
+            .includes(searchQueryToLower) &&
+          (assigneeLower
+            ? report.order &&
+              report.order.assignee.toLowerCase().includes(assigneeLower)
+            : true))
       )
     } else if (assigneeLower) {
       return (
