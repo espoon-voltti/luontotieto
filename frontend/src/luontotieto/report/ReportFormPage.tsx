@@ -17,6 +17,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
+import InfoModal, { InfoModalActions } from 'shared/modals/InfoModal'
 import styled from 'styled-components'
 
 import {
@@ -41,6 +42,10 @@ type Props = CreateProps | EditProps
 const StyledButton = styled(Button)`
   margin-right: 20px;
 `
+interface ShowModal extends InfoModalActions {
+  title: string
+  text?: string
+}
 
 export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const { user } = useContext(UserContext)
@@ -62,13 +67,18 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const { data: reportFiles, isLoading: isLoadingReportFiles } =
     useGetReportFilesQuery(id)
 
+  const [showModal, setShowModal] = useState<ShowModal | null>(null)
+
   const { mutateAsync: createReportMutation, isPending: savingReport } =
     useMutation({
       mutationFn: apiPostReport,
-      onSuccess: (report) => {
+      onSuccess: (_report) => {
         void queryClient.invalidateQueries({ queryKey: ['report', id] })
         void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-        navigate(`/luontotieto/selvitys/${report.id}`)
+        setShowModal({
+          title: 'Selvitys luotu',
+          resolve: { action: () => setShowModal(null), label: 'Ok' }
+        })
       },
       onError: (error: FileValidationErrorResponse) =>
         setReportFileErrors([error])
@@ -77,10 +87,13 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const { mutateAsync: updateReportMutation, isPending: updatingReport } =
     useMutation({
       mutationFn: apiPutReport,
-      onSuccess: (report) => {
+      onSuccess: (_report) => {
         void queryClient.invalidateQueries({ queryKey: ['report', id] })
         void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-        navigate(`/luontotieto/selvitys/${report.id}`)
+        setShowModal({
+          title: 'Tiedot tallennettu',
+          resolve: { action: () => setShowModal(null), label: 'Ok' }
+        })
       },
       onError: (error: FileValidationErrorResponse) =>
         setReportFileErrors([error])
@@ -91,7 +104,10 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['report', id] })
       void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-      alert('Hyväksytty ja tiedostot lähetetty PostGIS kantaan.')
+      setShowModal({
+        title: 'Selvitys hyväksytty',
+        resolve: { action: () => setShowModal(null), label: 'Ok' }
+      })
     }
   })
 
@@ -183,9 +199,20 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
                   disabled={
                     !report || !reportInput || approving || report.approved
                   }
-                  onClick={async () => {
+                  onClick={() => {
                     if (!report) return
-                    await approveReport(report.id)
+                    setShowModal({
+                      title: 'Hyväksy selvitys',
+                      text: 'Selvityksen hyväksyminen lukitsee selvityksen ja tallentaa paikkatiedot paikkatietokantaan',
+                      resolve: {
+                        action: () => approveReport(report.id),
+                        label: 'Hyväksy'
+                      },
+                      reject: {
+                        action: () => setShowModal(null),
+                        label: 'Peruuta'
+                      }
+                    })
                   }}
                 />
               )}
@@ -193,6 +220,17 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
           )}
         </FlexRight>
       </Footer>
+      {showModal && (
+        <InfoModal
+          close={() => setShowModal(null)}
+          closeLabel="Sulje"
+          title={showModal.title}
+          resolve={showModal.resolve}
+          reject={showModal.reject}
+        >
+          {showModal.text}
+        </InfoModal>
+      )}
     </>
   )
 })
