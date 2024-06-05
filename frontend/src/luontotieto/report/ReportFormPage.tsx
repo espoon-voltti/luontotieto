@@ -5,13 +5,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useGetReportFilesQuery, useGetReportQuery } from 'api/hooks/reports'
 import {
-  apiPostReport,
-  ReportFormInput,
-  apiPutReport,
   apiApproveReport,
-  FileValidationErrorResponse
+  apiPostReport,
+  apiPutReport,
+  FileValidationErrorResponse,
+  ReportFormInput
 } from 'api/report-api'
-import { UserContext, hasOrdererRole, hasViewerRole } from 'auth/UserContext'
+import { hasOrdererRole, hasViewerRole, UserContext } from 'auth/UserContext'
 import React, { useContext, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
@@ -20,6 +20,7 @@ import { Button } from 'shared/buttons/Button'
 import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
 import styled from 'styled-components'
 
+import { NotFound } from '../../shared/404'
 import {
   FlexRight,
   PageContainer,
@@ -37,6 +38,7 @@ interface CreateProps {
 interface EditProps {
   mode: 'EDIT'
 }
+
 type Props = CreateProps | EditProps
 
 const StyledButton = styled(Button)`
@@ -115,9 +117,14 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
     }
   }
 
-  if (isLoadingReport || isLoadingReportFiles || !report || !reportFiles) {
+  if (isLoadingReport || isLoadingReportFiles) {
     return null
   }
+
+  if (!report || !reportFiles) {
+    return <NotFound />
+  }
+
   const title =
     props.mode === 'CREATE'
       ? 'Uusi luontoselvitys'

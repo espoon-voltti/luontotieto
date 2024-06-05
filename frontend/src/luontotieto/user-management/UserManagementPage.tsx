@@ -7,6 +7,7 @@ import React from 'react'
 import { useParams } from 'react-router-dom'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 
+import { NotFound } from '../../shared/404'
 import { PageContainer, VerticalGap } from '../../shared/layout'
 
 import { UserManagementForm } from './UserManagementForm'
@@ -17,8 +18,12 @@ export const UserManagementPage = React.memo(function UserManagementPage() {
 
   const { data: user, isLoading } = useGetUserQuery(id)
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return null
+  }
+
+  if (!user) {
+    return <NotFound />
   }
 
   return (

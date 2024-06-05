@@ -36,7 +36,13 @@ const Header = styled.nav`
   padding: 0 32px;
   background-color: #fff;
 `
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1
+    }
+  }
+})
 
 function App() {
   const { data: authStatus } = useAuthStatusQuery()
