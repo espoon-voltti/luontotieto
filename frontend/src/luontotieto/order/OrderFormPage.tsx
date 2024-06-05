@@ -5,9 +5,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   useGetOrderFilesQuery,
+  useGetorderingUnitsQuery,
   useGetOrderPlanNumbersQuery,
-  useGetOrderQuery,
-  useGetorderingUnitsQuery
+  useGetOrderQuery
 } from 'api/hooks/orders'
 import { apiPostOrder, apiPutOrder, OrderFormInput } from 'api/order-api'
 import React, { useState } from 'react'
@@ -16,6 +16,7 @@ import { Footer } from 'shared/Footer'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
 
+import { NotFound } from '../../shared/404'
 import { FlexRight, PageContainer, VerticalGap } from '../../shared/layout'
 
 import { OrderForm } from './OrderForm'
@@ -81,6 +82,10 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
 
   if (isLoadingOrder || isLoadingOrderFiles) {
     return null
+  }
+
+  if (!order && props.mode === 'EDIT') {
+    return <NotFound />
   }
 
   return (
