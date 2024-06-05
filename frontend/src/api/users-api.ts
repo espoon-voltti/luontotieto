@@ -81,6 +81,13 @@ export const apiChangeUserPassword = async (
     .then((r) => r.data)
 }
 
+export const apiResetUserPassword = async (userInput: {
+  userId: string
+}): Promise<string> =>
+  await apiClient
+    .put<string>(`/users/${userInput.userId}/password/reset`)
+    .then((r) => r.data)
+
 export const apiGetUser = (id: string): Promise<User> =>
   apiClient.get<User>(`/users/${id}`).then((res) => res.data)
 
