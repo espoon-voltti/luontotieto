@@ -98,7 +98,7 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
             <P>{order.name}</P>
           </GridItem>
           <GridItem $col={2} $row={1}>
-            <Label>Tilauksen kaavanumero</Label>
+            <Label>Maankäytön suunnitelmat</Label>
             <P>{order.planNumber?.join(', ')}</P>
           </GridItem>
           <GridItem $col={3} $row={1}>

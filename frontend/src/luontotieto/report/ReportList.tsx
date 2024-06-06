@@ -139,8 +139,8 @@ export const ReportList = React.memo(function ReportList() {
               >
                 TILAUKSEN NIMI
               </SortableTh>
-              <Th style={{ width: '160px' }}>TILAUKSEN KAAVANUMERO</Th>
-              <Th style={{ width: '300px' }}>Luontotyypit</Th>
+              <Th style={{ width: '160px' }}>MAANKÄYTÖN SUUNNITELMAT</Th>
+              <Th style={{ width: '300px' }}>SELVITETTÄVÄT ASIAT</Th>
               <Th style={{ width: '80px' }}>
                 SELVITYKSEN TEKIJÄ
                 <Select
