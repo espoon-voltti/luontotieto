@@ -145,6 +145,36 @@ class OrderController {
             .also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
     }
 
+    @DeleteMapping("/{orderId}")
+    fun deleteOrder(
+        user: AuthenticatedUser,
+        @PathVariable orderId: UUID,
+    ) {
+        user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
+        val dataBucket = bucketEnv.data
+        jdbi
+            .inTransactionUnchecked { tx ->
+                val report = tx.getReportByOrderId(orderId, user)
+                val reportFiles = tx.getReportFiles(report.id)
+                if (reportFiles.isNotEmpty())
+                    {
+                        throw BadRequest("Tilausta ei voi poistaa koska selvitykseen on jo tallennettu tiedostoja")
+                    }
+                val orderFiles = tx.getOrderFiles(orderId, user)
+                for (of in orderFiles) {
+                    documentClient.delete(dataBucket, "$orderId/${of.id}")
+                }
+                tx.deleteOrderAndReportData(orderId, report.id)
+            }
+            .also {
+                logger.audit(
+                    user,
+                    AuditEvent.DELETE_ORDER,
+                    mapOf("id" to "$orderId")
+                )
+            }
+    }
+
     @PostMapping("/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @ResponseStatus(HttpStatus.CREATED)
     fun uploadOrderFile(

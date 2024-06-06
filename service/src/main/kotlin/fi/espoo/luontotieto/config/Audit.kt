@@ -27,7 +27,8 @@ enum class AuditEvent {
     CREATE_USER,
     UPDATE_USER,
     UPDATE_USER_PASSWORD,
-    RESET_USER_PASSWORD
+    RESET_USER_PASSWORD,
+    DELETE_ORDER
 }
 
 fun KLogger.audit(
