@@ -147,6 +147,22 @@ const defaultReportDocuments = [
   {
     checked: false,
     documentType: ReportFileDocumentType.NORO_VIIVAT
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.LUONTOTYYPIT_ALUEET
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.EKOYHTEYDET_ALUEET
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.EKOYHTEYDET_VIIVAT
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.LAHTEET_PISTEET
   }
 ]
 
