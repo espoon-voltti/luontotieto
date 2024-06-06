@@ -21,6 +21,9 @@ object DocumentName {
     const val LEPAKKO = "Lepakko"
     const val LUMO = "Lumo"
     const val NORO = "Noro"
+    const val LUONTOTYYPIT = "Luontotyypit"
+    const val EKOYHTEYDET = "Ekoyhteydet"
+    const val LAHTEET = "Lähteet"
 }
 
 enum class DocumentType(
@@ -68,6 +71,18 @@ enum class DocumentType(
 
     @DatabaseValue("paikkatieto:noro_viivat")
     NORO_VIIVAT(TableDefinition.NORO_VIIVAT, DocumentName.NORO),
+
+    @DatabaseValue("paikkatieto:luontotyypit_alueet")
+    LUONTOTYYPIT_ALUEET(TableDefinition.LUONTOTYYPIT_ALUEET, DocumentName.LUONTOTYYPIT),
+
+    @DatabaseValue("paikkatieto:ekoyhteydet_alueet")
+    EKOYHTEYDET_ALUEET(TableDefinition.EKOYHTEYDET_ALUEET, DocumentName.EKOYHTEYDET),
+
+    @DatabaseValue("paikkatieto:ekoyhteydet_viivat")
+    EKOYHTEYDET_VIIVAT(TableDefinition.EKOYHTEYDET_VIIVAT, DocumentName.EKOYHTEYDET),
+
+    @DatabaseValue("paikkatieto:lahteet_pisteet")
+    LAHTEET_PISTEET(TableDefinition.LAHTEET_PISTEET, DocumentName.LAHTEET),
 
     @DatabaseValue("luontotieto:report")
     REPORT,
