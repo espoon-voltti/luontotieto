@@ -200,3 +200,6 @@ export const apiGetPlanNumbers = (): Promise<string[]> =>
 
 export const apiGetorderingUnits = (): Promise<string[]> =>
   apiClient.get<string[]>(`/orders/ordering-units`).then((res) => res.data)
+
+export const apiDeleteOrder = (id: string): Promise<void> =>
+  apiClient.delete<void>(`/orders/${id}`).then((res) => res.data)
