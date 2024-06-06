@@ -156,10 +156,9 @@ class OrderController {
             .inTransactionUnchecked { tx ->
                 val report = tx.getReportByOrderId(orderId, user)
                 val reportFiles = tx.getReportFiles(report.id)
-                if (reportFiles.isNotEmpty())
-                    {
-                        throw BadRequest("Tilausta ei voi poistaa koska selvitykseen on jo tallennettu tiedostoja")
-                    }
+                if (reportFiles.isNotEmpty()) {
+                    throw BadRequest("Tilausta ei voi poistaa koska selvitykseen on jo tallennettu tiedostoja")
+                }
                 val orderFiles = tx.getOrderFiles(orderId, user)
                 for (of in orderFiles) {
                     documentClient.delete(dataBucket, "$orderId/${of.id}")
