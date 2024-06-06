@@ -199,7 +199,7 @@ const filterReports = (
             ?.toString()
             .toLowerCase()
             .includes(searchQueryToLower) ||
-          report.order.reportDocumentsString
+          report.reportDocumentsString
             ?.toLowerCase()
             .includes(searchQueryToLower)) &&
         (assigneeLower

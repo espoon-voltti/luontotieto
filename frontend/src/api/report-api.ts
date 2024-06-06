@@ -91,6 +91,7 @@ export interface ReportDetails extends ReportInput {
   approved: boolean
   noObservations: ReportFileDocumentType[] | null
   order: Order
+  reportDocumentsString?: string
 }
 
 export interface ReportFileDetails extends ReportFileInput {
@@ -197,10 +198,7 @@ export const apiGetReports = (): Promise<ReportDetails[]> =>
 
       return {
         ...report,
-        order: {
-          ...report.order,
-          reportDocumentsString: reportApiDocumentsString
-        }
+        reportDocumentsString: reportApiDocumentsString
       }
     })
   )
