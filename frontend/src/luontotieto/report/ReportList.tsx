@@ -164,9 +164,13 @@ export const ReportList = React.memo(function ReportList() {
                 </td>
                 <td>{report.order?.planNumber?.toString() ?? '-'}</td>
                 <td>
-                  {report.order?.reportDocuments.map((r, index) => (
-                    <li key={index}>{getDocumentTypeTitle(r.documentType)}</li>
-                  ))}
+                  <ul>
+                    {report.order?.reportDocuments.map((r, index) => (
+                      <li key={index}>
+                        {getDocumentTypeTitle(r.documentType)}
+                      </li>
+                    ))}
+                  </ul>
                 </td>
                 <td>{report.order?.assignee}</td>
               </tr>
