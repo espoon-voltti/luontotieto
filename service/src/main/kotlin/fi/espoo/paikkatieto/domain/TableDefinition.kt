@@ -277,6 +277,7 @@ enum class TableDefinition(
         listOf(
             Column(name = "geom", kClass = Polygon::class),
             Column(name = "vuosi", kClass = Int::class),
+            Column(name = "havaitsija", kClass = String::class),
             Column(name = "nimi", kClass = String::class, isNullable = true),
             Column(
                 name = "luontotyyppi_paaryhma",
@@ -313,7 +314,6 @@ enum class TableDefinition(
         listOf(
             Column(name = "geom", kClass = Polygon::class),
             Column(name = "pvm", kClass = Date::class),
-            Column(name = "vuosi", kClass = Int::class),
             Column(name = "havaitsija", kClass = String::class),
             Column(
                 name = "laatu",
@@ -330,7 +330,6 @@ enum class TableDefinition(
         listOf(
             Column(name = "geom", kClass = LineString::class),
             Column(name = "pvm", kClass = Date::class),
-            Column(name = "vuosi", kClass = Int::class),
             Column(name = "havaitsija", kClass = String::class),
             Column(
                 name = "laatu",
@@ -347,7 +346,6 @@ enum class TableDefinition(
         listOf(
             Column(name = "geom", kClass = Point::class),
             Column(name = "pvm", kClass = Date::class),
-            Column(name = "vuosi", kClass = Int::class),
             Column(name = "havaitsija", kClass = String::class),
             Column(name = "tyyppi", kClass = String::class),
             Column(name = "lisatieto", kClass = String::class),
@@ -733,13 +731,13 @@ private const val SQL_INSERT_LUONTOTYYPIT_ALUEET =
         vuosi,
         havaitsija,
         nimi,
-        luintotyyppi_paaryhma,
+        luontotyyppi_paaryhma,
         luontotyyppi,
         uhanalaisuusluokka,
         edustavuus,
         kuvaus,
         lisatieto,
-        ominaislajit
+        ominaislajit,
         uhanalaiset_lajit,
         lahopuusto,
         lumo_luokka,
@@ -751,13 +749,13 @@ private const val SQL_INSERT_LUONTOTYYPIT_ALUEET =
         :vuosi,
         :havaitsija,
         :nimi,
-        :luintotyyppi_paaryhma::luontotyyppi_paaryhma,
+        :luontotyyppi_paaryhma::luontotyyppi_paaryhma,
         :luontotyyppi,
         :uhanalaisuusluokka::"IUCN_luokka",
         :edustavuus::edustavuus_luokka,
         :kuvaus,
         :lisatieto,
-        :ominaislajit
+        :ominaislajit,
         :uhanalaiset_lajit,
         :lahopuusto,
         :lumo_luokka::luontotyyppi_lumo_luokka,
@@ -772,7 +770,6 @@ private const val SQL_INSERT_EKOYHTEYDET_ALUEET =
     """
     INSERT INTO ekoyhteydet_alueet (
         pvm,
-        vuosi,
         havaitsija,
         laatu,
         lisatieto,
@@ -782,7 +779,6 @@ private const val SQL_INSERT_EKOYHTEYDET_ALUEET =
     ) 
     VALUES (
         :pvm,
-        :vuosi,
         :havaitsija,
         :laatu::yhteyden_laatu,
         :lisatieto,
@@ -797,7 +793,6 @@ private const val SQL_INSERT_EKOYHTEYDET_VIIVAT =
     """
     INSERT INTO ekoyhteydet_viivat (
         pvm,
-        vuosi,
         havaitsija,
         laatu,
         lisatieto,
@@ -807,7 +802,6 @@ private const val SQL_INSERT_EKOYHTEYDET_VIIVAT =
     ) 
     VALUES (
         :pvm,
-        :vuosi,
         :havaitsija,
         :laatu::yhteyden_laatu,
         :lisatieto,
@@ -820,9 +814,8 @@ private const val SQL_INSERT_EKOYHTEYDET_VIIVAT =
 
 private const val SQL_INSERT_LAHTEET_PISTEET =
     """
-    INSERT INTO ekoyhteydet_viivat (
+    INSERT INTO lahteet_pisteet (
         pvm,
-        vuosi,
         havaitsija,
         tyyppi,
         lisatieto,
@@ -832,7 +825,6 @@ private const val SQL_INSERT_LAHTEET_PISTEET =
     ) 
     VALUES (
         :pvm,
-        :vuosi,
         :havaitsija,
         :tyyppi,
         :lisatieto,
