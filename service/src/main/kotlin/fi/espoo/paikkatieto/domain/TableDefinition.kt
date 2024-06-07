@@ -34,15 +34,21 @@ data class Column(
                     value = null,
                     reason = GpkgValidationErrorReason.IS_NULL
                 )
-
             value != null &&
-                (!value::class.isSubclassOf(kClass) && value::class != kClass::class) ->
+                (!value::class.isSubclassOf(kClass) && value::class != kClass::class) -> {
+                val errorValue =
+                    if (kClass.isSubclassOf(Geometry::class)) {
+                        kClass.simpleName
+                    } else {
+                        value
+                    }
+
                 GpkgValidationError(
                     column = name,
-                    value = value,
+                    value = errorValue,
                     reason = GpkgValidationErrorReason.WRONG_TYPE
                 )
-
+            }
             else -> null
         }
 }
@@ -144,11 +150,7 @@ enum class TableDefinition(
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
-                Column(
-                    name = "IUCN_luokka",
-                    kClass = String::class,
-                    sqlType = "IUCN_luokka"
-                ),
+                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka"),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "paikan_nimi", kClass = String::class, isNullable = true),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
@@ -178,11 +180,7 @@ enum class TableDefinition(
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
-                Column(
-                    name = "IUCN_luokka",
-                    kClass = String::class,
-                    sqlType = "IUCN_luokka"
-                ),
+                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka"),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
                 Column(name = "laji_luokitus", kClass = String::class),
@@ -206,11 +204,7 @@ enum class TableDefinition(
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
-                Column(
-                    name = "IUCN_luokka",
-                    kClass = String::class,
-                    sqlType = "IUCN_luokka"
-                ),
+                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka"),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
                 Column(name = "laji_luokitus", kClass = String::class),
@@ -290,11 +284,7 @@ enum class TableDefinition(
                     kClass = String::class,
                     sqlType = "IUCN_luokka"
                 ),
-                Column(
-                    name = "edustavuus",
-                    kClass = String::class,
-                    sqlType = "edustavuus_luokka"
-                ),
+                Column(name = "edustavuus", kClass = String::class, sqlType = "edustavuus_luokka"),
                 Column(name = "kuvaus", kClass = String::class),
                 Column(name = "lisatieto", kClass = String::class),
                 Column(name = "ominaislajit", kClass = String::class),
@@ -315,11 +305,7 @@ enum class TableDefinition(
                 Column(name = "geom", kClass = Polygon::class),
                 Column(name = "pvm", kClass = Date::class),
                 Column(name = "havaitsija", kClass = String::class),
-                Column(
-                    name = "laatu",
-                    kClass = String::class,
-                    sqlType = "yhteyden_laatu"
-                ),
+                Column(name = "laatu", kClass = String::class, sqlType = "yhteyden_laatu"),
                 Column(name = "lisatieto", kClass = String::class),
             )
     ),
@@ -331,11 +317,7 @@ enum class TableDefinition(
                 Column(name = "geom", kClass = LineString::class),
                 Column(name = "pvm", kClass = Date::class),
                 Column(name = "havaitsija", kClass = String::class),
-                Column(
-                    name = "laatu",
-                    kClass = String::class,
-                    sqlType = "yhteyden_laatu"
-                ),
+                Column(name = "laatu", kClass = String::class, sqlType = "yhteyden_laatu"),
                 Column(name = "lisatieto", kClass = String::class),
             )
     ),

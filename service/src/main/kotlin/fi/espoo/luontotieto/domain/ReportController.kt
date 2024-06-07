@@ -4,6 +4,7 @@
 
 package fi.espoo.luontotieto.domain
 
+import fi.espoo.luontotieto.common.BadRequest
 import fi.espoo.luontotieto.common.EmailContent
 import fi.espoo.luontotieto.common.Emails
 import fi.espoo.luontotieto.common.NotFound
@@ -16,6 +17,7 @@ import fi.espoo.luontotieto.config.audit
 import fi.espoo.luontotieto.s3.MultipartDocument
 import fi.espoo.luontotieto.s3.S3DocumentService
 import fi.espoo.luontotieto.s3.checkFileContentType
+import fi.espoo.luontotieto.s3.checkFileExtension
 import fi.espoo.luontotieto.s3.getAndCheckFileName
 import fi.espoo.luontotieto.ses.Email
 import fi.espoo.luontotieto.ses.SESEmailClient
@@ -51,6 +53,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
+import java.io.IOException
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -90,6 +93,7 @@ class ReportController {
     ): ResponseEntity<List<GpkgValidationError>> {
         val dataBucket = bucketEnv.data
 
+        checkFileExtension(file, documentType)
         val fileName = getAndCheckFileName(file)
         val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
 
@@ -99,9 +103,15 @@ class ReportController {
             tableDefinition?.let { td ->
                 val tmpGpkgFile = kotlin.io.path.createTempFile(fileName)
                 file.transferTo(tmpGpkgFile)
-                GpkgReader(File(tmpGpkgFile.toUri()), td).use { reader ->
-                    reader.asSequence().flatMap { it.errors }.toList()
+                val gpkgReader: GpkgReader
+                try {
+                    gpkgReader = GpkgReader(File(tmpGpkgFile.toUri()), td)
+                } catch (e: IOException) {
+                    logger.error("Invalid GeoPackage file: ${file.originalFilename}", e)
+                    throw BadRequest("Invalid GeoPackage file: ${file.originalFilename}")
                 }
+
+                gpkgReader.use { reader -> reader.asSequence().flatMap { it.errors }.toList() }
             } ?: emptyList()
 
         if (errors.isEmpty()) {
@@ -377,8 +387,11 @@ class ReportController {
         val file = File.createTempFile(reportFile.fileName, "gpkg")
         file.writeBytes(document.bytes)
 
-        val reader = GpkgReader(file, tableDefinition)
-
-        return reader
+        try {
+            return GpkgReader(file, tableDefinition)
+        } catch (e: IOException) {
+            logger.error("Invalid GeoPackage file: ${reportFile.fileName}", e)
+            throw BadRequest("Invalid GeoPackage file: ${reportFile.fileName}")
+        }
     }
 }

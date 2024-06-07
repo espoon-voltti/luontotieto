@@ -8,7 +8,7 @@ import {
   apiApproveReport,
   apiPostReport,
   apiPutReport,
-  FileValidationErrorResponse,
+  ReportFileValidationErrorResponse,
   ReportFormInput
 } from 'api/report-api'
 import { hasOrdererRole, hasViewerRole, UserContext } from 'auth/UserContext'
@@ -21,12 +21,7 @@ import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
 import styled from 'styled-components'
 
 import { NotFound } from '../../shared/404'
-import {
-  FlexRight,
-  PageContainer,
-  SectionContainer,
-  VerticalGap
-} from '../../shared/layout'
+import { FlexRight, PageContainer, SectionContainer, VerticalGap } from '../../shared/layout'
 
 import { OrderDetails } from './OrderDetails'
 import { ReportForm } from './ReportForm'
@@ -42,7 +37,7 @@ interface EditProps {
 type Props = CreateProps | EditProps
 
 const StyledButton = styled(Button)`
-  margin-right: 20px;
+    margin-right: 20px;
 `
 
 export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
@@ -58,7 +53,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
 
   const [reportInput, setReportInput] = useState<ReportFormInput | null>(null)
   const [reportFileErrors, setReportFileErrors] = useState<
-    FileValidationErrorResponse[] | undefined
+    ReportFileValidationErrorResponse[] | undefined
   >(undefined)
 
   const { data: report, isLoading: isLoadingReport } = useGetReportQuery(id)
@@ -78,7 +73,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
           resolve: { action: () => setShowModal(null), label: 'Ok' }
         })
       },
-      onError: (error: FileValidationErrorResponse) =>
+      onError: (error: ReportFileValidationErrorResponse) =>
         setReportFileErrors([error])
     })
 
@@ -88,14 +83,22 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
       onSuccess: (_report) => {
         void queryClient.invalidateQueries({ queryKey: ['report', id] })
         void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+        setReportFileErrors([])
         setShowModal({
           title: 'Tiedot tallennettu',
           resolve: { action: () => setShowModal(null), label: 'Ok' }
         })
       },
-      onError: (error: FileValidationErrorResponse) =>
+      onError: (error: ReportFileValidationErrorResponse) => {
         setReportFileErrors([error])
+        setShowModal({
+          title: 'Tietojen tallennus epäonnistui',
+          resolve: { action: () => setShowModal(null), label: 'Sulje' }
+        })
+      }
     })
+
+  console.log(reportFiles)
 
   const { mutateAsync: approveReport, isPending: approving } = useMutation({
     mutationFn: apiApproveReport,
@@ -122,7 +125,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   }
 
   if (!report || !reportFiles) {
-    return <NotFound />
+    return <NotFound/>
   }
 
   const title =
@@ -137,15 +140,16 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   return (
     <>
       <PageContainer>
-        <BackNavigation text={title} navigationText="Etusivulle" />
+        <BackNavigation text={title} navigationText="Etusivulle"/>
         {report?.order && (
-          <OrderDetails order={report?.order} reportId={report.id} />
+          <OrderDetails order={report?.order} reportId={report.id}/>
         )}
-        <VerticalGap $size="m" />
+        <VerticalGap $size="m"/>
 
         <SectionContainer>
           {props.mode === 'EDIT' && report && reportFiles && (
             <ReportForm
+              key={report.updated.toString()}
               readOnly={userIsViewer}
               mode={props.mode}
               onChange={setReportInput}
@@ -164,8 +168,8 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
           )}
         </SectionContainer>
       </PageContainer>
-      <VerticalGap $size="XL" />
-      <VerticalGap $size="XL" />
+      <VerticalGap $size="XL"/>
+      <VerticalGap $size="XL"/>
       <Footer>
         <FlexRight style={{ height: '100%' }}>
           {userIsViewer ? (

@@ -38,6 +38,7 @@ export interface FileInputProps extends BaseProps {
   autoFocus?: boolean
   inputRef?: RefObject<HTMLInputElement>
   wrapperClassName?: string
+  accept?: string
 }
 
 const Wrapper = styled.div<{ $width: InputWidth | undefined }>`

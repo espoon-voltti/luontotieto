@@ -26,51 +26,77 @@ object DocumentName {
     const val LAHTEET = "Lähteet"
 }
 
+enum class FileExtension(val extension: String) {
+    PDF("pdf"),
+    GPKG("gpkg");
+
+    fun matches(extension: String): Boolean = extension == this.extension
+}
+
 enum class DocumentType(
     val tableDefinition: TableDefinition? = null,
-    val documentName: String? = null
+    val documentName: String? = null,
+    val fileExtension: FileExtension? = null
 ) : DatabaseEnum {
     @DatabaseValue("paikkatieto:liito_orava_pisteet")
-    LIITO_ORAVA_PISTEET(TableDefinition.LIITO_ORAVA_PISTEET, DocumentName.LIITO_ORAVA),
+    LIITO_ORAVA_PISTEET(
+        TableDefinition.LIITO_ORAVA_PISTEET,
+        DocumentName.LIITO_ORAVA,
+        FileExtension.GPKG
+    ),
 
     @DatabaseValue("paikkatieto:liito_orava_alueet")
-    LIITO_ORAVA_ALUEET(TableDefinition.LIITO_ORAVA_ALUEET, DocumentName.LIITO_ORAVA),
+    LIITO_ORAVA_ALUEET(
+        TableDefinition.LIITO_ORAVA_ALUEET,
+        DocumentName.LIITO_ORAVA,
+        FileExtension.GPKG
+    ),
 
     @DatabaseValue("paikkatieto:liito_orava_yhteysviivat")
-    LIITO_ORAVA_VIIVAT(TableDefinition.LIITO_ORAVA_YHTEYSVIIVAT, DocumentName.LIITO_ORAVA),
+    LIITO_ORAVA_VIIVAT(
+        TableDefinition.LIITO_ORAVA_YHTEYSVIIVAT,
+        DocumentName.LIITO_ORAVA,
+        FileExtension.GPKG
+    ),
 
     @DatabaseValue("paikkatieto:muut_huomioitavat_lajit_pisteet")
     MUUT_HUOMIOITAVAT_LAJIT_PISTEET(
         TableDefinition.MUUT_HUOMIOITAVAT_LAJIT_PISTEET,
-        DocumentName.MUUT_LAJIT
+        DocumentName.MUUT_LAJIT,
+        FileExtension.GPKG
     ),
 
     @DatabaseValue("paikkatieto:muut_huomioitavat_lajit_alueet")
     MUUT_HUOMIOITAVAT_LAJIT_ALUEET(
         TableDefinition.MUUT_HUOMIOITAVAT_LAJIT_ALUEET,
-        DocumentName.MUUT_LAJIT
+        DocumentName.MUUT_LAJIT,
+        FileExtension.GPKG
     ),
 
     @DatabaseValue("paikkatieto:muut_huomioitavat_lajit_viivat")
     MUUT_HUOMIOITAVAT_LAJIT_VIIVAT(
         TableDefinition.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT,
-        DocumentName.MUUT_LAJIT
+        DocumentName.MUUT_LAJIT,
+        FileExtension.GPKG
     ),
 
     @DatabaseValue("paikkatieto:aluerajaus_luontoselvitys")
-    ALUERAJAUS_LUONTOSELVITYS(TableDefinition.ALUERAJAUS_LUONTOSELVITYS),
+    ALUERAJAUS_LUONTOSELVITYS(
+        tableDefinition = TableDefinition.ALUERAJAUS_LUONTOSELVITYS,
+        fileExtension = FileExtension.GPKG
+    ),
 
     @DatabaseValue("paikkatieto:lepakko_viivat")
-    LEPAKKO_VIIVAT(TableDefinition.LEPAKKO_VIIVAT, DocumentName.LEPAKKO),
+    LEPAKKO_VIIVAT(TableDefinition.LEPAKKO_VIIVAT, DocumentName.LEPAKKO, FileExtension.GPKG),
 
     @DatabaseValue("paikkatieto:lepakko_alueet")
-    LEPAKKO_ALUEET(TableDefinition.LEPAKKO_ALUEET, DocumentName.LEPAKKO),
+    LEPAKKO_ALUEET(TableDefinition.LEPAKKO_ALUEET, DocumentName.LEPAKKO, FileExtension.GPKG),
 
     @DatabaseValue("paikkatieto:lumo_alueet")
-    LUMO_ALUEET(TableDefinition.LUMO_ALUEET, DocumentName.LUMO),
+    LUMO_ALUEET(TableDefinition.LUMO_ALUEET, DocumentName.LUMO, FileExtension.GPKG),
 
     @DatabaseValue("paikkatieto:noro_viivat")
-    NORO_VIIVAT(TableDefinition.NORO_VIIVAT, DocumentName.NORO),
+    NORO_VIIVAT(TableDefinition.NORO_VIIVAT, DocumentName.NORO, FileExtension.GPKG),
 
     @DatabaseValue("paikkatieto:luontotyypit_alueet")
     LUONTOTYYPIT_ALUEET(TableDefinition.LUONTOTYYPIT_ALUEET, DocumentName.LUONTOTYYPIT),
@@ -85,7 +111,7 @@ enum class DocumentType(
     LAHTEET_PISTEET(TableDefinition.LAHTEET_PISTEET, DocumentName.LAHTEET),
 
     @DatabaseValue("luontotieto:report")
-    REPORT,
+    REPORT(fileExtension = FileExtension.PDF),
 
     @DatabaseValue("luontotieto:other")
     OTHER;
@@ -210,5 +236,4 @@ fun Handle.deleteReportFile(
         .bind("fileId", fileId)
         .bind("reportId", reportId)
         .execute()
-        .also { if (it != 1) throw NotFound() }
 }

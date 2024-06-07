@@ -35,15 +35,25 @@ data class GpkgFeature(val columns: Map<String, Any?>, val errors: List<GpkgVali
 
 class GpkgReader(private val file: File, val tableDefinition: TableDefinition) :
     Iterator<GpkgFeature>, Closeable {
-    private val gpkg: GeoPackage = GeoPackage(file)
-    private val reader: SimpleFeatureReader
+    private lateinit var gpkg: GeoPackage
+    private var reader: SimpleFeatureReader
 
     init {
-        val featureEntry =
-            gpkg.features().firstOrNull()
-                ?: throw GpkgReaderException("Unable to find feature table ${file.name}")
-        logger.debug("Found feature table ${featureEntry.tableName} in file ${file.name}")
-        reader = gpkg.reader(featureEntry, null, null)
+        try {
+            gpkg = GeoPackage(file)
+            val featureEntry =
+                gpkg.features().firstOrNull()
+                    ?: throw GpkgReaderException("Unable to find feature table ${file.name}")
+            logger.debug("Found feature table ${featureEntry.tableName} in file ${file.name}")
+            reader = gpkg.reader(featureEntry, null, null)
+        } catch (e: IOException) {
+            try {
+                gpkg.close()
+            } catch (e: IOException) {
+                logger.error("Unable to close GeoPackage", e)
+            }
+            throw e
+        }
     }
 
     fun isValid(): Boolean {

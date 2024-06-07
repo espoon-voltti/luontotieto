@@ -17,12 +17,6 @@ import React from 'react'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import styled from 'styled-components'
 
-export interface SavedFile {
-  id: string
-  mediaType: string
-  fileName: string
-}
-
 export const fileIcon = (
   file: OrderFile | ReportFileDetails
 ): IconDefinition => {
@@ -55,6 +49,13 @@ const DownloadButton = styled.button`
   text-decoration: none;
 `
 
+const FileName = styled.div`
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  padding-right: 16px;
+`
+
 interface FileDownloadButtonProps {
   file: OrderFile | ReportFileDetails
   onClick: (fileId: string) => void
@@ -75,7 +76,7 @@ export default React.memo(function FileDownloadButton({
   return (
     <DownloadButton onClick={() => onClick(file.id)} data-qa={dataQa}>
       {icon && <FontAwesomeIcon icon={icon === true ? fileIcon(file) : icon} />}
-      <div>{text ?? file.fileName}</div>
+      <FileName title={text ?? file.fileName}>{text ?? file.fileName}</FileName>
       <InlineButton
         text="Poista"
         icon={faX}

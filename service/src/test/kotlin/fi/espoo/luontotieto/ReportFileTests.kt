@@ -101,7 +101,7 @@ class ReportFileTests : FullApplicationTest() {
     }
 
     @Test
-    fun `create report files - text document`() {
+    fun `create report files - pdf document`() {
         val createOrderResponse = createOrderAndReport(orderController)
         val response =
             controller.uploadReportFile(
@@ -109,9 +109,9 @@ class ReportFileTests : FullApplicationTest() {
                 reportId = createOrderResponse.reportId,
                 file =
                     MockMultipartFile(
-                        "selvitys.txt",
-                        "selvitys.txt",
-                        "text/plain",
+                        "selvitys.pdf",
+                        "selvitys.pdf",
+                        "application/pdf",
                         "TEST FILE CONTENT".toByteArray()
                     ),
                 documentType = DocumentType.REPORT,
@@ -127,9 +127,9 @@ class ReportFileTests : FullApplicationTest() {
             reportId = createOrderResponse.reportId,
             file =
                 MockMultipartFile(
-                    "lisatieto.txt",
-                    "lisatieto.txt",
-                    "text/plain",
+                    "lisatieto.pdf",
+                    "lisatieto.pdf",
+                    "application/pdf",
                     "MORE INFORMATION".toByteArray()
                 ),
             documentType = DocumentType.OTHER,
@@ -144,7 +144,7 @@ class ReportFileTests : FullApplicationTest() {
         val s3Doc =
             controller.documentClient.get(
                 controller.bucketEnv.data,
-                "${createOrderResponse.reportId}/${reportFileResponse.first { it.fileName == "selvitys.txt" }.id}"
+                "${createOrderResponse.reportId}/${reportFileResponse.first { it.fileName == "selvitys.pdf" }.id}"
             )
         assertEquals("TEST FILE CONTENT", String(s3Doc.bytes))
     }
