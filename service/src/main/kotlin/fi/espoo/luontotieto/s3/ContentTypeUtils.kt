@@ -24,7 +24,8 @@ fun checkFileExtension(
 ) {
     val fileExtension =
         file.originalFilename?.substringAfterLast(".") ?: throw BadRequest("File extension missing")
-    if (documentType.fileExtension != null && ".$fileExtension" != documentType.fileExtension) {
+
+    if (documentType.fileExtension?.matches(fileExtension) == false) {
         throw BadRequest("Invalid file extension")
     }
 }

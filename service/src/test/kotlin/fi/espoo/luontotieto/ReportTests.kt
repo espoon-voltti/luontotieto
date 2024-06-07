@@ -7,6 +7,7 @@ package fi.espoo.luontotieto
 import fi.espoo.luontotieto.common.BadRequest
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.domain.DocumentType
+import fi.espoo.luontotieto.domain.FileExtension
 import fi.espoo.luontotieto.domain.OrderController
 import fi.espoo.luontotieto.domain.OrderReportDocument
 import fi.espoo.luontotieto.domain.Report
@@ -260,7 +261,7 @@ class ReportTests : FullApplicationTest() {
                 description = "Original description",
                 reportDocuments =
                     DocumentType.entries.mapNotNull {
-                        if (it.fileExtension == ".gpkg") {
+                        if (it.fileExtension == FileExtension.GPKG) {
                             OrderReportDocument(description = it.name, it)
                         } else {
                             null
