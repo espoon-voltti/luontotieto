@@ -121,5 +121,4 @@ fun Handle.deleteOrderFile(
         .bind("fileId", fileId)
         .bind("orderId", orderId)
         .execute()
-        .also { if (it != 1) throw NotFound() }
 }

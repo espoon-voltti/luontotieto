@@ -4,6 +4,7 @@
 
 package fi.espoo.luontotieto
 
+import fi.espoo.luontotieto.common.BadRequest
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.OrderController
@@ -19,6 +20,7 @@ import java.io.File
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -207,8 +209,8 @@ class ReportTests : FullApplicationTest() {
             reportId = createOrderResponse.reportId,
             file =
                 MockMultipartFile(
-                    "luontoselvitysraportti.txt",
-                    "luontoselvitysraportti.txt",
+                    "luontoselvitysraportti.pdf",
+                    "luontoselvitysraportti.pdf",
                     "plain/text",
                     "LUONTOSELVITYSRAPORTTI".toByteArray()
                 ),
@@ -246,6 +248,45 @@ class ReportTests : FullApplicationTest() {
                 ),
                 data.selvitetytTiedot
             )
+        }
+    }
+
+    @Test
+    fun `test that uploading DocumentType_REPORT with extension txt throws error`() {
+        val createOrderResponse =
+            createOrderAndReport(
+                controller = orderController,
+                name = "Original name",
+                description = "Original description",
+                reportDocuments =
+                    DocumentType.entries.mapNotNull {
+                        if (it.fileExtension == ".gpkg") {
+                            OrderReportDocument(description = it.name, it)
+                        } else {
+                            null
+                        }
+                    }
+            )
+
+        for (documentType in DocumentType.entries) {
+            if (documentType == DocumentType.OTHER) {
+                continue
+            }
+            assertFailsWith(BadRequest::class) {
+                reportController.uploadReportFile(
+                    user = adminUser,
+                    reportId = createOrderResponse.reportId,
+                    file =
+                        MockMultipartFile(
+                            "text-file.txt",
+                            "text-file.txt",
+                            "plain/text",
+                            "This is a text file".toByteArray()
+                        ),
+                    description = null,
+                    documentType = documentType
+                )
+            }
         }
     }
 }

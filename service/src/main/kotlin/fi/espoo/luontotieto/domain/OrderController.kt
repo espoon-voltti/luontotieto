@@ -22,6 +22,8 @@ import fi.espoo.paikkatieto.domain.TableDefinition
 import fi.espoo.paikkatieto.domain.deleteAluerajausLuontoselvitystilaus
 import fi.espoo.paikkatieto.domain.insertPaikkatieto
 import fi.espoo.paikkatieto.reader.GpkgReader
+import fi.espoo.paikkatieto.reader.GpkgValidationError
+import fi.espoo.paikkatieto.reader.GpkgValidationErrorReason
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
@@ -30,6 +32,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -43,6 +46,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
+import java.io.IOException
 import java.net.URL
 import java.util.UUID
 
@@ -149,7 +153,7 @@ class OrderController {
         @RequestPart("file") file: MultipartFile,
         @RequestPart("description") description: String?,
         @RequestParam("documentType") documentType: OrderDocumentType
-    ) {
+    ): ResponseEntity<List<GpkgValidationError>> {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
 
         val dataBucket = bucketEnv.data
@@ -174,12 +178,33 @@ class OrderController {
                 val tableDefinition = TableDefinition.ALUERAJAUS_LUONTOSELVITYSTILAUS
                 val tmpGpkgFile = kotlin.io.path.createTempFile(fileName)
                 file.transferTo(tmpGpkgFile)
-                GpkgReader(File(tmpGpkgFile.toUri()), tableDefinition).use { reader ->
+                val gpkgReader: GpkgReader?
+                try {
+                    gpkgReader = GpkgReader(File(tmpGpkgFile.toUri()), tableDefinition)
+                } catch (e: IOException) {
+                    logger.error("Error reading GeoPackage file: $fileName", e)
+                    throw BadRequest("Error reading GeoPackage file: ${file.name}")
+                }
+
+                gpkgReader.use { reader ->
                     val data = reader.asSequence().toList()
+                    if (data.isEmpty()) {
+                        logger.error("No data in file: $fileName")
+                        return ResponseEntity.badRequest()
+                            .body(
+                                listOf(
+                                    GpkgValidationError(
+                                        "geom",
+                                        null,
+                                        GpkgValidationErrorReason.IS_NULL
+                                    )
+                                )
+                            )
+                    }
                     val errors = data.flatMap { it.errors }.toList()
                     if (errors.isNotEmpty()) {
                         logger.error(errors.toString())
-                        throw BadRequest("File does not conform the schema.")
+                        return ResponseEntity.badRequest().body(errors)
                     }
 
                     jdbi.inTransactionUnchecked { tx ->
@@ -213,6 +238,7 @@ class OrderController {
             jdbi.inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, id) }
             throw BadRequest("Error uploading file")
         }
+        return ResponseEntity.status(HttpStatus.CREATED).body(emptyList())
     }
 
     @GetMapping("/{orderId}/files")

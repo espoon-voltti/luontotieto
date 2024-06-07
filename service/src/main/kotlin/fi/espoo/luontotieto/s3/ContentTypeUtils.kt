@@ -5,6 +5,7 @@
 package fi.espoo.luontotieto.s3
 
 import fi.espoo.luontotieto.common.BadRequest
+import fi.espoo.luontotieto.domain.DocumentType
 import org.springframework.web.multipart.MultipartFile
 import java.io.InputStream
 
@@ -16,3 +17,14 @@ fun checkFileContentType(file: InputStream): String {
 }
 
 fun getAndCheckFileName(file: MultipartFile) = (file.originalFilename?.takeIf { it.isNotBlank() } ?: throw BadRequest("Filename missing"))
+
+fun checkFileExtension(
+    file: MultipartFile,
+    documentType: DocumentType
+) {
+    val fileExtension =
+        file.originalFilename?.substringAfterLast(".") ?: throw BadRequest("File extension missing")
+    if (documentType.fileExtension != null && ".$fileExtension" != documentType.fileExtension) {
+        throw BadRequest("Invalid file extension")
+    }
+}
