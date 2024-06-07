@@ -2,8 +2,11 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { OrderFileDocumentType } from 'api/order-api'
-import { FileValidationError, ReportFileDocumentType } from 'api/report-api'
+import { OrderFileDocumentType, OrderFileValidationError } from 'api/order-api'
+import {
+  ReportFileDocumentType,
+  ReportFileValidationError
+} from 'api/report-api'
 import classNames from 'classnames'
 import React, { useEffect, useState } from 'react'
 import { InputField, InputFieldUnderRow } from 'shared/form/InputField'
@@ -37,16 +40,21 @@ export interface FileInputData {
 interface FileInputProps<T> {
   documentType: T
   data: FileInputData
-  errors?: FileValidationError[]
+  errors?: ReportFileValidationError[] | OrderFileValidationError[] | string
   onChange: (data: FileInputData & { noObservation: boolean }) => void
   showTitle?: boolean
   readOnly?: boolean
   noObservation?: boolean
+  accept?: string
 }
 
-const fileValidationErrorToMessage = (error: FileValidationError): string => {
+const fileValidationErrorToMessage = (
+  error: ReportFileValidationError | OrderFileValidationError
+): string => {
   if (error.reason === 'IS_NULL') {
     return `${error.column}: tyhjä arvo ei sallittu`
+  } else if (error.reason === 'WRONG_TYPE') {
+    return `${error.column}: väärä tietotyyppi`
   }
   return `${error.column}:  ${error.reason}`
 }
@@ -74,7 +82,8 @@ export const FileInput = <
   errors,
   noObservation = false,
   showTitle = true,
-  readOnly = false
+  readOnly = false,
+  accept
 }: FileInputProps<T>) => {
   const [file, setFile] = useState(data.file ?? null)
   const [description, setDescription] = useDebouncedState(data.description)
@@ -90,16 +99,22 @@ export const FileInput = <
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file, description, noObs])
 
-  const errorMessage =
-    errors && errors.length > 0
-      ? {
-          text: [
-            'Tiedosto sisältää seuraavat virheet:',
-            ...errors.map((e) => fileValidationErrorToMessage(e))
-          ],
-          status: 'warning' as const
-        }
-      : undefined
+  const errorMessage = errors
+    ? typeof errors === 'string'
+      ? { text: [errors], status: 'warning' as const }
+      : errors.length > 0
+        ? {
+            text: [
+              'Tiedosto sisältää seuraavat virheet:',
+              ...errors.map((e) => fileValidationErrorToMessage(e))
+            ],
+            status: 'warning' as const
+          }
+        : {
+            text: ['Tiedoston tallennus epäonnistui'],
+            status: 'warning' as const
+          }
+    : undefined
 
   const showNoObservationCheckBox = isReportFileNatureDocument(documentType)
 
@@ -130,6 +145,7 @@ export const FileInput = <
               const file = fileList?.[0]
               file && setFile(file)
             }}
+            accept={accept}
           />
         </LabeledInput>
 

@@ -9,7 +9,12 @@ import {
   useGetOrderPlanNumbersQuery,
   useGetOrderQuery
 } from 'api/hooks/orders'
-import { apiPostOrder, apiPutOrder, OrderFormInput } from 'api/order-api'
+import {
+  apiPostOrder,
+  apiPutOrder,
+  OrderFileValidationErrorResponse,
+  OrderFormInput
+} from 'api/order-api'
 import React, { useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
@@ -57,6 +62,10 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
   const [orderInput, setOrderInput] = useState<OrderFormInput | null>(null)
 
+  const [orderFileErrors, setOrderFileErrors] = useState<
+    OrderFileValidationErrorResponse[]
+  >([])
+
   const { mutateAsync: createOrderMutation, isPending: savingOrder } =
     useMutation({
       mutationFn: apiPostOrder,
@@ -95,6 +104,19 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             label: 'Ok'
           }
         })
+      },
+      onError: (error: OrderFileValidationErrorResponse | null) => {
+        console.error('Error updating order', error)
+        error && setOrderFileErrors([error])
+        setShowModal({
+          title: 'Tilauksen päivitys epäonnistui',
+          resolve: {
+            action: () => {
+              setShowModal(null)
+            },
+            label: 'Ok'
+          }
+        })
       }
     })
 
@@ -123,21 +145,25 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
         <VerticalGap $size="s" />
         {props.mode == 'CREATE' && (
           <OrderForm
+            key={order?.updated.toString()}
             mode="CREATE"
             onChange={setOrderInput}
             planNumbers={planNumbers ?? []}
             orderingUnits={orderingUnits ?? []}
+            errors={orderFileErrors}
           />
         )}
 
         {props.mode == 'EDIT' && order && orderFiles && (
           <OrderForm
+            key={order.updated.toString()}
             mode="EDIT"
             order={order}
             orderFiles={orderFiles}
             onChange={setOrderInput}
             planNumbers={planNumbers ?? []}
             orderingUnits={orderingUnits ?? []}
+            errors={orderFileErrors}
           />
         )}
       </PageContainer>

@@ -5,10 +5,10 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { OrderReportDocumentInput } from 'api/order-api'
 import {
-  FileValidationErrorResponse,
   ReportDetails,
   ReportFileDetails,
   ReportFileDocumentType,
+  ReportFileValidationErrorResponse,
   ReportFormInput
 } from 'api/report-api'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -29,7 +29,7 @@ const StyledInlineButton = styled(InlineButton)`
 interface CreateProps {
   mode: 'CREATE'
   onChange: (validInput: ReportFormInput | null) => void
-  saveErrors?: FileValidationErrorResponse[]
+  saveErrors?: ReportFileValidationErrorResponse[]
   readOnly: boolean
 }
 
@@ -38,7 +38,7 @@ interface EditProps {
   report: ReportDetails
   reportFiles: ReportFileDetails[]
   onChange: (validInput: ReportFormInput | null) => void
-  saveErrors?: FileValidationErrorResponse[]
+  saveErrors?: ReportFileValidationErrorResponse[]
   readOnly: boolean
 }
 
@@ -64,6 +64,19 @@ interface ReportFileInputElementExisting {
 type ReportFileInputElement =
   | ReportFileInputElementNew
   | ReportFileInputElementExisting
+
+function getAcceptedFileTypes(
+  documentType: ReportFileDocumentType
+): string | undefined {
+  switch (documentType) {
+    case ReportFileDocumentType.REPORT:
+      return '.pdf'
+    case ReportFileDocumentType.OTHER:
+      return undefined
+    default:
+      return '.gpkg'
+  }
+}
 
 function createFileInputs(
   reportFiles: ReportFileDetails[],
@@ -306,13 +319,14 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
                 (error) => error.documentType === fInput.documentType
               )
             : undefined
+
           switch (fInput.type) {
             case 'NEW':
               return (
                 <FileInput
                   readOnly={readOnly}
                   documentType={fInput.documentType}
-                  key={fInput.documentType + index}
+                  key={fInput.id}
                   data={{
                     description: fInput.userDescription,
                     file: fInput.file,
@@ -325,13 +339,14 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
                       documentType: fInput.documentType
                     })
                   }}
+                  accept={getAcceptedFileTypes(fInput.documentType)}
                   errors={documentSaveError?.errors}
                 />
               )
             case 'EXISTING':
               return (
                 <ExistingFile
-                  key={fInput.documentType + index}
+                  key={fInput.details.id}
                   data={{
                     type: 'REPORT',
                     file: fInput.details,

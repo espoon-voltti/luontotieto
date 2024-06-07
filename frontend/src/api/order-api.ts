@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { apiClient } from 'api-client'
+import { AxiosError } from 'axios'
 import { JsonOf } from 'shared/api-utils'
 
 import { ReportFileDocumentType } from './report-api'
@@ -57,6 +58,18 @@ export interface OrderReportDocument {
 export enum OrderFileDocumentType {
   ORDER_INFO = 'ORDER_INFO',
   ORDER_AREA = 'ORDER_AREA'
+}
+
+export interface OrderFileValidationError {
+  column: string
+  value: null
+  reason: string
+}
+
+export interface OrderFileValidationErrorResponse {
+  documentType: OrderFileDocumentType
+  id: string
+  errors: OrderFileValidationError[] | string
 }
 
 export type OrderReportDocumentInput = Pick<OrderReportDocument, 'documentType'>
@@ -120,6 +133,7 @@ interface OrderFileInput {
   description: string
   documentType: OrderFileDocumentType
   file: File
+  id: string
 }
 
 export interface OrderFile extends OrderFileInput {
@@ -133,13 +147,35 @@ export interface OrderFile extends OrderFileInput {
   orderId: string
 }
 
-const apiPostOrderFile = (id: string, file: OrderFileInput): Promise<void> => {
+const apiPostOrderFile = async (
+  id: string,
+  file: OrderFileInput
+): Promise<void> => {
   const formData = new FormData()
   formData.append('file', file.file)
   formData.append('description', file.description)
   formData.append('documentType', OrderFileDocumentType[file.documentType])
 
-  return apiClient.postForm(`/orders/${id}/files`, formData)
+  await apiClient
+    .postForm(`/orders/${id}/files`, formData)
+    .catch((error: AxiosError) => {
+      if (error.response?.status === 400) {
+        const errorResponse = {
+          documentType: file.documentType,
+          id: file.id,
+          errors: error?.response?.data
+        } as OrderFileValidationErrorResponse
+        return Promise.reject(errorResponse)
+      } else if (error.response?.status === 409) {
+        const errorResponse = {
+          documentType: file.documentType,
+          id: file.id,
+          errors: 'Tiedostonimi on jo olemassa'
+        } as OrderFileValidationErrorResponse
+        return Promise.reject(errorResponse)
+      }
+      return Promise.reject(null)
+    })
 }
 
 const apiDeleteOrderFile = (orderId: string, fileId: string): Promise<void> =>

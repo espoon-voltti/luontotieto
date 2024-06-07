@@ -7,6 +7,7 @@ import {
   Order,
   OrderFile,
   OrderFileDocumentType,
+  OrderFileValidationErrorResponse,
   OrderFormInput,
   OrderReportDocumentInput
 } from 'api/order-api'
@@ -42,6 +43,7 @@ interface CreateProps {
   onChange: (validInput: OrderFormInput | null) => void
   planNumbers: string[]
   orderingUnits: string[]
+  errors: OrderFileValidationErrorResponse[]
 }
 
 interface EditProps {
@@ -51,6 +53,7 @@ interface EditProps {
   onChange: (validInput: OrderFormInput | null) => void
   planNumbers: string[]
   orderingUnits: string[]
+  errors: OrderFileValidationErrorResponse[]
 }
 
 type Props = CreateProps | EditProps
@@ -79,22 +82,40 @@ type OrderFileInputElement =
   | OrderFileInputElementExisting
 
 function createFileInputs(orderFiles: OrderFile[]): OrderFileInputElement[] {
-  if (orderFiles.length > 0) {
-    return orderFiles.map((orderFile) => ({
-      documentType: orderFile.documentType,
-      type: 'EXISTING',
-      orderFile
-    }))
-  }
-
-  return orderFileTypes.map((documentType) => {
+  const files = orderFileTypes.map((documentType) => {
     const orderFile = orderFiles.find(
       (file) => file.documentType === documentType
     )
     return orderFile
-      ? { documentType, type: 'EXISTING', orderFile }
-      : { documentType, type: 'NEW', description: '', file: null, id: uuidv4() }
+      ? ({
+          documentType,
+          type: 'EXISTING',
+          orderFile
+        } as OrderFileInputElementExisting)
+      : ({
+          documentType,
+          type: 'NEW',
+          description: '',
+          file: null,
+          id: uuidv4()
+        } as OrderFileInputElementNew)
   })
+
+  const additionalFiles = orderFiles
+    .filter(
+      (file) =>
+        !files.some((f) => f.type === 'EXISTING' && f.orderFile.id === file.id)
+    )
+    .map(
+      (orderFile) =>
+        ({
+          documentType: orderFile.documentType,
+          type: 'EXISTING',
+          orderFile
+        }) as OrderFileInputElementExisting
+    )
+
+  return [...files, ...additionalFiles]
 }
 
 function filesAreValid(fileInputs: OrderFileInputElement[]): boolean {
@@ -360,7 +381,8 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               {
                 description: e.description,
                 documentType: e.documentType,
-                file: e.file
+                file: e.file,
+                id: e.id
               }
             ]
           : []
@@ -582,6 +604,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                   documentType: orderAreaFile.documentType
                 })
               }}
+              errors={
+                props.errors.find((error) => error.id === orderAreaFile.id)
+                  ?.errors
+              }
             />
           )}
           {orderAreaFile && orderAreaFile.type === 'EXISTING' && (
@@ -617,6 +643,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                         documentType: fInput.documentType
                       })
                     }}
+                    errors={
+                      props.errors.find((error) => error.id === fInput.id)
+                        ?.errors
+                    }
                   />
                 )
               case 'EXISTING':
