@@ -36,7 +36,7 @@ data class Column(
                 )
 
             value != null &&
-                    (!value::class.isSubclassOf(kClass) && value::class != kClass::class) ->
+                (!value::class.isSubclassOf(kClass) && value::class != kClass::class) ->
                 GpkgValidationError(
                     column = name,
                     value = value,
@@ -66,290 +66,290 @@ enum class TableDefinition(
         layerName = "liito_orava_pisteet",
         sqlInsertStatement = SQL_INSERT_LIITO_ORAVA_PISTEET,
         columns =
-        listOf(
-            Column(name = "geom", kClass = Point::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(name = "puulaji", kClass = String::class),
-            Column(name = "halkaisija", kClass = Int::class),
-            Column(name = "papanamaara", kClass = Int::class),
-            Column(name = "pesa", kClass = Boolean::class),
-            Column(
-                name = "pesatyyppi",
-                kClass = String::class,
-                sqlType = "liito_orava_pesatyyppi"
-            ),
-            Column(name = "pesankorkeus", kClass = Int::class),
-            Column(name = "lisatieto", kClass = String::class, isNullable = true),
-            Column(name = "kunta", kClass = Int::class, isNullable = true),
-            Column(
-                name = "tarkkuus",
-                kClass = String::class,
-                sqlType = "luontotieto_mittaustyyppi"
+            listOf(
+                Column(name = "geom", kClass = Point::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "puulaji", kClass = String::class),
+                Column(name = "halkaisija", kClass = Int::class),
+                Column(name = "papanamaara", kClass = Int::class),
+                Column(name = "pesa", kClass = Boolean::class),
+                Column(
+                    name = "pesatyyppi",
+                    kClass = String::class,
+                    sqlType = "liito_orava_pesatyyppi"
+                ),
+                Column(name = "pesankorkeus", kClass = Int::class),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(name = "kunta", kClass = Int::class, isNullable = true),
+                Column(
+                    name = "tarkkuus",
+                    kClass = String::class,
+                    sqlType = "luontotieto_mittaustyyppi"
+                )
             )
-        )
     ),
     LIITO_ORAVA_ALUEET(
         layerName = "liito_orava_alueet",
         sqlInsertStatement = SQL_INSERT_LIITO_ORAVA_ALUEET,
         columns =
-        listOf(
-            Column(name = "geom", kClass = Polygon::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(
-                name = "aluetyyppi",
-                kClass = String::class,
-                sqlType = "liito_orava_aluetyyppi"
-            ),
-            Column(name = "aluekuvaus", kClass = String::class, isNullable = true),
-            Column(name = "lisatieto", kClass = String::class, isNullable = true),
-            Column(name = "kunta", kClass = Int::class, isNullable = true),
-            Column(
-                name = "tarkkuus",
-                kClass = String::class,
-                sqlType = "luontotieto_mittaustyyppi"
+            listOf(
+                Column(name = "geom", kClass = Polygon::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(
+                    name = "aluetyyppi",
+                    kClass = String::class,
+                    sqlType = "liito_orava_aluetyyppi"
+                ),
+                Column(name = "aluekuvaus", kClass = String::class, isNullable = true),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(name = "kunta", kClass = Int::class, isNullable = true),
+                Column(
+                    name = "tarkkuus",
+                    kClass = String::class,
+                    sqlType = "luontotieto_mittaustyyppi"
+                )
             )
-        )
     ),
     LIITO_ORAVA_YHTEYSVIIVAT(
         layerName = "liito_orava_yhteysviivat",
         sqlInsertStatement = SQL_INSERT_LIITO_ORAVA_YHTEYSVIIVAT,
         columns =
-        listOf(
-            Column(name = "geom", kClass = LineString::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(name = "laatu", kClass = String::class, sqlType = "liito_orava_aluetyyppi"),
-            Column(name = "lisatieto", kClass = String::class, isNullable = true),
-            Column(name = "kunta", kClass = Int::class, isNullable = true),
-            Column(
-                name = "tarkkuus",
-                kClass = String::class,
-                sqlType = "luontotieto_mittaustyyppi"
+            listOf(
+                Column(name = "geom", kClass = LineString::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "laatu", kClass = String::class, sqlType = "liito_orava_aluetyyppi"),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(name = "kunta", kClass = Int::class, isNullable = true),
+                Column(
+                    name = "tarkkuus",
+                    kClass = String::class,
+                    sqlType = "luontotieto_mittaustyyppi"
+                )
             )
-        )
     ),
     MUUT_HUOMIOITAVAT_LAJIT_PISTEET(
         layerName = "muut_huomioitavat_lajit_pisteet",
         sqlInsertStatement = SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_PISTEET,
         columns =
-        listOf(
-            Column(name = "geom", kClass = Point::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(
-                name = "elioryhma",
-                kClass = String::class,
-                sqlType = "muut_huomioitavat_lajit_elioryhma"
-            ),
-            Column(name = "tieteellinen_nimi", kClass = String::class),
-            Column(name = "suomenkielinen_nimi", kClass = String::class),
-            Column(
-                name = "IUCN_luokka",
-                kClass = String::class,
-                sqlType = "muut_huomioitavat_lajit_IUCN_luokka"
-            ),
-            Column(name = "direktiivi", kClass = String::class),
-            Column(name = "paikan_nimi", kClass = String::class, isNullable = true),
-            Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
-            Column(name = "koordinaatti_tarkkuus", kClass = Double::class, isNullable = true),
-            Column(
-                name = "tarkkuus",
-                kClass = String::class,
-                sqlType = "luontotieto_mittaustyyppi"
-            ),
-            Column(name = "yksilo_maara", kClass = Int::class),
-            Column(name = "yksikko", kClass = String::class, isNullable = true),
-            Column(name = "lisatieto", kClass = String::class, isNullable = true),
-            Column(name = "havaitsija", kClass = String::class)
-        )
+            listOf(
+                Column(name = "geom", kClass = Point::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(
+                    name = "elioryhma",
+                    kClass = String::class,
+                    sqlType = "muut_huomioitavat_lajit_elioryhma"
+                ),
+                Column(name = "tieteellinen_nimi", kClass = String::class),
+                Column(name = "suomenkielinen_nimi", kClass = String::class),
+                Column(
+                    name = "IUCN_luokka",
+                    kClass = String::class,
+                    sqlType = "muut_huomioitavat_lajit_IUCN_luokka"
+                ),
+                Column(name = "direktiivi", kClass = String::class),
+                Column(name = "paikan_nimi", kClass = String::class, isNullable = true),
+                Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
+                Column(name = "koordinaatti_tarkkuus", kClass = Double::class, isNullable = true),
+                Column(
+                    name = "tarkkuus",
+                    kClass = String::class,
+                    sqlType = "luontotieto_mittaustyyppi"
+                ),
+                Column(name = "yksilo_maara", kClass = Int::class),
+                Column(name = "yksikko", kClass = String::class, isNullable = true),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(name = "havaitsija", kClass = String::class)
+            )
     ),
     MUUT_HUOMIOITAVAT_LAJIT_VIIVAT(
         layerName = "muut_huomioitavat_lajit_viivat",
         sqlInsertStatement = SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_VIIVAT,
         columns =
-        listOf(
-            Column(name = "geom", kClass = LineString::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(
-                name = "elioryhma",
-                kClass = String::class,
-                sqlType = "muut_huomioitavat_lajit_elioryhma"
-            ),
-            Column(name = "tieteellinen_nimi", kClass = String::class),
-            Column(name = "suomenkielinen_nimi", kClass = String::class),
-            Column(
-                name = "IUCN_luokka",
-                kClass = String::class,
-                sqlType = "muut_huomioitavat_lajit_IUCN_luokka"
-            ),
-            Column(name = "direktiivi", kClass = String::class),
-            Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
-            Column(name = "laji_luokitus", kClass = String::class),
-            // Do not write pituus to DB. Keep it only in the template.
-            Column(name = "pituus", kClass = Double::class, isNullable = true),
-            Column(name = "lisatieto", kClass = String::class, isNullable = true),
-            Column(name = "havaitsija", kClass = String::class)
-        )
+            listOf(
+                Column(name = "geom", kClass = LineString::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(
+                    name = "elioryhma",
+                    kClass = String::class,
+                    sqlType = "muut_huomioitavat_lajit_elioryhma"
+                ),
+                Column(name = "tieteellinen_nimi", kClass = String::class),
+                Column(name = "suomenkielinen_nimi", kClass = String::class),
+                Column(
+                    name = "IUCN_luokka",
+                    kClass = String::class,
+                    sqlType = "muut_huomioitavat_lajit_IUCN_luokka"
+                ),
+                Column(name = "direktiivi", kClass = String::class),
+                Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
+                Column(name = "laji_luokitus", kClass = String::class),
+                // Do not write pituus to DB. Keep it only in the template.
+                Column(name = "pituus", kClass = Double::class, isNullable = true),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(name = "havaitsija", kClass = String::class)
+            )
     ),
     MUUT_HUOMIOITAVAT_LAJIT_ALUEET(
         layerName = "muut_huomioitavat_lajit_alueet",
         sqlInsertStatement = SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_ALUEET,
         columns =
-        listOf(
-            Column(name = "geom", kClass = Polygon::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(
-                name = "elioryhma",
-                kClass = String::class,
-                sqlType = "muut_huomioitavat_lajit_elioryhma"
-            ),
-            Column(name = "tieteellinen_nimi", kClass = String::class),
-            Column(name = "suomenkielinen_nimi", kClass = String::class),
-            Column(
-                name = "IUCN_luokka",
-                kClass = String::class,
-                sqlType = "muut_huomioitavat_lajit_IUCN_luokka"
-            ),
-            Column(name = "direktiivi", kClass = String::class),
-            Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
-            Column(name = "laji_luokitus", kClass = String::class),
-            Column(name = "yksilo_maara", kClass = Int::class, isNullable = true),
-            Column(name = "yksikko", kClass = String::class, isNullable = true),
-            // Do not write pinta_ala to DB. Keep it only in the template.
-            Column(name = "pinta_ala", kClass = Double::class, isNullable = true),
-            Column(name = "lisatieto", kClass = String::class, isNullable = true),
-            Column(name = "havaitsija", kClass = String::class)
-        )
+            listOf(
+                Column(name = "geom", kClass = Polygon::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(
+                    name = "elioryhma",
+                    kClass = String::class,
+                    sqlType = "muut_huomioitavat_lajit_elioryhma"
+                ),
+                Column(name = "tieteellinen_nimi", kClass = String::class),
+                Column(name = "suomenkielinen_nimi", kClass = String::class),
+                Column(
+                    name = "IUCN_luokka",
+                    kClass = String::class,
+                    sqlType = "muut_huomioitavat_lajit_IUCN_luokka"
+                ),
+                Column(name = "direktiivi", kClass = String::class),
+                Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
+                Column(name = "laji_luokitus", kClass = String::class),
+                Column(name = "yksilo_maara", kClass = Int::class, isNullable = true),
+                Column(name = "yksikko", kClass = String::class, isNullable = true),
+                // Do not write pinta_ala to DB. Keep it only in the template.
+                Column(name = "pinta_ala", kClass = Double::class, isNullable = true),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(name = "havaitsija", kClass = String::class)
+            )
     ),
     LEPAKKO_VIIVAT(
         layerName = "lepakko_viivat",
         sqlInsertStatement = SQL_INSERT_LEPAKKO_VIIVAT,
         columns =
-        listOf(
-            Column(name = "geom", kClass = LineString::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(name = "kuvaus", kClass = String::class),
-            Column(name = "lisatieto", kClass = String::class, isNullable = true)
-        )
+            listOf(
+                Column(name = "geom", kClass = LineString::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "kuvaus", kClass = String::class),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+            )
     ),
     LEPAKKO_ALUEET(
         layerName = "lepakko_alueet",
         sqlInsertStatement = SQL_INSERT_LEPAKKO_ALUEET,
         columns =
-        listOf(
-            Column(name = "geom", kClass = Polygon::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(name = "luokka", kClass = String::class, sqlType = "lepakko_luokka"),
-            Column(name = "lisatieto", kClass = String::class, isNullable = true)
-        )
+            listOf(
+                Column(name = "geom", kClass = Polygon::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "luokka", kClass = String::class, sqlType = "lepakko_luokka"),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+            )
     ),
     LUMO_ALUEET(
         layerName = "lumo_alueet",
         sqlInsertStatement = SQL_INSERT_LUMO_ALUEET,
         columns =
-        listOf(
-            Column(name = "geom", kClass = Polygon::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(name = "nimi", kClass = String::class, isNullable = true),
-            Column(name = "lumo_luokka", kClass = String::class, sqlType = "lumo_luokka"),
-            Column(name = "lisatieto", kClass = String::class, isNullable = true)
-        )
+            listOf(
+                Column(name = "geom", kClass = Polygon::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "nimi", kClass = String::class, isNullable = true),
+                Column(name = "lumo_luokka", kClass = String::class, sqlType = "lumo_luokka"),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+            )
     ),
     NORO_VIIVAT(
         layerName = "noro_viivat",
         sqlInsertStatement = SQL_INSERT_NORO_VIIVAT,
         columns =
-        listOf(
-            Column(name = "geom", kClass = LineString::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(name = "lisatieto", kClass = String::class, isNullable = true)
-        )
+            listOf(
+                Column(name = "geom", kClass = LineString::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+            )
     ),
     LUONTOTYYPIT_ALUEET(
         layerName = "luontotyypit_alueet",
         sqlInsertStatement = SQL_INSERT_LUONTOTYYPIT_ALUEET,
         columns =
-        listOf(
-            Column(name = "geom", kClass = Polygon::class),
-            Column(name = "vuosi", kClass = Int::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(name = "nimi", kClass = String::class, isNullable = true),
-            Column(
-                name = "luontotyyppi_paaryhma",
-                kClass = String::class,
-                sqlType = "luontotyyppi_paaryhma"
-            ),
-            Column(name = "luontotyyppi", kClass = String::class),
-            Column(
-                name = "uhanalaisuusluokka",
-                kClass = String::class,
-                sqlType = "IUCN_luokka"
-            ),
-            Column(
-                name = "edustavuus",
-                kClass = String::class,
-                sqlType = "edustavuus_luokka"
-            ),
-            Column(name = "kuvaus", kClass = String::class),
-            Column(name = "lisatieto", kClass = String::class),
-            Column(name = "ominaislajit", kClass = String::class),
-            Column(name = "uhanalaiset_lajit", kClass = String::class, isNullable = true),
-            Column(name = "lahopuusto", kClass = String::class),
-            Column(
-                name = "lumo_luokka",
-                kClass = String::class,
-                sqlType = "luontotyyppi_lumo_luokka"
-            ),
-        )
+            listOf(
+                Column(name = "geom", kClass = Polygon::class),
+                Column(name = "vuosi", kClass = Int::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "nimi", kClass = String::class, isNullable = true),
+                Column(
+                    name = "luontotyyppi_paaryhma",
+                    kClass = String::class,
+                    sqlType = "luontotyyppi_paaryhma"
+                ),
+                Column(name = "luontotyyppi", kClass = String::class),
+                Column(
+                    name = "uhanalaisuusluokka",
+                    kClass = String::class,
+                    sqlType = "IUCN_luokka"
+                ),
+                Column(
+                    name = "edustavuus",
+                    kClass = String::class,
+                    sqlType = "edustavuus_luokka"
+                ),
+                Column(name = "kuvaus", kClass = String::class),
+                Column(name = "lisatieto", kClass = String::class),
+                Column(name = "ominaislajit", kClass = String::class),
+                Column(name = "uhanalaiset_lajit", kClass = String::class, isNullable = true),
+                Column(name = "lahopuusto", kClass = String::class),
+                Column(
+                    name = "lumo_luokka",
+                    kClass = String::class,
+                    sqlType = "luontotyyppi_lumo_luokka"
+                ),
+            )
     ),
     EKOYHTEYDET_ALUEET(
         layerName = "ekoyhteydet_alueet",
         sqlInsertStatement = SQL_INSERT_EKOYHTEYDET_ALUEET,
         columns =
-        listOf(
-            Column(name = "geom", kClass = Polygon::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(
-                name = "laatu",
-                kClass = String::class,
-                sqlType = "yhteyden_laatu"
-            ),
-            Column(name = "lisatieto", kClass = String::class),
-        )
+            listOf(
+                Column(name = "geom", kClass = Polygon::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(
+                    name = "laatu",
+                    kClass = String::class,
+                    sqlType = "yhteyden_laatu"
+                ),
+                Column(name = "lisatieto", kClass = String::class),
+            )
     ),
     EKOYHTEYDET_VIIVAT(
         layerName = "ekoyhteydet_viivat",
         sqlInsertStatement = SQL_INSERT_EKOYHTEYDET_VIIVAT,
         columns =
-        listOf(
-            Column(name = "geom", kClass = LineString::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(
-                name = "laatu",
-                kClass = String::class,
-                sqlType = "yhteyden_laatu"
-            ),
-            Column(name = "lisatieto", kClass = String::class),
-        )
+            listOf(
+                Column(name = "geom", kClass = LineString::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(
+                    name = "laatu",
+                    kClass = String::class,
+                    sqlType = "yhteyden_laatu"
+                ),
+                Column(name = "lisatieto", kClass = String::class),
+            )
     ),
     LAHTEET_PISTEET(
         layerName = "lahteet_pisteet",
         sqlInsertStatement = SQL_INSERT_LAHTEET_PISTEET,
         columns =
-        listOf(
-            Column(name = "geom", kClass = Point::class),
-            Column(name = "pvm", kClass = Date::class),
-            Column(name = "havaitsija", kClass = String::class),
-            Column(name = "tyyppi", kClass = String::class),
-            Column(name = "lisatieto", kClass = String::class),
-        )
+            listOf(
+                Column(name = "geom", kClass = Point::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "tyyppi", kClass = String::class),
+                Column(name = "lisatieto", kClass = String::class),
+            )
     )
 }
 
@@ -835,7 +835,6 @@ private const val SQL_INSERT_LAHTEET_PISTEET =
     RETURNING id
     """
 
-
 fun Handle.getEnumRange(column: Column): List<String>? {
     return column.sqlType?.let { sqlType ->
         createQuery("""SELECT unnest(enum_range(NULL::"$sqlType"))::text""")
@@ -852,4 +851,3 @@ private fun convertColumnsWithGeometry(map: Map<String, Any?>): Map<String, Any?
         }
     }
 }
-
