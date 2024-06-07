@@ -7,8 +7,9 @@ SPDX-License-Identifier: LGPL-2.1-or-later
 # Luontotietoportaali WFS-endpoint (GeoServer)
 
 This directory `./geoserver` contains:
-* `Dockerfile` to create a customized GeoServer installation for Luontotietoportaali WFS-service
-* `./geoserver/data_dir` GeoServer's data directory with relevant configurations. This directory is fully copied into the built Docker-image.
+
+- `Dockerfile` to create a customized GeoServer installation for Luontotietoportaali WFS-service
+- `./geoserver/data_dir` GeoServer's data directory with relevant configurations. This directory is fully copied into the built Docker-image.
 
 ## Instructions
 
@@ -33,6 +34,7 @@ GeoServer supports only a limited set of password hashing algorithms. Irreversib
 best option in this service despite it's technical limitations.
 
 Execute in the running GeoServer container:
+
 ```
 docker exec -it [CONTAINER_ID] bash
 echo "digest1:" && java -classpath $(find $CLASSPATH -regex ".*jasypt-[0-9]\.[0-9]\.[0-9].*jar") org.jasypt.intf.cli.JasyptStringDigestCLI digest.sh algorithm=SHA-256 saltSizeBytes=16 iterations=100000 input=PASSWORD_TO_HASH verbose=0
@@ -40,21 +42,21 @@ echo "digest1:" && java -classpath $(find $CLASSPATH -regex ".*jasypt-[0-9]\.[0-
 
 Copy the hash and provide it either in `GEOSERVER_ADMIN_PASSWORD` or `GEOSERVER_WFS_PASSWORD`
 
-
 ### Layer configuration
 
-1. Navigate to GeoServer Admin UI in `http://localhost:8000`. Username is `admin` and password can be found from `compose/docker-compose.yml`
+1. Navigate to GeoServer Admin UI in `http://localhost:8000/geoserver`. Username is `admin` and password can be found from `compose/docker-compose.yml`
 
-2. Open *Layers* view and click *+ Add a new layer*
+2. Open _Layers_ view and click _+ Add a new layer_
    ![Add a new layer](docs/add-layer-1.png "Add a new layer")
 
 3. Publish the layer
    ![Publish layer](docs/add-layer-2.png "Publish")
 
 4. Configure the layer.
-   * *Compute from SRS bounds* (calculates layer bounds)
-   * *Compute from native bounds* (calculate native layer bounds)
-   * *Save* after bounds have been calculated.
-      ![Configure the layer](docs/add-layer-3.png "Configure the layer")
+
+   - _Compute from SRS bounds_ (calculates layer bounds)
+   - _Compute from native bounds_ (calculate native layer bounds)
+   - _Save_ after bounds have been calculated.
+     ![Configure the layer](docs/add-layer-3.png "Configure the layer")
 
 5. Commit changes in `geoserver/*` to Git.

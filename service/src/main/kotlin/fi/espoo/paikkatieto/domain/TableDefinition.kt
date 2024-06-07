@@ -34,6 +34,7 @@ data class Column(
                     value = null,
                     reason = GpkgValidationErrorReason.IS_NULL
                 )
+
             value != null &&
                 (!value::class.isSubclassOf(kClass) && value::class != kClass::class) ->
                 GpkgValidationError(
@@ -41,6 +42,7 @@ data class Column(
                     value = value,
                     reason = GpkgValidationErrorReason.WRONG_TYPE
                 )
+
             else -> null
         }
 }
@@ -145,7 +147,7 @@ enum class TableDefinition(
                 Column(
                     name = "IUCN_luokka",
                     kClass = String::class,
-                    sqlType = "muut_huomioitavat_lajit_IUCN_luokka"
+                    sqlType = "IUCN_luokka"
                 ),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "paikan_nimi", kClass = String::class, isNullable = true),
@@ -179,7 +181,7 @@ enum class TableDefinition(
                 Column(
                     name = "IUCN_luokka",
                     kClass = String::class,
-                    sqlType = "muut_huomioitavat_lajit_IUCN_luokka"
+                    sqlType = "IUCN_luokka"
                 ),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
@@ -207,7 +209,7 @@ enum class TableDefinition(
                 Column(
                     name = "IUCN_luokka",
                     kClass = String::class,
-                    sqlType = "muut_huomioitavat_lajit_IUCN_luokka"
+                    sqlType = "IUCN_luokka"
                 ),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
@@ -266,6 +268,87 @@ enum class TableDefinition(
                 Column(name = "pvm", kClass = Date::class),
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true)
+            )
+    ),
+    LUONTOTYYPIT_ALUEET(
+        layerName = "luontotyypit_alueet",
+        sqlInsertStatement = SQL_INSERT_LUONTOTYYPIT_ALUEET,
+        columns =
+            listOf(
+                Column(name = "geom", kClass = Polygon::class),
+                Column(name = "vuosi", kClass = Int::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "nimi", kClass = String::class, isNullable = true),
+                Column(
+                    name = "luontotyyppi_paaryhma",
+                    kClass = String::class,
+                    sqlType = "luontotyyppi_paaryhma"
+                ),
+                Column(name = "luontotyyppi", kClass = String::class),
+                Column(
+                    name = "uhanalaisuusluokka",
+                    kClass = String::class,
+                    sqlType = "IUCN_luokka"
+                ),
+                Column(
+                    name = "edustavuus",
+                    kClass = String::class,
+                    sqlType = "edustavuus_luokka"
+                ),
+                Column(name = "kuvaus", kClass = String::class),
+                Column(name = "lisatieto", kClass = String::class),
+                Column(name = "ominaislajit", kClass = String::class),
+                Column(name = "uhanalaiset_lajit", kClass = String::class, isNullable = true),
+                Column(name = "lahopuusto", kClass = String::class),
+                Column(
+                    name = "lumo_luokka",
+                    kClass = String::class,
+                    sqlType = "luontotyyppi_lumo_luokka"
+                ),
+            )
+    ),
+    EKOYHTEYDET_ALUEET(
+        layerName = "ekoyhteydet_alueet",
+        sqlInsertStatement = SQL_INSERT_EKOYHTEYDET_ALUEET,
+        columns =
+            listOf(
+                Column(name = "geom", kClass = Polygon::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(
+                    name = "laatu",
+                    kClass = String::class,
+                    sqlType = "yhteyden_laatu"
+                ),
+                Column(name = "lisatieto", kClass = String::class),
+            )
+    ),
+    EKOYHTEYDET_VIIVAT(
+        layerName = "ekoyhteydet_viivat",
+        sqlInsertStatement = SQL_INSERT_EKOYHTEYDET_VIIVAT,
+        columns =
+            listOf(
+                Column(name = "geom", kClass = LineString::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(
+                    name = "laatu",
+                    kClass = String::class,
+                    sqlType = "yhteyden_laatu"
+                ),
+                Column(name = "lisatieto", kClass = String::class),
+            )
+    ),
+    LAHTEET_PISTEET(
+        layerName = "lahteet_pisteet",
+        sqlInsertStatement = SQL_INSERT_LAHTEET_PISTEET,
+        columns =
+            listOf(
+                Column(name = "geom", kClass = Point::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(name = "tyyppi", kClass = String::class),
+                Column(name = "lisatieto", kClass = String::class),
             )
     )
 }
@@ -459,7 +542,7 @@ private const val SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_PISTEET =
         :elioryhma::muut_huomioitavat_lajit_elioryhma,
         :tieteellinen_nimi,
         :suomenkielinen_nimi,
-        :IUCN_luokka::"muut_huomioitavat_lajit_IUCN_luokka",
+        :IUCN_luokka::"IUCN_luokka",
         :direktiivi,
         :paikan_nimi,
         :havaintopaikan_kuvaus,
@@ -498,7 +581,7 @@ private const val SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_VIIVAT =
         :elioryhma::muut_huomioitavat_lajit_elioryhma,
         :tieteellinen_nimi,
         :suomenkielinen_nimi,
-        :IUCN_luokka::"muut_huomioitavat_lajit_IUCN_luokka",
+        :IUCN_luokka::"IUCN_luokka",
         :direktiivi,
         :havaintopaikan_kuvaus,
         :laji_luokitus,
@@ -535,7 +618,7 @@ private const val SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_ALUEET =
         :elioryhma::muut_huomioitavat_lajit_elioryhma,
         :tieteellinen_nimi,
         :suomenkielinen_nimi,
-        :IUCN_luokka::"muut_huomioitavat_lajit_IUCN_luokka",
+        :IUCN_luokka::"IUCN_luokka",
         :direktiivi,
         :havaintopaikan_kuvaus,
         :laji_luokitus,
@@ -638,6 +721,116 @@ private const val SQL_INSERT_NORO_VIIVAT =
         :reportName,
         ST_GeomFromWKB(:geom, 3879),
         :reportId
+    )
+    RETURNING id
+    """
+
+private const val SQL_INSERT_LUONTOTYYPIT_ALUEET =
+    """
+    INSERT INTO luontotyypit_alueet (
+        vuosi,
+        havaitsija,
+        nimi,
+        luontotyyppi_paaryhma,
+        luontotyyppi,
+        uhanalaisuusluokka,
+        edustavuus,
+        kuvaus,
+        lisatieto,
+        ominaislajit,
+        uhanalaiset_lajit,
+        lahopuusto,
+        lumo_luokka,
+        viite,
+        selvitys_id,
+        geom
+    ) 
+    VALUES (
+        :vuosi,
+        :havaitsija,
+        :nimi,
+        :luontotyyppi_paaryhma::luontotyyppi_paaryhma,
+        :luontotyyppi,
+        :uhanalaisuusluokka::"IUCN_luokka",
+        :edustavuus::edustavuus_luokka,
+        :kuvaus,
+        :lisatieto,
+        :ominaislajit,
+        :uhanalaiset_lajit,
+        :lahopuusto,
+        :lumo_luokka::luontotyyppi_lumo_luokka,
+        :reportName,
+        :reportId,
+        ST_GeomFromWKB(:geom, 3879)
+    )
+    RETURNING id
+    """
+
+private const val SQL_INSERT_EKOYHTEYDET_ALUEET =
+    """
+    INSERT INTO ekoyhteydet_alueet (
+        pvm,
+        havaitsija,
+        laatu,
+        lisatieto,
+        viite,
+        selvitys_id,
+        geom
+    ) 
+    VALUES (
+        :pvm,
+        :havaitsija,
+        :laatu::yhteyden_laatu,
+        :lisatieto,
+        :reportName,
+        :reportId,
+        ST_GeomFromWKB(:geom, 3879)
+    )
+    RETURNING id
+    """
+
+private const val SQL_INSERT_EKOYHTEYDET_VIIVAT =
+    """
+    INSERT INTO ekoyhteydet_viivat (
+        pvm,
+        havaitsija,
+        laatu,
+        lisatieto,
+        viite,
+        selvitys_id,
+        geom
+    ) 
+    VALUES (
+        :pvm,
+        :havaitsija,
+        :laatu::yhteyden_laatu,
+        :lisatieto,
+        :reportName,
+        :reportId,
+        ST_GeomFromWKB(:geom, 3879)
+    )
+    RETURNING id
+    """
+
+private const val SQL_INSERT_LAHTEET_PISTEET =
+    """
+    INSERT INTO lahteet_pisteet (
+        pvm,
+        havaitsija,
+        tyyppi,
+        lisatieto,
+        viite,
+        selvitys_id,
+        geom
+    ) 
+    VALUES (
+        :pvm,
+        :havaitsija,
+        :tyyppi,
+        :lisatieto,
+        :reportName,
+        :reportId,
+        ST_GeomFromWKB(:geom, 3879)
     )
     RETURNING id
     """

@@ -1,0 +1,16 @@
+<layer>
+  <name>ekoyhteydet_viivat</name>
+  <id>LayerInfoImpl--71259d67:18fdd758eaf:-7ffa</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--3bd8cec9:18ef552d955:-7fff</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--71259d67:18fdd758eaf:-7ffb</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-06-06 11:24:46.562 UTC</dateCreated>
+</layer>
