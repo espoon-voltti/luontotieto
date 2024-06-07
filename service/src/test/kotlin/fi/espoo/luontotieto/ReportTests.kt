@@ -24,9 +24,11 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ReportTests : FullApplicationTest() {
-    @Autowired lateinit var reportController: ReportController
+    @Autowired
+    lateinit var reportController: ReportController
 
-    @Autowired lateinit var orderController: OrderController
+    @Autowired
+    lateinit var orderController: OrderController
 
     @Test
     fun `create report with all data and fetch`() {
@@ -130,7 +132,7 @@ class ReportTests : FullApplicationTest() {
 
         reportController.updateReport(adminUser, createOrderResponse.reportId, reportInput)
 
-        File("src/test/resources/test-data/muut_huomioitavat_lajit_alueet_ilves.gpkg")
+        File("src/test/resources/test-data/muut_huomioitavat_lajit_alueet_torakka.gpkg")
             .inputStream()
             .use { inStream ->
                 reportController.uploadReportFile(
@@ -138,8 +140,8 @@ class ReportTests : FullApplicationTest() {
                     reportId = createOrderResponse.reportId,
                     file =
                         MockMultipartFile(
-                            "muut_huomioitavat_lajit_alueet_ilves.gpkg",
-                            "muut_huomioitavat_lajit_alueet_ilves.gpkg",
+                            "muut_huomioitavat_lajit_alueet_torakka.gpkg",
+                            "muut_huomioitavat_lajit_alueet_torakka.gpkg",
                             "application/geopackage+sqlite3",
                             inStream
                         ),
@@ -148,7 +150,7 @@ class ReportTests : FullApplicationTest() {
                 )
             }
 
-        File("src/test/resources/test-data/muut_huomioitavat_lajit_viivat_susi.gpkg")
+        File("src/test/resources/test-data/muut_huomioitavat_lajit_viivat_perhonen.gpkg")
             .inputStream()
             .use { inStream ->
                 reportController.uploadReportFile(
@@ -156,8 +158,8 @@ class ReportTests : FullApplicationTest() {
                     reportId = createOrderResponse.reportId,
                     file =
                         MockMultipartFile(
-                            "muut_huomioitavat_lajit_viivat_susi.gpkg",
-                            "muut_huomioitavat_lajit_viivat_susi.gpkg",
+                            "muut_huomioitavat_lajit_viivat_perhonen.gpkg",
+                            "muut_huomioitavat_lajit_viivat_perhonen.gpkg",
                             "application/geopackage+sqlite3",
                             inStream
                         ),
@@ -166,7 +168,7 @@ class ReportTests : FullApplicationTest() {
                 )
             }
 
-        File("src/test/resources/test-data/muut_huomioitavat_lajit_pisteet_karhu.gpkg")
+        File("src/test/resources/test-data/muut_huomioitavat_lajit_pisteet_ilves.gpkg")
             .inputStream()
             .use { inStream ->
                 reportController.uploadReportFile(
@@ -174,8 +176,8 @@ class ReportTests : FullApplicationTest() {
                     reportId = createOrderResponse.reportId,
                     file =
                         MockMultipartFile(
-                            "muut_huomioitavat_lajit_pisteet_karhu.gpkg",
-                            "muut_huomioitavat_lajit_pisteet_karhu.gpkg",
+                            "muut_huomioitavat_lajit_pisteet_ilves.gpkg",
+                            "muut_huomioitavat_lajit_pisteet_ilves.gpkg",
                             "application/geopackage+sqlite3",
                             inStream
                         ),
@@ -184,8 +186,7 @@ class ReportTests : FullApplicationTest() {
                 )
             }
 
-        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use {
-                inStream ->
+        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use { inStream ->
             reportController.uploadReportFile(
                 user = adminUser,
                 reportId = createOrderResponse.reportId,
@@ -196,7 +197,7 @@ class ReportTests : FullApplicationTest() {
                         "application/geopackage+sqlite3",
                         inStream
                     ),
-                description = "Alueelta löytyi susi, karhu ja ilves.",
+                description = "Alueelta löytyi ilves, torakka ja perhonen.",
                 documentType = DocumentType.ALUERAJAUS_LUONTOSELVITYS
             )
         }
@@ -237,11 +238,11 @@ class ReportTests : FullApplicationTest() {
                     .mapTo<AluerajausResult>()
                     .one()
 
-            assertEquals("Alueelta löytyi susi, karhu ja ilves.", data.lisatieto)
+            assertEquals("Alueelta löytyi ilves, torakka ja perhonen.", data.lisatieto)
             assertEquals(
                 listOf(
                     "Liito-orava (ei havaittu)",
-                    "Muut huomioitavat lajit (havaittu; Ilves, Karhu, Susi)"
+                    "Muut huomioitavat lajit (havaittu; Ilves, Perhonen, Torakka)"
                 ),
                 data.selvitetytTiedot
             )

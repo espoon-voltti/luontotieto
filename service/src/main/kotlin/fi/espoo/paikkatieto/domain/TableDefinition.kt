@@ -147,7 +147,7 @@ enum class TableDefinition(
                 Column(
                     name = "IUCN_luokka",
                     kClass = String::class,
-                    sqlType = "muut_huomioitavat_lajit_IUCN_luokka"
+                    sqlType = "IUCN_luokka"
                 ),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "paikan_nimi", kClass = String::class, isNullable = true),
@@ -181,7 +181,7 @@ enum class TableDefinition(
                 Column(
                     name = "IUCN_luokka",
                     kClass = String::class,
-                    sqlType = "muut_huomioitavat_lajit_IUCN_luokka"
+                    sqlType = "IUCN_luokka"
                 ),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
@@ -209,7 +209,7 @@ enum class TableDefinition(
                 Column(
                     name = "IUCN_luokka",
                     kClass = String::class,
-                    sqlType = "muut_huomioitavat_lajit_IUCN_luokka"
+                    sqlType = "IUCN_luokka"
                 ),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
