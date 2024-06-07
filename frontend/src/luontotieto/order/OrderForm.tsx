@@ -82,23 +82,23 @@ type OrderFileInputElement =
   | OrderFileInputElementExisting
 
 function createFileInputs(orderFiles: OrderFile[]): OrderFileInputElement[] {
-  const files = orderFileTypes.map((documentType) => {
+  const files: OrderFileInputElement[] = orderFileTypes.map((documentType) => {
     const orderFile = orderFiles.find(
       (file) => file.documentType === documentType
     )
     return orderFile
-      ? ({
+      ? {
           documentType,
           type: 'EXISTING',
           orderFile
-        } as OrderFileInputElementExisting)
-      : ({
+        }
+      : {
           documentType,
           type: 'NEW',
           description: '',
           file: null,
           id: uuidv4()
-        } as OrderFileInputElementNew)
+        }
   })
 
   const additionalFiles = orderFiles
