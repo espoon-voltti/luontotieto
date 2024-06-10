@@ -433,7 +433,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           <RowOfInputs>
             <LabeledInput $cols={4}>
               <Label>Tilauksen nimi</Label>
-              <InputField
+              <TextArea
                 onChange={(name) => setOrderInput({ ...orderInput, name })}
                 value={orderInput.name}
               />
@@ -451,6 +451,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                   })) ?? []
                 }
                 onChange={updateOrderingUnits}
+                placeholderText="Etsi tai lisää yksikkö"
               />
             </LabeledInput>
           </RowOfInputs>
@@ -466,6 +467,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                   })) ?? []
                 }
                 onChange={updatePlanNumbers}
+                placeholderText="Etsi tai lisää kaava"
               />
             </LabeledInput>
           </RowOfInputs>

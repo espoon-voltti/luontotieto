@@ -78,12 +78,16 @@ export const ExistingFile = React.memo(function ExistingFile({
             file={props.data.file}
             onClick={handleClick}
             onDelete={(fileId) => props.onRemove(fileId)}
+            readonly={props.data.readonly}
           />
         </LabeledInput>
         <LabeledInput $cols={5}>
           {showTitle && <VerticalGap $size="L" />}
           <Label>Lisätiedot tarvittaessa</Label>
-          <InputField value={props.data.file.description} />
+          <InputField
+            value={props.data.file.description}
+            readonly={props.data.readonly}
+          />
         </LabeledInput>
       </FlexRowWithGaps>
       <FlexRowWithGaps>

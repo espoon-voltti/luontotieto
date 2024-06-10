@@ -60,6 +60,7 @@ interface FileDownloadButtonProps {
   file: OrderFile | ReportFileDetails
   onClick: (fileId: string) => void
   onDelete: (fileId: string) => void
+  readonly: boolean
   icon?: IconDefinition | boolean
   'data-qa'?: string
   text?: string
@@ -71,20 +72,24 @@ export default React.memo(function FileDownloadButton({
   onClick,
   onDelete,
   'data-qa': dataQa,
-  text
+  text,
+  readonly
 }: FileDownloadButtonProps) {
   return (
     <DownloadButton onClick={() => onClick(file.id)} data-qa={dataQa}>
       {icon && <FontAwesomeIcon icon={icon === true ? fileIcon(file) : icon} />}
       <FileName title={text ?? file.fileName}>{text ?? file.fileName}</FileName>
-      <InlineButton
-        text="Poista"
-        icon={faX}
-        onClick={() => {
-          onDelete(file.id)
-        }}
-        stopPropagation={true}
-      />
+      {!readonly && (
+        <InlineButton
+          text="Poista"
+          icon={faX}
+          onClick={() => {
+            onDelete(file.id)
+          }}
+          stopPropagation={true}
+          disabled={readonly}
+        />
+      )}
     </DownloadButton>
   )
 })
