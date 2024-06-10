@@ -19,6 +19,7 @@ import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
@@ -88,14 +90,16 @@ class UserController {
     }
 
     @GetMapping()
-    fun getUsers(user: AuthenticatedUser): List<User> {
+    fun getUsers(
+        user: AuthenticatedUser, @RequestParam includeInactive: Boolean = true
+    ): List<User> {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         return jdbi.inTransactionUnchecked { tx ->
             tx.getUsers().filter { u ->
                 if (user.role === UserRole.ADMIN) {
-                    true
+                    includeInactive || u.active
                 } else {
-                    u.role === UserRole.CUSTOMER || u.id == user.id
+                    (u.role === UserRole.CUSTOMER || u.id == user.id) && includeInactive || u.active
                 }
             }
         }

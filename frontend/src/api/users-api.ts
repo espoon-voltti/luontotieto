@@ -91,8 +91,10 @@ export const apiResetUserPassword = async (userInput: {
 export const apiGetUser = (id: string): Promise<User> =>
   apiClient.get<User>(`/users/${id}`).then((res) => res.data)
 
-export const apiGetUsers = (): Promise<User[]> =>
-  apiClient.get<User[]>(`/users`).then((res) => res.data)
+export const apiGetUsers = (params?: {
+  includeInactive?: boolean
+}): Promise<User[]> =>
+  apiClient.get<User[]>(`/users`, { params }).then((res) => res.data)
 
 export function getUserRole(role: UserRole) {
   switch (role) {

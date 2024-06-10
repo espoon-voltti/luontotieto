@@ -15,7 +15,10 @@ export function useGetUsersQuery() {
 export function useGetAssigneeUsersQuery() {
   return useQuery({
     queryKey: ['assignee-users'],
-    queryFn: () => apiGetUsers().then((users) => [undefined, ...users])
+    queryFn: () =>
+      apiGetUsers({
+        includeInactive: false
+      }).then((users) => [undefined, ...users])
   })
 }
 
