@@ -19,6 +19,7 @@ import {
   OrderFormInput
 } from 'api/order-api'
 import { UserContext, hasOrdererRole } from 'auth/UserContext'
+import { AxiosError } from 'axios'
 import React, { useContext, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
@@ -35,7 +36,6 @@ import {
 } from '../../shared/layout'
 
 import { OrderForm } from './OrderForm'
-import { AxiosError } from 'axios'
 
 interface CreateProps {
   mode: 'CREATE'
