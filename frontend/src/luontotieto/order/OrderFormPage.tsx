@@ -209,6 +209,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             {showDeleteButton && (
               <Button
                 text="Poista selvitystilaus"
+                className="danger"
                 data-qa="save-button"
                 disabled={deletingOrder}
                 onClick={() => {
@@ -222,7 +223,11 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
                         action: async () => {
                           await deleteOrderMutation(order.id)
                         },
-                        label: 'Ok'
+                        label: 'Poista'
+                      },
+                      reject: {
+                        action: () => setShowModal(null),
+                        label: 'Peruuta'
                       }
                     })
                   }
