@@ -16,6 +16,8 @@ import kotlin.reflect.full.isSubclassOf
 
 private val logger = KotlinLogging.logger {}
 
+const val MAX_ERRORS = 30
+
 class GpkgReaderException(msg: String) : IOException(msg)
 
 enum class GpkgValidationErrorReason {

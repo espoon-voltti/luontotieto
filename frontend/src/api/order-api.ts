@@ -6,7 +6,7 @@ import { apiClient } from 'api-client'
 import { AxiosError } from 'axios'
 import { JsonOf } from 'shared/api-utils'
 
-import { ReportFileDocumentType } from './report-api'
+import { ReportDetails, ReportFileDocumentType } from './report-api'
 
 export interface Order extends OrderInput {
   id: string
@@ -70,25 +70,49 @@ export interface OrderFileValidationErrorResponse {
   documentType: OrderFileDocumentType
   id: string
   errors: OrderFileValidationError[] | string
+  orderId: string
 }
 
 export type OrderReportDocumentInput = Pick<OrderReportDocument, 'documentType'>
 
-export const apiPostOrder = async (data: OrderFormInput): Promise<string> => {
+export const apiPostOrder = async (
+  orderInput: { orderId?: string | undefined } & OrderFormInput
+): Promise<{ orderId: string; reportId: string }> => {
   const body: JsonOf<OrderInput> = {
-    ...data,
-    reportDocuments: data.reportDocuments.map((rd) => ({
+    ...orderInput,
+    reportDocuments: orderInput.reportDocuments.map((rd) => ({
       ...rd,
       description: ''
     }))
   }
 
-  const response = await apiClient
-    .post<{ orderId: string; reportId: string }>('/orders', body)
-    .then((r) => r.data)
-  await handleFiles(response.orderId, data.filesToAdd, data.filesToRemove)
+  let orderId = orderInput.orderId
+  let reportId: string | undefined
+  if (!orderInput.orderId) {
+    await apiClient
+      .post<{ orderId: string; reportId: string }>('/orders', body)
+      .then((r) => r.data)
+      .then((r) => {
+        orderId = r.orderId
+        reportId = r.reportId
+      })
+  } else {
+    await apiClient
+      .put<ReportDetails>(`/orders/${orderInput.orderId}`, body)
+      .then((r) => r.data)
+      .then((r) => {
+        orderId = r.order.id
+        reportId = r.id
+      })
+  }
 
-  return response.reportId
+  if (!reportId || !orderId) {
+    throw new Error('Failed to create report')
+  }
+
+  await handleFiles(orderId, orderInput.filesToAdd, orderInput.filesToRemove)
+
+  return { orderId, reportId }
 }
 
 const handleFiles = async (
@@ -161,6 +185,7 @@ const apiPostOrderFile = async (
     .catch((error: AxiosError) => {
       if (error.response?.status === 400) {
         const errorResponse = {
+          orderId: id,
           documentType: file.documentType,
           id: file.id,
           errors: error?.response?.data
@@ -168,13 +193,19 @@ const apiPostOrderFile = async (
         return Promise.reject(errorResponse)
       } else if (error.response?.status === 409) {
         const errorResponse = {
+          orderId: id,
           documentType: file.documentType,
           id: file.id,
           errors: 'Tiedostonimi on jo olemassa'
         } as OrderFileValidationErrorResponse
         return Promise.reject(errorResponse)
       }
-      return Promise.reject(null)
+      return Promise.reject({
+        orderId: id,
+        id: file.id,
+        documentType: file.documentType,
+        errors: 'Tuntematon virhe'
+      } as OrderFileValidationErrorResponse)
     })
 }
 

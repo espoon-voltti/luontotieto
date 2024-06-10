@@ -24,6 +24,7 @@ import fi.espoo.paikkatieto.domain.insertPaikkatieto
 import fi.espoo.paikkatieto.reader.GpkgReader
 import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.reader.GpkgValidationErrorReason
+import fi.espoo.paikkatieto.reader.MAX_ERRORS
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
@@ -143,10 +144,13 @@ class OrderController {
         user: AuthenticatedUser,
         @PathVariable id: UUID,
         @RequestBody order: OrderInput
-    ): Order {
+    ): Report {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         return jdbi
-            .inTransactionUnchecked { tx -> tx.putOrder(id, order, user) }
+            .inTransactionUnchecked { tx ->
+                tx.putOrder(id, order, user)
+                tx.getReportByOrderId(id, user)
+            }
             .also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
     }
 
@@ -197,20 +201,8 @@ class OrderController {
         val fileName = getAndCheckFileName(file)
         val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
 
-        val id =
-            jdbi.inTransactionUnchecked { tx ->
-                tx.insertOrderFile(
-                    OrderFileInput(orderId, description, contentType, fileName, documentType),
-                    user
-                )
-            }
-
+        var id: UUID? = null
         try {
-            documentClient.upload(
-                dataBucket,
-                MultipartDocument(name = "$orderId/$id", file = file, contentType = contentType)
-            )
-
             if (documentType == OrderDocumentType.ORDER_AREA) {
                 val tableDefinition = TableDefinition.ALUERAJAUS_LUONTOSELVITYSTILAUS
                 val tmpGpkgFile = kotlin.io.path.createTempFile(fileName)
@@ -238,7 +230,7 @@ class OrderController {
                                 )
                             )
                     }
-                    val errors = data.flatMap { it.errors }.toList()
+                    val errors = data.flatMap { it.errors }.take(MAX_ERRORS).toList()
                     if (errors.isNotEmpty()) {
                         logger.error(errors.toString())
                         return ResponseEntity.badRequest().body(errors)
@@ -265,6 +257,19 @@ class OrderController {
                 }
             }
 
+            id =
+                jdbi.inTransactionUnchecked { tx ->
+                    tx.insertOrderFile(
+                        OrderFileInput(orderId, description, contentType, fileName, documentType),
+                        user
+                    )
+                }
+
+            documentClient.upload(
+                dataBucket,
+                MultipartDocument(name = "$orderId/$id", file = file, contentType = contentType)
+            )
+
             logger.audit(
                 user,
                 AuditEvent.ADD_ORDER_FILE,
@@ -272,7 +277,9 @@ class OrderController {
             )
         } catch (e: Exception) {
             logger.error("Error uploading file: ", e)
-            jdbi.inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, id) }
+            if (id != null) {
+                jdbi.inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, id) }
+            }
             throw BadRequest("Error uploading file")
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(emptyList())
