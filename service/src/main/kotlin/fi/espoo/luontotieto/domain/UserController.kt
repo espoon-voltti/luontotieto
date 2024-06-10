@@ -38,9 +38,11 @@ class UserController {
     @Autowired
     lateinit var jdbi: Jdbi
 
-    @Autowired lateinit var sesEmailClient: SESEmailClient
+    @Autowired
+    lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired lateinit var luontotietoHost: LuontotietoHost
+    @Autowired
+    lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -60,7 +62,11 @@ class UserController {
                 sesEmailClient.send(
                     Email(
                         body.email,
-                        Emails.getUserCreatedEmail(luontotietoHost.getCustomerUserLoginUrl(), createdUser.email ?: "", generatedString)
+                        Emails.getUserCreatedEmail(
+                            luontotietoHost.getCustomerUserLoginUrl(),
+                            createdUser.email ?: "",
+                            generatedString
+                        )
                     )
                 )
 
@@ -84,7 +90,15 @@ class UserController {
     @GetMapping()
     fun getUsers(user: AuthenticatedUser): List<User> {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
-        return jdbi.inTransactionUnchecked { tx -> tx.getUsers() }
+        return jdbi.inTransactionUnchecked { tx ->
+            tx.getUsers().filter { u ->
+                if (user.role === UserRole.ADMIN) {
+                    true
+                } else {
+                    u.role === UserRole.CUSTOMER || u.id == user.id
+                }
+            }
+        }
     }
 
     @PutMapping("/{id}")
