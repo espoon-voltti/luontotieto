@@ -21,7 +21,12 @@ import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
 import styled from 'styled-components'
 
 import { NotFound } from '../../shared/404'
-import { FlexRight, PageContainer, SectionContainer, VerticalGap } from '../../shared/layout'
+import {
+  FlexRight,
+  PageContainer,
+  SectionContainer,
+  VerticalGap
+} from '../../shared/layout'
 
 import { OrderDetails } from './OrderDetails'
 import { ReportForm } from './ReportForm'
@@ -37,7 +42,7 @@ interface EditProps {
 type Props = CreateProps | EditProps
 
 const StyledButton = styled(Button)`
-    margin-right: 20px;
+  margin-right: 20px;
 `
 
 export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
@@ -98,8 +103,6 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
       }
     })
 
-  console.log(reportFiles)
-
   const { mutateAsync: approveReport, isPending: approving } = useMutation({
     mutationFn: apiApproveReport,
     onSuccess: () => {
@@ -125,7 +128,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   }
 
   if (!report || !reportFiles) {
-    return <NotFound/>
+    return <NotFound />
   }
 
   const title =
@@ -140,11 +143,11 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   return (
     <>
       <PageContainer>
-        <BackNavigation text={title} navigationText="Etusivulle"/>
+        <BackNavigation text={title} navigationText="Etusivulle" />
         {report?.order && (
-          <OrderDetails order={report?.order} reportId={report.id}/>
+          <OrderDetails order={report?.order} reportId={report.id} />
         )}
-        <VerticalGap $size="m"/>
+        <VerticalGap $size="m" />
 
         <SectionContainer>
           {props.mode === 'EDIT' && report && reportFiles && (
@@ -168,8 +171,8 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
           )}
         </SectionContainer>
       </PageContainer>
-      <VerticalGap $size="XL"/>
-      <VerticalGap $size="XL"/>
+      <VerticalGap $size="XL" />
+      <VerticalGap $size="XL" />
       <Footer>
         <FlexRight style={{ height: '100%' }}>
           {userIsViewer ? (
