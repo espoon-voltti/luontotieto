@@ -61,15 +61,20 @@ class OrderController {
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired lateinit var sesEmailClient: SESEmailClient
+    @Autowired
+    lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired lateinit var documentClient: S3DocumentService
+    @Autowired
+    lateinit var documentClient: S3DocumentService
 
-    @Autowired lateinit var bucketEnv: BucketEnv
+    @Autowired
+    lateinit var bucketEnv: BucketEnv
 
-    @Autowired lateinit var emailEnv: EmailEnv
+    @Autowired
+    lateinit var emailEnv: EmailEnv
 
-    @Autowired lateinit var luontotietoHost: LuontotietoHost
+    @Autowired
+    lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -157,7 +162,10 @@ class OrderController {
                 val report = tx.getReportByOrderId(orderId, user)
                 val reportFiles = tx.getReportFiles(report.id)
                 if (reportFiles.isNotEmpty()) {
-                    throw BadRequest("Tilausta ei voi poistaa koska selvitykseen on jo tallennettu tiedostoja")
+                    throw BadRequest(
+                        "Tilausta ei voi poistaa koska selvitykseen on jo tallennettu tiedostoja",
+                        "order-delete-failed-existing-files"
+                    )
                 }
                 val orderFiles = tx.getOrderFiles(orderId, user)
                 for (of in orderFiles) {

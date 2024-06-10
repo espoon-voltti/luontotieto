@@ -13,6 +13,8 @@ import {
   apiDeleteOrder,
   apiPostOrder,
   apiPutOrder,
+  DeleteOrderError,
+  DeleteorderErrorCode,
   OrderFileValidationErrorResponse,
   OrderFormInput
 } from 'api/order-api'
@@ -33,6 +35,7 @@ import {
 } from '../../shared/layout'
 
 import { OrderForm } from './OrderForm'
+import { AxiosError } from 'axios'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -152,6 +155,24 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             label: 'Ok'
           }
         })
+      },
+      onError: (e: AxiosError<{ errorCode: DeleteorderErrorCode }>) => {
+        if (e instanceof AxiosError) {
+          const errorCode = e.response?.data.errorCode
+          const errorMessage = errorCode
+            ? DeleteOrderError[errorCode]
+            : 'Odottamaton virhe'
+          setShowModal({
+            title: 'Tilauksen poisto epännistui',
+            text: errorMessage,
+            resolve: {
+              action: () => {
+                setShowModal(null)
+              },
+              label: 'Ok'
+            }
+          })
+        }
       }
     })
 
