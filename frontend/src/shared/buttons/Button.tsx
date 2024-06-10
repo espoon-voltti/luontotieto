@@ -75,6 +75,24 @@ const StyledButton = styled.button`
       background: ${colors.grayscale.g35};
     }
   }
+  &.danger {
+    color: ${colors.status.danger};
+    border: 1px solid ${colors.status.danger};
+    background: ${colors.grayscale.g0};
+
+    &:hover {
+      background: ${colors.grayscale.g0};
+    }
+
+    &:active {
+      background: ${colors.grayscale.g0};
+    }
+
+    &.disabled {
+      border-color: ${colors.grayscale.g35};
+      background: ${colors.grayscale.g35};
+    }
+  }
 
   @media (min-width: ${tabletMin}) {
     width: fit-content;

@@ -9,7 +9,15 @@ import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.OrderController
 import fi.espoo.luontotieto.domain.OrderInput
 import fi.espoo.luontotieto.domain.OrderReportDocument
+import fi.espoo.luontotieto.domain.ReportController
+import fi.espoo.paikkatieto.reader.GpkgValidationError
+import org.springframework.http.ResponseEntity
+import org.springframework.mock.web.MockMultipartFile
+import org.springframework.web.multipart.MultipartFile
+import java.io.File
+import java.io.FileInputStream
 import java.time.LocalDate
+import java.util.UUID
 
 fun createOrderAndReport(
     controller: OrderController,
@@ -44,5 +52,27 @@ fun createOrderAndReport(
                 contactPerson = contactPerson,
                 orderingUnit = orderingUnit
             )
+    )
+}
+
+fun createLiitoOravaPisteetReportFile(
+    controller: ReportController,
+    reportId: UUID
+): ResponseEntity<List<GpkgValidationError>> {
+    val file = File("src/test/resources/test-data/liito_orava_pisteet.gpkg")
+    val multipartFile: MultipartFile =
+        MockMultipartFile(
+            "liito_orava_pisteet.gpkg",
+            "liito_orava_pisteet.gpkg",
+            "application/x-sqlite3",
+            FileInputStream(file)
+        )
+
+    return controller.uploadReportFile(
+        user = adminUser,
+        reportId = reportId,
+        file = multipartFile,
+        documentType = DocumentType.LIITO_ORAVA_PISTEET,
+        description = "Test Description"
     )
 }

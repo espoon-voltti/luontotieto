@@ -313,7 +313,7 @@ export const ReportForm = React.memo(function ReportForm(props: Props) {
       <H3>Selvityksen tiedot</H3>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
-        {fileInputs.map((fInput, index) => {
+        {fileInputs.map((fInput) => {
           const documentSaveError = props.saveErrors
             ? props.saveErrors.find(
                 (error) => error.documentType === fInput.documentType

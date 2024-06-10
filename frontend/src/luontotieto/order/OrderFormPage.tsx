@@ -10,12 +10,16 @@ import {
   useGetOrderQuery
 } from 'api/hooks/orders'
 import {
+  apiDeleteOrder,
   apiPostOrder,
   apiPutOrder,
+  DeleteOrderError,
+  DeleteorderErrorCode,
   OrderFileValidationErrorResponse,
   OrderFormInput
 } from 'api/order-api'
-import React, { useState } from 'react'
+import { UserContext, hasOrdererRole } from 'auth/UserContext'
+import React, { useContext, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
@@ -23,9 +27,15 @@ import { Button } from 'shared/buttons/Button'
 import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
 
 import { NotFound } from '../../shared/404'
-import { FlexRight, PageContainer, VerticalGap } from '../../shared/layout'
+import {
+  FlexLeftRight,
+  FlexRight,
+  PageContainer,
+  VerticalGap
+} from '../../shared/layout'
 
 import { OrderForm } from './OrderForm'
+import { AxiosError } from 'axios'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -46,6 +56,8 @@ interface LocationState {
 }
 
 export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
+  const { user } = useContext(UserContext)
+
   const location: LocationState = useLocation()
   const queryClient = useQueryClient()
 
@@ -61,6 +73,11 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
 
   const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
   const [orderInput, setOrderInput] = useState<OrderFormInput | null>(null)
+
+  const showDeleteButton = useMemo(
+    () => props.mode === 'EDIT' && hasOrdererRole(user),
+    [props.mode, user]
+  )
 
   const [orderFileErrors, setOrderFileErrors] = useState<
     OrderFileValidationErrorResponse[]
@@ -120,6 +137,45 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
       }
     })
 
+  const { mutateAsync: deleteOrderMutation, isPending: deletingOrder } =
+    useMutation({
+      mutationFn: apiDeleteOrder,
+      onSuccess: (_order): void => {
+        void queryClient.invalidateQueries({ queryKey: ['order', id] })
+        void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
+        void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
+        void queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
+        setShowModal({
+          title: 'Tilaus poistettu',
+          resolve: {
+            action: () => {
+              setShowModal(null)
+              navigate(`/luontotieto`)
+            },
+            label: 'Ok'
+          }
+        })
+      },
+      onError: (e: AxiosError<{ errorCode: DeleteorderErrorCode }>) => {
+        if (e instanceof AxiosError) {
+          const errorCode = e.response?.data.errorCode
+          const errorMessage = errorCode
+            ? DeleteOrderError[errorCode]
+            : 'Odottamaton virhe'
+          setShowModal({
+            title: 'Tilauksen poisto epännistui',
+            text: errorMessage,
+            resolve: {
+              action: () => {
+                setShowModal(null)
+              },
+              label: 'Ok'
+            }
+          })
+        }
+      }
+    })
+
   if (isLoadingOrder || isLoadingOrderFiles) {
     return null
   }
@@ -169,23 +225,55 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
       </PageContainer>
       <VerticalGap $size="XL" />
       <Footer>
-        <FlexRight style={{ height: '100%' }}>
-          <Button
-            text="Tallenna"
-            data-qa="save-button"
-            primary
-            disabled={!orderInput || savingOrder || updatingOrder}
-            onClick={async () => {
-              if (!orderInput) return
+        <FlexLeftRight>
+          <>
+            {showDeleteButton && (
+              <Button
+                text="Poista selvitystilaus"
+                className="danger"
+                data-qa="save-button"
+                disabled={deletingOrder}
+                onClick={() => {
+                  if (order) {
+                    setShowModal({
+                      title:
+                        'Oletko varma että haluat poistaa selvitystilauksen?',
+                      text: `Selvitystilauksen poistaminen on mahdollista vain jos 
+                      selvitykseen ei ole tallennettu tiedostoja. Selvitystilauksen poistaminen on peruuttamaton toimenpide.`,
+                      resolve: {
+                        action: async () => {
+                          await deleteOrderMutation(order.id)
+                        },
+                        label: 'Poista'
+                      },
+                      reject: {
+                        action: () => setShowModal(null),
+                        label: 'Peruuta'
+                      }
+                    })
+                  }
+                }}
+              />
+            )}
+          </>
+          <FlexRight style={{ height: '100%' }}>
+            <Button
+              text="Tallenna"
+              data-qa="save-button"
+              primary
+              disabled={!orderInput || savingOrder || updatingOrder}
+              onClick={async () => {
+                if (!orderInput) return
 
-              if (props.mode === 'CREATE') {
-                await createOrderMutation(orderInput)
-              } else {
-                await updateOrderMutation({ ...orderInput, orderId: id! })
-              }
-            }}
-          />
-        </FlexRight>
+                if (props.mode === 'CREATE') {
+                  await createOrderMutation(orderInput)
+                } else {
+                  await updateOrderMutation({ ...orderInput, orderId: id! })
+                }
+              }}
+            />
+          </FlexRight>
+        </FlexLeftRight>
       </Footer>
       {showModal && (
         <InfoModal

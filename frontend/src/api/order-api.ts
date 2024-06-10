@@ -200,3 +200,12 @@ export const apiGetPlanNumbers = (): Promise<string[]> =>
 
 export const apiGetorderingUnits = (): Promise<string[]> =>
   apiClient.get<string[]>(`/orders/ordering-units`).then((res) => res.data)
+
+export type DeleteorderErrorCode = 'order-delete-failed-existing-files'
+
+export const DeleteOrderError = {
+  'order-delete-failed-existing-files':
+    'Tilaukseen on jo lisätty tiedostoja joten tilausta ei voitu poistaa.'
+}
+export const apiDeleteOrder = (id: string): Promise<void> =>
+  apiClient.delete<void>(`/orders/${id}`).then((res) => res.data)

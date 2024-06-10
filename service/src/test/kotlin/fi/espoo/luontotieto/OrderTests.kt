@@ -4,6 +4,8 @@
 
 package fi.espoo.luontotieto
 
+import fi.espoo.luontotieto.common.BadRequest
+import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.OrderController
@@ -11,6 +13,7 @@ import fi.espoo.luontotieto.domain.OrderInput
 import fi.espoo.luontotieto.domain.OrderReportDocument
 import fi.espoo.luontotieto.domain.ReportController
 import fi.espoo.luontotieto.domain.UserRole
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.util.UUID
@@ -117,5 +120,31 @@ class OrderTests : FullApplicationTest() {
         assertEquals("Yritys Oy", updatedOrder.assignee)
         assertEquals(customerUser.id, updatedOrder.assigneeId)
         assertEquals(updatedReportDocuments, updatedOrder.reportDocuments)
+    }
+
+    @Test
+    fun `Delete order and report`() {
+        val createdOrder = createOrderAndReport(controller = controller)
+
+        controller.deleteOrder(adminUser, createdOrder.orderId)
+
+        assertThrows<NotFound> { controller.getOrderById(adminUser, createdOrder.orderId) }
+        assertThrows<NotFound> { reportController.getReportById(adminUser, createdOrder.reportId) }
+        assertThrows<NotFound> { reportController.getReportFiles(adminUser, createdOrder.reportId) }
+        val orderFiles = controller.getOrderFiles(adminUser, createdOrder.orderId)
+        assertEquals(orderFiles.count(), 0)
+    }
+
+    @Test
+    fun `Can not delete order that has filled report data`() {
+        val createdOrder = createOrderAndReport(controller = controller)
+
+        createLiitoOravaPisteetReportFile(reportController, createdOrder.reportId)
+
+        assertThrows<BadRequest> { controller.deleteOrder(adminUser, createdOrder.orderId) }
+
+        val report = reportController.getReportById(adminUser, createdOrder.reportId)
+
+        assertNotNull(report)
     }
 }

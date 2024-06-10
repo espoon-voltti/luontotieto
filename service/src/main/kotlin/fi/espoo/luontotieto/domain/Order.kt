@@ -158,3 +158,19 @@ fun Handle.getorderingUnits(): List<String> =
     )
         .mapTo<String>()
         .sorted()
+
+fun Handle.deleteOrderAndReportData(
+    orderId: UUID,
+    reportId: UUID
+): Int =
+    createUpdate(
+        """
+            DELETE FROM report_file rf WHERE rf.report_id = :reportId;
+            DELETE FROM order_file of WHERE of.order_id = :orderId;
+            DELETE FROM report r WHERE r.order_id = :orderId AND r.id = :reportId;
+            DELETE FROM "order" o WHERE o.id = :orderId;
+            """
+    )
+        .bind("orderId", orderId)
+        .bind("reportId", reportId)
+        .execute()

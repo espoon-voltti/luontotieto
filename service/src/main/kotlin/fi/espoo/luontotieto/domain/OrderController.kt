@@ -61,15 +61,20 @@ class OrderController {
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired lateinit var sesEmailClient: SESEmailClient
+    @Autowired
+    lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired lateinit var documentClient: S3DocumentService
+    @Autowired
+    lateinit var documentClient: S3DocumentService
 
-    @Autowired lateinit var bucketEnv: BucketEnv
+    @Autowired
+    lateinit var bucketEnv: BucketEnv
 
-    @Autowired lateinit var emailEnv: EmailEnv
+    @Autowired
+    lateinit var emailEnv: EmailEnv
 
-    @Autowired lateinit var luontotietoHost: LuontotietoHost
+    @Autowired
+    lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -143,6 +148,38 @@ class OrderController {
         return jdbi
             .inTransactionUnchecked { tx -> tx.putOrder(id, order, user) }
             .also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
+    }
+
+    @DeleteMapping("/{orderId}")
+    fun deleteOrder(
+        user: AuthenticatedUser,
+        @PathVariable orderId: UUID,
+    ) {
+        user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
+        val dataBucket = bucketEnv.data
+        jdbi
+            .inTransactionUnchecked { tx ->
+                val report = tx.getReportByOrderId(orderId, user)
+                val reportFiles = tx.getReportFiles(report.id)
+                if (reportFiles.isNotEmpty()) {
+                    throw BadRequest(
+                        "Tilausta ei voi poistaa koska selvitykseen on jo tallennettu tiedostoja",
+                        "order-delete-failed-existing-files"
+                    )
+                }
+                val orderFiles = tx.getOrderFiles(orderId, user)
+                for (of in orderFiles) {
+                    documentClient.delete(dataBucket, "$orderId/${of.id}")
+                }
+                tx.deleteOrderAndReportData(orderId, report.id)
+            }
+            .also {
+                logger.audit(
+                    user,
+                    AuditEvent.DELETE_ORDER,
+                    mapOf("id" to "$orderId")
+                )
+            }
     }
 
     @PostMapping("/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])

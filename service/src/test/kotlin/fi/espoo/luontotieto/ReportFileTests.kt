@@ -27,22 +27,7 @@ class ReportFileTests : FullApplicationTest() {
     fun `create report files and fetch and delete`() {
         val createOrderResponse = createOrderAndReport(orderController)
 
-        val file = File("src/test/resources/test-data/liito_orava_pisteet.gpkg")
-        val multipartFile: MultipartFile =
-            MockMultipartFile(
-                "liito_orava_pisteet.gpkg",
-                "liito_orava_pisteet.gpkg",
-                "application/x-sqlite3",
-                FileInputStream(file)
-            )
-
-        controller.uploadReportFile(
-            user = adminUser,
-            reportId = createOrderResponse.reportId,
-            file = multipartFile,
-            documentType = DocumentType.LIITO_ORAVA_PISTEET,
-            description = "Test Description"
-        )
+        createLiitoOravaPisteetReportFile(controller, createOrderResponse.reportId)
 
         val reportFileResponse =
             controller.getReportFiles(customerUser, createOrderResponse.reportId)
