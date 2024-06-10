@@ -19,7 +19,6 @@ import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
 import org.springframework.web.bind.annotation.GetMapping
@@ -91,7 +90,8 @@ class UserController {
 
     @GetMapping()
     fun getUsers(
-        user: AuthenticatedUser, @RequestParam includeInactive: Boolean = true
+        user: AuthenticatedUser,
+        @RequestParam includeInactive: Boolean = true
     ): List<User> {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         return jdbi.inTransactionUnchecked { tx ->
