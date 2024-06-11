@@ -11,7 +11,7 @@ import {
   ReportFileValidationErrorResponse,
   ReportFormInput
 } from 'api/report-api'
-import { hasOrdererRole, hasViewerRole, UserContext } from 'auth/UserContext'
+import { hasViewerRole, UserContext } from 'auth/UserContext'
 import React, { useContext, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
@@ -29,6 +29,7 @@ import {
 } from '../../shared/layout'
 
 import { OrderDetails } from './OrderDetails'
+import { ReportApproval } from './ReportApproval'
 import { ReportForm } from './ReportForm'
 
 interface CreateProps {
@@ -52,7 +53,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const queryClient = useQueryClient()
   const { id } = useParams()
   const userIsViewer = useMemo(() => hasViewerRole(user), [user])
-  const showApproveButton = useMemo(() => hasOrdererRole(user), [user])
+  const [approve, setApprove] = useState(false)
 
   if (!id && props.mode === 'EDIT') throw Error('Id not found in path')
 
@@ -121,6 +122,20 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
     } else {
       await updateReportMutation({ ...reportInput, reportId: id! })
     }
+    if (report && approve) {
+      setShowModal({
+        title: 'Hyväksy selvitys',
+        text: 'Selvityksen hyväksyminen lukitsee selvityksen ja tallentaa paikkatiedot paikkatietokantaan',
+        resolve: {
+          action: () => approveReport(report.id),
+          label: 'Hyväksy'
+        },
+        reject: {
+          action: () => setShowModal(null),
+          label: 'Peruuta'
+        }
+      })
+    }
   }
 
   if (isLoadingReport || isLoadingReportFiles) {
@@ -170,6 +185,14 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
             />
           )}
         </SectionContainer>
+        <VerticalGap $size="m" />
+        {report && (
+          <ReportApproval
+            report={report}
+            onApprove={setApprove}
+            isValid={!!reportInput}
+          />
+        )}
       </PageContainer>
       <VerticalGap $size="XL" />
       <VerticalGap $size="XL" />
@@ -194,38 +217,14 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
                   !reportInput ||
                   savingReport ||
                   updatingReport ||
-                  report?.approved
+                  report?.approved ||
+                  approving
                 }
                 onClick={() => {
                   if (!reportInput) return
                   void onSubmit(reportInput)
                 }}
               />
-              {showApproveButton && (
-                <Button
-                  text="Hyväksy selvitys"
-                  data-qa="approve-button"
-                  primary
-                  disabled={
-                    !report || !reportInput || approving || report.approved
-                  }
-                  onClick={() => {
-                    if (!report) return
-                    setShowModal({
-                      title: 'Hyväksy selvitys',
-                      text: 'Selvityksen hyväksyminen lukitsee selvityksen ja tallentaa paikkatiedot paikkatietokantaan',
-                      resolve: {
-                        action: () => approveReport(report.id),
-                        label: 'Hyväksy'
-                      },
-                      reject: {
-                        action: () => setShowModal(null),
-                        label: 'Peruuta'
-                      }
-                    })
-                  }}
-                />
-              )}
             </>
           )}
         </FlexRight>
