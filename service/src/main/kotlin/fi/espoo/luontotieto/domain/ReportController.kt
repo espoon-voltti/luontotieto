@@ -22,6 +22,7 @@ import fi.espoo.luontotieto.s3.getAndCheckFileName
 import fi.espoo.luontotieto.ses.Email
 import fi.espoo.luontotieto.ses.SESEmailClient
 import fi.espoo.paikkatieto.domain.TableDefinition
+import fi.espoo.paikkatieto.domain.deletePaikkatieto
 import fi.espoo.paikkatieto.domain.getEnumRange
 import fi.espoo.paikkatieto.domain.insertPaikkatieto
 import fi.espoo.paikkatieto.reader.GpkgReader
@@ -70,15 +71,20 @@ class ReportController {
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired lateinit var documentClient: S3DocumentService
+    @Autowired
+    lateinit var documentClient: S3DocumentService
 
-    @Autowired lateinit var sesEmailClient: SESEmailClient
+    @Autowired
+    lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired lateinit var bucketEnv: BucketEnv
+    @Autowired
+    lateinit var bucketEnv: BucketEnv
 
-    @Autowired lateinit var luontotietoHost: LuontotietoHost
+    @Autowired
+    lateinit var luontotietoHost: LuontotietoHost
 
-    @Autowired lateinit var emailEnv: EmailEnv
+    @Autowired
+    lateinit var emailEnv: EmailEnv
 
     private val logger = KotlinLogging.logger {}
 
@@ -227,6 +233,7 @@ class ReportController {
                                     )
                                 }
                             }
+
                             else -> emptyMap()
                         }
                     ptx.insertPaikkatieto(
@@ -240,7 +247,7 @@ class ReportController {
         }
 
         jdbi
-            .inTransactionUnchecked { tx -> tx.approveReport(reportId, user) }
+            .inTransactionUnchecked { tx -> tx.updateReportApproved(reportId, true, user) }
             .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
 
         if (emailEnv.enabled) {
@@ -254,6 +261,30 @@ class ReportController {
                 )
             sendReportEmails(reportApprovedEmail, report)
         }
+    }
+
+    @PostMapping("/{reportId}/reopen")
+    @ResponseStatus(HttpStatus.CREATED)
+    fun reopenReport(
+        user: AuthenticatedUser,
+        @PathVariable reportId: UUID,
+    ) {
+        user.checkRoles(UserRole.ADMIN)
+
+        val report = jdbi.inTransactionUnchecked { tx -> tx.getReport(reportId, user) }
+
+        if (!report.approved) {
+            throw BadRequest("Cannot reopen a report that has not been approved.")
+        }
+        paikkatietoJdbi.inTransactionUnchecked { ptx ->
+            TableDefinition.entries.forEach { td ->
+                ptx.deletePaikkatieto(td, report.id)
+            }
+        }
+
+        jdbi
+            .inTransactionUnchecked { tx -> tx.updateReportApproved(reportId, false, user) }
+            .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
     }
 
     @GetMapping("/{reportId}/files")

@@ -38,6 +38,7 @@ data class Column(
                     value = null,
                     reason = GpkgValidationErrorReason.IS_NULL
                 )
+
             value != null &&
                 (!value::class.isSubclassOf(kClass) && value::class != kClass::class) -> {
                 val errorValue =
@@ -54,6 +55,7 @@ data class Column(
                     reason = GpkgValidationErrorReason.WRONG_TYPE
                 )
             }
+
             else -> null
         }
 }
@@ -356,6 +358,16 @@ fun Handle.insertPaikkatieto(
         )
     }
     return batchInsert.execute().toTypedArray()
+}
+
+fun Handle.deletePaikkatieto(
+    tableDefinition: TableDefinition,
+    reportId: UUID,
+): Int {
+    val deleteQuery = "DELETE FROM ${tableDefinition.layerName} WHERE selvitys_id = :reportId"
+    return createUpdate(deleteQuery)
+        .bind("reportId", reportId)
+        .execute()
 }
 
 fun Handle.deleteAluerajausLuontoselvitystilaus(reportId: UUID): Int {

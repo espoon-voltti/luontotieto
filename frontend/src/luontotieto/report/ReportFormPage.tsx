@@ -8,9 +8,11 @@ import {
   apiApproveReport,
   apiPostReport,
   apiPutReport,
+  apiReOpenReport,
   ReportFileValidationErrorResponse,
   ReportFormInput
 } from 'api/report-api'
+import { UserRole } from 'api/users-api'
 import { hasViewerRole, UserContext } from 'auth/UserContext'
 import React, { useContext, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -31,6 +33,7 @@ import {
 import { OrderDetails } from './OrderDetails'
 import { ReportApproval } from './ReportApproval'
 import { ReportForm } from './ReportForm'
+import { ReportReOpen } from './ReportReOpen'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -54,6 +57,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const { id } = useParams()
   const userIsViewer = useMemo(() => hasViewerRole(user), [user])
   const [approve, setApprove] = useState(false)
+  const [reOpen, setReOpen] = useState(false)
 
   if (!id && props.mode === 'EDIT') throw Error('Id not found in path')
 
@@ -116,7 +120,40 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
     }
   })
 
+  const { mutateAsync: reOpenReport, isPending: reOpening } = useMutation({
+    mutationFn: apiReOpenReport,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['report', id] })
+      void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+      setShowModal({
+        title: 'Selvitys avattu uudelleen',
+        resolve: {
+          action: () => {
+            setShowModal(null)
+            navigate(0)
+          },
+          label: 'Ok'
+        }
+      })
+    }
+  })
+
   const onSubmit = async (reportInput: ReportFormInput) => {
+    if (report && report.approved && reOpen) {
+      setShowModal({
+        title: 'Avaa selvitys uudelleen',
+        text: 'Selvityksen avaaminen poistaa kaikki tallennetut tiedot paikkatietokannasta, oletko varma?',
+        resolve: {
+          action: () => reOpenReport(report.id),
+          label: 'Hyväksy'
+        },
+        reject: {
+          action: () => setShowModal(null),
+          label: 'Peruuta'
+        }
+      })
+      return
+    }
     if (props.mode === 'CREATE') {
       await createReportMutation(reportInput)
     } else {
@@ -154,6 +191,9 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
         : report?.approved
           ? `${report?.name} (Hyväksytty)`
           : report?.name ?? ''
+
+  const showReportReOpen =
+    user?.role === UserRole.ADMIN && report && report.approved
 
   return (
     <>
@@ -193,6 +233,10 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
             isValid={!!reportInput}
           />
         )}
+        <VerticalGap $size="m" />
+        {showReportReOpen && (
+          <ReportReOpen report={report} onReopen={setReOpen} />
+        )}
       </PageContainer>
       <VerticalGap $size="XL" />
       <VerticalGap $size="XL" />
@@ -214,11 +258,13 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
                 data-qa="save-button"
                 primary
                 disabled={
-                  !reportInput ||
-                  savingReport ||
-                  updatingReport ||
-                  report?.approved ||
-                  approving
+                  !reOpen &&
+                  (!reportInput ||
+                    savingReport ||
+                    updatingReport ||
+                    report?.approved ||
+                    approving ||
+                    reOpening)
                 }
                 onClick={() => {
                   if (!reportInput) return
