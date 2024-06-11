@@ -26,7 +26,6 @@ import fi.espoo.paikkatieto.domain.getEnumRange
 import fi.espoo.paikkatieto.domain.insertPaikkatieto
 import fi.espoo.paikkatieto.reader.GpkgReader
 import fi.espoo.paikkatieto.reader.GpkgValidationError
-import fi.espoo.paikkatieto.reader.MAX_ERRORS
 import fi.espoo.paikkatieto.writer.GpkgWriter
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
@@ -112,9 +111,7 @@ class ReportController {
                     throw BadRequest("Invalid GeoPackage file: ${file.originalFilename}")
                 }
 
-                gpkgReader.use { reader ->
-                    reader.asSequence().flatMap { it.errors }.take(MAX_ERRORS).toList()
-                }
+                gpkgReader.use { reader -> reader.asSequence().flatMap { it.errors }.toList() }
             } ?: emptyList()
 
         if (errors.isEmpty()) {

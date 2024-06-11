@@ -11,8 +11,8 @@ import {
 } from 'api/hooks/orders'
 import {
   apiDeleteOrder,
-  apiPostOrder,
   apiPutOrder,
+  apiUpsertOrder,
   DeleteOrderError,
   DeleteorderErrorCode,
   OrderFileValidationErrorResponse,
@@ -88,7 +88,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
 
   const { mutateAsync: createOrderMutation, isPending: savingOrder } =
     useMutation({
-      mutationFn: apiPostOrder,
+      mutationFn: apiUpsertOrder,
       onSuccess: ({ orderId, reportId }) => {
         void queryClient.invalidateQueries({ queryKey: ['order', id] })
         void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })

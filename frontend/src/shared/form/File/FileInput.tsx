@@ -52,11 +52,11 @@ const fileValidationErrorToMessage = (
   error: ReportFileValidationError | OrderFileValidationError
 ): string => {
   if (error.reason === 'IS_NULL') {
-    return `${error.column}: tyhjä arvo ei sallittu`
+    return `${error.id}: ${error.column}: tyhjä arvo ei sallittu`
   } else if (error.reason === 'WRONG_TYPE') {
-    return `${error.column}: väärä tietotyyppi`
+    return `${error.id}: ${error.column}: väärä tietotyyppi`
   }
-  return `${error.column}:  ${error.reason}`
+  return `${error.id}: ${error.column}:  ${error.reason}`
 }
 
 const isReportFileNatureDocument = (

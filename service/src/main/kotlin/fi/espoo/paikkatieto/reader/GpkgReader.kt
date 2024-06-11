@@ -16,8 +16,6 @@ import kotlin.reflect.full.isSubclassOf
 
 private val logger = KotlinLogging.logger {}
 
-const val MAX_ERRORS = 30
-
 class GpkgReaderException(msg: String) : IOException(msg)
 
 enum class GpkgValidationErrorReason {
@@ -26,6 +24,7 @@ enum class GpkgValidationErrorReason {
 }
 
 data class GpkgValidationError(
+    val id: String,
     val column: String,
     val value: Any?,
     val reason: GpkgValidationErrorReason
@@ -89,7 +88,7 @@ class GpkgReader(private val file: File, val tableDefinition: TableDefinition) :
                     } else {
                         gpkgFeature.getAttribute(column.name)
                     }
-                column.validate(attr)
+                column.validate(gpkgFeature.id, attr)
             }
 
         return GpkgFeature(columns = columns, errors = errors)

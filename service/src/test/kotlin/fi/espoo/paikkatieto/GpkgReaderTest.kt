@@ -138,11 +138,13 @@ class GpkgReaderTest {
                     errors =
                         listOf(
                             GpkgValidationError(
+                                id = "liito_orava_alueet.1",
                                 column = "kunta",
                                 value = "79",
                                 reason = GpkgValidationErrorReason.WRONG_TYPE
                             ),
                             GpkgValidationError(
+                                id = "liito_orava_alueet.1",
                                 column = "tarkkuus",
                                 value = null,
                                 reason = GpkgValidationErrorReason.IS_NULL

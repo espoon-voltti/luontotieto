@@ -61,6 +61,7 @@ export enum OrderFileDocumentType {
 }
 
 export interface OrderFileValidationError {
+  id: string
   column: string
   value: null
   reason: string
@@ -75,7 +76,7 @@ export interface OrderFileValidationErrorResponse {
 
 export type OrderReportDocumentInput = Pick<OrderReportDocument, 'documentType'>
 
-export const apiPostOrder = async (
+export const apiUpsertOrder = async (
   orderInput: { orderId?: string | undefined } & OrderFormInput
 ): Promise<{ orderId: string; reportId: string }> => {
   const body: JsonOf<OrderInput> = {

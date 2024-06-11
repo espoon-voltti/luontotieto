@@ -24,7 +24,6 @@ import fi.espoo.paikkatieto.domain.insertPaikkatieto
 import fi.espoo.paikkatieto.reader.GpkgReader
 import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.reader.GpkgValidationErrorReason
-import fi.espoo.paikkatieto.reader.MAX_ERRORS
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
@@ -62,20 +61,15 @@ class OrderController {
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired
-    lateinit var sesEmailClient: SESEmailClient
+    @Autowired lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired
-    lateinit var documentClient: S3DocumentService
+    @Autowired lateinit var documentClient: S3DocumentService
 
-    @Autowired
-    lateinit var bucketEnv: BucketEnv
+    @Autowired lateinit var bucketEnv: BucketEnv
 
-    @Autowired
-    lateinit var emailEnv: EmailEnv
+    @Autowired lateinit var emailEnv: EmailEnv
 
-    @Autowired
-    lateinit var luontotietoHost: LuontotietoHost
+    @Autowired lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -177,13 +171,7 @@ class OrderController {
                 }
                 tx.deleteOrderAndReportData(orderId, report.id)
             }
-            .also {
-                logger.audit(
-                    user,
-                    AuditEvent.DELETE_ORDER,
-                    mapOf("id" to "$orderId")
-                )
-            }
+            .also { logger.audit(user, AuditEvent.DELETE_ORDER, mapOf("id" to "$orderId")) }
     }
 
     @PostMapping("/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -223,6 +211,7 @@ class OrderController {
                             .body(
                                 listOf(
                                     GpkgValidationError(
+                                        "-1",
                                         "geom",
                                         null,
                                         GpkgValidationErrorReason.IS_NULL
@@ -230,7 +219,7 @@ class OrderController {
                                 )
                             )
                     }
-                    val errors = data.flatMap { it.errors }.take(MAX_ERRORS).toList()
+                    val errors = data.flatMap { it.errors }.toList()
                     if (errors.isNotEmpty()) {
                         logger.error(errors.toString())
                         return ResponseEntity.badRequest().body(errors)
