@@ -78,10 +78,10 @@ export const ReportList = React.memo(function ReportList() {
       return sortBy === null
         ? filtered
         : orderBy(
-            filtered,
-            [sortBy],
-            [sortDirection === 'ASC' ? 'asc' : 'desc']
-          )
+          filtered,
+          [sortBy],
+          [sortDirection === 'ASC' ? 'asc' : 'desc']
+        )
     },
     [sortBy, sortDirection, filterByReportAssignee, filterBySearchQuery]
   )
@@ -94,7 +94,7 @@ export const ReportList = React.memo(function ReportList() {
   return (
     <PageContainer>
       <SectionContainer>
-        <VerticalGap $size="m" />
+        <VerticalGap $size="m"/>
         <FlexLeftRight>
           <FlexRowWithGaps $gapSize="s">
             <InputField
@@ -102,7 +102,7 @@ export const ReportList = React.memo(function ReportList() {
               value={filterBySearchQuery ?? ''}
               placeholder="Haku"
               icon={faSearch}
-              clearable={true}
+              $clearable={true}
               backgroundColor="#F7F7F7"
             />
           </FlexRowWithGaps>
@@ -116,70 +116,70 @@ export const ReportList = React.memo(function ReportList() {
           )}
         </FlexLeftRight>
 
-        <VerticalGap $size="L" />
+        <VerticalGap $size="L"/>
 
         <Table style={{ width: '100%' }}>
           <thead>
-            <tr>
-              <SortableTh
-                sorted={isSorted('updated')}
-                onClick={toggleSort('updated')}
-              >
-                Viimeksi päivitetty
-              </SortableTh>
-              <SortableTh
-                sorted={isSorted('approved')}
-                onClick={toggleSort('approved')}
-              >
-                TILA
-              </SortableTh>
-              <SortableTh
-                sorted={isSorted('name')}
-                onClick={toggleSort('name')}
-              >
-                TILAUKSEN NIMI
-              </SortableTh>
-              <Th style={{ width: '160px' }}>MAANKÄYTÖN SUUNNITELMAT</Th>
-              <Th style={{ width: '300px' }}>SELVITETTÄVÄT ASIAT</Th>
-              <Th style={{ width: '80px' }}>
-                SELVITYKSEN TEKIJÄ
-                <Select
-                  selectedItem={filterByReportAssignee}
-                  items={reportAssignees ?? []}
-                  getItemLabel={(u) => u ?? 'Valitse'}
-                  onChange={setFilterByReportAssignee}
-                />
-              </Th>
-            </tr>
+          <tr>
+            <SortableTh
+              sorted={isSorted('updated')}
+              onClick={toggleSort('updated')}
+            >
+              Viimeksi päivitetty
+            </SortableTh>
+            <SortableTh
+              sorted={isSorted('approved')}
+              onClick={toggleSort('approved')}
+            >
+              TILA
+            </SortableTh>
+            <SortableTh
+              sorted={isSorted('name')}
+              onClick={toggleSort('name')}
+            >
+              TILAUKSEN NIMI
+            </SortableTh>
+            <Th style={{ width: '160px' }}>MAANKÄYTÖN SUUNNITELMAT</Th>
+            <Th style={{ width: '300px' }}>SELVITETTÄVÄT ASIAT</Th>
+            <Th style={{ width: '80px' }}>
+              SELVITYKSEN TEKIJÄ
+              <Select
+                selectedItem={filterByReportAssignee}
+                items={reportAssignees ?? []}
+                getItemLabel={(u) => u ?? 'Valitse'}
+                onChange={setFilterByReportAssignee}
+              />
+            </Th>
+          </tr>
           </thead>
           <tbody>
-            {orderReports(reports).map((report) => (
-              <tr key={report.id}>
-                <td>{formatDateTime(report.updated)}</td>
-                <td>{report.approved ? 'Hyväksytty' : 'Lähetetty'}</td>
-                <td>
-                  <Link to={`/luontotieto/selvitys/${report.id}`}>
-                    {report.order?.name ?? report.name}
-                  </Link>
-                </td>
-                <td>{report.order?.planNumber?.toString() ?? '-'}</td>
-                <td>
-                  <ul>
-                    {report.order?.reportDocuments.map((r, index) => (
-                      <li key={index}>
-                        {getDocumentTypeTitle(r.documentType)}
-                      </li>
-                    ))}
-                  </ul>
-                </td>
-                <td>{report.order?.assignee}</td>
-              </tr>
-            ))}
-            {reports.length == 0 && (
-              <tr>
-                <td colSpan={4}>Ei näytettäviä selvityksiä</td>
-              </tr>
-            )}
+          {orderReports(reports).map((report) => (
+            <tr key={report.id}>
+              <td>{formatDateTime(report.updated)}</td>
+              <td>{report.approved ? 'Hyväksytty' : 'Lähetetty'}</td>
+              <td>
+                <Link to={`/luontotieto/selvitys/${report.id}`}>
+                  {report.order?.name ?? report.name}
+                </Link>
+              </td>
+              <td>{report.order?.planNumber?.toString() ?? '-'}</td>
+              <td>
+                <ul>
+                  {report.order?.reportDocuments.map((r, index) => (
+                    <li key={index}>
+                      {getDocumentTypeTitle(r.documentType)}
+                    </li>
+                  ))}
+                </ul>
+              </td>
+              <td>{report.order?.assignee}</td>
+            </tr>
+          ))}
+          {reports.length == 0 && (
+            <tr>
+              <td colSpan={4}>Ei näytettäviä selvityksiä</td>
+            </tr>
+          )}
           </tbody>
         </Table>
       </SectionContainer>
