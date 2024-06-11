@@ -4,7 +4,7 @@
 
 import classNames from 'classnames'
 import React, { RefObject, useMemo, useState } from 'react'
-import TextareaAutosize from 'react-autosize-textarea'
+import TextareaAutosize from 'react-textarea-autosize'
 import styled from 'styled-components'
 
 import { FlexColWithGaps } from '../layout'
@@ -61,7 +61,6 @@ export const TextArea = React.memo(function TextArea({
   width,
   rows,
   maxLength,
-  type,
   autoFocus,
   placeholder,
   info,
@@ -104,7 +103,6 @@ export const TextArea = React.memo(function TextArea({
         $width={width}
         disabled={readonly}
         maxLength={maxLength}
-        type={type}
         autoFocus={autoFocus}
         className={classNames(className, infoStatus)}
         data-qa={dataQa}
