@@ -29,8 +29,8 @@ import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
 
 import { NotFound } from '../../shared/404'
 import {
+  FlexCol,
   FlexLeftRight,
-  FlexRight,
   PageContainer,
   VerticalGap
 } from '../../shared/layout'
@@ -226,7 +226,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
       <VerticalGap $size="XL" />
       <Footer>
         <FlexLeftRight>
-          <>
+          <FlexCol>
             {showDeleteButton && (
               <Button
                 text="Poista selvitystilaus"
@@ -255,8 +255,8 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
                 }}
               />
             )}
-          </>
-          <FlexRight style={{ height: '100%' }}>
+          </FlexCol>
+          <FlexCol>
             <Button
               text="Tallenna"
               data-qa="save-button"
@@ -272,7 +272,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
                 }
               }}
             />
-          </FlexRight>
+          </FlexCol>
         </FlexLeftRight>
       </Footer>
       {showModal && (

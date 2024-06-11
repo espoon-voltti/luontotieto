@@ -170,9 +170,15 @@ interface Props {
   suggestions: Tag[]
   data: Tag[]
   onChange: (selected: Tag[]) => void
+  placeholderText: string
 }
 
-export const TagAutoComplete = ({ onChange, suggestions, data }: Props) => {
+export const TagAutoComplete = ({
+  onChange,
+  suggestions,
+  data,
+  placeholderText
+}: Props) => {
   const [selected, setSelected] = useState<Tag[]>(data ?? [])
 
   const onAdd = useCallback(
@@ -196,7 +202,7 @@ export const TagAutoComplete = ({ onChange, suggestions, data }: Props) => {
   return (
     <Wrapper>
       <ReactTags
-        placeholderText="Etsi tai lisää kaava"
+        placeholderText={placeholderText}
         newOptionText="Lisää %value%"
         allowNew={true}
         selected={selected}
