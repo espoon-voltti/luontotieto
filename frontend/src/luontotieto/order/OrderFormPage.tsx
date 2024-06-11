@@ -11,14 +11,14 @@ import {
 } from 'api/hooks/orders'
 import {
   apiDeleteOrder,
-  apiPostOrder,
   apiPutOrder,
+  apiUpsertOrder,
   DeleteOrderError,
   DeleteorderErrorCode,
   OrderFileValidationErrorResponse,
   OrderFormInput
 } from 'api/order-api'
-import { UserContext, hasOrdererRole } from 'auth/UserContext'
+import { hasOrdererRole, UserContext } from 'auth/UserContext'
 import { AxiosError } from 'axios'
 import React, { useContext, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
@@ -65,6 +65,9 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   const { id } = useParams()
   if (!id && props.mode === 'EDIT') throw Error('Id not found in path')
 
+  // Use this to store order id in case of order file saving error
+  const [orderId, setOrderId] = useState<string | undefined>(undefined)
+
   const { data: order, isLoading: isLoadingOrder } = useGetOrderQuery(id)
   const { data: orderFiles, isLoading: isLoadingOrderFiles } =
     useGetOrderFilesQuery(id)
@@ -85,18 +88,33 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
 
   const { mutateAsync: createOrderMutation, isPending: savingOrder } =
     useMutation({
-      mutationFn: apiPostOrder,
-      onSuccess: (reportId) => {
+      mutationFn: apiUpsertOrder,
+      onSuccess: ({ orderId, reportId }) => {
         void queryClient.invalidateQueries({ queryKey: ['order', id] })
         void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
         void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
         void queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
+        setOrderId(orderId)
+
         setShowModal({
           title: 'Tilaus luotu',
           resolve: {
             action: () => {
               setShowModal(null)
               navigate(`/luontotieto/selvitys/${reportId}`)
+            },
+            label: 'Ok'
+          }
+        })
+      },
+      onError: (error: OrderFileValidationErrorResponse | null) => {
+        error && setOrderFileErrors([error])
+        setOrderId(error?.orderId)
+        setShowModal({
+          title: 'Tilauksen luonti epäonnistui',
+          resolve: {
+            action: () => {
+              setShowModal(null)
             },
             label: 'Ok'
           }
@@ -123,7 +141,6 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
         })
       },
       onError: (error: OrderFileValidationErrorResponse | null) => {
-        console.error('Error updating order', error)
         error && setOrderFileErrors([error])
         setShowModal({
           title: 'Tilauksen päivitys epäonnistui',
@@ -266,7 +283,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
                 if (!orderInput) return
 
                 if (props.mode === 'CREATE') {
-                  await createOrderMutation(orderInput)
+                  await createOrderMutation({ ...orderInput, orderId })
                 } else {
                   await updateOrderMutation({ ...orderInput, orderId: id! })
                 }

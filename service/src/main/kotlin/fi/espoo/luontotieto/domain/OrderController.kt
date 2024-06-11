@@ -61,20 +61,15 @@ class OrderController {
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired
-    lateinit var sesEmailClient: SESEmailClient
+    @Autowired lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired
-    lateinit var documentClient: S3DocumentService
+    @Autowired lateinit var documentClient: S3DocumentService
 
-    @Autowired
-    lateinit var bucketEnv: BucketEnv
+    @Autowired lateinit var bucketEnv: BucketEnv
 
-    @Autowired
-    lateinit var emailEnv: EmailEnv
+    @Autowired lateinit var emailEnv: EmailEnv
 
-    @Autowired
-    lateinit var luontotietoHost: LuontotietoHost
+    @Autowired lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -143,10 +138,13 @@ class OrderController {
         user: AuthenticatedUser,
         @PathVariable id: UUID,
         @RequestBody order: OrderInput
-    ): Order {
+    ): Report {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         return jdbi
-            .inTransactionUnchecked { tx -> tx.putOrder(id, order, user) }
+            .inTransactionUnchecked { tx ->
+                tx.putOrder(id, order, user)
+                tx.getReportByOrderId(id, user)
+            }
             .also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
     }
 
@@ -173,13 +171,7 @@ class OrderController {
                 }
                 tx.deleteOrderAndReportData(orderId, report.id)
             }
-            .also {
-                logger.audit(
-                    user,
-                    AuditEvent.DELETE_ORDER,
-                    mapOf("id" to "$orderId")
-                )
-            }
+            .also { logger.audit(user, AuditEvent.DELETE_ORDER, mapOf("id" to "$orderId")) }
     }
 
     @PostMapping("/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -197,20 +189,8 @@ class OrderController {
         val fileName = getAndCheckFileName(file)
         val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
 
-        val id =
-            jdbi.inTransactionUnchecked { tx ->
-                tx.insertOrderFile(
-                    OrderFileInput(orderId, description, contentType, fileName, documentType),
-                    user
-                )
-            }
-
+        var id: UUID? = null
         try {
-            documentClient.upload(
-                dataBucket,
-                MultipartDocument(name = "$orderId/$id", file = file, contentType = contentType)
-            )
-
             if (documentType == OrderDocumentType.ORDER_AREA) {
                 val tableDefinition = TableDefinition.ALUERAJAUS_LUONTOSELVITYSTILAUS
                 val tmpGpkgFile = kotlin.io.path.createTempFile(fileName)
@@ -231,6 +211,7 @@ class OrderController {
                             .body(
                                 listOf(
                                     GpkgValidationError(
+                                        "-1",
                                         "geom",
                                         null,
                                         GpkgValidationErrorReason.IS_NULL
@@ -265,6 +246,19 @@ class OrderController {
                 }
             }
 
+            id =
+                jdbi.inTransactionUnchecked { tx ->
+                    tx.insertOrderFile(
+                        OrderFileInput(orderId, description, contentType, fileName, documentType),
+                        user
+                    )
+                }
+
+            documentClient.upload(
+                dataBucket,
+                MultipartDocument(name = "$orderId/$id", file = file, contentType = contentType)
+            )
+
             logger.audit(
                 user,
                 AuditEvent.ADD_ORDER_FILE,
@@ -272,7 +266,9 @@ class OrderController {
             )
         } catch (e: Exception) {
             logger.error("Error uploading file: ", e)
-            jdbi.inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, id) }
+            if (id != null) {
+                jdbi.inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, id) }
+            }
             throw BadRequest("Error uploading file")
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(emptyList())

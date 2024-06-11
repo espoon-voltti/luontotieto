@@ -610,6 +610,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 props.errors.find((error) => error.id === orderAreaFile.id)
                   ?.errors
               }
+              accept=".gpkg"
             />
           )}
           {orderAreaFile && orderAreaFile.type === 'EXISTING' && (

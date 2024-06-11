@@ -166,6 +166,7 @@ export const apiApproveReport = async (reportId: string): Promise<void> => {
 }
 
 export interface ReportFileValidationError {
+  id: string
   column: string
   value: null
   reason: string

@@ -26,10 +26,14 @@ data class Column(
     val isNullable: Boolean = false,
     val sqlType: String? = null
 ) {
-    fun validate(value: Any?): GpkgValidationError? =
+    fun validate(
+        id: String,
+        value: Any?
+    ): GpkgValidationError? =
         when {
             value == null && !isNullable ->
                 GpkgValidationError(
+                    id = id,
                     column = name,
                     value = null,
                     reason = GpkgValidationErrorReason.IS_NULL
@@ -44,6 +48,7 @@ data class Column(
                     }
 
                 GpkgValidationError(
+                    id = id,
                     column = name,
                     value = errorValue,
                     reason = GpkgValidationErrorReason.WRONG_TYPE

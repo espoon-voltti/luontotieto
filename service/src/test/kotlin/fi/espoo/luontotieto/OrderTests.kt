@@ -34,10 +34,7 @@ class OrderTests : FullApplicationTest() {
                 OrderReportDocument("Test description 2", DocumentType.LIITO_ORAVA_ALUEET)
             )
         val createdOrder =
-            createOrderAndReport(
-                controller = controller,
-                reportDocuments = orderReportDocuments
-            )
+            createOrderAndReport(controller = controller, reportDocuments = orderReportDocuments)
 
         val orderResponse = controller.getOrderById(adminUser, createdOrder.orderId)
 
@@ -95,7 +92,7 @@ class OrderTests : FullApplicationTest() {
         val createdOrder = createOrderAndReport(controller = controller)
         val updatedReportDocuments =
             listOf(OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_ALUEET))
-        val updatedOrder =
+        val updatedReport =
             controller.updateOrder(
                 adminUser,
                 createdOrder.orderId,
@@ -115,11 +112,11 @@ class OrderTests : FullApplicationTest() {
                 )
             )
 
-        assertEquals("New name", updatedOrder.name)
-        assertEquals("New description", updatedOrder.description)
-        assertEquals("Yritys Oy", updatedOrder.assignee)
-        assertEquals(customerUser.id, updatedOrder.assigneeId)
-        assertEquals(updatedReportDocuments, updatedOrder.reportDocuments)
+        assertEquals("New name", updatedReport.order?.name)
+        assertEquals("New description", updatedReport.order?.description)
+        assertEquals("Yritys Oy", updatedReport.order?.assignee)
+        assertEquals(customerUser.id, updatedReport.order?.assigneeId)
+        assertEquals(updatedReportDocuments, updatedReport.order?.reportDocuments)
     }
 
     @Test
