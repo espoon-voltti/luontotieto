@@ -165,6 +165,10 @@ export const apiApproveReport = async (reportId: string): Promise<void> => {
   await apiClient.post(`/reports/${reportId}/approve`, {})
 }
 
+export const apiReOpenReport = async (reportId: string): Promise<void> => {
+  await apiClient.post(`/reports/${reportId}/reopen`, {})
+}
+
 export interface ReportFileValidationError {
   id: string
   column: string

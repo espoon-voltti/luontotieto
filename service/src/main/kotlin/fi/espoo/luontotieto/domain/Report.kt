@@ -91,20 +91,22 @@ fun Handle.insertReport(
         .one()
 }
 
-fun Handle.approveReport(
+fun Handle.updateReportApproved(
     reportId: UUID,
+    approve: Boolean,
     user: AuthenticatedUser
 ): Report {
     return createUpdate(
         """
             UPDATE report 
               SET
-                approved = TRUE,
+                approved = :approved,
                 updated_by = :updatedBy
             WHERE id = :reportId
             """
     )
         .bind("reportId", reportId)
+        .bind("approved", approve)
         .bind("updatedBy", user.id)
         .executeAndReturnGeneratedKeys()
         .mapTo<Report>()
