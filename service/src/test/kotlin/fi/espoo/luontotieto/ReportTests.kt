@@ -22,6 +22,7 @@ import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -100,7 +101,7 @@ class ReportTests : FullApplicationTest() {
     }
 
     @Test
-    fun `create and approve report`() {
+    fun `create, approve and reopen report`() {
         val createOrderResponse =
             createOrderAndReport(
                 controller = orderController,
@@ -249,6 +250,37 @@ class ReportTests : FullApplicationTest() {
                 ),
                 data.selvitetytTiedot
             )
+        }
+
+        reportController.reopenReport(adminUser, createOrderResponse.reportId)
+
+        val reopenedReport = reportController.getReportById(adminUser, createOrderResponse.reportId)
+        assertFalse(reopenedReport.approved)
+
+        reportController.paikkatietoJdbi.inTransactionUnchecked { ptx ->
+            val aluerajausRows =
+                ptx.createQuery(
+                    """
+                            SELECT selvitys_id FROM aluerajaus_luontoselvitys WHERE selvitys_id = :reportId
+                        """
+                        .trimIndent()
+                )
+                    .bind("reportId", createOrderResponse.reportId)
+                    .mapTo<String>()
+
+            assertEquals(aluerajausRows.count(), 0)
+
+            val muutHuomioitavatLajitPisteet =
+                ptx.createQuery(
+                    """
+                            SELECT selvitys_id FROM muut_huomioitavat_lajit_pisteet WHERE selvitys_id = :reportId
+                        """
+                        .trimIndent()
+                )
+                    .bind("reportId", createOrderResponse.reportId)
+                    .mapTo<String>()
+
+            assertEquals(muutHuomioitavatLajitPisteet.count(), 0)
         }
     }
 
