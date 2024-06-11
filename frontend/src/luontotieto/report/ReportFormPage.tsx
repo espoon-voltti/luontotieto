@@ -33,7 +33,7 @@ import {
 import { OrderDetails } from './OrderDetails'
 import { ReportApproval } from './ReportApproval'
 import { ReportForm } from './ReportForm'
-import { ReportReOpen } from './ReportReopen'
+import { ReportReOpen } from './ReportReOpen'
 
 interface CreateProps {
   mode: 'CREATE'
