@@ -41,4 +41,6 @@ export const H4 = styled.h4`
 
 export const P = styled.p``
 
+export const B = styled.b``
+
 export const I = styled.i``

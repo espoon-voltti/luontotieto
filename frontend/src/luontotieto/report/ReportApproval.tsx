@@ -10,10 +10,9 @@ import React, { useContext, useMemo, useState } from 'react'
 import { formatDateTime } from 'shared/dates'
 import { Checkbox } from 'shared/form/Checkbox'
 import { colors } from 'shared/theme'
-import styled from 'styled-components'
 
 import { FlexCol, SectionContainer, VerticalGap } from '../../shared/layout'
-import { H3, P } from '../../shared/typography'
+import { B, H3 } from '../../shared/typography'
 
 type Props = {
   report: ReportDetails
@@ -38,19 +37,19 @@ export const ReportApproval = React.memo(function ReportApproval({
       <FlexCol>
         <H3>Selvityksen hyväksyminen</H3>
         <VerticalGap $size="m" />
-        <StyledP>
+        <B>
           {`Tilaus lähetetty ${formatDateTime(report.order.created)}, ${report.order.createdBy}`}
-        </StyledP>
+        </B>
         <VerticalGap $size="m" />
         {report.approved && (
-          <StyledP>
+          <B>
             <FontAwesomeIcon
               icon={faCheckCircle}
               color={colors.status.success}
               style={{ marginRight: '6px' }}
             />
             {`Selvitys hyväksytty ${formatDateTime(report.updated)}, ${report.updatedBy}`}
-          </StyledP>
+          </B>
         )}
         <VerticalGap $size="m" />
         {showApproveButton && (
@@ -69,7 +68,3 @@ export const ReportApproval = React.memo(function ReportApproval({
     </SectionContainer>
   )
 })
-
-const StyledP = styled(P)`
-  font-weight: bold;
-`
