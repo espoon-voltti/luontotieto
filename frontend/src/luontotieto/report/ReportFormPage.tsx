@@ -6,7 +6,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useGetReportFilesQuery, useGetReportQuery } from 'api/hooks/reports'
 import {
   apiApproveReport,
-  apiPostReport,
   apiPutReport,
   apiReOpenReport,
   ReportFileValidationErrorResponse,
@@ -35,21 +34,11 @@ import { ReportApproval } from './ReportApproval'
 import { ReportForm } from './ReportForm'
 import { ReportReOpen } from './ReportReOpen'
 
-interface CreateProps {
-  mode: 'CREATE'
-}
-
-interface EditProps {
-  mode: 'EDIT'
-}
-
-type Props = CreateProps | EditProps
-
 const StyledButton = styled(Button)`
   margin-right: 20px;
 `
 
-export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
+export const ReportFormPage = React.memo(function ReportFormPage() {
   const { user } = useContext(UserContext)
 
   const navigate = useNavigate()
@@ -59,7 +48,7 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
   const [approve, setApprove] = useState(false)
   const [reOpen, setReOpen] = useState(false)
 
-  if (!id && props.mode === 'EDIT') throw Error('Id not found in path')
+  if (!id) throw Error('Id not found in path')
 
   const [reportInput, setReportInput] = useState<ReportFormInput | null>(null)
   const [reportFileErrors, setReportFileErrors] = useState<
@@ -72,21 +61,6 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
 
   const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
 
-  const { mutateAsync: createReportMutation, isPending: savingReport } =
-    useMutation({
-      mutationFn: apiPostReport,
-      onSuccess: (_report) => {
-        void queryClient.invalidateQueries({ queryKey: ['report', id] })
-        void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-        setShowModal({
-          title: 'Selvitys luotu',
-          resolve: { action: () => setShowModal(null), label: 'Ok' }
-        })
-      },
-      onError: (error: ReportFileValidationErrorResponse) =>
-        setReportFileErrors([error])
-    })
-
   const { mutateAsync: updateReportMutation, isPending: updatingReport } =
     useMutation({
       mutationFn: apiPutReport,
@@ -96,7 +70,12 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
         setReportFileErrors([])
         setShowModal({
           title: 'Tiedot tallennettu',
-          resolve: { action: () => setShowModal(null), label: 'Ok' }
+          resolve: {
+            action: () => {
+              setShowModal(null), navigate(`/luontotieto`)
+            },
+            label: 'Ok'
+          }
         })
       },
       onError: (error: ReportFileValidationErrorResponse) => {
@@ -154,11 +133,9 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
       })
       return
     }
-    if (props.mode === 'CREATE') {
-      await createReportMutation(reportInput)
-    } else {
-      await updateReportMutation({ ...reportInput, reportId: id! })
-    }
+
+    await updateReportMutation({ ...reportInput, reportId: id })
+
     if (report && approve) {
       setShowModal({
         title: 'Hyväksy selvitys',
@@ -183,14 +160,9 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
     return <NotFound />
   }
 
-  const title =
-    props.mode === 'CREATE'
-      ? 'Uusi luontoselvitys'
-      : report?.order
-        ? report.order.name
-        : report?.approved
-          ? `${report?.name} (Hyväksytty)`
-          : report?.name ?? ''
+  const title = report?.approved
+    ? `${report.order.name} (Hyväksytty)`
+    : report.order.name
 
   const showReportReOpen =
     user?.role === UserRole.ADMIN && report && report.approved
@@ -199,31 +171,19 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
     <>
       <PageContainer>
         <BackNavigation text={title} navigationText="Etusivulle" />
-        {report?.order && (
-          <OrderDetails order={report?.order} reportId={report.id} />
-        )}
+        <OrderDetails order={report.order} reportId={report.id} />
+
         <VerticalGap $size="m" />
 
         <SectionContainer>
-          {props.mode === 'EDIT' && report && reportFiles && (
-            <ReportForm
-              key={report.updated.toString()}
-              readOnly={userIsViewer}
-              mode={props.mode}
-              onChange={setReportInput}
-              report={report}
-              reportFiles={reportFiles}
-              saveErrors={reportFileErrors}
-            />
-          )}
-
-          {props.mode === 'CREATE' && (
-            <ReportForm
-              readOnly={userIsViewer}
-              mode={props.mode}
-              onChange={setReportInput}
-            />
-          )}
+          <ReportForm
+            key={report.updated.toString()}
+            readOnly={userIsViewer}
+            onChange={setReportInput}
+            report={report}
+            reportFiles={reportFiles}
+            saveErrors={reportFileErrors}
+          />
         </SectionContainer>
         <VerticalGap $size="m" />
         {report && (
@@ -260,7 +220,6 @@ export const ReportFormPage = React.memo(function ReportFormPage(props: Props) {
                 disabled={
                   !reOpen &&
                   (!reportInput ||
-                    savingReport ||
                     updatingReport ||
                     report?.approved ||
                     approving ||

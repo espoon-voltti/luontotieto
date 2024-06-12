@@ -26,23 +26,13 @@ const StyledInlineButton = styled(InlineButton)`
   font-size: 0.9rem;
 `
 
-interface CreateProps {
-  mode: 'CREATE'
-  onChange: (validInput: ReportFormInput | null) => void
-  saveErrors?: ReportFileValidationErrorResponse[]
-  readOnly: boolean
-}
-
-interface EditProps {
-  mode: 'EDIT'
+interface ReportFormProps {
   report: ReportDetails
   reportFiles: ReportFileDetails[]
   onChange: (validInput: ReportFormInput | null) => void
   saveErrors?: ReportFileValidationErrorResponse[]
   readOnly: boolean
 }
-
-type Props = CreateProps | EditProps
 
 interface ReportFileInputElementNew {
   type: 'NEW'
@@ -193,26 +183,29 @@ function filesAreValid(
   })
 }
 
-export const ReportForm = React.memo(function ReportForm(props: Props) {
-  const readOnly =
-    props.readOnly || (props.mode === 'EDIT' && props.report.approved)
+export const ReportForm = React.memo(function ReportForm(
+  props: ReportFormProps
+) {
+  const readOnly = props.readOnly || props.report.approved
   const requiredFiles = useMemo(
-    () =>
-      props.mode === 'EDIT' ? props.report.order?.reportDocuments ?? [] : [],
+    () => props.report.order?.reportDocuments ?? [],
     [props]
   )
   const [noObservations, _setNoObservations] = useState<
     ReportFileDocumentType[] | null
-  >(props.mode === 'CREATE' ? null : props.report.noObservations)
+  >(props.report.noObservations)
 
-  const originalFileInputs = useMemo(() => {
-    const reportFiles = props.mode === 'EDIT' ? props.reportFiles : []
-    return createFileInputs(reportFiles, requiredFiles, noObservations ?? [])
-  }, [requiredFiles, props, noObservations])
-
-  const [name, _] = useDebouncedState(
-    props.mode === 'CREATE' ? '' : props.report.name
+  const originalFileInputs = useMemo(
+    () =>
+      createFileInputs(
+        props.reportFiles ?? [],
+        requiredFiles,
+        noObservations ?? []
+      ),
+    [requiredFiles, props, noObservations]
   )
+
+  const [name, _] = useDebouncedState(props.report.name)
 
   const [fileInputs, setFileInputs] = useState(originalFileInputs)
 

@@ -18,7 +18,6 @@ export interface FileInputProps extends BaseProps {
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void
   readonly?: boolean
   width?: InputWidth
-
   autoComplete?: string
   placeholder?: string
   info?: InputInfo
