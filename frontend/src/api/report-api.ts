@@ -9,17 +9,6 @@ import { JsonOf } from 'shared/api-utils'
 
 import { Order, OrderFileDocumentType } from './order-api'
 
-export interface ReportFormInput {
-  name: string
-  noObservations: string[] | null
-  filesToAdd: ReportFileInput[]
-  filesToRemove: string[]
-}
-
-export interface ReportInput {
-  name: string
-}
-
 export function getDocumentTypeTitle<
   T extends ReportFileDocumentType | OrderFileDocumentType
 >(dt: T) {
@@ -87,15 +76,16 @@ export enum ReportFileDocumentType {
   REPORT = 'REPORT'
 }
 
-export interface ReportFileInput {
-  description: string
-  documentType: ReportFileDocumentType
-  file: File
-  saveErrors?: ReportFileValidationError[]
+export interface ReportFormInput {
+  name: string
+  noObservations: string[] | null
+  filesToAdd: ReportFileInput[]
+  filesToRemove: string[]
 }
 
-export interface ReportDetails extends ReportInput {
+export interface ReportDetails {
   id: string
+  name: string
   created: Date
   updated: Date
   createdBy: string
@@ -104,6 +94,13 @@ export interface ReportDetails extends ReportInput {
   noObservations: ReportFileDocumentType[] | null
   order: Order
   reportDocumentsString?: string
+}
+
+export interface ReportFileInput {
+  description: string
+  documentType: ReportFileDocumentType
+  file: File
+  saveErrors?: ReportFileValidationError[]
 }
 
 export interface ReportFileDetails extends ReportFileInput {
@@ -120,7 +117,7 @@ export interface ReportFileDetails extends ReportFileInput {
 export const apiPutReport = async (
   reportInput: { reportId: string } & ReportFormInput
 ): Promise<ReportDetails> => {
-  const body: JsonOf<ReportInput> = {
+  const body: JsonOf<ReportFormInput> = {
     ...reportInput
   }
 
