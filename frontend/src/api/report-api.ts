@@ -117,28 +117,6 @@ export interface ReportFileDetails extends ReportFileInput {
   reportId: string
 }
 
-export const apiPostReport = async (
-  reportInput: ReportFormInput
-): Promise<ReportDetails> => {
-  const body: JsonOf<ReportInput> = {
-    ...reportInput
-  }
-
-  const report = await apiClient
-    .post<ReportDetails>('/reports', body)
-    .then((r) => r.data)
-
-  for (const id of reportInput.filesToRemove) {
-    await apiClient.delete(`/reports/${report.id}/files/${id}`)
-  }
-
-  for (const file of reportInput.filesToAdd) {
-    await apiPostReportFile(report.id, file)
-  }
-
-  return report
-}
-
 export const apiPutReport = async (
   reportInput: { reportId: string } & ReportFormInput
 ): Promise<ReportDetails> => {
