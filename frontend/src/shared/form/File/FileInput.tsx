@@ -25,12 +25,6 @@ import { UnderRowStatusIcon } from '../StatusIcon'
 import { FileInputField } from './FileInputField'
 import { FileTitle } from './FileTitle'
 
-export interface ValidFileInputData<T> {
-  description: string
-  file: File
-  documentType: T
-}
-
 export interface FileInputData {
   description: string
   file: File | null
