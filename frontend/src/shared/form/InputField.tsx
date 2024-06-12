@@ -93,6 +93,7 @@ export const StyledInput = styled.input<StyledInputProps>`
     color: ${colors.grayscale.g70};
     background: none;
   }
+
   &.fileInput {
     border: none;
     background-color: #f7f7f7;
@@ -182,7 +183,7 @@ export interface InputProps extends BaseProps {
 }
 
 interface ClearableInputProps extends OtherInputProps {
-  clearable: true
+  $clearable: boolean
   clearLabel: string
 }
 
@@ -240,7 +241,7 @@ export const InputField = React.memo(function InputField({
   const infoText = hideError ? undefined : info?.text
   const infoStatus = hideError ? undefined : info?.status
 
-  const clearable = 'clearable' in rest && rest.clearable
+  const clearable = '$clearable' in rest && rest.$clearable
 
   const showIcon = !!(clearable || icon || symbol)
 

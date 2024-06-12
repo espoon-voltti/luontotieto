@@ -83,7 +83,7 @@ export const UserListPage = React.memo(function UserListPage() {
               value={filterBySearchQuery ?? ''}
               placeholder="Haku"
               icon={faSearch}
-              clearable={true}
+              $clearable={true}
               backgroundColor="#F7F7F7"
             />
           </FlexRowWithGaps>
