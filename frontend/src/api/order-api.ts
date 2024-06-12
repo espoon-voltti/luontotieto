@@ -8,7 +8,7 @@ import { JsonOf } from 'shared/api-utils'
 
 import { ReportDetails, ReportFileDocumentType } from './report-api'
 
-export interface Order extends OrderInput {
+export interface Order extends OrderFormInput {
   id: string
   created: Date
   updated: Date
@@ -31,21 +31,6 @@ export interface OrderFormInput {
   assigneeContactPerson: string
   assigneeContactEmail: string
   returnDate: string
-  orderingUnit?: string[]
-}
-
-export interface OrderInput {
-  name: string
-  description: string
-  planNumber?: string[]
-  assigneeId: string
-  contactPerson: string
-  contactEmail: string
-  contactPhone: string
-  assigneeContactPerson: string
-  assigneeContactEmail: string
-  returnDate: string
-  reportDocuments: OrderReportDocumentInput[]
   orderingUnit?: string[]
 }
 
@@ -79,7 +64,7 @@ export type OrderReportDocumentInput = Pick<OrderReportDocument, 'documentType'>
 export const apiUpsertOrder = async (
   orderInput: { orderId?: string | undefined } & OrderFormInput
 ): Promise<{ orderId: string; reportId: string }> => {
-  const body: JsonOf<OrderInput> = {
+  const body: JsonOf<OrderFormInput> = {
     ...orderInput,
     reportDocuments: orderInput.reportDocuments.map((rd) => ({
       ...rd,
@@ -132,7 +117,7 @@ const handleFiles = async (
 export const apiPutOrder = async (
   orderInput: { orderId: string } & OrderFormInput
 ): Promise<Order> => {
-  const body: JsonOf<OrderInput> = {
+  const body: JsonOf<OrderFormInput> = {
     ...orderInput,
     //TODO: The description is to be removed (but for the moment a bit hesitant to remove it, lets clean it up later)
     reportDocuments: orderInput.reportDocuments.map((rd) => ({
