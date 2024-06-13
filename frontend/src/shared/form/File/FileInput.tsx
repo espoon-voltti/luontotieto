@@ -112,6 +112,11 @@ export const FileInput = <
 
   const showNoObservationCheckBox = isReportFileNatureDocument(documentType)
 
+  const showDescription =
+    documentType === ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS ||
+    documentType === ReportFileDocumentType.OTHER ||
+    documentType === OrderFileDocumentType.ORDER_INFO
+
   return (
     <FlexCol>
       <FlexRowWithGaps $gapSize="m" style={{ marginBottom: '5px' }}>
@@ -143,17 +148,19 @@ export const FileInput = <
           />
         </LabeledInput>
 
-        <LabeledInput $cols={5}>
-          {showTitle && <VerticalGap $size="L" />}
-          <Label>Lisätiedot tarvittaessa</Label>
-          <InputField
-            readonly={readOnly || noObservation}
-            onChange={(value) => {
-              setDescription(value)
-            }}
-            value={description}
-          />
-        </LabeledInput>
+        {showDescription && (
+          <LabeledInput $cols={5}>
+            {showTitle && <VerticalGap $size="L" />}
+            <Label>Lisätiedot tarvittaessa</Label>
+            <InputField
+              readonly={readOnly || noObservation}
+              onChange={(value) => {
+                setDescription(value)
+              }}
+              value={description}
+            />
+          </LabeledInput>
+        )}
       </FlexRowWithGaps>
       {errorMessage && (
         <FlexRowWithGaps>
