@@ -7,11 +7,13 @@ package fi.espoo.paikkatieto.reader
 import fi.espoo.paikkatieto.domain.TableDefinition
 import mu.KotlinLogging
 import org.geotools.api.data.SimpleFeatureReader
+import org.geotools.api.feature.simple.SimpleFeature
 import org.geotools.geopkg.GeoPackage
 import org.locationtech.jts.geom.Geometry
 import java.io.Closeable
 import java.io.File
 import java.io.IOException
+import java.util.Locale
 import kotlin.reflect.full.isSubclassOf
 
 private val logger = KotlinLogging.logger {}
@@ -75,7 +77,7 @@ class GpkgReader(private val file: File, val tableDefinition: TableDefinition) :
                     val geom = gpkgFeature.getAttribute(column.name) ?: gpkgFeature.defaultGeometry
                     Pair(column.name, geom)
                 } else {
-                    Pair(column.name, gpkgFeature.getAttribute(column.name))
+                    Pair(column.name, getAttribute(column.name, gpkgFeature))
                 }
             }
 
@@ -86,12 +88,25 @@ class GpkgReader(private val file: File, val tableDefinition: TableDefinition) :
                     if (isGeometryColumn) {
                         gpkgFeature.getAttribute(column.name) ?: gpkgFeature.defaultGeometry
                     } else {
-                        gpkgFeature.getAttribute(column.name)
+                        getAttribute(column.name, gpkgFeature)
                     }
                 column.validate(gpkgFeature.id, attr)
             }
 
         return GpkgFeature(columns = columns, errors = errors)
+    }
+
+    private fun getAttribute(
+        column: String,
+        gpkgFeature: SimpleFeature
+    ): Any? {
+        return gpkgFeature.getAttribute(column)
+            ?: gpkgFeature.getAttribute(column.uppercase())
+            ?: gpkgFeature.getAttribute(
+                column.lowercase().replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+                }
+            )
     }
 
     override fun close() {
