@@ -270,18 +270,19 @@ fun Handle.getAluerajausLuontoselvitysParams(
 
 fun reportsToCsv(reports: List<Report>): String {
     val CSV_HEADER = "id;name;created;updated;approved;noObservations;createdBy;o_id;o_name;\n"
+    val DELIMITER = ";"
     val csvContent = StringBuilder()
     csvContent.append(CSV_HEADER)
 
     for (report in reports) {
-        csvContent.append(report.id).append(";")
-            .append(report.name).append(";")
-            .append(report.created).append(";")
-            .append(report.updated).append(";")
-            .append(report.approved).append(";")
-            .append(report.noObservations).append(";")
-            .append(report.createdBy).append(";")
-            .append(report.order?.id).append(";")
+        csvContent.append(report.id).append(DELIMITER)
+            .append(report.name).append(DELIMITER)
+            .append(report.created).append(DELIMITER)
+            .append(report.updated).append(DELIMITER)
+            .append(report.approved).append(DELIMITER)
+            .append(report.noObservations).append(DELIMITER)
+            .append(report.createdBy).append(DELIMITER)
+            .append(report.order?.id).append(DELIMITER)
             .append(report.order?.name).append("\n")
     }
 
