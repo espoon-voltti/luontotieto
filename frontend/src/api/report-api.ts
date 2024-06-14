@@ -195,6 +195,21 @@ export const apiGetReports = (): Promise<ReportDetails[]> =>
     })
   )
 
+export const apiGetReportsAsCsv = (): Promise<unknown> =>
+  apiClient
+    .get<Blob>(`/reports/csv`, {
+      responseType: 'blob'
+    })
+    .then((res: AxiosResponse<Blob, AxiosHeaders>) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const dispositionHeader: string = res.headers['content-disposition'] ?? ''
+      const fileParameter = dispositionHeader.split('filename=')[1] ?? ''
+      const fileName = fileParameter.replace(/"/g, '')
+      if (fileName.length > 0) {
+        FileSaver.saveAs(res.data, fileName)
+      }
+    })
+
 export const apiGetReportFiles = (id: string): Promise<ReportFileDetails[]> =>
   apiClient
     .get<ReportFileDetails[]>(`/reports/${id}/files`)

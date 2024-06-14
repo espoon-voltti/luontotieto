@@ -58,7 +58,7 @@ private const val SELECT_REPORT_SQL =
            o.contact_person                           AS "o_contactPerson",
            o.contact_phone                            AS "o_contactPhone",
            o.contact_email                            AS "o_contactEmail",
-           o.ordering_unit                             AS "o_orderingUnit"
+           o.ordering_unit                            AS "o_orderingUnit"
     FROM report r
              LEFT JOIN users uc ON r.created_by = uc.id
              LEFT JOIN users uu ON r.updated_by = uu.id
@@ -266,4 +266,24 @@ fun Handle.getAluerajausLuontoselvitysParams(
         "reportDocumentLink" to reportDocumentLink,
         "surveyedData" to surveyedData
     )
+}
+
+fun reportsToCsv(reports: List<Report>): String {
+    val CSV_HEADER = "id;name;created;updated;approved;noObservations;createdBy;o_id;o_name;\n"
+    val csvContent = StringBuilder()
+    csvContent.append(CSV_HEADER)
+
+    for (report in reports) {
+        csvContent.append(report.id).append(";")
+            .append(report.name).append(";")
+            .append(report.created).append(";")
+            .append(report.updated).append(";")
+            .append(report.approved).append(";")
+            .append(report.noObservations).append(";")
+            .append(report.createdBy).append(";")
+            .append(report.order?.id).append(";")
+            .append(report.order?.name).append("\n")
+    }
+
+    return csvContent.toString()
 }

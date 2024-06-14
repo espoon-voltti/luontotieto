@@ -71,15 +71,20 @@ class ReportController {
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired lateinit var documentClient: S3DocumentService
+    @Autowired
+    lateinit var documentClient: S3DocumentService
 
-    @Autowired lateinit var sesEmailClient: SESEmailClient
+    @Autowired
+    lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired lateinit var bucketEnv: BucketEnv
+    @Autowired
+    lateinit var bucketEnv: BucketEnv
 
-    @Autowired lateinit var luontotietoHost: LuontotietoHost
+    @Autowired
+    lateinit var luontotietoHost: LuontotietoHost
 
-    @Autowired lateinit var emailEnv: EmailEnv
+    @Autowired
+    lateinit var emailEnv: EmailEnv
 
     private val logger = KotlinLogging.logger {}
 
@@ -165,6 +170,24 @@ class ReportController {
     @GetMapping()
     fun getReports(user: AuthenticatedUser) = jdbi.inTransactionUnchecked { tx -> tx.getReports(user) }
 
+    @GetMapping("/csv")
+    fun getReportsAsCsv(user: AuthenticatedUser): ResponseEntity<Resource> {
+        val reports =
+            jdbi.inTransactionUnchecked { tx -> tx.getReports(user) }
+
+        val contentDisposition =
+            ContentDisposition.attachment()
+                .filename("reports.csv")
+                .build()
+
+        val res = reportsToCsv(reports).byteInputStream()
+        val inputStreamResource = InputStreamResource(res)
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .body(inputStreamResource)
+    }
+
     @PutMapping("/{id}")
     fun updateReport(
         user: AuthenticatedUser,
@@ -225,10 +248,11 @@ class ReportController {
                                         observedSpecies = observedSpecies,
                                         reportLink = luontotietoHost.getReportUrl(reportId),
                                         reportDocumentLink =
-                                            luontotietoHost.getReportDocumentDownloadUrl(reportId)
+                                        luontotietoHost.getReportDocumentDownloadUrl(reportId)
                                     )
                                 }
                             }
+
                             else -> emptyMap()
                         }
                     ptx.insertPaikkatieto(
