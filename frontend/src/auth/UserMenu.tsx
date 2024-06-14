@@ -128,21 +128,19 @@ export const UserMenu = React.memo(function LanguageMenu({
               Käyttäjänhallinta
             </DropDownItemButton>
           )}
-          {user.role === UserRole.CUSTOMER && (
-            <DropDownItemButton
-              ref={firstButtonRef}
-              key="user-settings"
-              className={classNames({ active: true })}
-              onClick={() => {
-                navigate(`/luontotieto/omat-asetukset`)
-                setOpen(false)
-              }}
-              role="menuitemradio"
-              aria-checked={true}
-            >
-              Asetukset
-            </DropDownItemButton>
-          )}
+          <DropDownItemButton
+            ref={firstButtonRef}
+            key="user-settings"
+            className={classNames({ active: true })}
+            onClick={() => {
+              navigate(`/luontotieto/omat-asetukset`)
+              setOpen(false)
+            }}
+            role="menuitemradio"
+            aria-checked={true}
+          >
+            Asetukset
+          </DropDownItemButton>
           <DropDownItemButton
             ref={firstButtonRef}
             key="logout"
