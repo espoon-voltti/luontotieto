@@ -228,7 +228,8 @@ fun Handle.getAluerajausLuontoselvitysParams(
     user: AuthenticatedUser,
     id: UUID,
     observedSpecies: Set<String>,
-    reportLink: String
+    reportLink: String,
+    reportDocumentLink: String
 ): Map<String, Any?> {
     val report = this.getReport(id, user)
     val reportFiles = this.getReportFiles(id)
@@ -262,6 +263,7 @@ fun Handle.getAluerajausLuontoselvitysParams(
         "unit" to report.order?.orderingUnit?.joinToString(","),
         "additionalInformation" to reportAreaFile?.description,
         "reportLink" to reportLink,
+        "reportDocumentLink" to reportDocumentLink,
         "surveyedData" to surveyedData
     )
 }

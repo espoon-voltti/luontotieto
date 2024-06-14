@@ -71,20 +71,15 @@ class ReportController {
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired
-    lateinit var documentClient: S3DocumentService
+    @Autowired lateinit var documentClient: S3DocumentService
 
-    @Autowired
-    lateinit var sesEmailClient: SESEmailClient
+    @Autowired lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired
-    lateinit var bucketEnv: BucketEnv
+    @Autowired lateinit var bucketEnv: BucketEnv
 
-    @Autowired
-    lateinit var luontotietoHost: LuontotietoHost
+    @Autowired lateinit var luontotietoHost: LuontotietoHost
 
-    @Autowired
-    lateinit var emailEnv: EmailEnv
+    @Autowired lateinit var emailEnv: EmailEnv
 
     private val logger = KotlinLogging.logger {}
 
@@ -228,12 +223,12 @@ class ReportController {
                                         user = user,
                                         id = reportId,
                                         observedSpecies = observedSpecies,
-                                        reportLink =
+                                        reportLink = luontotietoHost.getReportUrl(reportId),
+                                        reportDocumentLink =
                                             luontotietoHost.getReportDocumentDownloadUrl(reportId)
                                     )
                                 }
                             }
-
                             else -> emptyMap()
                         }
                     ptx.insertPaikkatieto(
@@ -277,9 +272,7 @@ class ReportController {
             throw BadRequest("Cannot reopen a report that has not been approved.")
         }
         paikkatietoJdbi.inTransactionUnchecked { ptx ->
-            TableDefinition.entries.forEach { td ->
-                ptx.deletePaikkatieto(td, report.id)
-            }
+            TableDefinition.entries.forEach { td -> ptx.deletePaikkatieto(td, report.id) }
         }
 
         jdbi
