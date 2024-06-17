@@ -6,7 +6,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   ChangePasswordErrorCode,
   ChangePasswordError,
-  apiChangeUserPassword
+  apiChangeUserPassword,
+  UserRole,
+  getUserRole
 } from 'api/users-api'
 import { UserContext } from 'auth/UserContext'
 import { AxiosError } from 'axios'
@@ -17,7 +19,7 @@ import React, {
   useMemo,
   useState
 } from 'react'
-import { AlertBox } from 'shared/MessageBoxes'
+import { AlertBox, InfoBox } from 'shared/MessageBoxes'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
 import { InlineButton } from 'shared/buttons/InlineButton'
@@ -55,16 +57,34 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
             <Label>Yhteyssähköposti</Label>
             <InputField value={user.email ?? ''} readonly={true} />
           </LabeledInput>
-          {!showChangePassword ? (
-            <InlineButton
-              text="Vaihda salasana"
-              onClick={() => setShowChangePassword(!showChangePassword)}
-            />
-          ) : (
-            <ChangePasswordForm
-              userId={user.id}
-              onClose={() => setShowChangePassword(false)}
-            />
+          {user.role === UserRole.CUSTOMER && (
+            <>
+              {!showChangePassword ? (
+                <InlineButton
+                  text="Vaihda salasana"
+                  onClick={() => setShowChangePassword(!showChangePassword)}
+                />
+              ) : (
+                <ChangePasswordForm
+                  userId={user.id}
+                  onClose={() => setShowChangePassword(false)}
+                />
+              )}
+            </>
+          )}
+          {user.role !== UserRole.CUSTOMER && (
+            <>
+              <LabeledInput $cols={3}>
+                <Label>Käyttöoikeudet</Label>
+                <InputField value={getUserRole(user.role)} readonly={true} />
+              </LabeledInput>
+              {user.role === UserRole.VIEWER && (
+                <InfoBox
+                  message={`Katselija-oikeuksilla käyttäjällä on vain lukuoikeudet tehtyihin luontoselvityksiin. 
+                  Jos haluat muuttaa käyttöoikeuksiasi, ole yhteydessä pääkäyttäjään ymparisto@espoo.fi`}
+                />
+              )}
+            </>
           )}
         </GroupOfInputRows>
       </SectionContainer>
