@@ -2,21 +2,25 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.4"
-    kotlin("jvm") version "1.9.20"
-    kotlin("plugin.spring") version "1.9.20"
+    kotlin("jvm") version "2.0.0"
+    kotlin("plugin.spring") version "2.0.0"
     id("org.flywaydb.flyway") version "10.14.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
 
     idea
 }
 
-java { sourceCompatibility = JavaVersion.VERSION_21 }
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
 
 repositories {
     maven { url = uri("https://repo.osgeo.org/repository/release/") }
@@ -67,8 +71,9 @@ dependencies {
     implementation("com.github.kittinunf.fuel:fuel:2.3.1")
     implementation("com.github.kittinunf.fuel:fuel-jackson:2.3.1")
 
-    api(platform("com.fasterxml.jackson:jackson-bom:2.17.0"))
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    api(platform("com.fasterxml.jackson:jackson-bom:2.17.1"))
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.17.1")
 
     implementation("software.amazon.awssdk:s3:2.25.23")
     implementation("software.amazon.awssdk:ses:2.25.23")
@@ -94,9 +99,9 @@ dependencies {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs += "-Xjsr305=strict"
-        jvmTarget = "21"
+    compilerOptions {
+        freeCompilerArgs.add("-Xjsr305=strict")
+        jvmTarget.set(JvmTarget.JVM_21)
     }
 }
 
