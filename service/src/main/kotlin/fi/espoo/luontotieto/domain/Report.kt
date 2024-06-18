@@ -285,7 +285,7 @@ fun Handle.getAluerajausLuontoselvitysParams(
 
 fun reportsToCsv(reports: List<Report>): String {
     val csvHeader =
-        "id;name;approved;noObservations;created;createdBy;updated;updatedBy;o_id;o_name;o_planNumber;o_unit;o_report_documents\n"
+        "id;name;approved;noObservations;created;createdBy;updated;updatedBy;o_name;o_planNumber;o_unit;o_report_documents\n"
     val delimiter = ";"
     val csvContent = StringBuilder()
     csvContent.append(csvHeader)
@@ -299,7 +299,6 @@ fun reportsToCsv(reports: List<Report>): String {
             .append(report.createdBy).append(delimiter)
             .append(report.updated).append(delimiter)
             .append(report.updatedBy).append(delimiter)
-            .append(report.order?.id).append(delimiter)
             .append(report.order?.name).append(delimiter)
             .append(report.order?.planNumber).append(delimiter)
             .append(report.order?.orderingUnit).append(delimiter)
