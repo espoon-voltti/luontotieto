@@ -44,3 +44,5 @@ export const P = styled.p``
 export const B = styled.b``
 
 export const I = styled.i``
+
+export const A = styled.a``

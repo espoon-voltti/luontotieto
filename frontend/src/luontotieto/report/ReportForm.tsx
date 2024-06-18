@@ -2,7 +2,11 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import {
+  faArrowUpRightFromSquare,
+  faPlus
+} from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { OrderReportDocumentInput } from 'api/order-api'
 import {
   ReportDetails,
@@ -20,10 +24,15 @@ import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 
 import { FlexCol, GroupOfInputRows, VerticalGap } from '../../shared/layout'
-import { H3 } from '../../shared/typography'
+import { A, H3 } from '../../shared/typography'
 
 const StyledInlineButton = styled(InlineButton)`
   font-size: 0.9rem;
+`
+
+const InstructionsLink = styled.span`
+  text-decoration: underline;
+  margin-right: 10px;
 `
 
 interface ReportFormProps {
@@ -304,6 +313,16 @@ export const ReportForm = React.memo(function ReportForm(
   return (
     <FlexCol>
       <H3>Selvityksen tiedot</H3>
+      <VerticalGap $size="m" />
+      <A
+        href="https://www.espoo.fi/fi/espoon-luontotietoaineistot#paikkatietojen-toimittaminen-luontoselvitysten-yhteydess-61377"
+        target="_blank"
+      >
+        <InstructionsLink>
+          Ohjeet paikkatietojen toimittamisesta luontoselvitysten yhteydessä
+        </InstructionsLink>
+        <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+      </A>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
         {fileInputs.map((fInput) => {
