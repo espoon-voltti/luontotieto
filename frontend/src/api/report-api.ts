@@ -195,9 +195,13 @@ export const apiGetReports = (): Promise<ReportDetails[]> =>
     })
   )
 
-export const apiGetReportsAsCsv = (): Promise<unknown> =>
+export const apiGetReportsAsCsv = (params: {
+  startDate: string
+  endDate: string
+}): Promise<unknown> =>
   apiClient
     .get<Blob>(`/reports/csv`, {
+      params,
       responseType: 'blob'
     })
     .then((res: AxiosResponse<Blob, AxiosHeaders>) => {

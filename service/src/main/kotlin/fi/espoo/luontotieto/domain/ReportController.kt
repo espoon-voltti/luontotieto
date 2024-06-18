@@ -58,6 +58,8 @@ import java.io.IOException
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.time.LocalDate
+import java.util.Date
 import java.util.UUID
 
 @RestController
@@ -171,10 +173,13 @@ class ReportController {
     fun getReports(user: AuthenticatedUser) = jdbi.inTransactionUnchecked { tx -> tx.getReports(user) }
 
     @GetMapping("/csv")
-    fun getReportsAsCsv(user: AuthenticatedUser): ResponseEntity<Resource> {
+    fun getReportsAsCsv(
+        user: AuthenticatedUser,
+        @RequestParam startDate: LocalDate?,
+        @RequestParam endDate: LocalDate?
+    ): ResponseEntity<Resource> {
         val reports =
-            jdbi.inTransactionUnchecked { tx -> tx.getReports(user) }
-
+            jdbi.inTransactionUnchecked { tx -> tx.getReports(user, startDate, endDate) }
         val contentDisposition =
             ContentDisposition.attachment()
                 .filename("reports.csv")

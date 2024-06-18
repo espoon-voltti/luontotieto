@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { faSearch } from '@fortawesome/free-solid-svg-icons'
+import { faDownload, faSearch } from '@fortawesome/free-solid-svg-icons'
 import { useGetReportsQuery } from 'api/hooks/reports'
 import {
   apiGetReportsAsCsv,
@@ -14,16 +14,20 @@ import React, { useCallback, useContext, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { SortableTh, Th } from 'shared/Table'
 import { AddButton } from 'shared/buttons/AddButton'
-import { Button } from 'shared/buttons/Button'
+import { InlineButton } from 'shared/buttons/InlineButton'
 import { formatDateTime } from 'shared/dates'
+import { DateRange } from 'shared/form/DateRange'
 import { InputField } from 'shared/form/InputField'
 import { Select } from 'shared/form/Select'
+import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
+import { Label, P } from 'shared/typography'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
 import { hasOrdererRole, UserContext } from '../../auth/UserContext'
 import {
   FlexLeftRight,
   FlexRowWithGaps,
+  LabeledInput,
   PageContainer,
   SectionContainer,
   Table,
@@ -47,6 +51,14 @@ export const ReportList = React.memo(function ReportList() {
   const [filterBySearchQuery, setFilterBySearchQuery] = useDebouncedState<
     string | null
   >(null)
+
+  const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
+
+  const [reportInputDateRange, setReportInputDateRange] = useState({
+    startDate: '',
+    endDate: ''
+  })
+  const dateRange = useMemo(() => reportInputDateRange, [reportInputDateRange])
 
   const isOrderOrAdmin = useMemo(() => hasOrdererRole(user), [user])
 
@@ -112,9 +124,11 @@ export const ReportList = React.memo(function ReportList() {
             />
           </FlexRowWithGaps>
           {isOrderOrAdmin && (
-            <Button
-              onClick={async () => {
-                await apiGetReportsAsCsv()
+            <InlineButton
+              onClick={() => {
+                setShowModal({
+                  title: 'Lataa raportti selvityksistä'
+                })
               }}
               text="Lataa raportti"
             />
@@ -195,6 +209,40 @@ export const ReportList = React.memo(function ReportList() {
           </tbody>
         </Table>
       </SectionContainer>
+      {showModal && (
+        <InfoModal
+          close={() => setShowModal(null)}
+          closeLabel="Sulje"
+          title={showModal.title}
+          width="wide"
+        >
+          <>
+            <P>
+              Raportti listaa selvitystilaukset ja niihin liittyviä tietoja
+              .csv-muodossa. Raportin voi avata esim Excelissä.
+            </P>
+            <VerticalGap $size="m" />
+            <P>Raportti ei sisällä selvitystilausten liitetiedostoja.</P>
+            <VerticalGap $size="m" />
+            <LabeledInput>
+              <Label>
+                Lataa raportti selvityksistä jotka on tilattu aikavälillä
+              </Label>
+              <DateRange
+                start={dateRange.startDate}
+                end={dateRange.endDate}
+                onChange={(data) => setReportInputDateRange(data)}
+              />
+            </LabeledInput>
+            <VerticalGap $size="L" />
+            <InlineButton
+              icon={faDownload}
+              text="Lataa raportti"
+              onClick={async () => await apiGetReportsAsCsv(dateRange)}
+            />
+          </>
+        </InfoModal>
+      )}
     </PageContainer>
   )
 })

@@ -10,7 +10,9 @@ import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
+import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.util.Date
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
@@ -176,18 +178,29 @@ fun Handle.getReportByOrderId(
         .getOrNull() ?: throw NotFound()
 }
 
-fun Handle.getReports(user: AuthenticatedUser): List<Report> {
+fun Handle.getReports(user: AuthenticatedUser, startDate: LocalDate? = null, endDate: LocalDate? = null): List<Report> {
+    val whereClause = reportsDateWhereClause(startDate, endDate)
     return createQuery(
         """
                 $SELECT_REPORT_SQL
                 JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
+                $whereClause
                 ORDER BY r.created DESC
             """
     )
         .bind("userId", user.id)
+        .apply {
+            if (startDate !== null) {
+                bind("startDate", startDate)
+            }
+            if (endDate !== null) {
+                bind("endDate", endDate)
+            }
+        }
         .mapTo<Report>()
         .list() ?: emptyList()
 }
+
 
 fun Handle.getAluerajausLuontoselvitysTilausParams(
     user: AuthenticatedUser,
@@ -269,7 +282,8 @@ fun Handle.getAluerajausLuontoselvitysParams(
 }
 
 fun reportsToCsv(reports: List<Report>): String {
-    val CSV_HEADER = "id;name;created;updated;approved;noObservations;createdBy;o_id;o_name;\n"
+    val CSV_HEADER =
+        "id;name;approved;noObservations;created;createdBy;updated;updatedBy;o_id;o_name;o_planNumber;o_unit;o_report_documents\n"
     val DELIMITER = ";"
     val csvContent = StringBuilder()
     csvContent.append(CSV_HEADER)
@@ -277,14 +291,34 @@ fun reportsToCsv(reports: List<Report>): String {
     for (report in reports) {
         csvContent.append(report.id).append(DELIMITER)
             .append(report.name).append(DELIMITER)
-            .append(report.created).append(DELIMITER)
-            .append(report.updated).append(DELIMITER)
             .append(report.approved).append(DELIMITER)
             .append(report.noObservations).append(DELIMITER)
+            .append(report.created).append(DELIMITER)
             .append(report.createdBy).append(DELIMITER)
+            .append(report.updated).append(DELIMITER)
+            .append(report.updatedBy).append(DELIMITER)
             .append(report.order?.id).append(DELIMITER)
-            .append(report.order?.name).append("\n")
+            .append(report.order?.name).append(DELIMITER)
+            .append(report.order?.planNumber).append(DELIMITER)
+            .append(report.order?.orderingUnit).append(DELIMITER)
+            .append(report.order?.reportDocuments?.mapNotNull { rd -> rd.documentType.documentName }).append("\n")
     }
 
     return csvContent.toString()
+}
+
+private fun reportsDateWhereClause(startDate: LocalDate?, endDate: LocalDate?): String {
+    val query = StringBuilder()
+    if (startDate !== null) {
+        query.append("WHERE cast(r.created as date) >= :startDate")
+        if (endDate !== null) {
+            query.append(" AND cast(r.created as date) <= :endDate")
+        }
+    } else {
+        if (endDate !== null) {
+            query.append("WHERE cast(r.created as date) <= :endDate")
+        }
+    }
+
+    return query.toString()
 }
