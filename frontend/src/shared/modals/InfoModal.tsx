@@ -14,7 +14,7 @@ export interface InfoModalStateProps extends InfoModalActions {
 }
 
 export interface InfoModalActions {
-  resolve: {
+  resolve?: {
     action: () => void
     label: string
     disabled?: boolean
@@ -25,26 +25,14 @@ export interface InfoModalActions {
   }
 }
 type Props = Omit<ModalBaseProps, 'mobileFullScreen'> &
-  (InfoModalActions | { close: () => void; closeLabel: string })
+  (InfoModalActions & { close: () => void; closeLabel: string })
 
 export default React.memo(function InfoModal({ children, ...props }: Props) {
   return (
     <BaseModal
       {...props}
-      close={
-        'close' in props
-          ? props.close
-          : props.reject
-            ? props.reject.action
-            : props.resolve.action
-      }
-      closeLabel={
-        'close' in props
-          ? props.closeLabel
-          : props.reject
-            ? props.reject.label
-            : props.resolve.label
-      }
+      close={props.close}
+      closeLabel={props.closeLabel}
       mobileFullScreen={false}
     >
       {children}
@@ -52,13 +40,16 @@ export default React.memo(function InfoModal({ children, ...props }: Props) {
         <ModalButtons
           $justifyContent={!props.reject ? 'center' : 'space-between'}
         >
-          <Button
-            data-qa="modal-okBtn"
-            onClick={props.resolve.action}
-            disabled={props.resolve.disabled}
-            text={props.resolve.label}
-            primary
-          />
+          {props.resolve && (
+            <Button
+              data-qa="modal-okBtn"
+              onClick={props.resolve.action}
+              disabled={props.resolve.disabled}
+              text={props.resolve.label}
+              primary
+            />
+          )}
+
           {props.reject && (
             <Button
               onClick={props.reject.action}

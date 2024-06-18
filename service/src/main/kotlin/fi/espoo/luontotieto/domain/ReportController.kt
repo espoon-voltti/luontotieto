@@ -58,6 +58,7 @@ import java.io.IOException
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.time.LocalDate
 import java.util.UUID
 
 @RestController
@@ -71,15 +72,20 @@ class ReportController {
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired lateinit var documentClient: S3DocumentService
+    @Autowired
+    lateinit var documentClient: S3DocumentService
 
-    @Autowired lateinit var sesEmailClient: SESEmailClient
+    @Autowired
+    lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired lateinit var bucketEnv: BucketEnv
+    @Autowired
+    lateinit var bucketEnv: BucketEnv
 
-    @Autowired lateinit var luontotietoHost: LuontotietoHost
+    @Autowired
+    lateinit var luontotietoHost: LuontotietoHost
 
-    @Autowired lateinit var emailEnv: EmailEnv
+    @Autowired
+    lateinit var emailEnv: EmailEnv
 
     private val logger = KotlinLogging.logger {}
 
@@ -165,6 +171,27 @@ class ReportController {
     @GetMapping()
     fun getReports(user: AuthenticatedUser) = jdbi.inTransactionUnchecked { tx -> tx.getReports(user) }
 
+    @GetMapping("/csv")
+    fun getReportsAsCsv(
+        user: AuthenticatedUser,
+        @RequestParam startDate: LocalDate?,
+        @RequestParam endDate: LocalDate?
+    ): ResponseEntity<Resource> {
+        val reports =
+            jdbi.inTransactionUnchecked { tx -> tx.getReports(user, startDate, endDate) }
+        val contentDisposition =
+            ContentDisposition.attachment()
+                .filename("reports.csv")
+                .build()
+
+        val res = reportsToCsv(reports).byteInputStream()
+        val inputStreamResource = InputStreamResource(res)
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .body(inputStreamResource)
+    }
+
     @PutMapping("/{id}")
     fun updateReport(
         user: AuthenticatedUser,
@@ -229,6 +256,7 @@ class ReportController {
                                     )
                                 }
                             }
+
                             else -> emptyMap()
                         }
                     ptx.insertPaikkatieto(
