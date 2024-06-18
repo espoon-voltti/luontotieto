@@ -223,14 +223,14 @@ export const ReportList = React.memo(function ReportList() {
           <>
             <P>
               Raportti listaa selvitystilaukset ja niihin liittyviä tietoja
-              .csv-muodossa. Raportin voi avata esim Excelissä.
+              .csv-muodossa. Raportin voi avata esim. Excelissä.
             </P>
             <VerticalGap $size="m" />
             <P>Raportti ei sisällä selvitystilausten liitetiedostoja.</P>
             <VerticalGap $size="m" />
             <LabeledInput>
               <Label>
-                Lataa raportti selvityksistä jotka on tilattu aikavälillä
+                Lataa raportti selvityksistä, jotka on tilattu aikavälillä
               </Label>
               <DateRange
                 start={dateRange.startDate}
