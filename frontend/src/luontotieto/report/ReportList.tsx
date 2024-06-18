@@ -26,6 +26,7 @@ import { useDebouncedState } from 'shared/useDebouncedState'
 import { hasOrdererRole, UserContext } from '../../auth/UserContext'
 import {
   FlexLeftRight,
+  FlexRow,
   FlexRowWithGaps,
   LabeledInput,
   PageContainer,
@@ -33,6 +34,7 @@ import {
   Table,
   VerticalGap
 } from '../../shared/layout'
+import styled from 'styled-components'
 
 export type ReportSortColumn = 'updated' | 'name' | 'approved'
 export type SortDirection = 'ASC' | 'DESC'
@@ -123,23 +125,25 @@ export const ReportList = React.memo(function ReportList() {
               backgroundColor="#F7F7F7"
             />
           </FlexRowWithGaps>
-          {isOrderOrAdmin && (
-            <InlineButton
-              onClick={() => {
-                setShowModal({
-                  title: 'Lataa raportti selvityksistä'
-                })
-              }}
-              text="Lataa raportti"
-            />
-          )}
-          {isOrderOrAdmin && (
-            <AddButton
-              text="Lisää selvitys"
-              onClick={() => navigate('/luontotieto/tilaus/uusi')}
-              data-qa="create-report-button"
-            />
-          )}
+          <FlexRow>
+            {isOrderOrAdmin && (
+              <StyledInlineButton
+                onClick={() => {
+                  setShowModal({
+                    title: 'Lataa raportti selvityksistä'
+                  })
+                }}
+                text="Lataa raportti"
+              />
+            )}
+            {isOrderOrAdmin && (
+              <AddButton
+                text="Lisää selvitys"
+                onClick={() => navigate('/luontotieto/tilaus/uusi')}
+                data-qa="create-report-button"
+              />
+            )}
+          </FlexRow>
         </FlexLeftRight>
 
         <VerticalGap $size="L" />
@@ -280,3 +284,7 @@ const filterReports = (
     return true
   })
 }
+
+const StyledInlineButton = styled(InlineButton)`
+  margin-right: 32px;
+`
