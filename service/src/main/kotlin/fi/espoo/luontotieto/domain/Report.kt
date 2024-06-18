@@ -12,7 +12,6 @@ import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
 import java.time.LocalDate
 import java.time.OffsetDateTime
-import java.util.Date
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
@@ -178,7 +177,11 @@ fun Handle.getReportByOrderId(
         .getOrNull() ?: throw NotFound()
 }
 
-fun Handle.getReports(user: AuthenticatedUser, startDate: LocalDate? = null, endDate: LocalDate? = null): List<Report> {
+fun Handle.getReports(
+    user: AuthenticatedUser,
+    startDate: LocalDate? = null,
+    endDate: LocalDate? = null
+): List<Report> {
     val whereClause = reportsDateWhereClause(startDate, endDate)
     return createQuery(
         """
@@ -200,7 +203,6 @@ fun Handle.getReports(user: AuthenticatedUser, startDate: LocalDate? = null, end
         .mapTo<Report>()
         .list() ?: emptyList()
 }
-
 
 fun Handle.getAluerajausLuontoselvitysTilausParams(
     user: AuthenticatedUser,
@@ -282,32 +284,35 @@ fun Handle.getAluerajausLuontoselvitysParams(
 }
 
 fun reportsToCsv(reports: List<Report>): String {
-    val CSV_HEADER =
+    val csvHeader =
         "id;name;approved;noObservations;created;createdBy;updated;updatedBy;o_id;o_name;o_planNumber;o_unit;o_report_documents\n"
-    val DELIMITER = ";"
+    val delimiter = ";"
     val csvContent = StringBuilder()
-    csvContent.append(CSV_HEADER)
+    csvContent.append(csvHeader)
 
     for (report in reports) {
-        csvContent.append(report.id).append(DELIMITER)
-            .append(report.name).append(DELIMITER)
-            .append(report.approved).append(DELIMITER)
-            .append(report.noObservations).append(DELIMITER)
-            .append(report.created).append(DELIMITER)
-            .append(report.createdBy).append(DELIMITER)
-            .append(report.updated).append(DELIMITER)
-            .append(report.updatedBy).append(DELIMITER)
-            .append(report.order?.id).append(DELIMITER)
-            .append(report.order?.name).append(DELIMITER)
-            .append(report.order?.planNumber).append(DELIMITER)
-            .append(report.order?.orderingUnit).append(DELIMITER)
+        csvContent.append(report.id).append(delimiter)
+            .append(report.name).append(delimiter)
+            .append(report.approved).append(delimiter)
+            .append(report.noObservations).append(delimiter)
+            .append(report.created).append(delimiter)
+            .append(report.createdBy).append(delimiter)
+            .append(report.updated).append(delimiter)
+            .append(report.updatedBy).append(delimiter)
+            .append(report.order?.id).append(delimiter)
+            .append(report.order?.name).append(delimiter)
+            .append(report.order?.planNumber).append(delimiter)
+            .append(report.order?.orderingUnit).append(delimiter)
             .append(report.order?.reportDocuments?.mapNotNull { rd -> rd.documentType.documentName }).append("\n")
     }
 
     return csvContent.toString()
 }
 
-private fun reportsDateWhereClause(startDate: LocalDate?, endDate: LocalDate?): String {
+private fun reportsDateWhereClause(
+    startDate: LocalDate?,
+    endDate: LocalDate?
+): String {
     val query = StringBuilder()
     if (startDate !== null) {
         query.append("WHERE cast(r.created as date) >= :startDate")

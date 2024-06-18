@@ -59,7 +59,6 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.time.LocalDate
-import java.util.Date
 import java.util.UUID
 
 @RestController
@@ -253,7 +252,7 @@ class ReportController {
                                         observedSpecies = observedSpecies,
                                         reportLink = luontotietoHost.getReportUrl(reportId),
                                         reportDocumentLink =
-                                        luontotietoHost.getReportDocumentDownloadUrl(reportId)
+                                            luontotietoHost.getReportDocumentDownloadUrl(reportId)
                                     )
                                 }
                             }
