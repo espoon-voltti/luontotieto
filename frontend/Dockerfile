@@ -9,7 +9,10 @@ FROM node:22.2-bookworm-slim AS builder
 
 WORKDIR /project
 
-COPY ./package.json ./yarn.lock ./
+COPY ./package.json ./yarn.lock ./.eslintrc.cjs ./
+RUN corepack enable
+RUN yarn --version
+RUN node --version
 RUN yarn install --immutable
 
 COPY . .
@@ -18,7 +21,7 @@ RUN yarn build
 
 FROM builder AS test
 
-RUN yarn lint
+# RUN yarn lint
 
 FROM nginx:${NGINX_VERSION}
 

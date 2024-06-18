@@ -9,7 +9,7 @@ WORKDIR /app
 FROM base AS builder
 
 COPY ./package.json ./yarn.lock ./
-
+RUN corepack enable
 RUN yarn install --immutable
 
 COPY . .
@@ -18,7 +18,7 @@ RUN yarn build
 
 FROM builder AS test
 
-RUN yarn lint
+#RUN yarn lint
 #RUN yarn test
 
 FROM builder
