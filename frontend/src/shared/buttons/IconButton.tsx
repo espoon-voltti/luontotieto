@@ -81,6 +81,7 @@ const StyledButton = styled.button<StyledButtonProps>`
     justify-content: center;
     align-items: center;
     margin: 2px;
+    color: ${colors.main.m2};
   }
 
   &:hover .icon-wrapper {
