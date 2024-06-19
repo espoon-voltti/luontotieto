@@ -5,10 +5,15 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import { BaseProps } from '../theme'
+import { BaseProps, colors } from '../theme'
 
 const StyledLink = styled.a`
   font-weight: bold;
+
+  &:focus {
+    outline: 2px solid ${colors.main.m2Focus};
+    outline-offset: 2px;
+  }
 `
 
 export interface LinkFileDownloadProps extends BaseProps {
@@ -23,6 +28,14 @@ export const LinkFileDownload = React.memo(function LinkFileDownload({
   fileName
 }: LinkFileDownloadProps) {
   return (
-    <StyledLink onClick={() => onClick(fileId)}>{`${fileName}`}</StyledLink>
+    <StyledLink
+      onClick={() => onClick(fileId)}
+      onKeyDown={(event: React.KeyboardEvent<HTMLAnchorElement>) => {
+        if (event.code === 'Enter') {
+          onClick(fileId)
+        }
+      }}
+      tabIndex={0}
+    >{`${fileName}`}</StyledLink>
   )
 })

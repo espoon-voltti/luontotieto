@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { faPen } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useGetOrderFilesQuery } from 'api/hooks/orders'
 import { apiGetOrderFileUrl, Order } from 'api/order-api'
 import { getDocumentTypeTitle } from 'api/report-api'
@@ -21,6 +20,7 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H3, Label, P } from '../../shared/typography'
+import { IconButton } from 'shared/buttons/IconButton'
 
 type Props = { order: Order; reportId: string }
 
@@ -29,10 +29,6 @@ const StyledLi = styled.li`
     color: #0050bb;
     margin-right: 0.5ch;
   }
-`
-
-const StyledIcon = styled(FontAwesomeIcon)`
-  cursor: pointer;
 `
 
 const GridLayout = styled.div<{ $cols: number }>`
@@ -79,7 +75,8 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
         <FlexRowWithGaps $gapSize="m">
           <H3>Tilauksen tiedot</H3>
           {showEditBtn && (
-            <StyledIcon
+            <IconButton
+              aria-label="Muokkaa tilausta"
               icon={faPen}
               onClick={() =>
                 navigate(`/luontotieto/tilaus/${order.id}/muokkaa`, {
