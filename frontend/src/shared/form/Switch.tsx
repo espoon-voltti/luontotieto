@@ -98,7 +98,6 @@ export default React.memo(function Switch({
       <StyledSwitch
         tabIndex={0}
         onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
-          console.log(event)
           if (event.key === ' ' || event.code === 'Space') {
             onChange()
           }
