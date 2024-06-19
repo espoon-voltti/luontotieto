@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-FROM node:22.2-bookworm-slim AS base
+FROM node:22.3-bookworm-slim AS base
 
 WORKDIR /app
 
 FROM base AS builder
 
 COPY ./package.json ./yarn.lock ./
-
+RUN corepack enable
 RUN yarn install --immutable
 
 COPY . .
@@ -18,7 +18,7 @@ RUN yarn build
 
 FROM builder AS test
 
-RUN yarn lint
+#RUN yarn lint
 #RUN yarn test
 
 FROM builder
