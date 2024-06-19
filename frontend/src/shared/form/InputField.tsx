@@ -72,6 +72,11 @@ export const StyledInput = styled.input<StyledInputProps>`
         : ''}
   }
 
+  &:focus {
+    outline: 2px solid ${colors.main.m2Focus};
+    outline-offset: 2px;
+  }
+
   &.success {
     border-bottom-color: ${colors.status.success};
 

@@ -3,13 +3,9 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import React from 'react'
-import styled from 'styled-components'
 
 import { BaseProps } from '../theme'
-
-const StyledLink = styled.a`
-  font-weight: bold;
-`
+import { StyledLink } from './StyledLink'
 
 export interface LinkFileDownloadProps extends BaseProps {
   onClick: (fileId: string) => void
@@ -23,6 +19,14 @@ export const LinkFileDownload = React.memo(function LinkFileDownload({
   fileName
 }: LinkFileDownloadProps) {
   return (
-    <StyledLink onClick={() => onClick(fileId)}>{`${fileName}`}</StyledLink>
+    <StyledLink
+      onClick={() => onClick(fileId)}
+      onKeyDown={(event: React.KeyboardEvent<HTMLAnchorElement>) => {
+        if (event.code === 'Enter') {
+          onClick(fileId)
+        }
+      }}
+      tabIndex={0}
+    >{`${fileName}`}</StyledLink>
   )
 })

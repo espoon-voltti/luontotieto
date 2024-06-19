@@ -11,6 +11,7 @@ import {
   getDocumentTypeTitle
 } from 'api/report-api'
 import React from 'react'
+import { StyledLink } from 'shared/buttons/StyledLink'
 import { Label } from 'shared/typography'
 import styled from 'styled-components'
 
@@ -26,8 +27,7 @@ const isReportFileDocumentType = (
     documentType as ReportFileDocumentType
   )
 
-export const StyledLink = styled.a`
-  font-weight: 600;
+export const Link = styled(StyledLink)`
   margin-left: 30px;
 `
 
@@ -38,19 +38,27 @@ export const FileTitle = React.memo(function FileTitle(props: Props) {
       {isReportFileDocumentType(props.documentType) &&
         props.documentType !== ReportFileDocumentType.OTHER &&
         props.documentType !== ReportFileDocumentType.REPORT && (
-          <StyledLink
+          <Link
             onClick={() =>
               apiGetReportDocumentTypeFileTemplate(
                 props.documentType as ReportFileDocumentType
               )
             }
+            onKeyDown={(event: React.KeyboardEvent<HTMLAnchorElement>) => {
+              if (event.code === 'Enter') {
+                apiGetReportDocumentTypeFileTemplate(
+                  props.documentType as ReportFileDocumentType
+                )
+              }
+            }}
+            tabIndex={0}
           >
             <FontAwesomeIcon
               icon={faDownload}
               style={{ marginRight: '10px' }}
             />
             Lataa Pohja
-          </StyledLink>
+          </Link>
         )}
     </Label>
   )

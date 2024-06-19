@@ -34,13 +34,14 @@ export const LinkStyledAsButton = styled.a`
   justify-content: center;
   align-items: center;
 
-  :hover {
+  &:hover {
     background-color: ${colors.main.m2Hover};
   }
-  :focus {
-    background-color: ${colors.main.m2Focus};
+  &:focus {
+    outline: 2px solid ${colors.main.m2Focus};
+    outline-offset: 2px;
   }
-  :active {
+  &:active {
     background-color: ${colors.main.m2Active};
   }
 `

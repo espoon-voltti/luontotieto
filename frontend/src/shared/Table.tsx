@@ -78,6 +78,11 @@ const CustomButton = styled.button<{ theme: ITheme }>`
   cursor: pointer;
   text-transform: uppercase;
   font-weight: 700;
+
+  &:focus {
+    outline: 2px solid ${colors.main.m2Focus};
+    outline-offset: 2px;
+  }
 `
 
 export const SortableTh = React.memo(function SortableTh({

@@ -4,7 +4,7 @@
 
 import classNames from 'classnames'
 import React, { ReactNode, useRef } from 'react'
-import { ITheme } from 'shared/theme'
+import { ITheme, colors } from 'shared/theme'
 import styled from 'styled-components'
 
 const Container = styled.label<{ theme: ITheme }>`
@@ -45,11 +45,15 @@ const StyledSwitch = styled.div`
     background: white;
     transform: translate(0, -50%);
   }
+
+  &:focus {
+    outline: 2px solid ${colors.main.m2Focus};
+    outline-offset: 2px;
+  }
 `
 
 const Input = styled.input<{ theme: ITheme }>`
   display: none;
-
   &:checked + ${StyledSwitch} {
     border-color: ${(p) => p.theme.colors.main.m2};
     background-color: ${(p) => p.theme.colors.main.m2};
@@ -62,7 +66,7 @@ const Input = styled.input<{ theme: ITheme }>`
 
 type SwitchProps = {
   checked: boolean
-  onChange?: () => void
+  onChange: () => void
   disabled?: boolean
   id?: string
 } & ({ label: string } | { label: ReactNode; ariaLabel: string })
@@ -85,13 +89,20 @@ export default React.memo(function Switch({
         type="checkbox"
         onChange={(e) => {
           e.stopPropagation()
-          if (onChange) onChange()
+          onChange()
         }}
         disabled={disabled}
         readOnly={!onChange}
         ref={inputRef}
       />
-      <StyledSwitch />
+      <StyledSwitch
+        tabIndex={0}
+        onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+          if (event.key === ' ' || event.code === 'Space') {
+            onChange()
+          }
+        }}
+      />
     </Container>
   )
 })
