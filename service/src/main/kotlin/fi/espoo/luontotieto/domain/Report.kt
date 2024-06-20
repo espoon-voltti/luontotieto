@@ -285,7 +285,10 @@ fun Handle.getAluerajausLuontoselvitysParams(
 
 fun reportsToCsv(reports: List<Report>): String {
     val csvHeader =
-        "id;name;approved;noObservations;created;createdBy;updated;updatedBy;o_name;o_planNumber;o_unit;o_report_documents\n"
+        """"id;tilauksen nimi;hyväksytty;selvitykseen liittyvät suunnitelmat;tilaajayksikkö;tilaaja;
+            tilauksen luontipvm;viimeisin muokkaaja;viimeisin muokkauspvm;
+            ei löydettyjä havaintoja;löydetyt havainnot;\n
+        """.trimMargin()
     val delimiter = ";"
     val csvContent = StringBuilder()
     csvContent.append(csvHeader)
@@ -294,15 +297,17 @@ fun reportsToCsv(reports: List<Report>): String {
         csvContent.append(report.id).append(delimiter)
             .append(report.name).append(delimiter)
             .append(report.approved).append(delimiter)
-            .append(report.noObservations?.joinToString(",")).append(delimiter)
-            .append(report.created).append(delimiter)
-            .append(report.createdBy).append(delimiter)
-            .append(report.updated).append(delimiter)
-            .append(report.updatedBy).append(delimiter)
-            .append(report.order?.name).append(delimiter)
             .append(report.order?.planNumber?.joinToString(",")).append(delimiter)
             .append(report.order?.orderingUnit?.joinToString(",")).append(delimiter)
-            .append(report.order?.reportDocuments?.mapNotNull { rd -> rd.documentType.documentName }?.joinToString(","))
+            .append(report.createdBy).append(delimiter)
+            .append(report.created).append(delimiter)
+            .append(report.updatedBy).append(delimiter)
+            .append(report.updated).append(delimiter)
+            .append(report.noObservations?.mapNotNull { rd -> rd.documentName }?.joinToString(",")).append(delimiter)
+            .append(
+                report.order?.reportDocuments?.mapNotNull { rd -> rd.documentType.documentName }?.distinct()
+                    ?.joinToString(",")
+            )
             .append("\n")
     }
 
