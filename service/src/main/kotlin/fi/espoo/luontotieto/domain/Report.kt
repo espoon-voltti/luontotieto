@@ -285,10 +285,20 @@ fun Handle.getAluerajausLuontoselvitysParams(
 
 fun reportsToCsv(reports: List<Report>): String {
     val csvHeader =
-        """"id;tilauksen nimi;hyväksytty;selvitykseen liittyvät suunnitelmat;tilaajayksikkö;tilaaja;
-            tilauksen luontipvm;viimeisin muokkaaja;viimeisin muokkauspvm;
-            ei löydettyjä havaintoja;löydetyt havainnot;\n
-        """.trimMargin()
+        listOf(
+            "id",
+            "tilauksen nimi",
+            "hyväksytty",
+            "selvitykseen liittyvät suunnitelmat",
+            "tilaajayksikkö",
+            "tilaaja",
+            " tilauksen luontipvm",
+            "viimeisin muokkaaja",
+            "viimeisin muokkauspvm",
+            "selvitetyt tiedot",
+            "ei löydettyjä havaintoja"
+        ).joinToString(";") + "\n"
+
     val delimiter = ";"
     val csvContent = StringBuilder()
     csvContent.append(csvHeader)
@@ -303,11 +313,11 @@ fun reportsToCsv(reports: List<Report>): String {
             .append(report.created).append(delimiter)
             .append(report.updatedBy).append(delimiter)
             .append(report.updated).append(delimiter)
-            .append(report.noObservations?.mapNotNull { rd -> rd.documentName }?.joinToString(",")).append(delimiter)
             .append(
-                report.order?.reportDocuments?.mapNotNull { rd -> rd.documentType.documentName }?.distinct()
+                report.order?.reportDocuments?.map { rd -> rd.documentType }
                     ?.joinToString(",")
-            )
+            ).append(delimiter)
+            .append(report.noObservations?.map { rd -> rd }?.joinToString(","))
             .append("\n")
     }
 
