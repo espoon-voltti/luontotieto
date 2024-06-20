@@ -292,7 +292,7 @@ fun reportsToCsv(reports: List<Report>): String {
             "selvitykseen liittyvät suunnitelmat",
             "tilaajayksikkö",
             "tilaaja",
-            " tilauksen luontipvm",
+            "tilauksen luontipvm",
             "viimeisin muokkaaja",
             "viimeisin muokkauspvm",
             "selvitetyt tiedot",
