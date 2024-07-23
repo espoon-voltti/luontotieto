@@ -118,7 +118,12 @@ export const FileInput = <
     documentType === OrderFileDocumentType.ORDER_INFO
 
   return (
-    <FlexCol>
+    <FlexCol
+      style={{
+        marginBottom:
+          documentType === ReportFileDocumentType.REPORT ? '16px' : '32px'
+      }}
+    >
       <FlexRowWithGaps $gapSize="m" style={{ marginBottom: '5px' }}>
         <LabeledInput $cols={5}>
           {showTitle && (

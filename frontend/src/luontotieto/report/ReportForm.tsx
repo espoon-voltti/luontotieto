@@ -4,6 +4,7 @@
 
 import {
   faArrowUpRightFromSquare,
+  faInfo,
   faPlus
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -23,8 +24,17 @@ import { useDebouncedState } from 'shared/useDebouncedState'
 import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 
-import { FlexCol, GroupOfInputRows, VerticalGap } from '../../shared/layout'
-import { A, H3 } from '../../shared/typography'
+import {
+  FlexCol,
+  FlexRow,
+  GroupOfInputRows,
+  LabeledInput,
+  VerticalGap
+} from '../../shared/layout'
+import { A, H3, Label } from '../../shared/typography'
+import { Checkbox } from 'shared/form/Checkbox'
+import { InfoBox } from 'shared/MessageBoxes'
+import { colors } from 'shared/theme'
 
 const StyledInlineButton = styled(InlineButton)`
   font-size: 0.9rem;
@@ -215,6 +225,9 @@ export const ReportForm = React.memo(function ReportForm(
   )
 
   const [name, _] = useDebouncedState(props.report.name)
+  const [isPublic, setIsPublic] = useState<boolean | null>(
+    props.report.isPublic
+  )
 
   const [fileInputs, setFileInputs] = useState(originalFileInputs)
 
@@ -277,12 +290,14 @@ export const ReportForm = React.memo(function ReportForm(
     if (name.trim() === '') return null
     if (!filesAreValid(requiredFiles, fileInputs)) return null
     if (!hasReportDocument(fileInputs)) return null
+    if (isPublic === null) return null
 
     const noObs = fileInputs.flatMap((input) =>
       input.noObservation ? [input.documentType] : []
     )
     return {
       name: name.trim(),
+      isPublic,
       noObservations: noObs,
       filesToAdd: fileInputs.flatMap((e) =>
         e.type === 'NEW' && e.file !== null
@@ -304,7 +319,7 @@ export const ReportForm = React.memo(function ReportForm(
           : []
       )
     }
-  }, [name, fileInputs, requiredFiles, originalFileInputs])
+  }, [name, fileInputs, requiredFiles, originalFileInputs, isPublic])
 
   useEffect(() => {
     props.onChange(validInput)
@@ -335,41 +350,59 @@ export const ReportForm = React.memo(function ReportForm(
           switch (fInput.type) {
             case 'NEW':
               return (
-                <FileInput
-                  readOnly={readOnly}
-                  documentType={fInput.documentType}
-                  key={fInput.id}
-                  data={{
-                    description: fInput.userDescription,
-                    file: fInput.file,
-                    id: fInput.id
-                  }}
-                  noObservation={fInput.noObservation}
-                  onChange={(data) => {
-                    updateFileInput({
-                      ...data,
-                      documentType: fInput.documentType
-                    })
-                  }}
-                  accept={getAcceptedFileTypes(fInput.documentType)}
-                  errors={documentSaveError?.errors}
-                />
+                <>
+                  <FileInput
+                    readOnly={readOnly}
+                    documentType={fInput.documentType}
+                    key={fInput.id}
+                    data={{
+                      description: fInput.userDescription,
+                      file: fInput.file,
+                      id: fInput.id
+                    }}
+                    noObservation={fInput.noObservation}
+                    onChange={(data) => {
+                      updateFileInput({
+                        ...data,
+                        documentType: fInput.documentType
+                      })
+                    }}
+                    accept={getAcceptedFileTypes(fInput.documentType)}
+                    errors={documentSaveError?.errors}
+                  />
+                  {fInput.documentType === ReportFileDocumentType.REPORT && (
+                    <ReportFileIsPublic
+                      readOnly={readOnly}
+                      isPublic={props.report.isPublic}
+                      onChange={(value) => setIsPublic(value)}
+                    />
+                  )}
+                </>
               )
             case 'EXISTING':
               return (
-                <ExistingFile
-                  key={fInput.details.id}
-                  data={{
-                    type: 'REPORT',
-                    file: fInput.details,
-                    readonly: readOnly,
-                    documentType: fInput.documentType,
-                    updated: fInput.details.updated
-                  }}
-                  onRemove={(id) => {
-                    removeCreatedFileInput(id)
-                  }}
-                />
+                <>
+                  <ExistingFile
+                    key={fInput.details.id}
+                    data={{
+                      type: 'REPORT',
+                      file: fInput.details,
+                      readonly: readOnly,
+                      documentType: fInput.documentType,
+                      updated: fInput.details.updated
+                    }}
+                    onRemove={(id) => {
+                      removeCreatedFileInput(id)
+                    }}
+                  />
+                  {fInput.documentType === ReportFileDocumentType.REPORT && (
+                    <ReportFileIsPublic
+                      readOnly={readOnly}
+                      isPublic={props.report.isPublic}
+                      onChange={(value) => setIsPublic(value)}
+                    />
+                  )}
+                </>
               )
           }
         })}
@@ -385,3 +418,97 @@ export const ReportForm = React.memo(function ReportForm(
     </FlexCol>
   )
 })
+
+export const ReportFileIsPublic = React.memo(function ReportFileIsPublic({
+  onChange,
+  readOnly,
+  isPublic
+}: {
+  onChange: (isPublic: boolean) => void
+  readOnly: boolean
+  isPublic: boolean | null
+}) {
+  const [localPublic, setLocalPublic] = useState<boolean | null>(isPublic)
+  const [showInfoBox, setShowInfoBox] = useState<boolean>(false)
+  return (
+    <InnerContainer>
+      <LabeledInput $cols={8}>
+        <FlexRow>
+          <Label>Onko selvitysraportti julkinen?</Label>
+          <StyledIconButton onClick={() => setShowInfoBox(!showInfoBox)}>
+            <StyledIconContainer $color={colors.main.m1}>
+              <FontAwesomeIcon
+                icon={faInfo}
+                size="1x"
+                color={colors.main.m1}
+                inverse
+              />
+            </StyledIconContainer>
+          </StyledIconButton>
+        </FlexRow>
+        <VerticalGap $size="s" />
+        {showInfoBox && (
+          <InfoBox
+            message={`Julkinen selvitysraportti julkaistaan avoimessa verkossa ja Espoon paikkatietojärjestelmässä.
+             Jos raportti on tarkoitettu vain viranomaiskäyttöön, se ei voi olla julkinen.
+            Vain viranomaiskäyttöön tarkoitettu (ei julkinen) raportti voi sisältää esimerkiksi sensitiivisiä lajitietoja 
+            tai sen käyttö voi olla rajattu henkilötietojen takia.
+            
+            Lisätietoja sensitiivisestä lajitiedosta saat täältä
+            `}
+          />
+        )}
+        <FlexRow>
+          <Checkbox
+            key={'yes'}
+            label={'Kyllä'}
+            checked={!!localPublic}
+            onChange={(checked) => {
+              setLocalPublic(true)
+              onChange(true)
+            }}
+            disabled={readOnly}
+          />
+          <StyledCheckBox
+            key={'no'}
+            label={'Ei'}
+            checked={localPublic === false}
+            onChange={(checked) => {
+              setLocalPublic(false)
+              onChange(false)
+            }}
+            disabled={readOnly}
+          />
+        </FlexRow>
+      </LabeledInput>
+    </InnerContainer>
+  )
+})
+
+export const InnerContainer = styled.div`
+  padding-left: 32px;
+`
+export const StyledCheckBox = styled(Checkbox)`
+  padding-left: 32px;
+`
+
+const StyledIconContainer = styled.div<{ $color: string }>`
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  background: ${(props) => props.$color};
+  border-radius: 100%;
+`
+const StyledIconButton = styled.button`
+  margin-left: 16px;
+  border: none;
+  border-radius: 100%;
+  background: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+`

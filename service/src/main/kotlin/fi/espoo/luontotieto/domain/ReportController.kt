@@ -244,15 +244,19 @@ class ReportController {
                         when (reader.tableDefinition) {
                             TableDefinition.ALUERAJAUS_LUONTOSELVITYS -> {
                                 val observedSpecies = ptx.getObservedSpecies(reportId)
-
+                                val reportDocumentLink =
+                                    if (report.isPublic == true) {
+                                        luontotietoHost.getReportDocumentDownloadUrl(reportId)
+                                    } else {
+                                        "Ei julkinen"
+                                    }
                                 jdbi.inTransactionUnchecked { tx ->
                                     tx.getAluerajausLuontoselvitysParams(
                                         user = user,
                                         id = reportId,
                                         observedSpecies = observedSpecies,
                                         reportLink = luontotietoHost.getReportUrl(reportId),
-                                        reportDocumentLink =
-                                            luontotietoHost.getReportDocumentDownloadUrl(reportId)
+                                        reportDocumentLink = reportDocumentLink
                                     )
                                 }
                             }

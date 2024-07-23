@@ -23,11 +23,12 @@ data class Report(
     val updated: OffsetDateTime,
     val createdBy: String,
     val updatedBy: String,
+    val isPublic: Boolean?,
     val noObservations: List<DocumentType>?,
     @Nested("o_") val order: Order?
 ) {
     companion object {
-        data class ReportInput(val name: String, val noObservations: List<DocumentType>?)
+        data class ReportInput(val name: String, val isPublic: Boolean?, val noObservations: List<DocumentType>?)
     }
 }
 
@@ -39,6 +40,7 @@ private const val SELECT_REPORT_SQL =
            r.updated                                  AS "updated",
            r.approved                                 AS "approved",
            r.no_observations                          AS "noObservations",
+           r.is_public                                AS "isPublic",
            uc.name                                    AS "createdBy",
            uu.name                                    AS "updatedBy",
            r.order_id                                 AS "orderId",
@@ -77,14 +79,15 @@ fun Handle.insertReport(
     return createQuery(
         """
             WITH report AS (
-                INSERT INTO report (name, created_by, updated_by, order_id) 
-                VALUES (:name, :createdBy, :updatedBy, :orderId)
+                INSERT INTO report (name, created_by, updated_by, order_id, is_public) 
+                VALUES (:name, :createdBy, :updatedBy, :orderId, :isPublic)
                 RETURNING *
             ) 
             $SELECT_REPORT_SQL
             """
     )
         .bind("name", data.name)
+        .bind("isPublic", data.isPublic)
         .bind("orderId", orderI)
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
@@ -124,7 +127,7 @@ fun Handle.putReport(
         """
             WITH report AS (
                 UPDATE report r
-                 SET name = :name, updated_by = :updatedBy, no_observations = :noObservations
+                 SET name = :name, updated_by = :updatedBy, no_observations = :noObservations, is_public = :isPublic
                  FROM "order" o, users u
                 WHERE r.id = :id AND u.id = :updatedBy AND (o.assignee_id = u.id OR u.role != 'yrityskäyttäjä')
                 RETURNING r.*
@@ -133,6 +136,7 @@ fun Handle.putReport(
             """
     )
         .bind("name", report.name)
+        .bind("isPublic", report.isPublic)
         .bind("noObservations", noObservations)
         .bind("id", id)
         .bind("updatedBy", user.id)
@@ -205,7 +209,6 @@ fun Handle.getReports(
 }
 
 fun Handle.getAluerajausLuontoselvitysTilausParams(
-    user: AuthenticatedUser,
     report: Report,
     reportLink: String
 ): Map<String, Any?> {

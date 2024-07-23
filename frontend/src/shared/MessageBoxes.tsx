@@ -15,6 +15,7 @@ import { BaseProps, colors } from './theme'
 interface MessageBoxContainerProps {
   $color: string
   $width: string
+  $backGroundColor?: string
   $thin?: boolean
   $noMargin?: boolean
 }
@@ -27,9 +28,12 @@ const MessageBoxContainer = styled.div<MessageBoxContainerProps>`
   border-color: ${(props) => props.$color};
   border-radius: ${(props) => (props.$thin ? '0' : '4px')};
 
+  ${(props) =>
+    props.$backGroundColor && `background-color: ${props.$backGroundColor};`}
+
   .message-container {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
   }
 
   .icon-wrapper {
@@ -54,6 +58,7 @@ interface BaseMessageBoxProps {
   message?: string | React.ReactNode
   icon: IconProp
   color: string
+  backGroundColor?: string
   width?: string
   thin?: boolean
   'data-qa'?: string
@@ -64,6 +69,7 @@ const BaseMessageBox = React.memo(function MessageBox({
   message,
   icon,
   color,
+  backGroundColor,
   width,
   thin,
   'data-qa': dataQa
@@ -74,6 +80,7 @@ const BaseMessageBox = React.memo(function MessageBox({
 
   return (
     <MessageBoxContainer
+      $backGroundColor={backGroundColor}
       $color={color}
       $width={width ?? 'fit-content'}
       $thin={thin}
@@ -112,7 +119,8 @@ export const InfoBox = React.memo(function InfoBox({
       title={title}
       message={message}
       icon={faInfo}
-      color={colors.status.info}
+      color={colors.main.m1}
+      backGroundColor={colors.main.m4}
       width={wide ? '100%' : 'fit-content'}
       thin={thin}
       data-qa={dataQa}

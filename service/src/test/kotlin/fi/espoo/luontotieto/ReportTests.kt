@@ -92,12 +92,13 @@ class ReportTests : FullApplicationTest() {
             reportController.updateReport(
                 adminUser,
                 report.id,
-                Report.Companion.ReportInput("New name", listOf(DocumentType.LIITO_ORAVA_VIIVAT))
+                Report.Companion.ReportInput("New name", isPublic = true, listOf(DocumentType.LIITO_ORAVA_VIIVAT))
             )
         assertEquals("New name", updatedReport.name)
         assertEquals(listOf(DocumentType.LIITO_ORAVA_VIIVAT), updatedReport.noObservations)
         assertNotEquals(report.updated, updatedReport.updated)
         assertEquals(report.created, updatedReport.created)
+        assertEquals(true, updatedReport.isPublic)
     }
 
     @Test
@@ -131,6 +132,7 @@ class ReportTests : FullApplicationTest() {
         val reportInput =
             Report.Companion.ReportInput(
                 name = "Test report",
+                isPublic = false,
                 noObservations = listOf(DocumentType.LIITO_ORAVA_VIIVAT)
             )
 
@@ -229,12 +231,16 @@ class ReportTests : FullApplicationTest() {
         assertEquals(5, reportFiles.size)
 
         reportController.paikkatietoJdbi.inTransactionUnchecked { ptx ->
-            data class AluerajausResult(val lisatieto: String?, val selvitetytTiedot: List<String>)
+            data class AluerajausResult(
+                val lisatieto: String?,
+                val selvitetytTiedot: List<String>,
+                val selvitysRaporttiLinkki: String
+            )
 
             val data =
                 ptx.createQuery(
                     """
-                            SELECT lisatieto, selvitetyt_tiedot AS "selvitetytTiedot" FROM aluerajaus_luontoselvitys WHERE selvitys_id = :reportId
+                            SELECT lisatieto, selvitetyt_tiedot AS "selvitetytTiedot", selvitys_raportti_linkki AS "selvitysRaporttiLinkki" FROM aluerajaus_luontoselvitys WHERE selvitys_id = :reportId
                         """
                         .trimIndent()
                 )
@@ -249,6 +255,10 @@ class ReportTests : FullApplicationTest() {
                     "Muut huomioitavat lajit (havaittu; Ilves, Perhonen, Torakka)"
                 ),
                 data.selvitetytTiedot
+            )
+            assertEquals(
+                "Ei julkinen",
+                data.selvitysRaporttiLinkki
             )
         }
 
