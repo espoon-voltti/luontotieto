@@ -193,6 +193,7 @@ fun Handle.getReportDocumentForReport(reportId: UUID): ReportFile =
                 RIGHT JOIN report
                 ON report_file.report_id = report.id
                 WHERE report.is_public = true 
+                AND report.approved = true
                 AND report_file.report_id = :reportId
                 AND report_file.document_type = 'luontotieto:report'
             """
