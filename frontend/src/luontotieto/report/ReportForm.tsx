@@ -31,7 +31,7 @@ import {
   LabeledInput,
   VerticalGap
 } from '../../shared/layout'
-import { A, H3, Label } from '../../shared/typography'
+import { A, H3, Label, P } from '../../shared/typography'
 import { Checkbox } from 'shared/form/Checkbox'
 import { InfoBox } from 'shared/MessageBoxes'
 import { colors } from 'shared/theme'
@@ -449,13 +449,26 @@ export const ReportFileIsPublic = React.memo(function ReportFileIsPublic({
         <VerticalGap $size="s" />
         {showInfoBox && (
           <InfoBox
-            message={`Julkinen selvitysraportti julkaistaan avoimessa verkossa ja Espoon paikkatietojärjestelmässä.
-             Jos raportti on tarkoitettu vain viranomaiskäyttöön, se ei voi olla julkinen.
-            Vain viranomaiskäyttöön tarkoitettu (ei julkinen) raportti voi sisältää esimerkiksi sensitiivisiä lajitietoja 
-            tai sen käyttö voi olla rajattu henkilötietojen takia.
-            
-            Lisätietoja sensitiivisestä lajitiedosta saat täältä
-            `}
+            message={
+              <>
+                <P>
+                  {`Julkinen selvitysraportti julkaistaan avoimessa verkossa ja
+                  Espoon paikkatietojärjestelmässä. Jos raportti on tarkoitettu
+                  vain viranomaiskäyttöön, se ei voi olla julkinen. Vain
+                  viranomaiskäyttöön tarkoitettu (ei julkinen) raportti voi
+                  sisältää esimerkiksi sensitiivisiä lajitietoja tai sen käyttö
+                  voi olla rajattu henkilötietojen takia. Lisätietoja
+                  sensitiivisestä lajitiedosta saat `}
+                  <A
+                    href="https://laji.fi/sensitiiviset"
+                    target="_blank"
+                    style={{ textDecoration: 'underline' }}
+                  >
+                    täältä
+                  </A>
+                </P>
+              </>
+            }
           />
         )}
         <FlexRow>
