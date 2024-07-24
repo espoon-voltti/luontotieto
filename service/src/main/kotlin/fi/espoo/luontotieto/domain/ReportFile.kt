@@ -186,12 +186,15 @@ fun Handle.getReportFileById(
 fun Handle.getReportDocumentForReport(reportId: UUID): ReportFile =
     createQuery(
         """
-                SELECT id, description, report_id AS "reportId", media_type AS "mediaType", 
-                file_name AS "fileName", document_type AS "documentType",
-                created, updated,  created_by AS "createdBy", updated_by AS "updatedBy"
+                SELECT report_file.id, report_file.description, report_file.report_id AS "reportId", report_file.media_type AS "mediaType", 
+                report_file.file_name AS "fileName", report_file.document_type AS "documentType",
+                report_file.created, report_file.updated,  report_file.created_by AS "createdBy", report_file.updated_by AS "updatedBy"
                 FROM report_file
-                WHERE report_id = :reportId
-                AND document_type = 'luontotieto:report'
+                RIGHT JOIN report
+                ON report_file.report_id = report.id
+                WHERE report.is_public = true 
+                AND report_file.report_id = :reportId
+                AND report_file.document_type = 'luontotieto:report'
             """
     )
         .bind("reportId", reportId)

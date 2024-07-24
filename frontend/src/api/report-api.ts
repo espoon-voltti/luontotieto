@@ -81,6 +81,7 @@ export interface ReportFormInput {
   noObservations: string[] | null
   filesToAdd: ReportFileInput[]
   filesToRemove: string[]
+  isPublic?: boolean
 }
 
 export interface ReportDetails {
@@ -92,6 +93,7 @@ export interface ReportDetails {
   updatedBy: string
   approved: boolean
   noObservations: ReportFileDocumentType[] | null
+  isPublic: boolean | null
   order: Order
   reportDocumentsString?: string
 }

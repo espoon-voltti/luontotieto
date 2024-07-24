@@ -61,15 +61,20 @@ class OrderController {
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired lateinit var sesEmailClient: SESEmailClient
+    @Autowired
+    lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired lateinit var documentClient: S3DocumentService
+    @Autowired
+    lateinit var documentClient: S3DocumentService
 
-    @Autowired lateinit var bucketEnv: BucketEnv
+    @Autowired
+    lateinit var bucketEnv: BucketEnv
 
-    @Autowired lateinit var emailEnv: EmailEnv
+    @Autowired
+    lateinit var emailEnv: EmailEnv
 
-    @Autowired lateinit var luontotietoHost: LuontotietoHost
+    @Autowired
+    lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -117,7 +122,7 @@ class OrderController {
                     val orderId = tx.insertOrder(data = body, user = user)
                     val report =
                         tx.insertReport(
-                            Report.Companion.ReportInput(body.name, null),
+                            Report.Companion.ReportInput(body.name, null, null),
                             user,
                             orderId
                         )
@@ -229,7 +234,6 @@ class OrderController {
                         val report = tx.getReportByOrderId(orderId, user)
                         val params =
                             tx.getAluerajausLuontoselvitysTilausParams(
-                                user,
                                 report,
                                 luontotietoHost.getReportUrl(report.id)
                             )
