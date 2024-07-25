@@ -25,6 +25,7 @@ data class Report(
     val updatedBy: String,
     val isPublic: Boolean?,
     val noObservations: List<DocumentType>?,
+    val observedSpecies: List<String>?,
     @Nested("o_") val order: Order?
 ) {
     companion object {
@@ -41,6 +42,7 @@ private const val SELECT_REPORT_SQL =
            r.approved                                 AS "approved",
            r.no_observations                          AS "noObservations",
            r.is_public                                AS "isPublic",
+           r.observed_species                         AS "observedSpecies",
            uc.name                                    AS "createdBy",
            uu.name                                    AS "updatedBy",
            r.order_id                                 AS "orderId",
@@ -98,6 +100,7 @@ fun Handle.insertReport(
 fun Handle.updateReportApproved(
     reportId: UUID,
     approve: Boolean,
+    observedSpecies: List<String>,
     user: AuthenticatedUser
 ): Report {
     return createUpdate(
@@ -105,12 +108,14 @@ fun Handle.updateReportApproved(
             UPDATE report 
               SET
                 approved = :approved,
+                observed_species = :observedSpecies,
                 updated_by = :updatedBy
             WHERE id = :reportId
             """
     )
         .bind("reportId", reportId)
         .bind("approved", approve)
+        .bind("observedSpecies", observedSpecies.toTypedArray())
         .bind("updatedBy", user.id)
         .executeAndReturnGeneratedKeys()
         .mapTo<Report>()
@@ -221,7 +226,7 @@ fun Handle.getAluerajausLuontoselvitysTilausParams(
     )
 }
 
-fun Handle.getObservedSpecies(reportId: UUID): Set<String> {
+fun Handle.getObservedSpecies(reportId: UUID): List<String> {
     return createQuery(
         """
             SELECT suomenkielinen_nimi
@@ -239,7 +244,7 @@ fun Handle.getObservedSpecies(reportId: UUID): Set<String> {
     )
         .bind("reportId", reportId)
         .mapTo<String>()
-        .set()
+        .toList()
 }
 
 fun Handle.getAluerajausLuontoselvitysParams(
@@ -299,6 +304,7 @@ fun reportsToCsv(reports: List<Report>): String {
             "viimeisin muokkaaja",
             "viimeisin muokkauspvm",
             "selvitetyt tiedot",
+            "muut huomioitavat lajit",
             "ei löydettyjä havaintoja"
         ).joinToString(";") + "\n"
 
@@ -320,6 +326,7 @@ fun reportsToCsv(reports: List<Report>): String {
                 report.order?.reportDocuments?.map { rd -> rd.documentType }
                     ?.joinToString(",")
             ).append(delimiter)
+            .append(report.observedSpecies?.joinToString(","))
             .append(report.noObservations?.map { rd -> rd }?.joinToString(","))
             .append("\n")
     }
