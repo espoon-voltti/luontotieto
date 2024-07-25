@@ -226,6 +226,7 @@ class ReportTests : FullApplicationTest() {
 
         val approvedReport = reportController.getReportById(adminUser, createOrderResponse.reportId)
         assertTrue(approvedReport.approved)
+        assertEquals(approvedReport.observedSpecies, listOf("Ilves", "Torakka", "Perhonen"))
 
         val reportFiles = reportController.getReportFiles(adminUser, createOrderResponse.reportId)
         assertEquals(5, reportFiles.size)
