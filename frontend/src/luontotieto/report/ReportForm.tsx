@@ -4,6 +4,7 @@
 
 import {
   faArrowUpRightFromSquare,
+  faExternalLink,
   faInfo,
   faPlus
 } from '@fortawesome/free-solid-svg-icons'
@@ -336,7 +337,10 @@ export const ReportForm = React.memo(function ReportForm(
         <InstructionsLink>
           Ohjeet paikkatietojen toimittamisesta luontoselvitysten yhteydessä
         </InstructionsLink>
-        <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+        <FontAwesomeIcon
+          style={{ marginLeft: '10px' }}
+          icon={faArrowUpRightFromSquare}
+        />
       </A>
       <VerticalGap $size="m" />
       <GroupOfInputRows>
@@ -465,6 +469,10 @@ export const ReportFileIsPublic = React.memo(function ReportFileIsPublic({
                     style={{ textDecoration: 'underline' }}
                   >
                     täältä
+                    <FontAwesomeIcon
+                      icon={faExternalLink}
+                      style={{ marginLeft: '6px' }}
+                    />
                   </A>
                 </P>
               </>
