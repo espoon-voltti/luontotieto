@@ -237,6 +237,9 @@ class ReportController {
             reportFiles.mapNotNull { rf ->
                 getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf)
             }
+
+        val observed = mutableListOf<String>()
+
         paikkatietoJdbi.inTransactionUnchecked { ptx ->
             readers.forEach {
                 it.use { reader ->
@@ -250,11 +253,12 @@ class ReportController {
                                     } else {
                                         "Ei julkinen"
                                     }
+                                observed.addAll(observedSpecies)
                                 jdbi.inTransactionUnchecked { tx ->
                                     tx.getAluerajausLuontoselvitysParams(
                                         user = user,
                                         id = reportId,
-                                        observedSpecies = observedSpecies,
+                                        observedSpecies = observedSpecies.toSet(),
                                         reportLink = luontotietoHost.getReportUrl(reportId),
                                         reportDocumentLink = reportDocumentLink
                                     )
@@ -274,7 +278,7 @@ class ReportController {
         }
 
         jdbi
-            .inTransactionUnchecked { tx -> tx.updateReportApproved(reportId, true, user) }
+            .inTransactionUnchecked { tx -> tx.updateReportApproved(reportId, true, observed.distinct(), user) }
             .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
 
         if (emailEnv.enabled) {
@@ -308,7 +312,7 @@ class ReportController {
         }
 
         jdbi
-            .inTransactionUnchecked { tx -> tx.updateReportApproved(reportId, false, user) }
+            .inTransactionUnchecked { tx -> tx.updateReportApproved(reportId, false, listOf(), user) }
             .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
     }
 
