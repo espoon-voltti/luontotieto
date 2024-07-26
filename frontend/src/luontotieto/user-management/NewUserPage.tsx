@@ -98,7 +98,7 @@ export const NewUserPage = React.memo(function NewUserPage() {
           <GroupOfInputRows>
             <H3>Yrityksen tiedot</H3>
             <LabeledInput $cols={4}>
-              <Label>Yritys</Label>
+              <Label>Yritys *</Label>
               <InputField
                 value={userInput.name}
                 onChange={(value) =>
@@ -107,7 +107,7 @@ export const NewUserPage = React.memo(function NewUserPage() {
               />
             </LabeledInput>
             <LabeledInput $cols={4}>
-              <Label>Yhteyssähköposti</Label>
+              <Label>Yhteyssähköposti *</Label>
               <InputField
                 value={userInput.email}
                 onChange={(value) =>
