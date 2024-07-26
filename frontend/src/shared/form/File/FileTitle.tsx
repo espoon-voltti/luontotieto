@@ -34,7 +34,7 @@ export const Link = styled(StyledLink)`
 export const FileTitle = React.memo(function FileTitle(props: Props) {
   return (
     <Label>
-      {getDocumentTypeTitle(props.documentType)}
+      {`${getDocumentTypeTitle(props.documentType)} ${props.required && '*'}`}
       {isReportFileDocumentType(props.documentType) &&
         props.documentType !== ReportFileDocumentType.OTHER &&
         props.documentType !== ReportFileDocumentType.REPORT && (

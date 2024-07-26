@@ -432,7 +432,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
         <GroupOfInputRows>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Tilauksen nimi</Label>
+              <Label>Tilauksen nimi *</Label>
               <TextArea
                 onChange={(name) => setOrderInput({ ...orderInput, name })}
                 value={orderInput.name}
@@ -473,7 +473,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Selvitys palautettava viimeistään</Label>
+              <Label>Selvitys palautettava viimeistään *</Label>
               <InputField
                 width="m"
                 onChange={(returnDate) =>
@@ -486,7 +486,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={10}>
-              <Label>Selvityksen kuvaus</Label>
+              <Label>Selvityksen kuvaus *</Label>
               <TextArea
                 onChange={(description) =>
                   setOrderInput({
@@ -502,7 +502,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           <H3>Tilaajan tiedot</H3>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Yhteyshenkilö</Label>
+              <Label>Yhteyshenkilö *</Label>
               <InputField
                 onChange={(contactPerson) =>
                   setOrderInput({
@@ -516,7 +516,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Yhteyshenkilön sähköposti</Label>
+              <Label>Yhteyshenkilön sähköposti *</Label>
               <InputField
                 onChange={(contactEmail) =>
                   setOrderInput({
@@ -531,7 +531,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Yhteyshenkilön puhelinnumero</Label>
+              <Label>Yhteyshenkilön puhelinnumero *</Label>
               <InputField
                 onChange={(contactPhone) =>
                   setOrderInput({
@@ -546,7 +546,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           <H3>Selvityksen tekijä</H3>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Selvityksen tekijä</Label>
+              <Label>Selvityksen tekijä *</Label>
               <Select
                 selectedItem={assignee}
                 items={assigneeUsers ?? []}
@@ -563,7 +563,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Yhteyshenkilö</Label>
+              <Label>Yhteyshenkilö *</Label>
               <InputField
                 onChange={(assigneeContactPerson) =>
                   setOrderInput({
@@ -577,7 +577,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Yhteyshenkilön sähköposti</Label>
+              <Label>Yhteyshenkilön sähköposti *</Label>
               <InputField
                 onChange={(assigneeContactEmail) =>
                   setOrderInput({
@@ -611,6 +611,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                   ?.errors
               }
               accept=".gpkg"
+              required={true}
             />
           )}
           {orderAreaFile && orderAreaFile.type === 'EXISTING' && (

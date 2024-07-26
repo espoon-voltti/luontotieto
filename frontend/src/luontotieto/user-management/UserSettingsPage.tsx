@@ -50,11 +50,11 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
       <SectionContainer>
         <GroupOfInputRows>
           <LabeledInput $cols={3}>
-            <Label>Yritys</Label>
+            <Label>Yritys *</Label>
             <InputField value={user.name} readonly={true} />
           </LabeledInput>
           <LabeledInput $cols={3}>
-            <Label>Yhteyssähköposti</Label>
+            <Label>Yhteyssähköposti *</Label>
             <InputField value={user.email ?? ''} readonly={true} />
           </LabeledInput>
           {user.role === UserRole.CUSTOMER && (

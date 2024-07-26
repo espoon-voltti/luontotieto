@@ -438,7 +438,7 @@ export const ReportFileIsPublic = React.memo(function ReportFileIsPublic({
     <InnerContainer>
       <LabeledInput $cols={8}>
         <FlexRow>
-          <Label>Onko selvitysraportti julkinen?</Label>
+          <Label>Onko selvitysraportti julkinen? *</Label>
           <StyledIconButton onClick={() => setShowInfoBox(!showInfoBox)}>
             <StyledIconContainer $color={colors.main.m1}>
               <FontAwesomeIcon

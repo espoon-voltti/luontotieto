@@ -125,12 +125,14 @@ export const UserManagementForm = React.memo(function UserManagementForm({
     [userInput.email, enableEdit]
   )
 
+  const isValid = userInput.name && !invalidEmailInfo
+
   return (
     <SectionContainer>
       <GroupOfInputRows>
         <H3>Käyttäjän tiedot</H3>
         <LabeledInput $cols={3}>
-          <Label>Käyttäjä</Label>
+          <Label>Käyttäjä *</Label>
           <InputField
             value={userInput.name}
             onChange={(value) => setUserInput({ ...userInput, name: value })}
@@ -138,7 +140,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
           />
         </LabeledInput>
         <LabeledInput $cols={3}>
-          <Label>Yhteyssähköposti</Label>
+          <Label>Yhteyssähköposti *</Label>
           <InputField
             value={userInput.email}
             onChange={(value) => setUserInput({ ...userInput, email: value })}
@@ -149,7 +151,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
 
         {userInput.role !== UserRole.CUSTOMER && (
           <LabeledInput $cols={5}>
-            <Label>Käyttöoikeudet</Label>
+            <Label>Käyttöoikeudet *</Label>
             <FlexRowWithGaps style={{ paddingTop: '4px' }}>
               {roles.map((r) => (
                 <Radio
@@ -191,7 +193,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
               onClick={() => setEnableEdit(!enableEdit)}
             />
             <Button
-              disabled={updatingUser || !!invalidEmailInfo}
+              disabled={updatingUser || !isValid}
               primary
               text="Tallenna"
               onClick={async () =>

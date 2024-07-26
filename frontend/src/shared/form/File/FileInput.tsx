@@ -40,6 +40,7 @@ interface FileInputProps<T> {
   readOnly?: boolean
   noObservation?: boolean
   accept?: string
+  required?: boolean
 }
 
 const fileValidationErrorToMessage = (
@@ -77,7 +78,8 @@ export const FileInput = <
   noObservation = false,
   showTitle = true,
   readOnly = false,
-  accept
+  accept,
+  required
 }: FileInputProps<T>) => {
   const [file, setFile] = useState(data.file ?? null)
   const [description, setDescription] = useDebouncedState(data.description)
@@ -130,7 +132,9 @@ export const FileInput = <
             <>
               <FileTitle
                 documentType={documentType}
-                required={documentType !== ReportFileDocumentType.OTHER}
+                required={
+                  required || documentType !== ReportFileDocumentType.OTHER
+                }
               />
             </>
           )}
