@@ -25,7 +25,11 @@ export interface InfoModalActions {
   }
 }
 type Props = Omit<ModalBaseProps, 'mobileFullScreen'> &
-  (InfoModalActions & { close: () => void; closeLabel: string })
+  (InfoModalActions & {
+    close: () => void
+    closeLabel: string
+    disabled?: boolean
+  })
 
 export default React.memo(function InfoModal({ children, ...props }: Props) {
   return (
@@ -44,7 +48,7 @@ export default React.memo(function InfoModal({ children, ...props }: Props) {
             <Button
               data-qa="modal-okBtn"
               onClick={props.resolve.action}
-              disabled={props.resolve.disabled}
+              disabled={props.disabled || props.resolve.disabled}
               text={props.resolve.label}
               primary
             />

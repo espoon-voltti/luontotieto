@@ -241,6 +241,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
           title={showModal.title}
           resolve={showModal.resolve}
           reject={showModal.reject}
+          disabled={approving}
         >
           {showModal.text}
         </InfoModal>
