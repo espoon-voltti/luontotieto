@@ -6,7 +6,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import React, { FormEvent, useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from 'shared/buttons/Button'
-import { InlineButton } from 'shared/buttons/InlineButton'
 import { InputField } from 'shared/form/InputField'
 import { PageContainer } from 'shared/layout'
 import { useDebouncedState } from 'shared/useDebouncedState'
@@ -87,7 +86,6 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
               disabled={!email || !password || isPending}
               type="submit"
             />
-            <InlineButton text="Unohdin salasanan" onClick={() => true} />
           </GroupOfInputRows>
         </SectionContainer>
       </form>

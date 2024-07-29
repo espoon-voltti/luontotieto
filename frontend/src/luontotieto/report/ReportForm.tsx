@@ -527,9 +527,10 @@ const StyledIconContainer = styled.div<{ $color: string }>`
 const StyledIconButton = styled.button`
   margin-left: 16px;
   border: none;
-  border-radius: 100%;
   background: none;
-  outline: none;
   cursor: pointer;
   padding: 0;
+  &:focus {
+    outline: 2px solid ${colors.main.m3};
+  }
 `
