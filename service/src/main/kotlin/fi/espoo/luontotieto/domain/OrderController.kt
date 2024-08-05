@@ -283,6 +283,7 @@ class OrderController {
         user: AuthenticatedUser,
         @PathVariable orderId: UUID
     ) = jdbi.inTransactionUnchecked { tx -> tx.getOrderFiles(orderId, user) }
+        .also { logger.audit(user, AuditEvent.GET_ORDER_FILES, mapOf("id" to "$orderId")) }
 
     @DeleteMapping("/{orderId}/files/{fileId}")
     fun deleteOrderFile(
@@ -320,6 +321,13 @@ class OrderController {
 
         val orderFile =
             jdbi.inTransactionUnchecked { tx -> tx.getOrderFileById(orderId, fileId, user) }
+                .also {
+                    logger.audit(
+                        user,
+                        AuditEvent.GET_ORDER_FILE_BY_ID,
+                        mapOf("id" to "$orderId", "file" to "$fileId")
+                    )
+                }
         val contentDisposition =
             ContentDisposition.attachment().filename(orderFile.fileName).build()
 

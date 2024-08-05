@@ -83,6 +83,7 @@ class UserController {
     ): User {
         if (user.isSystemUser() || user.role == UserRole.ADMIN) {
             return jdbi.inTransactionUnchecked { tx -> tx.getUser(id) }
+                .also { logger.audit(user, AuditEvent.GET_USER, mapOf("id" to "$id")) }
         } else {
             throw NotFound()
         }
@@ -102,7 +103,7 @@ class UserController {
                     (u.role === UserRole.CUSTOMER || u.id == user.id) && includeInactive || u.active
                 }
             }
-        }
+        }.also { logger.audit(user, AuditEvent.GET_USERS) }
     }
 
     @PutMapping("/{id}")
@@ -176,7 +177,7 @@ class UserController {
                 result.id
             }
             .also {
-                logger.audit(user, AuditEvent.UPDATE_USER_PASSWORD, mapOf("id" to "${user.id}"))
+                logger.audit(user, AuditEvent.RESET_USER_PASSWORD, mapOf("id" to "${user.id}"))
             }
     }
 }

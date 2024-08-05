@@ -166,10 +166,22 @@ class ReportController {
     fun getReportById(
         user: AuthenticatedUser,
         @PathVariable id: UUID
-    ) = jdbi.inTransactionUnchecked { tx -> tx.getReport(id, user) }
+    ) = jdbi.inTransactionUnchecked { tx -> tx.getReport(id, user) }.also {
+        logger.audit(
+            user,
+            AuditEvent.GET_REPORT_BY_ID,
+            mapOf("id" to "$id")
+        )
+    }
 
     @GetMapping()
-    fun getReports(user: AuthenticatedUser) = jdbi.inTransactionUnchecked { tx -> tx.getReports(user) }
+    fun getReports(user: AuthenticatedUser) =
+        jdbi.inTransactionUnchecked { tx -> tx.getReports(user) }.also {
+            logger.audit(
+                user,
+                AuditEvent.GET_REPORTS,
+            )
+        }
 
     @GetMapping("/csv")
     fun getReportsAsCsv(
@@ -178,7 +190,12 @@ class ReportController {
         @RequestParam endDate: LocalDate?
     ): ResponseEntity<Resource> {
         val reports =
-            jdbi.inTransactionUnchecked { tx -> tx.getReports(user, startDate, endDate) }
+            jdbi.inTransactionUnchecked { tx -> tx.getReports(user, startDate, endDate) }.also {
+                logger.audit(
+                    user,
+                    AuditEvent.GET_REPORTS_AS_CSV,
+                )
+            }
         val contentDisposition =
             ContentDisposition.attachment()
                 .filename("reports.csv")
@@ -313,7 +330,7 @@ class ReportController {
 
         jdbi
             .inTransactionUnchecked { tx -> tx.updateReportApproved(reportId, false, listOf(), user) }
-            .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
+            .also { logger.audit(user, AuditEvent.REOPEN_REPORT, mapOf("id" to "$reportId")) }
     }
 
     @GetMapping("/{reportId}/files")
@@ -325,7 +342,7 @@ class ReportController {
             // This is done to check that user has access to the report
             val report = tx.getReport(reportId, user)
             tx.getReportFiles(reportId)
-        }
+        }.also { logger.audit(user, AuditEvent.GET_REPORT_FILES, mapOf("id" to "$reportId")) }
     }
 
     @GetMapping("/{reportId}/files/{fileId}")
@@ -338,6 +355,13 @@ class ReportController {
 
         val reportFile =
             jdbi.inTransactionUnchecked { tx -> tx.getReportFileById(reportId, fileId) }
+                .also {
+                    logger.audit(
+                        user,
+                        AuditEvent.GET_REPORT_FILE_BY_ID,
+                        mapOf("id" to "$reportId", "file" to "$fileId")
+                    )
+                }
         val contentDisposition =
             ContentDisposition.attachment()
                 .filename(reportFile.fileName, StandardCharsets.UTF_8)
