@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-FROM eclipse-temurin:21-jammy as base
+FROM eclipse-temurin:21-jammy AS base
 
 LABEL maintainer="https://github.com/espoon-voltti/luontotieto"
 
@@ -23,7 +23,7 @@ RUN apt-get update \
        -o /bin/s3download \
  && chmod +x /bin/s3download
 
-FROM base as builder
+FROM base AS builder
 
 RUN apt-get update\
  && apt-get install -y libglib2.0-0\
