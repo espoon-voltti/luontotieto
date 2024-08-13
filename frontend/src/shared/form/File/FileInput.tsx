@@ -151,7 +151,7 @@ export const FileInput = <
             readonly={noObservation}
             onChange={(fileList) => {
               const file = fileList?.[0]
-              file && setFile(file)
+              setFile(file ?? null)
             }}
             accept={accept}
           />

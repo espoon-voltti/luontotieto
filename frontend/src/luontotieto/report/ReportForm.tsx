@@ -186,6 +186,18 @@ function hasReportDocument(fileInputs: ReportFileInputElement[]): boolean {
   }
 }
 
+function hasAluerajausDocument(fileInputs: ReportFileInputElement[]): boolean {
+  const aluerajausDocument = fileInputs.find(
+    (input) =>
+      input.documentType === ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS
+  )
+  if (!aluerajausDocument) {
+    return false
+  } else {
+    return aluerajausDocument?.type === 'EXISTING' || !!aluerajausDocument?.file
+  }
+}
+
 function filesAreValid(
   requiredFiles: OrderReportDocumentInput[],
   fileInputs: ReportFileInputElement[]
@@ -288,10 +300,23 @@ export const ReportForm = React.memo(function ReportForm(
   }
 
   const validInput: ReportFormInput | null = useMemo(() => {
+    const filesToRemove = originalFileInputs.flatMap((e) =>
+      e.type === 'EXISTING' &&
+      !fileInputs.find(
+        (fi) => fi.type === 'EXISTING' && fi.details.id === e.details.id
+      )
+        ? [e.details.id]
+        : []
+    )
+
     if (name.trim() === '') return null
-    if (!filesAreValid(requiredFiles, fileInputs)) return null
-    if (!hasReportDocument(fileInputs)) return null
     if (isPublic === null) return null
+
+    if (filesToRemove.length === 0) {
+      if (!filesAreValid(requiredFiles, fileInputs)) return null
+      if (!hasReportDocument(fileInputs)) return null
+      if (!hasAluerajausDocument(fileInputs)) return null
+    }
 
     const noObs = fileInputs.flatMap((input) =>
       input.noObservation ? [input.documentType] : []
@@ -311,14 +336,7 @@ export const ReportForm = React.memo(function ReportForm(
             ]
           : []
       ),
-      filesToRemove: originalFileInputs.flatMap((e) =>
-        e.type === 'EXISTING' &&
-        !fileInputs.find(
-          (fi) => fi.type === 'EXISTING' && fi.details.id === e.details.id
-        )
-          ? [e.details.id]
-          : []
-      )
+      filesToRemove
     }
   }, [name, fileInputs, requiredFiles, originalFileInputs, isPublic])
 
