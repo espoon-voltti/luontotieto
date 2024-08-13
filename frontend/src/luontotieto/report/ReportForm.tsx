@@ -312,6 +312,7 @@ export const ReportForm = React.memo(function ReportForm(
     if (name.trim() === '') return null
     if (isPublic === null) return null
 
+    // With this we make it possible for the user to delete files he has previously saved to the system
     if (filesToRemove.length === 0) {
       if (!filesAreValid(requiredFiles, fileInputs)) return null
       if (!hasReportDocument(fileInputs)) return null
