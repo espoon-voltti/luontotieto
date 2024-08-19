@@ -295,6 +295,8 @@ class ReportController {
                 }
             }
         } catch (e: Exception) {
+            /** TODO: This could be imrpoved by trying to parse the exact error,
+             * for example which row and which column fails */
             logger.error("Error saving paikkatieto data", e)
             throw BadRequest("Error saving paikkatietodata", "error-saving-paikkatieto-data")
         }
