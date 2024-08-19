@@ -70,7 +70,7 @@ COMMENT ON COLUMN arvokkaat_vesikohteet_alueet.havaitsija IS 'Jos havainto on te
 COMMENT ON COLUMN arvokkaat_vesikohteet_alueet.nimi IS 'Kohteen nimi. Kenttään täytetään esimerkiksi uomanosuuden nimi, vesialueen nimi tai kohteen tunnettu kutsumanimi.';
 COMMENT ON COLUMN arvokkaat_vesikohteet_alueet.arvoluokka IS 'Kohteen arvon sanallinen kuvaus. Esim. paikallisesti arvokas, maakunnallisesti arvokas, luonnontilainen puro';
 COMMENT ON COLUMN arvokkaat_vesikohteet_alueet.aluekuvaus IS 'Alueen merkitys lajiryhmälle, esim. paikallisesti arvokas lintualue';
-COMMENT ON COLUMN arvokkaat_vesikohteet_alueet.vesisto IS 'TODO:';
+COMMENT ON COLUMN arvokkaat_vesikohteet_alueet.vesisto IS 'Vesistöalue, jossa kohde sijaitsee.';
 COMMENT ON COLUMN arvokkaat_vesikohteet_alueet.lisatieto IS 'Vapaaehtoinen kenttä, joka jätetään suurimmaksi osaksi tyhjäksi. Tähän voi kirjoittaa, jos kohteessa tai ympäristössä on jotain omasta mielestä mainitsemisen arvoista.';
 COMMENT ON COLUMN arvokkaat_vesikohteet_alueet.viite IS 'Päivämäärä, jolloin havainto on maastossa tehty';
 COMMENT ON COLUMN arvokkaat_vesikohteet_alueet.pinta_ala IS 'Alueen koko hehtaareina';
