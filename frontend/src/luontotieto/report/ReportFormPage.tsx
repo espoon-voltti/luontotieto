@@ -8,6 +8,7 @@ import {
   apiApproveReport,
   apiPutReport,
   apiReOpenReport,
+  ApproveReportError,
   ReportFileValidationErrorResponse,
   ReportFormInput
 } from 'api/report-api'
@@ -33,6 +34,7 @@ import { OrderDetails } from './OrderDetails'
 import { ReportApproval } from './ReportApproval'
 import { ReportForm } from './ReportForm'
 import { ReportReOpen } from './ReportReOpen'
+import { AlertBox } from 'shared/MessageBoxes'
 
 const StyledButton = styled(Button)`
   margin-right: 20px;
@@ -60,6 +62,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
     useGetReportFilesQuery(id)
 
   const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
+  const [approveError, setApproveError] = useState<string | null>(null)
 
   const { mutateAsync: updateReportMutation, isPending: updatingReport } =
     useMutation({
@@ -96,6 +99,13 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
         title: 'Selvitys hyväksytty',
         resolve: { action: () => setShowModal(null), label: 'Ok' }
       })
+    },
+    onError: (error: ApproveReportError) => {
+      if (error?.errorCode === 'error-saving-paikkatieto-data') {
+        setApproveError('Virhe tallentaessa paikkatietoja paikkatietokantaan.')
+      } else {
+        setApproveError('Virhe hyväksyttäessä selvitystä')
+      }
     }
   })
 
@@ -244,6 +254,12 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
           disabled={approving}
         >
           {showModal.text}
+          {approveError && (
+            <>
+              <VerticalGap $size="L" />
+              <AlertBox title="Virhe" message={approveError} />
+            </>
+          )}
         </InfoModal>
       )}
     </>

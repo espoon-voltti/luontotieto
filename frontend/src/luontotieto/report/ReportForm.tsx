@@ -369,7 +369,6 @@ export const ReportForm = React.memo(function ReportForm(
                 (error) => error.documentType === fInput.documentType
               )
             : undefined
-
           switch (fInput.type) {
             case 'NEW':
               return (

@@ -138,8 +138,20 @@ export const apiPutReport = async (
   return report
 }
 
+export interface ApproveReportError {
+  errorCode: 'error-saving-paikkatieto-data'
+}
+
 export const apiApproveReport = async (reportId: string): Promise<void> => {
-  await apiClient.post(`/reports/${reportId}/approve`, {})
+  await apiClient
+    .post(`/reports/${reportId}/approve`, {})
+    .catch((error: { response: { data: ApproveReportError } }) => {
+      const errorResponse = {
+        errorCode: error.response.data.errorCode
+      }
+      return Promise.reject(errorResponse)
+    })
+  return Promise.resolve()
 }
 
 export const apiReOpenReport = async (reportId: string): Promise<void> => {

@@ -257,41 +257,48 @@ class ReportController {
 
         val observed = mutableListOf<String>()
 
-        paikkatietoJdbi.inTransactionUnchecked { ptx ->
-            readers.forEach {
-                it.use { reader ->
-                    val params =
-                        when (reader.tableDefinition) {
-                            TableDefinition.ALUERAJAUS_LUONTOSELVITYS -> {
-                                val observedSpecies = ptx.getObservedSpecies(reportId)
-                                val reportDocumentLink =
-                                    if (report.isPublic == true) {
-                                        luontotietoHost.getReportDocumentDownloadUrl(reportId)
-                                    } else {
-                                        "Ei julkinen"
+        try {
+            paikkatietoJdbi.inTransactionUnchecked { ptx ->
+                readers.forEach {
+                    it.use { reader ->
+                        val params =
+                            when (reader.tableDefinition) {
+                                TableDefinition.ALUERAJAUS_LUONTOSELVITYS -> {
+                                    val observedSpecies = ptx.getObservedSpecies(reportId)
+                                    val reportDocumentLink =
+                                        if (report.isPublic == true) {
+                                            luontotietoHost.getReportDocumentDownloadUrl(reportId)
+                                        } else {
+                                            "Ei julkinen"
+                                        }
+                                    observed.addAll(observedSpecies)
+                                    jdbi.inTransactionUnchecked { tx ->
+                                        tx.getAluerajausLuontoselvitysParams(
+                                            user = user,
+                                            id = reportId,
+                                            observedSpecies = observedSpecies.toSet(),
+                                            reportLink = luontotietoHost.getReportUrl(reportId),
+                                            reportDocumentLink = reportDocumentLink
+                                        )
                                     }
-                                observed.addAll(observedSpecies)
-                                jdbi.inTransactionUnchecked { tx ->
-                                    tx.getAluerajausLuontoselvitysParams(
-                                        user = user,
-                                        id = reportId,
-                                        observedSpecies = observedSpecies.toSet(),
-                                        reportLink = luontotietoHost.getReportUrl(reportId),
-                                        reportDocumentLink = reportDocumentLink
-                                    )
                                 }
-                            }
 
-                            else -> emptyMap()
-                        }
-                    ptx.insertPaikkatieto(
-                        reader.tableDefinition,
-                        report,
-                        reader.asSequence(),
-                        params
-                    )
+                                else -> emptyMap()
+                            }
+                        ptx.insertPaikkatieto(
+                            reader.tableDefinition,
+                            report,
+                            reader.asSequence(),
+                            params
+                        )
+                    }
                 }
             }
+        } catch (e: Exception) {
+            /** TODO: This could be imrpoved by trying to parse the exact error,
+             * for example which row and which column fails */
+            logger.error("Error saving paikkatieto data", e)
+            throw BadRequest("Error saving paikkatietodata", "error-saving-paikkatieto-data")
         }
 
         jdbi
