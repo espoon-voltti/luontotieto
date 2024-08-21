@@ -39,11 +39,9 @@ class UserController {
     @Autowired
     lateinit var jdbi: Jdbi
 
-    @Autowired
-    lateinit var sesEmailClient: SESEmailClient
+    @Autowired lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired
-    lateinit var luontotietoHost: LuontotietoHost
+    @Autowired lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -82,8 +80,9 @@ class UserController {
         @PathVariable id: UUID
     ): User {
         if (user.isSystemUser() || user.role == UserRole.ADMIN) {
-            return jdbi.inTransactionUnchecked { tx -> tx.getUser(id) }
-                .also { logger.audit(user, AuditEvent.GET_USER, mapOf("id" to "$id")) }
+            return jdbi.inTransactionUnchecked { tx -> tx.getUser(id) }.also {
+                logger.audit(user, AuditEvent.GET_USER, mapOf("id" to "$id"))
+            }
         } else {
             throw NotFound()
         }
@@ -95,15 +94,18 @@ class UserController {
         @RequestParam includeInactive: Boolean = true
     ): List<User> {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
-        return jdbi.inTransactionUnchecked { tx ->
-            tx.getUsers().filter { u ->
-                if (user.role === UserRole.ADMIN) {
-                    includeInactive || u.active
-                } else {
-                    (u.role === UserRole.CUSTOMER || u.id == user.id) && includeInactive || u.active
+        return jdbi
+            .inTransactionUnchecked { tx ->
+                tx.getUsers().filter { u ->
+                    if (user.role === UserRole.ADMIN) {
+                        includeInactive || u.active
+                    } else {
+                        (u.role === UserRole.CUSTOMER || u.id == user.id) && includeInactive ||
+                            u.active
+                    }
                 }
             }
-        }.also { logger.audit(user, AuditEvent.GET_USERS) }
+            .also { logger.audit(user, AuditEvent.GET_USERS) }
     }
 
     @PutMapping("/{id}")
@@ -172,7 +174,10 @@ class UserController {
                 sesEmailClient.send(
                     Email(
                         result.email,
-                        Emails.getPasswordResetedEmail(luontotietoHost.getCustomerUserLoginUrl(), generatedString)
+                        Emails.getPasswordResetedEmail(
+                            luontotietoHost.getCustomerUserLoginUrl(),
+                            generatedString
+                        )
                     )
                 )
                 result.id
