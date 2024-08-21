@@ -39,9 +39,11 @@ class UserController {
     @Autowired
     lateinit var jdbi: Jdbi
 
-    @Autowired lateinit var sesEmailClient: SESEmailClient
+    @Autowired
+    lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired lateinit var luontotietoHost: LuontotietoHost
+    @Autowired
+    lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -152,7 +154,16 @@ class UserController {
                 }
 
                 val passwordHash = encoder.encode(data.newPassword)
-                tx.putPassword(user.id, passwordHash, user).id
+                val result = tx.putPassword(user.id, passwordHash, user)
+                sesEmailClient.send(
+                    Email(
+                        result.email,
+                        Emails.getUserPasswordUpdatedEmail(
+                            luontotietoHost.getCustomerUserLoginUrl(),
+                        )
+                    )
+                )
+                result.id
             }
             .also {
                 logger.audit(user, AuditEvent.UPDATE_USER_PASSWORD, mapOf("id" to "${user.id}"))
