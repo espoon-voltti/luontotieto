@@ -40,12 +40,12 @@ data class EmailContent(
             EmailContent(
                 subject,
                 text =
-                    doc.body()
-                        .wholeText()
-                        .lineSequence()
-                        .joinToString(separator = "\n") { it.trim() }
-                        .replace(TOO_MANY_NEWLINES, "\n\n")
-                        .trim(),
+                doc.body()
+                    .wholeText()
+                    .lineSequence()
+                    .joinToString(separator = "\n") { it.trim() }
+                    .replace(TOO_MANY_NEWLINES, "\n\n")
+                    .trim(),
                 html = parsedHtml,
             )
         }
@@ -70,11 +70,22 @@ class Emails {
 """
         )
 
+        fun getUserPasswordUpdatedEmail(link: String) =
+            EmailContent.fromHtml(
+                "Salasana vaihdettu Espoon Luontotietoportaalissa",
+                """
+<p>Teidän salasananne on vaihdettu Espoon Luontotietoportaalissa.</p>
+<p>Voitte kirjautua palveluun osoitteessa ${linkElement(link)}.</p>
+<p>Jos et ole itse vaihtanut salasanaasi, pyydämme sinua ottamaan yhteyttä ymparisto@espoo.fi.</p>
+<p>$DO_NOT_REPLY_MESSAGE</p>
+"""
+            )
+
         fun getPasswordResetedEmail(
             link: String,
             password: String
         ) = EmailContent.fromHtml(
-            "Salasana resetoitu Espoon Luontotietoportaaliissa",
+            "Salasana resetoitu Espoon Luontotietoportaalissa",
             """
 <p>Teidän salasananne Espoon Luontotietoportaaliin on resetoitu.</p>
 <p>Voitte kirjautua palveluun osoitteessa ${linkElement(link)}.</p>
