@@ -40,12 +40,12 @@ data class EmailContent(
             EmailContent(
                 subject,
                 text =
-                doc.body()
-                    .wholeText()
-                    .lineSequence()
-                    .joinToString(separator = "\n") { it.trim() }
-                    .replace(TOO_MANY_NEWLINES, "\n\n")
-                    .trim(),
+                    doc.body()
+                        .wholeText()
+                        .lineSequence()
+                        .joinToString(separator = "\n") { it.trim() }
+                        .replace(TOO_MANY_NEWLINES, "\n\n")
+                        .trim(),
                 html = parsedHtml,
             )
         }
