@@ -64,7 +64,7 @@ export const ChangePasswordError = {
   'new-password-already-in-use':
     'Uusi salasana ei saa olla sama kuin nykyinen salana',
   'weak-password':
-    'Syötä vahva salasana jossa on: vähintään 10 merkkiä, yksi iso kirjain, yksi pieni kirjain ja yksi numero.'
+    'Syötä vahva salasana jossa on: vähintään 12 merkkiä, yksi iso kirjain, yksi pieni kirjain ja yksi numero.'
 }
 
 export const apiChangeUserPassword = async (

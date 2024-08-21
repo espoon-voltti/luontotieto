@@ -93,7 +93,7 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
   )
 })
 
-const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{10,}$/
+const passwordRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{12,}$/
 
 const ChangePasswordForm = React.memo(function ChangePasswordForm({
   userId,
