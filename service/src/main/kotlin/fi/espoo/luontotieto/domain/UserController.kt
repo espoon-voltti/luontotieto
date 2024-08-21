@@ -124,7 +124,8 @@ class UserController {
         @RequestBody data: User.Companion.UpdatePasswordPayload
     ): UUID {
         user.checkRoles(UserRole.CUSTOMER)
-        if (!data.newPassword.matches("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{10,}\$".toRegex())) {
+
+        if (!data.newPassword.matches("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{12,}\$".toRegex())) {
             throw BadRequest("User entered a weak new password.", "weak-password")
         }
         return jdbi
