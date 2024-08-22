@@ -29,6 +29,10 @@ class GpkgWriterTest {
         val schema = dataStore.getSchema(tableDefinition.layerName)
 
         return tableDefinition.columns.all { column ->
+            /** Ignore viite column here since it is a corner case we support for
+             * importing the existing report data and therefore it does not exist in the usual cases.
+             */
+            if (column.name === "viite") return true
             val type = schema.getType(column.name)
             val descriptor = schema.getDescriptor(column.name)
             (column.kClass == type.binding.kotlin && column.isNullable == descriptor.isNillable)
