@@ -22,7 +22,7 @@ import java.util.UUID
 data class AuthenticatedUser(val id: UUID, val role: UserRole) {
     fun isSystemUser() = id == UUID.fromString("00000000-0000-0000-0000-000000000000")
 
-    fun isCustomer() = role == UserRole.CUSTOMER
+    fun isAdmin() = role == UserRole.ADMIN
 
     fun checkRoles(vararg roles: UserRole) {
         if (!roles.contains(role)) {
@@ -87,6 +87,7 @@ class HttpAccessControl : HttpFilter() {
                             .toRegex()
                     )
             -> false
+
             else -> true
         }
 

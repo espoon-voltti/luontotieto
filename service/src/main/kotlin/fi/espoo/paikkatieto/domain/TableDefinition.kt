@@ -38,6 +38,7 @@ data class Column(
                     value = null,
                     reason = GpkgValidationErrorReason.IS_NULL
                 )
+
             value != null &&
                 (!value::class.isSubclassOf(kClass) && value::class != kClass::class) -> {
                 val errorValue =
@@ -54,6 +55,7 @@ data class Column(
                     reason = GpkgValidationErrorReason.WRONG_TYPE
                 )
             }
+
             else -> null
         }
 }
@@ -97,6 +99,10 @@ enum class TableDefinition(
                     name = "tarkkuus",
                     kClass = String::class,
                     sqlType = "luontotieto_mittaustyyppi"
+                ),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
                 )
             )
     ),
@@ -120,6 +126,10 @@ enum class TableDefinition(
                     name = "tarkkuus",
                     kClass = String::class,
                     sqlType = "luontotieto_mittaustyyppi"
+                ),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
                 )
             )
     ),
@@ -138,6 +148,10 @@ enum class TableDefinition(
                     name = "tarkkuus",
                     kClass = String::class,
                     sqlType = "luontotieto_mittaustyyppi"
+                ),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
                 )
             )
     ),
@@ -168,7 +182,11 @@ enum class TableDefinition(
                 Column(name = "yksilo_maara", kClass = Int::class),
                 Column(name = "yksikko", kClass = String::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(name = "havaitsija", kClass = String::class)
+                Column(name = "havaitsija", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                )
             )
     ),
     MUUT_HUOMIOITAVAT_LAJIT_VIIVAT(
@@ -192,7 +210,11 @@ enum class TableDefinition(
                 // Do not write pituus to DB. Keep it only in the template.
                 Column(name = "pituus", kClass = Double::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(name = "havaitsija", kClass = String::class)
+                Column(name = "havaitsija", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                )
             )
     ),
     MUUT_HUOMIOITAVAT_LAJIT_ALUEET(
@@ -218,7 +240,11 @@ enum class TableDefinition(
                 // Do not write pinta_ala to DB. Keep it only in the template.
                 Column(name = "pinta_ala", kClass = Double::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(name = "havaitsija", kClass = String::class)
+                Column(name = "havaitsija", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                )
             )
     ),
     LEPAKKO_VIIVAT(
@@ -230,7 +256,11 @@ enum class TableDefinition(
                 Column(name = "pvm", kClass = Date::class),
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "kuvaus", kClass = String::class),
-                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                )
             )
     ),
     LEPAKKO_ALUEET(
@@ -242,7 +272,11 @@ enum class TableDefinition(
                 Column(name = "pvm", kClass = Date::class),
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "luokka", kClass = String::class, sqlType = "lepakko_luokka"),
-                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                )
             )
     ),
     LUMO_ALUEET(
@@ -255,7 +289,11 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "nimi", kClass = String::class, isNullable = true),
                 Column(name = "lumo_luokka", kClass = String::class, sqlType = "lumo_luokka"),
-                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                )
             )
     ),
     NORO_VIIVAT(
@@ -266,7 +304,11 @@ enum class TableDefinition(
                 Column(name = "geom", kClass = LineString::class),
                 Column(name = "pvm", kClass = Date::class),
                 Column(name = "havaitsija", kClass = String::class),
-                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                )
             )
     ),
     LUONTOTYYPIT_ALUEET(
@@ -300,6 +342,10 @@ enum class TableDefinition(
                     kClass = String::class,
                     sqlType = "luontotyyppi_lumo_luokka"
                 ),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                )
             )
     ),
     EKOYHTEYDET_ALUEET(
@@ -312,6 +358,10 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "laatu", kClass = String::class, sqlType = "yhteyden_laatu"),
                 Column(name = "lisatieto", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                )
             )
     ),
     EKOYHTEYDET_VIIVAT(
@@ -324,6 +374,10 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "laatu", kClass = String::class, sqlType = "yhteyden_laatu"),
                 Column(name = "lisatieto", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                )
             )
     ),
     LAHTEET_PISTEET(
@@ -336,6 +390,10 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "tyyppi", kClass = String::class),
                 Column(name = "lisatieto", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                )
             )
     )
 }
@@ -344,14 +402,16 @@ fun Handle.insertPaikkatieto(
     tableDefinition: TableDefinition,
     report: Report,
     data: Sequence<GpkgFeature>,
-    params: Map<String, Any?> = emptyMap()
+    params: Map<String, Any?> = emptyMap(),
+    overrideReportName: Boolean = false
 ): Array<Int> {
     val batchInsert = prepareBatch(tableDefinition.sqlInsertStatement)
     data.forEach {
+        val reportName = if (overrideReportName) it.columns["viite"] ?: report.name else report.name
         batchInsert.add(
             convertColumnsWithGeometry(it.columns)
                 .plus("reportId" to report.id)
-                .plus("reportName" to report.name)
+                .plus("reportName" to reportName)
                 .plus(params)
         )
     }

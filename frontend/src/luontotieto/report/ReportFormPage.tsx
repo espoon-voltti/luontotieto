@@ -49,6 +49,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
   const userIsViewer = useMemo(() => hasViewerRole(user), [user])
   const [approve, setApprove] = useState(false)
   const [reOpen, setReOpen] = useState(false)
+  const [overrideReportName, setOverrideReportName] = useState(false)
 
   if (!id) throw Error('Id not found in path')
 
@@ -64,6 +65,12 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
   const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
   const [approveError, setApproveError] = useState<string | null>(null)
 
+  const closeModal = () => {
+    setShowModal(null)
+    setApproveError(null)
+    setOverrideReportName(false)
+  }
+
   const { mutateAsync: updateReportMutation, isPending: updatingReport } =
     useMutation({
       mutationFn: apiPutReport,
@@ -75,7 +82,8 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
           title: 'Tiedot tallennettu',
           resolve: {
             action: () => {
-              setShowModal(null), navigate(`/luontotieto`)
+              closeModal()
+              navigate(`/luontotieto`)
             },
             label: 'Ok'
           }
@@ -85,7 +93,10 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
         setReportFileErrors([error])
         setShowModal({
           title: 'Tietojen tallennus epäonnistui',
-          resolve: { action: () => setShowModal(null), label: 'Sulje' }
+          resolve: {
+            action: () => closeModal(),
+            label: 'Sulje'
+          }
         })
       }
     })
@@ -97,7 +108,10 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
       void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
       setShowModal({
         title: 'Selvitys hyväksytty',
-        resolve: { action: () => setShowModal(null), label: 'Ok' }
+        resolve: {
+          action: () => closeModal(),
+          label: 'Ok'
+        }
       })
     },
     onError: (error: ApproveReportError) => {
@@ -118,7 +132,8 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
         title: 'Selvitys avattu uudelleen',
         resolve: {
           action: () => {
-            setShowModal(null)
+            closeModal()
+
             navigate(0)
           },
           label: 'Ok'
@@ -126,8 +141,11 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
       })
     }
   })
+  console.log()
 
   const onSubmit = async (reportInput: ReportFormInput) => {
+    console.log('ON SUBMIT RENDER???')
+    console.log(overrideReportName)
     if (report && report.approved && reOpen) {
       setShowModal({
         title: 'Avaa selvitys uudelleen',
@@ -137,7 +155,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
           label: 'Hyväksy'
         },
         reject: {
-          action: () => setShowModal(null),
+          action: () => closeModal(),
           label: 'Peruuta'
         }
       })
@@ -151,11 +169,12 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
         title: 'Hyväksy selvitys',
         text: 'Selvityksen hyväksyminen lukitsee selvityksen ja tallentaa paikkatiedot paikkatietokantaan',
         resolve: {
-          action: () => approveReport(report.id),
+          action: () =>
+            approveReport({ reportId: report.id, overrideReportName }),
           label: 'Hyväksy'
         },
         reject: {
-          action: () => setShowModal(null),
+          action: () => closeModal(),
           label: 'Peruuta'
         }
       })
@@ -201,6 +220,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
             report={report}
             onApprove={setApprove}
             isValid={!!reportInput}
+            onOverrideReportName={setOverrideReportName}
           />
         )}
         <VerticalGap $size="m" />
@@ -246,7 +266,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
       </Footer>
       {showModal && (
         <InfoModal
-          close={() => setShowModal(null)}
+          close={() => closeModal()}
           closeLabel="Sulje"
           title={showModal.title}
           resolve={showModal.resolve}

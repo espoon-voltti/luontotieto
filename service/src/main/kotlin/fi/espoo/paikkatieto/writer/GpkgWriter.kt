@@ -39,7 +39,13 @@ object GpkgWriter {
                     setSRS("EPSG:3879")
                 }
 
-            for (column in tableDefinition.columns) {
+            /**
+             * Filter out viite columns since it should not be generated to the template files
+             * Viite column is normally populated from the report name, but added
+             * to column definitions to import existing data with old report names
+             */
+            val addableColumns = tableDefinition.columns.filter { column -> column.name !== "viite" }
+            for (column in addableColumns) {
                 if (column.sqlType != null) {
                     getColumnRange(column)?.let { builder.options(it) }
                 }
