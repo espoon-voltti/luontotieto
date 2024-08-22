@@ -249,7 +249,6 @@ class ReportController {
             }
 
         val report = jdbi.inTransactionUnchecked { tx -> tx.getReport(reportId, user) }
-
         val readers =
             reportFiles.mapNotNull { rf ->
                 getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf)
@@ -257,10 +256,17 @@ class ReportController {
 
         val observed = mutableListOf<String>()
 
+        /** Sort readers so that we make sure to insert the aluerajaus definitions last,
+         * this is done because the observed species value is deferred from
+         * the muut_huomioitavat_lajit tables that need
+         * to be inserted first. */
+        val sortedReaders = readers.sortedBy { it.tableDefinition.layerName.contains("aluerajaus") }
+
         try {
             paikkatietoJdbi.inTransactionUnchecked { ptx ->
-                readers.forEach {
+                sortedReaders.forEach {
                     it.use { reader ->
+
                         val params =
                             when (reader.tableDefinition) {
                                 TableDefinition.ALUERAJAUS_LUONTOSELVITYS -> {
