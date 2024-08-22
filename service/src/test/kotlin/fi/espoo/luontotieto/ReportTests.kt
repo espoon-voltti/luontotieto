@@ -141,85 +141,100 @@ class ReportTests : FullApplicationTest() {
         File("src/test/resources/test-data/muut_huomioitavat_lajit_alueet_torakka.gpkg")
             .inputStream()
             .use { inStream ->
-                reportController.uploadReportFile(
-                    user = adminUser,
-                    reportId = createOrderResponse.reportId,
-                    file =
-                        MockMultipartFile(
-                            "muut_huomioitavat_lajit_alueet_torakka.gpkg",
-                            "muut_huomioitavat_lajit_alueet_torakka.gpkg",
-                            "application/geopackage+sqlite3",
-                            inStream
-                        ),
-                    description = null,
-                    documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET
+                assertEquals(
+                    reportController.uploadReportFile(
+                        user = adminUser,
+                        reportId = createOrderResponse.reportId,
+                        file =
+                            MockMultipartFile(
+                                "muut_huomioitavat_lajit_alueet_torakka.gpkg",
+                                "muut_huomioitavat_lajit_alueet_torakka.gpkg",
+                                "application/geopackage+sqlite3",
+                                inStream
+                            ),
+                        description = null,
+                        documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET
+                    ).statusCode.value(),
+                    201
                 )
             }
 
         File("src/test/resources/test-data/muut_huomioitavat_lajit_viivat_perhonen.gpkg")
             .inputStream()
             .use { inStream ->
-                reportController.uploadReportFile(
-                    user = adminUser,
-                    reportId = createOrderResponse.reportId,
-                    file =
-                        MockMultipartFile(
-                            "muut_huomioitavat_lajit_viivat_perhonen.gpkg",
-                            "muut_huomioitavat_lajit_viivat_perhonen.gpkg",
-                            "application/geopackage+sqlite3",
-                            inStream
-                        ),
-                    description = null,
-                    documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT
+                assertEquals(
+                    reportController.uploadReportFile(
+                        user = adminUser,
+                        reportId = createOrderResponse.reportId,
+                        file =
+                            MockMultipartFile(
+                                "muut_huomioitavat_lajit_viivat_perhonen.gpkg",
+                                "muut_huomioitavat_lajit_viivat_perhonen.gpkg",
+                                "application/geopackage+sqlite3",
+                                inStream
+                            ),
+                        description = null,
+                        documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT
+                    ).statusCode.value(),
+                    201
                 )
             }
 
         File("src/test/resources/test-data/muut_huomioitavat_lajit_pisteet_ilves.gpkg")
             .inputStream()
             .use { inStream ->
+                assertEquals(
+                    reportController.uploadReportFile(
+                        user = adminUser,
+                        reportId = createOrderResponse.reportId,
+                        file =
+                            MockMultipartFile(
+                                "muut_huomioitavat_lajit_pisteet_ilves.gpkg",
+                                "muut_huomioitavat_lajit_pisteet_ilves.gpkg",
+                                "application/geopackage+sqlite3",
+                                inStream
+                            ),
+                        description = null,
+                        documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET
+                    ).statusCode.value(),
+                    201
+                )
+            }
+
+        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use { inStream ->
+            assertEquals(
                 reportController.uploadReportFile(
                     user = adminUser,
                     reportId = createOrderResponse.reportId,
                     file =
                         MockMultipartFile(
-                            "muut_huomioitavat_lajit_pisteet_ilves.gpkg",
-                            "muut_huomioitavat_lajit_pisteet_ilves.gpkg",
+                            "aluerajaus_luontoselvitys.gpkg",
+                            "aluerajaus_luontoselvitys.gpkg",
                             "application/geopackage+sqlite3",
                             inStream
                         ),
-                    description = null,
-                    documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET
-                )
-            }
+                    description = "Alueelta löytyi ilves, torakka ja perhonen.",
+                    documentType = DocumentType.ALUERAJAUS_LUONTOSELVITYS
+                ).statusCode.value(),
+                201
+            )
+        }
 
-        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use { inStream ->
+        assertEquals(
             reportController.uploadReportFile(
                 user = adminUser,
                 reportId = createOrderResponse.reportId,
                 file =
                     MockMultipartFile(
-                        "aluerajaus_luontoselvitys.gpkg",
-                        "aluerajaus_luontoselvitys.gpkg",
-                        "application/geopackage+sqlite3",
-                        inStream
+                        "luontoselvitysraportti.pdf",
+                        "luontoselvitysraportti.pdf",
+                        "plain/text",
+                        "LUONTOSELVITYSRAPORTTI".toByteArray()
                     ),
-                description = "Alueelta löytyi ilves, torakka ja perhonen.",
-                documentType = DocumentType.ALUERAJAUS_LUONTOSELVITYS
-            )
-        }
-
-        reportController.uploadReportFile(
-            user = adminUser,
-            reportId = createOrderResponse.reportId,
-            file =
-                MockMultipartFile(
-                    "luontoselvitysraportti.pdf",
-                    "luontoselvitysraportti.pdf",
-                    "plain/text",
-                    "LUONTOSELVITYSRAPORTTI".toByteArray()
-                ),
-            description = null,
-            documentType = DocumentType.REPORT
+                description = null,
+                documentType = DocumentType.REPORT
+            ).statusCode.value(),
+            201
         )
 
         reportController.approveReport(adminUser, createOrderResponse.reportId)

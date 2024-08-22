@@ -103,6 +103,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -130,6 +131,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -152,6 +154,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -186,6 +189,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -214,6 +218,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -244,6 +249,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -260,6 +266,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -276,6 +283,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -293,6 +301,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -308,6 +317,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -345,6 +355,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -361,6 +372,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -377,6 +389,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -393,6 +406,7 @@ enum class TableDefinition(
                 Column(
                     name = "viite",
                     kClass = String::class,
+                    isNullable = true
                 )
             )
     )
