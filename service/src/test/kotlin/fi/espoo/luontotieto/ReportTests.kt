@@ -213,7 +213,7 @@ class ReportTests : FullApplicationTest() {
                             "application/geopackage+sqlite3",
                             inStream
                         ),
-                    description = "Alueelta löytyi ilves, torakka ja perhonen.",
+                    description = "Alueelta löytyi ilves, torakka, jänis ja perhonen.",
                     documentType = DocumentType.ALUERAJAUS_LUONTOSELVITYS
                 ).statusCode.value(),
                 201
@@ -237,11 +237,11 @@ class ReportTests : FullApplicationTest() {
             201
         )
 
-        reportController.approveReport(adminUser, createOrderResponse.reportId)
+        reportController.approveReport(adminUser, createOrderResponse.reportId, true)
 
         val approvedReport = reportController.getReportById(adminUser, createOrderResponse.reportId)
         assertTrue(approvedReport.approved)
-        assertEquals(approvedReport.observedSpecies, listOf("Ilves", "Torakka", "Perhonen"))
+        assertEquals(approvedReport.observedSpecies, listOf("Ilves", "Torakka", "Jänis", "Perhonen"))
 
         val reportFiles = reportController.getReportFiles(adminUser, createOrderResponse.reportId)
         assertEquals(5, reportFiles.size)
@@ -264,11 +264,11 @@ class ReportTests : FullApplicationTest() {
                     .mapTo<AluerajausResult>()
                     .one()
 
-            assertEquals("Alueelta löytyi ilves, torakka ja perhonen.", data.lisatieto)
+            assertEquals("Alueelta löytyi ilves, torakka, jänis ja perhonen.", data.lisatieto)
             assertEquals(
                 listOf(
                     "Liito-orava (ei havaittu)",
-                    "Muut huomioitavat lajit (havaittu; Ilves, Perhonen, Torakka)"
+                    "Muut huomioitavat lajit (havaittu; Ilves, Jänis, Perhonen, Torakka)"
                 ),
                 data.selvitetytTiedot
             )
@@ -276,6 +276,19 @@ class ReportTests : FullApplicationTest() {
                 "Ei julkinen",
                 data.selvitysRaporttiLinkki
             )
+
+            val viitteet =
+                ptx.createQuery(
+                    """
+                            SELECT viite FROM muut_huomioitavat_lajit_pisteet WHERE selvitys_id = :reportId
+                        """
+                        .trimIndent()
+                )
+                    .bind("reportId", createOrderResponse.reportId)
+                    .mapTo<String>()
+                    .toList()
+
+            assertEquals(viitteet, listOf("over-written", "Test report"))
         }
 
         reportController.reopenReport(adminUser, createOrderResponse.reportId)
