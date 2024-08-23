@@ -231,7 +231,7 @@ class ReportController {
     fun approveReport(
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
-        @RequestParam("overrideReportName") overrideReportName: Boolean?
+        @RequestParam("overrideReportName") overrideReportName: Boolean? = false
     ) {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         val dataBucket = bucketEnv.data
