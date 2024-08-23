@@ -231,6 +231,7 @@ class ReportController {
     fun approveReport(
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
+        @RequestParam("overrideReportName") overrideReportName: Boolean?
     ) {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         val dataBucket = bucketEnv.data
@@ -288,11 +289,13 @@ class ReportController {
 
                                 else -> emptyMap()
                             }
+
                         ptx.insertPaikkatieto(
                             reader.tableDefinition,
                             report,
                             reader.asSequence(),
-                            params
+                            params,
+                            user.isAdmin() && overrideReportName == true
                         )
                     }
                 }

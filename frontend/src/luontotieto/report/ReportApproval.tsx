@@ -17,8 +17,9 @@ import {
   SectionContainer,
   VerticalGap
 } from '../../shared/layout'
-import { B, H3 } from '../../shared/typography'
+import { B, H3, P } from '../../shared/typography'
 import { UserRole } from 'api/users-api'
+import { InfoBox } from 'shared/MessageBoxes'
 
 type Props = {
   report: ReportDetails
@@ -88,6 +89,21 @@ export const ReportApproval = React.memo(function ReportApproval({
             />
           )}
         </FlexRowWithGaps>
+        {showApproveButton &&
+          user?.role === UserRole.ADMIN &&
+          overrideReportName && (
+            <>
+              <VerticalGap $size="m" />
+              <InfoBox
+                message={
+                  <P>
+                    {`Jos ylikirjoita viitesarake valintaruutu on valittuna, 
+                  kirjoitetaan paikkatietokantaan selvityksen nimen sijasta tiedostota löytyvä viite.`}
+                  </P>
+                }
+              />
+            </>
+          )}
       </FlexCol>
     </SectionContainer>
   )
