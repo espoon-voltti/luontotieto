@@ -11,19 +11,28 @@ import { formatDateTime } from 'shared/dates'
 import { Checkbox } from 'shared/form/Checkbox'
 import { colors } from 'shared/theme'
 
-import { FlexCol, SectionContainer, VerticalGap } from '../../shared/layout'
-import { B, H3 } from '../../shared/typography'
+import {
+  FlexCol,
+  FlexRowWithGaps,
+  SectionContainer,
+  VerticalGap
+} from '../../shared/layout'
+import { B, H3, P } from '../../shared/typography'
+import { UserRole } from 'api/users-api'
+import { InfoBox } from 'shared/MessageBoxes'
 
 type Props = {
   report: ReportDetails
   isValid: boolean
   onApprove: (approved: boolean) => void
+  onOverrideReportName: (approved: boolean) => void
 }
 
 export const ReportApproval = React.memo(function ReportApproval({
   report,
   isValid,
-  onApprove
+  onApprove,
+  onOverrideReportName
 }: Props) {
   const { user } = useContext(UserContext)
   const showApproveButton = useMemo(
@@ -32,6 +41,8 @@ export const ReportApproval = React.memo(function ReportApproval({
   )
 
   const [approved, setApproved] = useState(report.approved)
+  const [overrideReportName, setOverrideReportName] = useState(false)
+
   return (
     <SectionContainer>
       <FlexCol>
@@ -52,18 +63,47 @@ export const ReportApproval = React.memo(function ReportApproval({
           </B>
         )}
         <VerticalGap $size="m" />
-        {showApproveButton && (
-          <Checkbox
-            disabled={report.approved}
-            key="approve-report"
-            label="Hyväksy selvitys"
-            checked={approved}
-            onChange={(checked) => {
-              setApproved(checked)
-              onApprove(checked)
-            }}
-          />
-        )}
+        <FlexRowWithGaps $gapSize="L">
+          {showApproveButton && (
+            <Checkbox
+              disabled={report.approved}
+              key="approve-report"
+              label="Hyväksy selvitys"
+              checked={approved}
+              onChange={(checked) => {
+                setApproved(checked)
+                onApprove(checked)
+              }}
+            />
+          )}
+          {showApproveButton && user?.role === UserRole.ADMIN && (
+            <Checkbox
+              disabled={report.approved}
+              key="override-report-name"
+              label="Ylikirjoita viitesarake"
+              checked={overrideReportName}
+              onChange={(checked) => {
+                setOverrideReportName(checked)
+                onOverrideReportName(checked)
+              }}
+            />
+          )}
+        </FlexRowWithGaps>
+        {showApproveButton &&
+          user?.role === UserRole.ADMIN &&
+          overrideReportName && (
+            <>
+              <VerticalGap $size="m" />
+              <InfoBox
+                message={
+                  <P>
+                    {`Jos ylikirjoita viitesarake valintaruutu on valittuna, 
+                  kirjoitetaan paikkatietokantaan selvityksen nimen sijasta tiedostota löytyvä viite.`}
+                  </P>
+                }
+              />
+            </>
+          )}
       </FlexCol>
     </SectionContainer>
   )

@@ -142,9 +142,17 @@ export interface ApproveReportError {
   errorCode: 'error-saving-paikkatieto-data'
 }
 
-export const apiApproveReport = async (reportId: string): Promise<void> => {
+export const apiApproveReport = async (input: {
+  reportId: string
+  overrideReportName: boolean
+}): Promise<void> => {
+  const { reportId, overrideReportName } = input
   await apiClient
-    .post(`/reports/${reportId}/approve`, {})
+    .post(
+      `/reports/${reportId}/approve`,
+      {},
+      { params: { overrideReportName } }
+    )
     .catch((error: { response: { data: ApproveReportError } }) => {
       const errorResponse = {
         errorCode: error.response.data.errorCode

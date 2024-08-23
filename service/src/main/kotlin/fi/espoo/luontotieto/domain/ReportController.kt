@@ -119,7 +119,8 @@ class ReportController {
                 }
 
                 gpkgReader.use { reader -> reader.asSequence().flatMap { it.errors }.toList() }
-            } ?: emptyList()
+            }
+                ?: emptyList()
 
         if (errors.isEmpty()) {
             val id =
@@ -167,11 +168,7 @@ class ReportController {
         user: AuthenticatedUser,
         @PathVariable id: UUID
     ) = jdbi.inTransactionUnchecked { tx -> tx.getReport(id, user) }.also {
-        logger.audit(
-            user,
-            AuditEvent.GET_REPORT_BY_ID,
-            mapOf("id" to "$id")
-        )
+        logger.audit(user, AuditEvent.GET_REPORT_BY_ID, mapOf("id" to "$id"))
     }
 
     @GetMapping()
@@ -196,10 +193,7 @@ class ReportController {
                     AuditEvent.GET_REPORTS_AS_CSV,
                 )
             }
-        val contentDisposition =
-            ContentDisposition.attachment()
-                .filename("reports.csv")
-                .build()
+        val contentDisposition = ContentDisposition.attachment().filename("reports.csv").build()
 
         val res = reportsToCsv(reports).byteInputStream()
         val inputStreamResource = InputStreamResource(res)
@@ -216,9 +210,9 @@ class ReportController {
         @RequestBody report: Report.Companion.ReportInput
     ): Report {
         val reportResponse =
-            jdbi
-                .inTransactionUnchecked { tx -> tx.putReport(id, report, user) }
-                .also { logger.audit(user, AuditEvent.UPDATE_REPORT, mapOf("id" to "$id")) }
+            jdbi.inTransactionUnchecked { tx -> tx.putReport(id, report, user) }.also {
+                logger.audit(user, AuditEvent.UPDATE_REPORT, mapOf("id" to "$id"))
+            }
 
         if (emailEnv.enabled) {
             val reportApprovedEmail =
@@ -237,6 +231,7 @@ class ReportController {
     fun approveReport(
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
+        @RequestParam("overrideReportName") overrideReportName: Boolean? = false
     ) {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         val dataBucket = bucketEnv.data
@@ -273,7 +268,9 @@ class ReportController {
                                     val observedSpecies = ptx.getObservedSpecies(reportId)
                                     val reportDocumentLink =
                                         if (report.isPublic == true) {
-                                            luontotietoHost.getReportDocumentDownloadUrl(reportId)
+                                            luontotietoHost.getReportDocumentDownloadUrl(
+                                                reportId
+                                            )
                                         } else {
                                             "Ei julkinen"
                                         }
@@ -283,7 +280,8 @@ class ReportController {
                                             user = user,
                                             id = reportId,
                                             observedSpecies = observedSpecies.toSet(),
-                                            reportLink = luontotietoHost.getReportUrl(reportId),
+                                            reportLink =
+                                                luontotietoHost.getReportUrl(reportId),
                                             reportDocumentLink = reportDocumentLink
                                         )
                                     }
@@ -291,24 +289,30 @@ class ReportController {
 
                                 else -> emptyMap()
                             }
+
                         ptx.insertPaikkatieto(
                             reader.tableDefinition,
                             report,
                             reader.asSequence(),
-                            params
+                            params,
+                            user.isAdmin() && overrideReportName == true
                         )
                     }
                 }
             }
         } catch (e: Exception) {
-            /** TODO: This could be imrpoved by trying to parse the exact error,
-             * for example which row and which column fails */
+            /**
+             * TODO: This could be imrpoved by trying to parse the exact error, for example which
+             * row and which column fails
+             */
             logger.error("Error saving paikkatieto data", e)
             throw BadRequest("Error saving paikkatietodata", "error-saving-paikkatieto-data")
         }
 
         jdbi
-            .inTransactionUnchecked { tx -> tx.updateReportApproved(reportId, true, observed.distinct(), user) }
+            .inTransactionUnchecked { tx ->
+                tx.updateReportApproved(reportId, true, observed.distinct(), user)
+            }
             .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
 
         if (emailEnv.enabled) {
@@ -342,7 +346,9 @@ class ReportController {
         }
 
         jdbi
-            .inTransactionUnchecked { tx -> tx.updateReportApproved(reportId, false, listOf(), user) }
+            .inTransactionUnchecked { tx ->
+                tx.updateReportApproved(reportId, false, listOf(), user)
+            }
             .also { logger.audit(user, AuditEvent.REOPEN_REPORT, mapOf("id" to "$reportId")) }
     }
 
@@ -351,11 +357,15 @@ class ReportController {
         user: AuthenticatedUser,
         @PathVariable reportId: UUID
     ): List<ReportFile> {
-        return jdbi.inTransactionUnchecked { tx ->
-            // This is done to check that user has access to the report
-            val report = tx.getReport(reportId, user)
-            tx.getReportFiles(reportId)
-        }.also { logger.audit(user, AuditEvent.GET_REPORT_FILES, mapOf("id" to "$reportId")) }
+        return jdbi
+            .inTransactionUnchecked { tx ->
+                // This is done to check that user has access to the report
+                val report = tx.getReport(reportId, user)
+                tx.getReportFiles(reportId)
+            }
+            .also {
+                logger.audit(user, AuditEvent.GET_REPORT_FILES, mapOf("id" to "$reportId"))
+            }
     }
 
     @GetMapping("/{reportId}/files/{fileId}")
@@ -367,14 +377,13 @@ class ReportController {
         val dataBucket = bucketEnv.data
 
         val reportFile =
-            jdbi.inTransactionUnchecked { tx -> tx.getReportFileById(reportId, fileId) }
-                .also {
-                    logger.audit(
-                        user,
-                        AuditEvent.GET_REPORT_FILE_BY_ID,
-                        mapOf("id" to "$reportId", "file" to "$fileId")
-                    )
-                }
+            jdbi.inTransactionUnchecked { tx -> tx.getReportFileById(reportId, fileId) }.also {
+                logger.audit(
+                    user,
+                    AuditEvent.GET_REPORT_FILE_BY_ID,
+                    mapOf("id" to "$reportId", "file" to "$fileId")
+                )
+            }
         val contentDisposition =
             ContentDisposition.attachment()
                 .filename(reportFile.fileName, StandardCharsets.UTF_8)
@@ -417,15 +426,13 @@ class ReportController {
 
         documentClient.delete(dataBucket, "$reportId/$fileId")
 
-        jdbi
-            .inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }
-            .also {
-                logger.audit(
-                    user,
-                    AuditEvent.DELETE_REPORT_FILE,
-                    mapOf("id" to "$reportId", "file" to "$fileId")
-                )
-            }
+        jdbi.inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }.also {
+            logger.audit(
+                user,
+                AuditEvent.DELETE_REPORT_FILE,
+                mapOf("id" to "$reportId", "file" to "$fileId")
+            )
+        }
     }
 
     @GetMapping("/template/{documentType}.gpkg")
@@ -437,7 +444,8 @@ class ReportController {
             GpkgWriter.write(tableDefinition) { column ->
                 paikkatietoJdbi.inTransactionUnchecked { tx -> tx.getEnumRange(column) }
             }
-                ?.takeIf { Files.size(it) > 0 } ?: throw NotFound()
+                ?.takeIf { Files.size(it) > 0 }
+                ?: throw NotFound()
 
         val resource = UrlResource(file.toUri())
 

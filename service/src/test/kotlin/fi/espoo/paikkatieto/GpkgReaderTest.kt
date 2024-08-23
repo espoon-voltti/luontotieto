@@ -43,7 +43,8 @@ class GpkgReaderTest {
                             "pesankorkeus" to 2,
                             "lisatieto" to null,
                             "kunta" to 79,
-                            "tarkkuus" to "GPS"
+                            "tarkkuus" to "GPS",
+                            "viite" to "11"
                         ),
                     errors = emptyList()
                 ),
@@ -61,7 +62,8 @@ class GpkgReaderTest {
                             "pesankorkeus" to 11,
                             "lisatieto" to null,
                             "kunta" to 79,
-                            "tarkkuus" to "Muu"
+                            "tarkkuus" to "Muu",
+                            "viite" to "Espoo"
                         ),
                     errors = emptyList()
                 )
@@ -97,7 +99,8 @@ class GpkgReaderTest {
                             "aluekuvaus" to "Alue oravalle",
                             "lisatieto" to null,
                             "kunta" to 79,
-                            "tarkkuus" to "Muu"
+                            "tarkkuus" to "Muu",
+                            "viite" to "Espoo 4/2024"
                         ),
                     errors = emptyList()
                 )
@@ -133,7 +136,8 @@ class GpkgReaderTest {
                             "aluekuvaus" to "Alue oravalle",
                             "lisatieto" to null,
                             "kunta" to "79",
-                            "tarkkuus" to null
+                            "tarkkuus" to null,
+                            "viite" to "Espoo 4/2024"
                         ),
                     errors =
                         listOf(
