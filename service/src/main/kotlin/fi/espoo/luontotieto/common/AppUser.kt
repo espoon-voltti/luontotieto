@@ -134,11 +134,11 @@ fun Handle.userIsLockedOrInDelayPeriod(email: String): String? {
 
 /**
  * Record a failed login attempt and set progressive delay or lock account if necessary
- * Example workflow lopgic
+ * Example workflow logic
  * First 2 failed attempts: No delay.
  * 3rd failed attempt: 5 seconds delay.
  * 4th failed attempt: 10 seconds delay.
- * 5th failed attempt: 20 seconds delay, and lockout if the threshold is reached.
+ * 5th failed attempt: 20 seconds delay, and a 5 minutes lockout if the threshold is reached.
  */
 fun Handle.loginFailed(email: String) {
     //  1. Fetch the current number of failed attempts from the database
