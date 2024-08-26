@@ -121,7 +121,6 @@ fun Handle.userIsLockedOrInDelayPeriod(email: String): String? {
             .findOne()
             .getOrNull()
 
-
     if (userStatus != null) {
         if (userStatus.isLocked && LocalDateTime.now().isBefore(userStatus.lockoutExpiration)) {
             return "account-is-locked"

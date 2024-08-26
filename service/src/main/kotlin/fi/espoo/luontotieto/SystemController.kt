@@ -70,7 +70,7 @@ class SystemController {
         return jdbi
             .inTransactionUnchecked {
                 // First, check if the user is locked out
-                val userIsLockedOut = it.userIsLockedOrInDelayPeriod(passwordUser.email)
+                val userIsLockedOut = it.userIsLockedOrInDelayPeriod(email = passwordUser.email)
                 if (userIsLockedOut != null) {
                     logger.info("Login attempt failed. $userIsLockedOut")
                     throw Unauthorized("Unauthorized", userIsLockedOut)
