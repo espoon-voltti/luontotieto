@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import React, { FormEvent, useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from 'shared/buttons/Button'
@@ -11,7 +12,7 @@ import { PageContainer } from 'shared/layout'
 import { useDebouncedState } from 'shared/useDebouncedState'
 import styled from 'styled-components'
 
-import { apiPostLogin } from '../api/auth-api'
+import { LoginError, LoginErrorCode, apiPostLogin } from '../api/auth-api'
 import {
   GroupOfInputRows,
   LabeledInput,
@@ -37,15 +38,19 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
 
   const { mutateAsync: loginMutation, isPending } = useMutation({
     mutationFn: apiPostLogin,
-    onSuccess: async (success: boolean) => {
-      if (success) {
-        await queryClient.invalidateQueries({ queryKey: ['auth-status'] })
-        navigate('/luontotieto')
-      } else {
-        setErrorMsg('Virheellinen sähköposti tai salasana!')
-      }
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['auth-status'] })
+      navigate('/luontotieto')
     },
-    onError: () => setErrorMsg('Virheellinen sähköposti tai salasana!')
+    onError: (e: AxiosError<{ errorCode: LoginErrorCode }>) => {
+      if (e instanceof AxiosError) {
+        const errorCode = e.response?.data.errorCode
+        const errorMessage = errorCode
+          ? LoginError[errorCode]
+          : 'Virheellinen sähköposti tai salasana!'
+        setErrorMsg(errorMessage)
+      }
+    }
   })
 
   const onSubmit = useCallback(

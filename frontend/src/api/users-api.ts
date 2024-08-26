@@ -59,7 +59,7 @@ export type ChangePasswordErrorCode =
   | 'new-password-already-in-use'
   | 'weak-password'
 
-export const ChangePasswordError = {
+export const ChangePasswordError: Record<ChangePasswordErrorCode, string> = {
   'wrong-current-password': 'Väärä nykyinen salasana',
   'new-password-already-in-use':
     'Uusi salasana ei saa olla sama kuin nykyinen salana',
