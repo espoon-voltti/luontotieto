@@ -6,6 +6,7 @@ package fi.espoo.luontotieto
 
 import fi.espoo.luontotieto.common.AdUser
 import fi.espoo.luontotieto.common.Unauthorized
+import fi.espoo.luontotieto.common.userIsLockedOrInDelayPeriod
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,7 +15,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 class SystemControllerTests : FullApplicationTest() {
-    @Autowired lateinit var controller: SystemController
+    @Autowired
+    lateinit var controller: SystemController
 
     @Test
     fun passwordLoginOk() {
@@ -33,27 +35,11 @@ class SystemControllerTests : FullApplicationTest() {
     }
 
     @Test
-    fun passwordLoginInvalidPassword() {
-        val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
-        val jdbi = controller.jdbi
-        val password = "password.1A"
-        jdbi.inTransactionUnchecked {
-            it.createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
-                .bind("password", encoder.encode(password))
-                .bind("id", customerUser.id)
-                .execute()
-        }
-
-        assertFailsWith(Unauthorized::class) {
-            controller.passwordLogin(PasswordUser("yritys@example.com", "password.1B"))
-        }
-    }
-
-    @Test
     fun passwordLoginInactive() {
         val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
         val jdbi = controller.jdbi
         val password = "password.1A"
+        val email = "yritys@example.com"
         jdbi.inTransactionUnchecked {
             it.createUpdate(
                 "UPDATE users SET active = false, password_hash = :password WHERE id = :id"
@@ -64,8 +50,42 @@ class SystemControllerTests : FullApplicationTest() {
         }
 
         assertFailsWith(Unauthorized::class) {
-            controller.passwordLogin(PasswordUser("yritys@example.com", password))
+            controller.passwordLogin(PasswordUser(email, password))
         }
+    }
+
+    @Test
+    fun passwordLoginInvalidPasswordProgressiveLoginDelay() {
+        val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
+        val jdbi = controller.jdbi
+        val password = "password.1A"
+        val wrongPassword = "wrong password"
+        val email = "yritys@example.com"
+        jdbi.inTransactionUnchecked {
+            it.createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
+                .bind("password", encoder.encode(password))
+                .bind("id", customerUser.id)
+                .execute()
+        }
+
+        assertFailsWith(Unauthorized::class) {
+            controller.passwordLogin(PasswordUser(email, wrongPassword))
+        }
+
+        assertFailsWith(Unauthorized::class) {
+            controller.passwordLogin(PasswordUser(email, wrongPassword))
+        }
+
+        assertFailsWith(Unauthorized::class) {
+            controller.passwordLogin(PasswordUser(email, wrongPassword))
+        }
+
+        jdbi
+            .inTransactionUnchecked {
+                // After three failed attempts there should be a delay on next try
+                val userIsLockedOut = it.userIsLockedOrInDelayPeriod(email)
+                assertEquals(userIsLockedOut, "account-login-delay")
+            }
     }
 
     @Test
