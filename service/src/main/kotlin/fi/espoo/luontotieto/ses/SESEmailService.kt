@@ -5,6 +5,7 @@
 package fi.espoo.luontotieto.ses
 
 import fi.espoo.luontotieto.common.EmailContent
+import fi.espoo.luontotieto.common.SanitizationService
 import fi.espoo.luontotieto.config.EmailEnv
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
@@ -29,8 +30,10 @@ data class Email(
 @Service
 class SESEmailClient(
     private val client: SesClient,
-    private val env: EmailEnv
+    private val env: EmailEnv,
+    private val sanitizationService: SanitizationService
 ) {
+
     private val charset = "UTF-8"
 
     fun send(email: Email) {
@@ -52,10 +55,11 @@ class SESEmailClient(
 <title>$title</title>
 </head>
 <body>
-${content.html}
+${sanitizationService.sanitizeHtml(content.html)}
 </body>
 </html>
 """
+
         logger.info { "Sending email" }
         try {
             val request =
@@ -95,6 +99,7 @@ ${content.html}
                 is ConfigurationSetSendingPausedException,
                 is AccountSendingPausedException ->
                     logger.error(e) { "Will not send email : ${e.message}" }
+
                 else -> {
                     logger.error(e) { "Couldn't send email : ${e.message}" }
                     throw e
