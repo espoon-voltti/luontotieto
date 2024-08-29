@@ -1,20 +1,13 @@
 package fi.espoo.luontotieto
 
 import fi.espoo.luontotieto.common.SanitizationService
-import fi.espoo.luontotieto.domain.DocumentType
-import fi.espoo.luontotieto.domain.Order
-import fi.espoo.luontotieto.domain.OrderReportDocument
-import fi.espoo.luontotieto.domain.Report
-import org.junit.jupiter.api.Assertions.assertTrue
+
+import org.junit.jupiter.api.Assertions.assertEquals
+
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.util.UUID
-import kotlin.reflect.full.memberProperties
 
-@SpringBootTest
+
 class SanitizationServiceTest {
 
     private lateinit var sanitizationService: SanitizationService
@@ -24,103 +17,46 @@ class SanitizationServiceTest {
         sanitizationService = SanitizationService()
     }
 
-    val unsafePatterns =
-        listOf("=", "+", "-", "@", "<", ">", "script", "<body>", "<iframe", "<html>", "<h1>", "+CMD", "style")
-
-
     @Test
-    fun `test CSV and HTML injection prevention on a report`() {
-
-        val testReport = Report(
-            UUID.randomUUID(),
-            "=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>",
-            true,
-            OffsetDateTime.now(),
-            OffsetDateTime.now(),
-            "\"<body onload='stealCookies()'>",
-            "\"<iframe src='evil.com'></iframe>",
-            false,
-            listOf(DocumentType.REPORT),
-            listOf("\"=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>\"", "+CMD|' /C calc'!A0"),
-
-            Order(
-                UUID.randomUUID(),
-                "=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>",
-                "=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>",
-                listOf(
-                    "\"=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>\"",
-                    "+CMD|' /C calc'!A0"
-                ),
-                listOf(
-                    "\"=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>\"",
-                    "+CMD|' /C calc'!A0"
-                ),
-                OffsetDateTime.now(),
-                OffsetDateTime.now(),
-                "=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>",
-                "=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>",
-                "=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>",
-                UUID.randomUUID(),
-                "=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>",
-                "=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>",
-                LocalDate.now(),
-                "=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>",
-                "=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>",
-                "=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>",
-                listOf(
-                    OrderReportDocument(
-                        description = "=SUM(21:21)<script>alert('XSS')</script><html><h1>injection</h1></html>",
-                        DocumentType.LIITO_ORAVA_VIIVAT
-                    )
-                )
-
-            )
+    fun `test cell data processing and validation`() {
+        val dangerousInputs = listOf(
+            "=SUM(12+13)",          // Dangerous prefix
+            "+1+1",                 // Dangerous prefix
+            "-1-2",                 // Dangerous prefix
+            "@A1",                  // Dangerous prefix
+            "\\tTROUBLE",           // Dangerous prefix
+            "\\rCRLF",              // Dangerous prefix
+            "Text, with, commas",    // Special character: comma
+            "Text;with;semicolons",  // Special character: semicolon
+            "Text with \"quotes\""   // Special character: double quotes
         )
 
-        val sanitizedReport = sanitizationService.sanitizeObject(testReport)
+        val expectedOutputs = listOf(
+            "'=SUM(12+13)",
+            "'+1+1",
+            "'-1-2",
+            "'@A1",
+            "'\\tTROUBLE",
+            "'\\rCRLF",
+            "\"Text, with, commas\"",
+            "\"Text;with;semicolons\"",
+            "\"Text with \"\"quotes\"\"\""
+        )
 
-        checkForUnsafePatterns(sanitizedReport, unsafePatterns)
-
-    }
-
-    private fun checkForUnsafePatterns(obj: Any, unsafePatterns: List<String>) {
-        obj::class.memberProperties.forEach { prop ->
-            val value = prop.getter.call(obj)
-            when (value) {
-                is String -> {
-                    // Ensure that the string does not contain any unsafe patterns after sanitization
-                    unsafePatterns.forEach { pattern ->
-                        assertTrue(
-                            !value.contains(pattern),
-                            "Property ${prop.name} contains unsafe pattern after sanitization: $value"
-                        )
-                    }
-                }
-
-                is Array<*> -> {
-                    // If it's an array, check each element
-                    value.forEach { item ->
-                        if (item is String) {
-                            unsafePatterns.forEach { pattern ->
-                                assertTrue(
-                                    !item.contains(pattern),
-                                    "Array item in ${prop.name} contains unsafe pattern after sanitization: $item"
-                                )
-                            }
-                        }
-                    }
-                }
-
-                else -> {
-                    // If it's an object, recursively check its properties
-                    if (value != null && !sanitizationService.isPrimitiveOrString(value)) {
-                        checkForUnsafePatterns(value, unsafePatterns)
-                    }
-                }
-            }
+        dangerousInputs.forEachIndexed { index, input ->
+            val processedData = sanitizationService.sanitizeCsvCellData(input)
+            assertEquals((expectedOutputs[index]), processedData)
         }
     }
 
+    @Test
+    fun `test HTML sanitization`() {
+        val htmlInput = "<div><script>alert('XSS')</script><b>Bold</b><i>Italic</i></div>"
+        val expectedOutput = "<b>Bold</b><i>Italic</i>"
+
+        val sanitizedHtml = sanitizationService.sanitizeHtml(htmlInput)
+        assertEquals(expectedOutput, sanitizedHtml)
+    }
 
 }
 

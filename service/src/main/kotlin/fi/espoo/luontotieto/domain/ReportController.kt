@@ -8,6 +8,7 @@ import fi.espoo.luontotieto.common.BadRequest
 import fi.espoo.luontotieto.common.EmailContent
 import fi.espoo.luontotieto.common.Emails
 import fi.espoo.luontotieto.common.NotFound
+import fi.espoo.luontotieto.common.SanitizationService
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.BucketEnv
@@ -77,6 +78,9 @@ class ReportController {
 
     @Autowired
     lateinit var sesEmailClient: SESEmailClient
+
+    @Autowired
+    lateinit var sanitizationService: SanitizationService
 
     @Autowired
     lateinit var bucketEnv: BucketEnv
@@ -195,7 +199,7 @@ class ReportController {
             }
         val contentDisposition = ContentDisposition.attachment().filename("reports.csv").build()
 
-        val res = reportsToCsv(reports).byteInputStream()
+        val res = reportsToCsv(reports, sanitizationService).byteInputStream()
         val inputStreamResource = InputStreamResource(res)
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
@@ -281,7 +285,7 @@ class ReportController {
                                             id = reportId,
                                             observedSpecies = observedSpecies.toSet(),
                                             reportLink =
-                                                luontotietoHost.getReportUrl(reportId),
+                                            luontotietoHost.getReportUrl(reportId),
                                             reportDocumentLink = reportDocumentLink
                                         )
                                     }

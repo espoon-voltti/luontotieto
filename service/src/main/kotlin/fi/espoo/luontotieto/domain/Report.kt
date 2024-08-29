@@ -5,6 +5,7 @@
 package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.NotFound
+import fi.espoo.luontotieto.common.SanitizationService
 import fi.espoo.luontotieto.common.databaseValue
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
@@ -291,7 +292,7 @@ fun Handle.getAluerajausLuontoselvitysParams(
     )
 }
 
-fun reportsToCsv(reports: List<Report>): String {
+fun reportsToCsv(reports: List<Report>, sanitizationService: SanitizationService): String {
     val csvHeader =
         listOf(
             "id",
@@ -313,21 +314,29 @@ fun reportsToCsv(reports: List<Report>): String {
     csvContent.append(csvHeader)
 
     for (report in reports) {
+        val planNumbers = sanitizationService.sanitizeCsvCellData(report.order?.planNumber?.joinToString(",") ?: "")
+        val orderingUnits = sanitizationService.sanitizeCsvCellData(report.order?.orderingUnit?.joinToString(",") ?: "")
+        val reportDocuments =
+            sanitizationService.sanitizeCsvCellData(report.order?.reportDocuments?.map { rd -> rd.documentType }
+                ?.joinToString(",") ?: "")
+        val observedSpecies = sanitizationService.sanitizeCsvCellData(report.observedSpecies?.joinToString(",") ?: "")
+
+        val noObservations = sanitizationService.sanitizeCsvCellData(report.noObservations?.joinToString(",") ?: "")
+
         csvContent.append(report.id).append(delimiter)
-            .append(report.name).append(delimiter)
+            .append(sanitizationService.sanitizeCsvCellData(report.name)).append(delimiter)
             .append(report.approved).append(delimiter)
-            .append(report.order?.planNumber?.joinToString(",")).append(delimiter)
-            .append(report.order?.orderingUnit?.joinToString(",")).append(delimiter)
-            .append(report.createdBy).append(delimiter)
+            .append(planNumbers).append(delimiter)
+            .append(orderingUnits).append(delimiter)
+            .append(sanitizationService.sanitizeCsvCellData(report.createdBy)).append(delimiter)
             .append(report.created).append(delimiter)
-            .append(report.updatedBy).append(delimiter)
+            .append(sanitizationService.sanitizeCsvCellData(report.updatedBy)).append(delimiter)
             .append(report.updated).append(delimiter)
             .append(
-                report.order?.reportDocuments?.map { rd -> rd.documentType }
-                    ?.joinToString(",")
+                reportDocuments
             ).append(delimiter)
-            .append(report.observedSpecies?.joinToString(","))
-            .append(report.noObservations?.map { rd -> rd }?.joinToString(","))
+            .append(observedSpecies).append(delimiter)
+            .append(noObservations)
             .append("\n")
     }
 
