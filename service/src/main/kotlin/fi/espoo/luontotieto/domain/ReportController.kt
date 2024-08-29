@@ -285,7 +285,7 @@ class ReportController {
                                             id = reportId,
                                             observedSpecies = observedSpecies.toSet(),
                                             reportLink =
-                                            luontotietoHost.getReportUrl(reportId),
+                                                luontotietoHost.getReportUrl(reportId),
                                             reportDocumentLink = reportDocumentLink
                                         )
                                     }

@@ -33,7 +33,6 @@ class SESEmailClient(
     private val env: EmailEnv,
     private val sanitizationService: SanitizationService
 ) {
-
     private val charset = "UTF-8"
 
     fun send(email: Email) {

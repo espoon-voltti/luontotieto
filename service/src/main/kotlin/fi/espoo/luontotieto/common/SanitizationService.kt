@@ -7,11 +7,8 @@ import org.jsoup.Jsoup
 import org.jsoup.safety.Safelist
 import org.springframework.stereotype.Service
 
-
 @Service
 class SanitizationService {
-
-
     fun sanitizeCsvCellData(cellData: String): String {
         val sanitizedData = escapeCsvInjection(cellData)
         return escapeSpecialCharacters(sanitizedData)

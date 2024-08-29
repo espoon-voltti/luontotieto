@@ -292,7 +292,10 @@ fun Handle.getAluerajausLuontoselvitysParams(
     )
 }
 
-fun reportsToCsv(reports: List<Report>, sanitizationService: SanitizationService): String {
+fun reportsToCsv(
+    reports: List<Report>,
+    sanitizationService: SanitizationService
+): String {
     val csvHeader =
         listOf(
             "id",
@@ -317,8 +320,10 @@ fun reportsToCsv(reports: List<Report>, sanitizationService: SanitizationService
         val planNumbers = sanitizationService.sanitizeCsvCellData(report.order?.planNumber?.joinToString(",") ?: "")
         val orderingUnits = sanitizationService.sanitizeCsvCellData(report.order?.orderingUnit?.joinToString(",") ?: "")
         val reportDocuments =
-            sanitizationService.sanitizeCsvCellData(report.order?.reportDocuments?.map { rd -> rd.documentType }
-                ?.joinToString(",") ?: "")
+            sanitizationService.sanitizeCsvCellData(
+                report.order?.reportDocuments?.map { rd -> rd.documentType }
+                    ?.joinToString(",") ?: ""
+            )
         val observedSpecies = sanitizationService.sanitizeCsvCellData(report.observedSpecies?.joinToString(",") ?: "")
 
         val noObservations = sanitizationService.sanitizeCsvCellData(report.noObservations?.joinToString(",") ?: "")
