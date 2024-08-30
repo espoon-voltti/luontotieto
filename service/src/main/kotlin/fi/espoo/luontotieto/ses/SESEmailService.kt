@@ -51,7 +51,7 @@ class SESEmailClient(
 <!DOCTYPE html>
 <html>
 <head>
-<title>$title</title>
+<title>${sanitizationService.sanitizeHtml(title)}</title>
 </head>
 <body>
 ${sanitizationService.sanitizeHtml(content.html)}
