@@ -91,6 +91,8 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
 
     api("org.jsoup:jsoup:1.17.1")
+
+    implementation("org.unbescape:unbescape:1.1.6.RELEASE")
 }
 
 tasks.withType<KotlinCompile> {

@@ -5,9 +5,10 @@
 package fi.espoo.luontotieto.ses
 
 import fi.espoo.luontotieto.common.EmailContent
-import fi.espoo.luontotieto.common.SanitizationService
 import fi.espoo.luontotieto.config.EmailEnv
 import mu.KotlinLogging
+import org.jsoup.Jsoup
+import org.jsoup.safety.Safelist
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.ses.SesClient
 import software.amazon.awssdk.services.ses.model.AccountSendingPausedException
@@ -31,7 +32,6 @@ data class Email(
 class SESEmailClient(
     private val client: SesClient,
     private val env: EmailEnv,
-    private val sanitizationService: SanitizationService
 ) {
     private val charset = "UTF-8"
 
@@ -51,10 +51,10 @@ class SESEmailClient(
 <!DOCTYPE html>
 <html>
 <head>
-<title>${sanitizationService.sanitizeHtml(title)}</title>
+<title>${Jsoup.clean(title, Safelist.basic())}</title>
 </head>
 <body>
-${sanitizationService.sanitizeHtml(content.html)}
+${Jsoup.clean(content.html, Safelist.basic())}
 </body>
 </html>
 """

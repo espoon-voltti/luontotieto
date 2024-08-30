@@ -4,19 +4,11 @@
 
 package fi.espoo.luontotieto
 
-import fi.espoo.luontotieto.common.SanitizationService
+import fi.espoo.luontotieto.common.sanitizeCsvCellData
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class SanitizationServiceTest {
-    private lateinit var sanitizationService: SanitizationService
-
-    @BeforeEach
-    fun setUp() {
-        sanitizationService = SanitizationService()
-    }
-
+class SanitizationTest {
     @Test
     fun `test cell data processing and validation`() {
         val dangerousInputs =
@@ -43,29 +35,20 @@ class SanitizationServiceTest {
 
         val expectedOutputs =
             listOf(
-                "'=SUM(12+13)",
-                "'+1+1",
-                "'-1-2",
-                "'@A1",
-                "'\\tTROUBLE",
-                "'\\rCRLF",
+                "\"'=SUM(12+13)\"",
+                "\"'+1+1\"",
+                "\"'-1-2\"",
+                "\"'@A1\"",
+                "\"'\\tTROUBLE\"",
+                "\"'\\rCRLF\"",
                 "\"Text, with, commas\"",
                 "\"Text;with;semicolons\"",
                 "\"Text with \"\"quotes\"\"\""
             )
 
         dangerousInputs.forEachIndexed { index, input ->
-            val processedData = sanitizationService.sanitizeCsvCellData(input)
+            val processedData = sanitizeCsvCellData(input)
             assertEquals((expectedOutputs[index]), processedData)
         }
-    }
-
-    @Test
-    fun `test HTML sanitization`() {
-        val htmlInput = "<div><script>alert('XSS')</script><b>Bold</b><i>Italic</i></div>"
-        val expectedOutput = "<b>Bold</b><i>Italic</i>"
-
-        val sanitizedHtml = sanitizationService.sanitizeHtml(htmlInput)
-        assertEquals(expectedOutput, sanitizedHtml)
     }
 }

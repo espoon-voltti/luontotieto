@@ -5,8 +5,8 @@
 package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.NotFound
-import fi.espoo.luontotieto.common.SanitizationService
 import fi.espoo.luontotieto.common.databaseValue
+import fi.espoo.luontotieto.common.sanitizeCsvCellData
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
@@ -292,10 +292,10 @@ fun Handle.getAluerajausLuontoselvitysParams(
     )
 }
 
-fun reportsToCsv(
-    reports: List<Report>,
-    sanitizationService: SanitizationService
-): String {
+const val CSV_FIELD_SEPARATOR = ";"
+const val CSV_RECORD_SEPARATOR = "\r\n"
+
+fun reportsToCsv(reports: List<Report>): String {
     val csvHeader =
         listOf(
             "id",
@@ -310,39 +310,40 @@ fun reportsToCsv(
             "selvitetyt tiedot",
             "muut huomioitavat lajit",
             "ei löydettyjä havaintoja"
-        ).joinToString(";") + "\n"
+        ).joinToString(CSV_FIELD_SEPARATOR, postfix = CSV_RECORD_SEPARATOR)
 
-    val delimiter = ";"
     val csvContent = StringBuilder()
     csvContent.append(csvHeader)
 
     for (report in reports) {
-        val planNumbers = sanitizationService.sanitizeCsvCellData(report.order?.planNumber?.joinToString(",") ?: "")
-        val orderingUnits = sanitizationService.sanitizeCsvCellData(report.order?.orderingUnit?.joinToString(",") ?: "")
+        val planNumbers = sanitizeCsvCellData(report.order?.planNumber?.joinToString(",") ?: "")
+        val orderingUnits = sanitizeCsvCellData(report.order?.orderingUnit?.joinToString(",") ?: "")
         val reportDocuments =
-            sanitizationService.sanitizeCsvCellData(
+
+            sanitizeCsvCellData(
                 report.order?.reportDocuments?.map { rd -> rd.documentType }
                     ?.joinToString(",") ?: ""
             )
-        val observedSpecies = sanitizationService.sanitizeCsvCellData(report.observedSpecies?.joinToString(",") ?: "")
 
-        val noObservations = sanitizationService.sanitizeCsvCellData(report.noObservations?.joinToString(",") ?: "")
+        val observedSpecies = sanitizeCsvCellData(report.observedSpecies?.joinToString(",") ?: "")
 
-        csvContent.append(report.id).append(delimiter)
-            .append(sanitizationService.sanitizeCsvCellData(report.name)).append(delimiter)
-            .append(report.approved).append(delimiter)
-            .append(planNumbers).append(delimiter)
-            .append(orderingUnits).append(delimiter)
-            .append(sanitizationService.sanitizeCsvCellData(report.createdBy)).append(delimiter)
-            .append(report.created).append(delimiter)
-            .append(sanitizationService.sanitizeCsvCellData(report.updatedBy)).append(delimiter)
-            .append(report.updated).append(delimiter)
+        val noObservations = sanitizeCsvCellData(report.noObservations?.joinToString(",") ?: "")
+
+        csvContent.append(report.id).append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.name)).append(CSV_FIELD_SEPARATOR)
+            .append(report.approved).append(CSV_FIELD_SEPARATOR)
+            .append(planNumbers).append(CSV_FIELD_SEPARATOR)
+            .append(orderingUnits).append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.createdBy)).append(CSV_FIELD_SEPARATOR)
+            .append(report.created).append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.updatedBy)).append(CSV_FIELD_SEPARATOR)
+            .append(report.updated).append(CSV_FIELD_SEPARATOR)
             .append(
                 reportDocuments
-            ).append(delimiter)
-            .append(observedSpecies).append(delimiter)
+            ).append(CSV_FIELD_SEPARATOR)
+            .append(observedSpecies).append(CSV_FIELD_SEPARATOR)
             .append(noObservations)
-            .append("\n")
+            .append(CSV_RECORD_SEPARATOR)
     }
 
     return csvContent.toString()
