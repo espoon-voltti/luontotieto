@@ -7,6 +7,7 @@ package fi.espoo.luontotieto.domain
 import fi.espoo.luontotieto.common.BadRequest
 import fi.espoo.luontotieto.common.EmailContent
 import fi.espoo.luontotieto.common.Emails
+import fi.espoo.luontotieto.common.HtmlSafe
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
@@ -217,8 +218,8 @@ class ReportController {
         if (emailEnv.enabled) {
             val reportApprovedEmail =
                 Emails.getReportUpdatedEmail(
-                    reportResponse.name,
-                    reportResponse.order?.assignee ?: "",
+                    HtmlSafe(reportResponse.name),
+                    HtmlSafe(reportResponse.order?.assignee ?: ""),
                     luontotietoHost.getReportUrl(reportResponse.id)
                 )
             sendReportEmails(reportApprovedEmail, reportResponse)
@@ -316,12 +317,11 @@ class ReportController {
             .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
 
         if (emailEnv.enabled) {
-            val report = jdbi.inTransactionUnchecked { tx -> tx.getReport(reportId, user) }
             val userResponse = jdbi.inTransactionUnchecked { tx -> tx.getUser(user.id) }
             val reportApprovedEmail =
                 Emails.getReportApprovedEmail(
-                    report.name,
-                    userResponse.name,
+                    HtmlSafe(report.name),
+                    HtmlSafe(userResponse.name),
                     luontotietoHost.getReportUrl(report.id)
                 )
             sendReportEmails(reportApprovedEmail, report)

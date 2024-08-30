@@ -7,6 +7,8 @@ package fi.espoo.luontotieto.ses
 import fi.espoo.luontotieto.common.EmailContent
 import fi.espoo.luontotieto.config.EmailEnv
 import mu.KotlinLogging
+import org.jsoup.Jsoup
+import org.jsoup.safety.Safelist
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.ses.SesClient
 import software.amazon.awssdk.services.ses.model.AccountSendingPausedException
@@ -29,7 +31,7 @@ data class Email(
 @Service
 class SESEmailClient(
     private val client: SesClient,
-    private val env: EmailEnv
+    private val env: EmailEnv,
 ) {
     private val charset = "UTF-8"
 
@@ -49,13 +51,14 @@ class SESEmailClient(
 <!DOCTYPE html>
 <html>
 <head>
-<title>$title</title>
+<title>${Jsoup.clean(title, Safelist.basic())}</title>
 </head>
 <body>
-${content.html}
+${Jsoup.clean(content.html, Safelist.basic())}
 </body>
 </html>
 """
+
         logger.info { "Sending email" }
         try {
             val request =
@@ -95,6 +98,7 @@ ${content.html}
                 is ConfigurationSetSendingPausedException,
                 is AccountSendingPausedException ->
                     logger.error(e) { "Will not send email : ${e.message}" }
+
                 else -> {
                     logger.error(e) { "Couldn't send email : ${e.message}" }
                     throw e

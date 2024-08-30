@@ -6,6 +6,7 @@ package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.common.databaseValue
+import fi.espoo.luontotieto.common.sanitizeCsvCellData
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
@@ -291,6 +292,9 @@ fun Handle.getAluerajausLuontoselvitysParams(
     )
 }
 
+const val CSV_FIELD_SEPARATOR = ";"
+const val CSV_RECORD_SEPARATOR = "\r\n"
+
 fun reportsToCsv(reports: List<Report>): String {
     val csvHeader =
         listOf(
@@ -306,29 +310,40 @@ fun reportsToCsv(reports: List<Report>): String {
             "selvitetyt tiedot",
             "muut huomioitavat lajit",
             "ei löydettyjä havaintoja"
-        ).joinToString(";") + "\n"
+        ).joinToString(CSV_FIELD_SEPARATOR, postfix = CSV_RECORD_SEPARATOR)
 
-    val delimiter = ";"
     val csvContent = StringBuilder()
     csvContent.append(csvHeader)
 
     for (report in reports) {
-        csvContent.append(report.id).append(delimiter)
-            .append(report.name).append(delimiter)
-            .append(report.approved).append(delimiter)
-            .append(report.order?.planNumber?.joinToString(",")).append(delimiter)
-            .append(report.order?.orderingUnit?.joinToString(",")).append(delimiter)
-            .append(report.createdBy).append(delimiter)
-            .append(report.created).append(delimiter)
-            .append(report.updatedBy).append(delimiter)
-            .append(report.updated).append(delimiter)
-            .append(
+        val planNumbers = sanitizeCsvCellData(report.order?.planNumber?.joinToString(",") ?: "")
+        val orderingUnits = sanitizeCsvCellData(report.order?.orderingUnit?.joinToString(",") ?: "")
+        val reportDocuments =
+
+            sanitizeCsvCellData(
                 report.order?.reportDocuments?.map { rd -> rd.documentType }
-                    ?.joinToString(",")
-            ).append(delimiter)
-            .append(report.observedSpecies?.joinToString(","))
-            .append(report.noObservations?.map { rd -> rd }?.joinToString(","))
-            .append("\n")
+                    ?.joinToString(",") ?: ""
+            )
+
+        val observedSpecies = sanitizeCsvCellData(report.observedSpecies?.joinToString(",") ?: "")
+
+        val noObservations = sanitizeCsvCellData(report.noObservations?.joinToString(",") ?: "")
+
+        csvContent.append(report.id).append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.name)).append(CSV_FIELD_SEPARATOR)
+            .append(report.approved).append(CSV_FIELD_SEPARATOR)
+            .append(planNumbers).append(CSV_FIELD_SEPARATOR)
+            .append(orderingUnits).append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.createdBy)).append(CSV_FIELD_SEPARATOR)
+            .append(report.created).append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.updatedBy)).append(CSV_FIELD_SEPARATOR)
+            .append(report.updated).append(CSV_FIELD_SEPARATOR)
+            .append(
+                reportDocuments
+            ).append(CSV_FIELD_SEPARATOR)
+            .append(observedSpecies).append(CSV_FIELD_SEPARATOR)
+            .append(noObservations)
+            .append(CSV_RECORD_SEPARATOR)
     }
 
     return csvContent.toString()

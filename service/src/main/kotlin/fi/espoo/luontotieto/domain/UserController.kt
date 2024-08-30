@@ -6,6 +6,7 @@ package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.BadRequest
 import fi.espoo.luontotieto.common.Emails
+import fi.espoo.luontotieto.common.HtmlSafe
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
@@ -65,7 +66,7 @@ class UserController {
                         body.email,
                         Emails.getUserCreatedEmail(
                             luontotietoHost.getCustomerUserLoginUrl(),
-                            createdUser.email ?: "",
+                            HtmlSafe(createdUser.email ?: ""),
                             generatedString
                         )
                     )

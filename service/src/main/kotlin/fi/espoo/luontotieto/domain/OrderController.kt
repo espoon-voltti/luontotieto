@@ -6,6 +6,7 @@ package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.BadRequest
 import fi.espoo.luontotieto.common.Emails
+import fi.espoo.luontotieto.common.HtmlSafe
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.BucketEnv
@@ -350,8 +351,8 @@ class OrderController {
                         Email(
                             email,
                             Emails.getReportCreatedEmail(
-                                report.name,
-                                report.order?.description ?: "",
+                                HtmlSafe(report.name),
+                                HtmlSafe(report.order?.description ?: ""),
                                 luontotietoHost.getReportUrl(report.id)
                             )
                         )
