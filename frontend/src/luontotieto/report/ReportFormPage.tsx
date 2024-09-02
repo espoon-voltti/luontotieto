@@ -9,8 +9,10 @@ import {
   apiPutReport,
   apiReOpenReport,
   ApproveReportError,
+  ReportFileSuccessResponse,
   ReportFileValidationErrorResponse,
-  ReportFormInput
+  ReportFormInput,
+  getDocumentTypeTitle
 } from 'api/report-api'
 import { UserRole } from 'api/users-api'
 import { hasViewerRole, UserContext } from 'auth/UserContext'
@@ -89,10 +91,26 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
           }
         })
       },
-      onError: (error: ReportFileValidationErrorResponse) => {
-        setReportFileErrors([error])
+      onError: (
+        responses: (
+          | ReportFileSuccessResponse
+          | ReportFileValidationErrorResponse
+        )[]
+      ) => {
+        void queryClient.invalidateQueries({ queryKey: ['report', id] })
+        void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+        const errors = responses.filter(
+          (r) => r.type === 'error'
+        ) as ReportFileValidationErrorResponse[]
+        errors && setReportFileErrors(errors)
+
         setShowModal({
           title: 'Tietojen tallennus epäonnistui',
+          text: `Seuravien tiedostojen tallennus epäonnistui: ${errors
+            .map(
+              (e) => `${getDocumentTypeTitle(e.documentType)}:${e.name} \r\n`
+            )
+            .join(',')}`,
           resolve: {
             action: () => closeModal(),
             label: 'Sulje'

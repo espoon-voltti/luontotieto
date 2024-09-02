@@ -234,7 +234,7 @@ export const ReportForm = React.memo(function ReportForm(
         requiredFiles,
         noObservations ?? []
       ),
-    [requiredFiles, props, noObservations]
+    [requiredFiles, props.reportFiles, noObservations]
   )
 
   const [name, _] = useDebouncedState(props.report.name)
@@ -330,6 +330,7 @@ export const ReportForm = React.memo(function ReportForm(
         e.type === 'NEW' && e.file !== null
           ? [
               {
+                id: e.id,
                 description: e.userDescription,
                 documentType: e.documentType,
                 file: e.file
@@ -344,6 +345,10 @@ export const ReportForm = React.memo(function ReportForm(
   useEffect(() => {
     props.onChange(validInput)
   }, [validInput, props])
+
+  useEffect(() => {
+    setFileInputs(originalFileInputs)
+  }, [originalFileInputs])
 
   return (
     <FlexCol>
