@@ -46,7 +46,7 @@ export const FileTitle = React.memo(function FileTitle(props: Props) {
             }
             onKeyDown={(event: React.KeyboardEvent<HTMLAnchorElement>) => {
               if (event.code === 'Enter') {
-                apiGetReportDocumentTypeFileTemplate(
+                void apiGetReportDocumentTypeFileTemplate(
                   props.documentType as ReportFileDocumentType
                 )
               }

@@ -22,6 +22,7 @@ import { Select } from 'shared/form/Select'
 import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
 import { Label, P } from 'shared/typography'
 import { useDebouncedState } from 'shared/useDebouncedState'
+import styled from 'styled-components'
 
 import { hasOrdererRole, UserContext } from '../../auth/UserContext'
 import {
@@ -34,7 +35,6 @@ import {
   Table,
   VerticalGap
 } from '../../shared/layout'
-import styled from 'styled-components'
 
 export type ReportSortColumn = 'updated' | 'name' | 'approved'
 export type SortDirection = 'ASC' | 'DESC'

@@ -5,6 +5,7 @@
 import React from 'react'
 
 import { BaseProps } from '../theme'
+
 import { StyledLink } from './StyledLink'
 
 export interface LinkFileDownloadProps extends BaseProps {

@@ -18,9 +18,12 @@ import {
   ReportFormInput
 } from 'api/report-api'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { InfoBox } from 'shared/MessageBoxes'
 import { InlineButton } from 'shared/buttons/InlineButton'
+import { Checkbox } from 'shared/form/Checkbox'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
 import { FileInput, FileInputData } from 'shared/form/File/FileInput'
+import { colors } from 'shared/theme'
 import { useDebouncedState } from 'shared/useDebouncedState'
 import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
@@ -33,9 +36,6 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { A, H3, Label, P } from '../../shared/typography'
-import { Checkbox } from 'shared/form/Checkbox'
-import { InfoBox } from 'shared/MessageBoxes'
-import { colors } from 'shared/theme'
 
 const StyledInlineButton = styled(InlineButton)`
   font-size: 0.9rem;
@@ -504,20 +504,20 @@ export const ReportFileIsPublic = React.memo(function ReportFileIsPublic({
         )}
         <FlexRow>
           <Checkbox
-            key={'yes'}
-            label={'Kyllä'}
+            key="yes"
+            label="Kyllä"
             checked={!!localPublic}
-            onChange={(checked) => {
+            onChange={(_checked) => {
               setLocalPublic(true)
               onChange(true)
             }}
             disabled={readOnly}
           />
           <StyledCheckBox
-            key={'no'}
-            label={'Ei'}
+            key="no"
+            label="Ei"
             checked={localPublic === false}
-            onChange={(checked) => {
+            onChange={(_checked) => {
               setLocalPublic(false)
               onChange(false)
             }}

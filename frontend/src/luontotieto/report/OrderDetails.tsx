@@ -9,6 +9,7 @@ import { getDocumentTypeTitle } from 'api/report-api'
 import { hasOrdererRole, UserContext } from 'auth/UserContext'
 import React, { useContext, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { IconButton } from 'shared/buttons/IconButton'
 import { LinkFileDownload } from 'shared/buttons/LinkFileDownload'
 import { formatDate, parseDate } from 'shared/dates'
 import styled from 'styled-components'
@@ -20,7 +21,6 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H3, Label, P } from '../../shared/typography'
-import { IconButton } from 'shared/buttons/IconButton'
 
 type Props = { order: Order; reportId: string }
 
