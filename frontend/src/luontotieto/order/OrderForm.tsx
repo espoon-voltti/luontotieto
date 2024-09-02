@@ -360,7 +360,6 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     if (!orderInput.contactEmail.trim().match(emailRegex)) return null
     if (orderInput.assigneeContactPerson.trim() === '') return null
     if (!orderInput.assigneeContactEmail.trim().match(emailRegex)) return null
-
     return {
       name: orderInput.name.trim(),
       description: orderInput.description.trim(),
@@ -384,7 +383,8 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 description: e.description,
                 documentType: e.documentType,
                 file: e.file,
-                id: e.id
+                id: e.id,
+                name: e.file.name
               }
             ]
           : []

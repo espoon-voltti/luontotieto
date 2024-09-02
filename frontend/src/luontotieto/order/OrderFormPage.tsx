@@ -15,6 +15,7 @@ import {
   apiUpsertOrder,
   DeleteOrderError,
   DeleteorderErrorCode,
+  OrderFileSuccessResponse,
   OrderFileValidationErrorResponse,
   OrderFormInput
 } from 'api/order-api'
@@ -36,6 +37,7 @@ import {
 } from '../../shared/layout'
 
 import { OrderForm } from './OrderForm'
+import { getDocumentTypeTitle } from 'api/report-api'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -65,6 +67,8 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   const { id } = useParams()
   if (!id && props.mode === 'EDIT') throw Error('Id not found in path')
 
+  // Use this to store the files that saved succesfully when creating a new order
+  const [savedFileIds, setSavedFileIds] = useState<string[]>([])
   // Use this to store order id in case of order file saving error
   const [orderId, setOrderId] = useState<string | undefined>(undefined)
 
@@ -94,6 +98,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
         void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
         void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
         void queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
+        setOrderFileErrors([])
         setOrderId(orderId)
 
         setShowModal({
@@ -107,11 +112,34 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
           }
         })
       },
-      onError: (error: OrderFileValidationErrorResponse | null) => {
-        error && setOrderFileErrors([error])
-        setOrderId(error?.orderId)
+      onError: (
+        responses: (
+          | OrderFileSuccessResponse
+          | OrderFileValidationErrorResponse
+        )[]
+      ) => {
+        const successResponses = responses.filter((r) => r.type === 'success')
+        setSavedFileIds(successResponses.map((r) => r.id))
+
+        const errors = responses.filter(
+          (r) => r.type === 'error'
+        ) as OrderFileValidationErrorResponse[]
+
+        errors && setOrderFileErrors(errors)
+
+        const firstOrderId = errors[0].orderId ?? undefined
+
+        setOrderId(firstOrderId)
+
+        const text = firstOrderId
+          ? `Seuravien tiedostojen tallennus epäonnistui: ${errors
+              .map((e) => `${getDocumentTypeTitle(e.documentType)}:${e.name}`)
+              .join(', ')}`
+          : ''
+
         setShowModal({
-          title: 'Tilauksen luonti epäonnistui',
+          title: 'Tilauksen luonti onnistui',
+          text: text,
           resolve: {
             action: () => {
               setShowModal(null)
@@ -140,10 +168,23 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
           }
         })
       },
-      onError: (error: OrderFileValidationErrorResponse | null) => {
-        error && setOrderFileErrors([error])
+      onError: (
+        responses: (
+          | OrderFileSuccessResponse
+          | OrderFileValidationErrorResponse
+        )[]
+      ) => {
+        const errors = responses.filter(
+          (r) => r.type === 'error'
+        ) as OrderFileValidationErrorResponse[]
+
+        errors && setOrderFileErrors(errors)
+
         setShowModal({
           title: 'Tilauksen päivitys epäonnistui',
+          text: `Seuravien tiedostojen tallennus epäonnistui: ${errors
+            .map((e) => `${getDocumentTypeTitle(e.documentType)}:${e.name}`)
+            .join(', ')}`,
           resolve: {
             action: () => {
               setShowModal(null)
@@ -288,9 +329,12 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
               }
               onClick={async () => {
                 if (!orderInput) return
-
                 if (props.mode === 'CREATE') {
-                  await createOrderMutation({ ...orderInput, orderId })
+                  await createOrderMutation({
+                    ...orderInput,
+                    orderId,
+                    savedFileIds
+                  })
                 } else {
                   await updateOrderMutation({ ...orderInput, orderId: id! })
                 }

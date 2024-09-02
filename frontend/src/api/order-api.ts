@@ -54,16 +54,30 @@ export interface OrderFileValidationError {
 }
 
 export interface OrderFileValidationErrorResponse {
+  type: 'error'
   documentType: OrderFileDocumentType
   id: string
-  errors: OrderFileValidationError[] | string
   orderId: string
+  name: string
+  errors: OrderFileValidationError[] | string
+  status: number
+}
+
+export interface OrderFileSuccessResponse {
+  type: 'success'
+  documentType: OrderFileDocumentType
+  id: string
+  name: string
+  status: number
 }
 
 export type OrderReportDocumentInput = Pick<OrderReportDocument, 'documentType'>
 
 export const apiUpsertOrder = async (
-  orderInput: { orderId?: string | undefined } & OrderFormInput
+  orderInput: {
+    savedFileIds: string[]
+    orderId?: string | undefined
+  } & OrderFormInput
 ): Promise<{ orderId: string; reportId: string }> => {
   const body: JsonOf<OrderFormInput> = {
     ...orderInput,
@@ -97,7 +111,13 @@ export const apiUpsertOrder = async (
     throw new Error('Failed to create report')
   }
 
-  await handleFiles(orderId, orderInput.filesToAdd, orderInput.filesToRemove)
+  await handleFiles(
+    orderId,
+    orderInput.filesToAdd.filter(
+      (r) => !orderInput.savedFileIds.includes(r.id)
+    ),
+    orderInput.filesToRemove
+  )
 
   return { orderId, reportId }
 }
@@ -110,8 +130,14 @@ const handleFiles = async (
   for (const id of deleteFiles) {
     await apiDeleteOrderFile(orderId, id)
   }
-  for (const file of addFiles) {
-    await apiPostOrderFile(orderId, file)
+
+  /** Make sure we try to save all files so the saving does not stop with the first file with error */
+  const postPromises = addFiles.map((f) => apiPostOrderFile(orderId, f))
+  const responses = await Promise.all(postPromises)
+
+  if (responses.find((r) => 'errors' in r)) {
+    /** Return all file responses to make sure we have a list of the saved files also */
+    return Promise.reject(responses)
   }
 }
 
@@ -145,6 +171,7 @@ interface OrderFileInput {
   documentType: OrderFileDocumentType
   file: File
   id: string
+  name: string
 }
 
 export interface OrderFile extends OrderFileInput {
@@ -161,38 +188,68 @@ export interface OrderFile extends OrderFileInput {
 const apiPostOrderFile = async (
   id: string,
   file: OrderFileInput
-): Promise<void> => {
+): Promise<OrderFileSuccessResponse | OrderFileValidationErrorResponse> => {
   const formData = new FormData()
   formData.append('file', file.file)
   formData.append('description', file.description)
   formData.append('documentType', OrderFileDocumentType[file.documentType])
 
-  await apiClient
+  return await apiClient
     .postForm(`/orders/${id}/files`, formData)
+    .then(
+      (resp) =>
+        ({
+          type: 'success',
+          status: resp.status,
+          documentType: file.documentType,
+          id: file.id,
+          name: file.name
+        }) satisfies OrderFileSuccessResponse
+    )
     .catch((error: AxiosError) => {
       if (error.response?.status === 400) {
         const errorResponse = {
+          type: 'error',
           orderId: id,
           documentType: file.documentType,
           id: file.id,
+          name: file.name,
+          status: error.response.status,
           errors: error?.response?.data
         } as OrderFileValidationErrorResponse
-        return Promise.reject(errorResponse)
+        return errorResponse
       } else if (error.response?.status === 409) {
         const errorResponse = {
+          type: 'error',
           orderId: id,
           documentType: file.documentType,
           id: file.id,
+          name: file.name,
+          status: error.response.status,
           errors: 'Tiedostonimi on jo olemassa'
         } as OrderFileValidationErrorResponse
-        return Promise.reject(errorResponse)
+        return errorResponse
+      } else if (error.response?.status === 413) {
+        const errorResponse = {
+          type: 'error',
+          orderId: id,
+          documentType: file.documentType,
+          id: file.id,
+          name: file.name,
+          status: error.response.status,
+          errors: 'Tiedosto on liian suuri. Sallittu maksimikoko on 100 Mt.'
+        } as OrderFileValidationErrorResponse
+        return errorResponse
       }
-      return Promise.reject({
+      return {
+        type: 'error',
         orderId: id,
         id: file.id,
         documentType: file.documentType,
+        name: file.name,
+        status: 500,
         errors: 'Tuntematon virhe'
-      } as OrderFileValidationErrorResponse)
+      } as OrderFileValidationErrorResponse
     })
 }
 

@@ -141,11 +141,8 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
       })
     }
   })
-  console.log()
 
   const onSubmit = async (reportInput: ReportFormInput) => {
-    console.log('ON SUBMIT RENDER???')
-    console.log(overrideReportName)
     if (report && report.approved && reOpen) {
       setShowModal({
         title: 'Avaa selvitys uudelleen',
