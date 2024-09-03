@@ -4,6 +4,7 @@
 
 package fi.espoo.paikkatieto.domain
 
+import fi.espoo.luontotieto.domain.Order
 import fi.espoo.luontotieto.domain.Report
 import fi.espoo.paikkatieto.reader.GpkgFeature
 import fi.espoo.paikkatieto.reader.GpkgValidationError
@@ -438,6 +439,30 @@ fun Handle.deletePaikkatieto(
 ): Int {
     val deleteQuery = "DELETE FROM ${tableDefinition.layerName} WHERE selvitys_id = :reportId"
     return createUpdate(deleteQuery).bind("reportId", reportId).execute()
+}
+
+fun Handle.updateAluerajausLuontoselvitystilaus(
+    reportId: UUID,
+    order: Order
+): Int {
+    return createQuery(
+        """
+        WITH updated AS (
+            UPDATE aluerajaus_luontoselvitystilaus
+                SET tilauksen_nimi = :name,
+                    tilauksen_tekija = :contactPerson,
+                    tilausyksikko = :unit
+            WHERE selvitys_id = :reportId
+            RETURNING *
+        )
+        SELECT COUNT(*) FROM updated;
+            """
+    ).bind("reportId", reportId)
+        .bind("name", order.name)
+        .bind("contactPerson", order.contactPerson)
+        .bind("unit", order.orderingUnit?.joinToString(","))
+        .mapTo<Int>()
+        .one()
 }
 
 fun Handle.deleteAluerajausLuontoselvitystilaus(reportId: UUID): Int {

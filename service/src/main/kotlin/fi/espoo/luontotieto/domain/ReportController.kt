@@ -342,7 +342,12 @@ class ReportController {
             throw BadRequest("Cannot reopen a report that has not been approved.")
         }
         paikkatietoJdbi.inTransactionUnchecked { ptx ->
-            TableDefinition.entries.forEach { td -> ptx.deletePaikkatieto(td, report.id) }
+            /**
+             * Delete all paikkatieto data for the report except for the aluerajaus_luontoselvitystilaus
+             * table. The order data is updated only when order is modified.
+             */
+            TableDefinition.entries.filter { td -> td.layerName !== "aluerajaus_luontoselvitystilaus" }
+                .forEach { td -> ptx.deletePaikkatieto(td, report.id) }
         }
 
         jdbi
