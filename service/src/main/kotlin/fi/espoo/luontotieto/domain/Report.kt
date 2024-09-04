@@ -64,7 +64,8 @@ private const val SELECT_REPORT_SQL =
            o.contact_person                           AS "o_contactPerson",
            o.contact_phone                            AS "o_contactPhone",
            o.contact_email                            AS "o_contactEmail",
-           o.ordering_unit                            AS "o_orderingUnit"
+           o.ordering_unit                            AS "o_orderingUnit",
+           r.approved                                 AS "o_hasApprovedReport"
     FROM report r
              LEFT JOIN users uc ON r.created_by = uc.id
              LEFT JOIN users uu ON r.updated_by = uu.id

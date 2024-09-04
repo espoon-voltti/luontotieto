@@ -36,7 +36,8 @@ data class Order(
     val contactPerson: String,
     val contactPhone: String,
     val contactEmail: String,
-    @Json val reportDocuments: List<OrderReportDocument>
+    @Json val reportDocuments: List<OrderReportDocument>,
+    val hasApprovedReport: Boolean
 )
 
 data class OrderInput(
@@ -51,7 +52,7 @@ data class OrderInput(
     val returnDate: LocalDate,
     val contactPerson: String,
     val contactPhone: String,
-    val contactEmail: String
+    val contactEmail: String,
 )
 
 private const val SELECT_ORDER_SQL =
@@ -73,11 +74,16 @@ private const val SELECT_ORDER_SQL =
            uc.name AS "createdBy",
            uu.name AS "updatedBy",
            ua.name AS "assignee",
-           o.assignee_id AS "assigneeId"
+           o.assignee_id AS "assigneeId",
+           CASE
+                WHEN r.approved IS TRUE THEN TRUE
+                ELSE FALSE
+              END AS "hasApprovedReport"
     FROM "order" o
         LEFT JOIN users uc ON o.created_by = uc.id
         LEFT JOIN users uu ON o.updated_by = uu.id
         LEFT JOIN users ua ON o.assignee_id = ua.id
+        LEFT JOIN report r ON o.id = r.order_id
 """
 
 fun Handle.insertOrder(
@@ -99,6 +105,9 @@ fun Handle.insertOrder(
         .one()
 }
 
+/**
+ * Update order and reflect the updated name field to report data
+ */
 fun Handle.putOrder(
     id: UUID,
     order: OrderInput,
@@ -115,7 +124,13 @@ fun Handle.putOrder(
                   contact_email = :contactEmail, ordering_unit = :orderingUnit
                  WHERE id = :id
                 RETURNING *
-            ) 
+            ),
+            updated_report AS (
+                UPDATE report r
+                   SET name = :name
+                WHERE r.order_id = :id
+                RETURNING *
+            )
             $SELECT_ORDER_SQL
             """
     )

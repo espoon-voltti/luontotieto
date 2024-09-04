@@ -15,6 +15,7 @@ export interface Order extends OrderFormInput {
   assignee: string
   createdBy: string
   updatedBy: string
+  hasApprovedReport: boolean
 }
 
 export interface OrderFormInput {
@@ -218,11 +219,15 @@ export const apiGetPlanNumbers = (): Promise<string[]> =>
 export const apiGetorderingUnits = (): Promise<string[]> =>
   apiClient.get<string[]>(`/orders/ordering-units`).then((res) => res.data)
 
-export type DeleteorderErrorCode = 'order-delete-failed-existing-files'
+export type DeleteorderErrorCode =
+  | 'order-delete-failed-existing-files'
+  | 'order-delete-failed-report-approved'
 
-export const DeleteOrderError = {
+export const DeleteOrderError: Record<DeleteorderErrorCode, string> = {
   'order-delete-failed-existing-files':
-    'Tilaukseen on jo lisätty tiedostoja joten tilausta ei voitu poistaa.'
+    'Tilaukseen on jo lisätty tiedostoja joten tilausta ei voitu poistaa.',
+  'order-delete-failed-report-approved':
+    'Tilauksen selvitys on jo hyväksytty joten tilausta ei voi poistaa'
 }
 export const apiDeleteOrder = (id: string): Promise<void> =>
   apiClient.delete<void>(`/orders/${id}`).then((res) => res.data)

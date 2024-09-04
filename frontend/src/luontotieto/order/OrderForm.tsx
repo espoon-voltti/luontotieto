@@ -44,6 +44,7 @@ interface CreateProps {
   planNumbers: string[]
   orderingUnits: string[]
   errors: OrderFileValidationErrorResponse[]
+  disabled?: boolean
 }
 
 interface EditProps {
@@ -54,6 +55,7 @@ interface EditProps {
   planNumbers: string[]
   orderingUnits: string[]
   errors: OrderFileValidationErrorResponse[]
+  disabled?: boolean
 }
 
 type Props = CreateProps | EditProps
@@ -436,6 +438,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               <TextArea
                 onChange={(name) => setOrderInput({ ...orderInput, name })}
                 value={orderInput.name}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -452,6 +455,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 onChange={updateOrderingUnits}
                 placeholderText="Etsi tai lisää yksikkö"
+                disabled={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -468,6 +472,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 onChange={updatePlanNumbers}
                 placeholderText="Etsi tai lisää kaava"
+                disabled={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -481,6 +486,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 value={orderInput.returnDate}
                 type="date"
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -496,6 +502,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 value={orderInput.description}
                 rows={2}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -511,6 +518,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                   })
                 }
                 value={orderInput.contactPerson}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -526,6 +534,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 value={orderInput.contactEmail}
                 info={invalidContactEmailInfo}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -540,6 +549,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                   })
                 }
                 value={orderInput.contactPhone}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -558,6 +568,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 getItemLabel={(u) => u?.name ?? '-'}
                 getItemValue={(u) => u?.id ?? '-'}
+                disabled={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -572,6 +583,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                   })
                 }
                 value={orderInput.assigneeContactPerson}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -587,6 +599,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 value={orderInput.assigneeContactEmail}
                 info={invalidAssigneeContactEmailInfo}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -612,6 +625,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               }
               accept=".gpkg"
               required={true}
+              readOnly={props.disabled}
             />
           )}
           {orderAreaFile && orderAreaFile.type === 'EXISTING' && (
@@ -620,7 +634,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               data={{
                 type: 'ORDER',
                 file: orderAreaFile.orderFile,
-                readonly: false,
+                readonly: props.disabled ?? false,
                 documentType: orderAreaFile.documentType,
                 updated: orderAreaFile.orderFile.updated
               }}
@@ -651,6 +665,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                       props.errors.find((error) => error.id === fInput.id)
                         ?.errors
                     }
+                    readOnly={props.disabled}
                   />
                 )
               case 'EXISTING':
@@ -661,7 +676,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                     data={{
                       type: 'ORDER',
                       file: fInput.orderFile,
-                      readonly: false,
+                      readonly: props.disabled ?? false,
                       documentType: fInput.documentType,
                       updated: fInput.orderFile.updated
                     }}
@@ -689,6 +704,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               }
             ])
           }
+          disabled={props.disabled}
         />
       </SectionContainer>
       <VerticalGap $size="m" />
@@ -710,6 +726,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                       documentType: rd.documentType
                     })
                   }
+                  disabled={props.disabled}
                 />
               ))}
             </LabeledInput>

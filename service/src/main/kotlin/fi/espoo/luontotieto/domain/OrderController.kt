@@ -22,6 +22,7 @@ import fi.espoo.luontotieto.ses.SESEmailClient
 import fi.espoo.paikkatieto.domain.TableDefinition
 import fi.espoo.paikkatieto.domain.deleteAluerajausLuontoselvitystilaus
 import fi.espoo.paikkatieto.domain.insertPaikkatieto
+import fi.espoo.paikkatieto.domain.updateAluerajausLuontoselvitystilaus
 import fi.espoo.paikkatieto.reader.GpkgReader
 import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.reader.GpkgValidationErrorReason
@@ -148,8 +149,17 @@ class OrderController {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         return jdbi
             .inTransactionUnchecked { tx ->
-                tx.putOrder(id, order, user)
-                tx.getReportByOrderId(id, user)
+                canUpdateOrder(id, user)
+                val createdOrder = tx.putOrder(id, order, user)
+                val updatedReport = tx.getReportByOrderId(id, user)
+
+                /**
+                 * Reflect the changes also to paikkatietodata
+                 */
+                paikkatietoJdbi.inTransactionUnchecked { ptx ->
+                    ptx.updateAluerajausLuontoselvitystilaus(updatedReport.id, createdOrder)
+                }
+                updatedReport
             }
             .also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
     }
@@ -163,7 +173,8 @@ class OrderController {
         val dataBucket = bucketEnv.data
         jdbi
             .inTransactionUnchecked { tx ->
-                val report = tx.getReportByOrderId(orderId, user)
+                val report = canUpdateOrder(orderId, user)
+
                 val reportFiles = tx.getReportFiles(report.id)
                 if (reportFiles.isNotEmpty()) {
                     throw BadRequest(
@@ -176,6 +187,9 @@ class OrderController {
                     documentClient.delete(dataBucket, "$orderId/${of.id}")
                 }
                 tx.deleteOrderAndReportData(orderId, report.id)
+                paikkatietoJdbi.inTransactionUnchecked { ptx ->
+                    ptx.deleteAluerajausLuontoselvitystilaus(report.id)
+                }
             }
             .also { logger.audit(user, AuditEvent.DELETE_ORDER, mapOf("id" to "$orderId")) }
     }
@@ -190,6 +204,7 @@ class OrderController {
         @RequestParam("documentType") documentType: OrderDocumentType
     ): ResponseEntity<List<GpkgValidationError>> {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
+        canUpdateOrder(orderId, user)
 
         val dataBucket = bucketEnv.data
         val fileName = getAndCheckFileName(file)
@@ -297,7 +312,7 @@ class OrderController {
         documentClient.delete(dataBucket, "$orderId/$fileId")
         jdbi
             .inTransactionUnchecked { tx ->
-                val report = tx.getReportByOrderId(orderId, user)
+                val report = canUpdateOrder(orderId, user)
                 tx.deleteOrderFile(orderId, fileId)
                 paikkatietoJdbi.inTransactionUnchecked { ptx ->
                     ptx.deleteAluerajausLuontoselvitystilaus(report.id)
@@ -335,6 +350,26 @@ class OrderController {
         val fileUrl =
             documentClient.presignedGetUrl(dataBucket, "$orderId/$fileId", contentDisposition)
         return fileUrl
+    }
+
+    /**
+     * Helper to check if order has a approved report and can there for not be updated
+     * @return Report when the report is not approved
+     */
+    private fun canUpdateOrder(
+        orderId: UUID,
+        user: AuthenticatedUser
+    ): Report {
+        return jdbi.inTransactionUnchecked { tx ->
+            val report = tx.getReportByOrderId(orderId, user)
+            if (report.approved) {
+                throw BadRequest(
+                    "Tilausta ei voi päivittää koska siihen liittyvä selvitys on jo hyväksytty",
+                    errorCode = "order-delete-failed-report-approved"
+                )
+            }
+            report
+        }
     }
 
     private fun sendReportCreatedEmail(

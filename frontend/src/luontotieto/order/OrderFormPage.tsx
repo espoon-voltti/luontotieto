@@ -224,6 +224,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             planNumbers={planNumbers ?? []}
             orderingUnits={orderingUnits ?? []}
             errors={orderFileErrors}
+            disabled={order?.hasApprovedReport}
           />
         )}
 
@@ -237,6 +238,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
             planNumbers={planNumbers ?? []}
             orderingUnits={orderingUnits ?? []}
             errors={orderFileErrors}
+            disabled={order?.hasApprovedReport}
           />
         )}
       </PageContainer>
@@ -249,7 +251,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
                 text="Poista selvitystilaus"
                 className="danger"
                 data-qa="save-button"
-                disabled={deletingOrder}
+                disabled={deletingOrder || order?.hasApprovedReport}
                 onClick={() => {
                   if (order) {
                     setShowModal({
@@ -278,7 +280,12 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
               text="Tallenna"
               data-qa="save-button"
               primary
-              disabled={!orderInput || savingOrder || updatingOrder}
+              disabled={
+                !orderInput ||
+                savingOrder ||
+                updatingOrder ||
+                order?.hasApprovedReport
+              }
               onClick={async () => {
                 if (!orderInput) return
 

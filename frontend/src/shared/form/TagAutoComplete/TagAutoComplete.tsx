@@ -171,13 +171,15 @@ interface Props {
   data: Tag[]
   onChange: (selected: Tag[]) => void
   placeholderText: string
+  disabled?: boolean
 }
 
 export const TagAutoComplete = ({
   onChange,
   suggestions,
   data,
-  placeholderText
+  placeholderText,
+  disabled
 }: Props) => {
   const [selected, setSelected] = useState<Tag[]>(data ?? [])
 
@@ -210,6 +212,7 @@ export const TagAutoComplete = ({
         onAdd={onAdd}
         onDelete={onDelete}
         noOptionsText="Ei hakutuloksia"
+        isDisabled={disabled}
       />
     </Wrapper>
   )
