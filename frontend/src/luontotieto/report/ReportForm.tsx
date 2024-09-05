@@ -141,16 +141,42 @@ function createFileInputs(
       noObservation
     }
   })
-  const otherFiles = reportFiles
+
+  // This is the order we want to hold for the additional in memory files
+  const inMemoryOtherFileIds = inMemoryFiles
+    .filter((imf) => imf.documentType === ReportFileDocumentType.OTHER)
+    .map((imf) => imf.id)
+
+  const existingOtherFileIds = reportFiles
     .filter((rf) => rf.documentType === ReportFileDocumentType.OTHER)
-    .map((rf) => ({
-      type: 'EXISTING' as const,
-      userDescription: rf.description,
-      documentType: rf.documentType,
-      details: rf,
-      noObservation: false,
-      id: rf.id
-    }))
+    .map((rf) => rf.id)
+
+  const otherFileIds = [
+    ...new Set([...inMemoryOtherFileIds, ...existingOtherFileIds])
+  ]
+
+  const otherFiles: (ReportFileInputElement | null)[] = otherFileIds.map(
+    (fileId) => {
+      const existingFile = reportFiles.find((rf) => rf.id === fileId)
+      if (existingFile) {
+        return {
+          type: 'EXISTING' as const,
+          userDescription: existingFile.description,
+          documentType: existingFile.documentType,
+          details: existingFile,
+          noObservation: false,
+          id: existingFile.id
+        } satisfies ReportFileInputElement
+      }
+      const inMemoryFile = inMemoryFiles.find(
+        (imf) => imf.type === 'NEW' && imf.id === fileId
+      )
+      if (inMemoryFile && inMemoryFile.type === 'NEW') {
+        return inMemoryFile satisfies ReportFileInputElement
+      }
+      return null
+    }
+  )
 
   const mappedReportInfo = createFileInputElement(
     ReportFileDocumentType.REPORT,
@@ -167,7 +193,7 @@ function createFileInputs(
     ...requiredFileInputs,
     mappedReportInfo,
     mappedAluerajaus,
-    ...otherFiles
+    ...otherFiles.flatMap((of) => (of !== null ? [of] : []))
   ]
 }
 

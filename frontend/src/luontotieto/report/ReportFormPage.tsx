@@ -82,8 +82,8 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
           title: 'Tiedot tallennettu',
           resolve: {
             action: async () => {
-              void queryClient.invalidateQueries({ queryKey: ['report', id] })
-              void queryClient.invalidateQueries({
+              await queryClient.invalidateQueries({ queryKey: ['report', id] })
+              await queryClient.invalidateQueries({
                 queryKey: ['reportFiles', id]
               })
               closeModal()

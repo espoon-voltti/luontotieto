@@ -95,13 +95,15 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
     reloadOrder = true
   ) => {
     if (reloadOrder) {
-      void queryClient.invalidateQueries({ queryKey: ['order', orderId ?? id] })
+      await queryClient.invalidateQueries({
+        queryKey: ['order', orderId ?? id]
+      })
     }
-    void queryClient.invalidateQueries({
+    await queryClient.invalidateQueries({
       queryKey: ['orderFiles', orderId ?? id]
     })
-    void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
-    void queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
+    await queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
+    await queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
   }
   const resetFormState = async (orderId: string | undefined) => {
     setOrderFileErrors([])
@@ -118,7 +120,6 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
           title: 'Tilaus luotu',
           resolve: {
             action: () => {
-              resetFormState(orderId)
               setShowModal(null)
               navigate(`/luontotieto/selvitys/${reportId}`)
             },
@@ -173,8 +174,8 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   const { mutateAsync: updateOrderMutation, isPending: updatingOrder } =
     useMutation({
       mutationFn: apiPutOrder,
-      onSuccess: (_order): void => {
-        resetFormState(orderId)
+      onSuccess: async (_order) => {
+        await resetFormState(orderId)
         setShowModal({
           title: 'Tilaus päivitetty',
           resolve: {
@@ -220,8 +221,8 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   const { mutateAsync: deleteOrderMutation, isPending: deletingOrder } =
     useMutation({
       mutationFn: apiDeleteOrder,
-      onSuccess: (_order): void => {
-        resetFormState(orderId)
+      onSuccess: async (_order) => {
+        await resetFormState(orderId)
         setShowModal({
           title: 'Tilaus poistettu',
           resolve: {
