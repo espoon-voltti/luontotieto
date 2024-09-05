@@ -73,6 +73,7 @@ fun createLiitoOravaPisteetReportFile(
         reportId = reportId,
         file = multipartFile,
         documentType = DocumentType.LIITO_ORAVA_PISTEET,
-        description = "Test Description"
+        description = "Test Description",
+        id = UUID.randomUUID().toString()
     )
 }

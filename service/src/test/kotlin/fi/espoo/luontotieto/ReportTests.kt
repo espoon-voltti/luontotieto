@@ -153,7 +153,8 @@ class ReportTests : FullApplicationTest() {
                                 inStream
                             ),
                         description = null,
-                        documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET
+                        documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET,
+                        id = UUID.randomUUID().toString()
                     ).statusCode.value(),
                     201
                 )
@@ -174,7 +175,8 @@ class ReportTests : FullApplicationTest() {
                                 inStream
                             ),
                         description = null,
-                        documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT
+                        documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT,
+                        id = UUID.randomUUID().toString()
                     ).statusCode.value(),
                     201
                 )
@@ -195,7 +197,8 @@ class ReportTests : FullApplicationTest() {
                                 inStream
                             ),
                         description = null,
-                        documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET
+                        documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET,
+                        id = UUID.randomUUID().toString()
                     ).statusCode.value(),
                     201
                 )
@@ -214,7 +217,8 @@ class ReportTests : FullApplicationTest() {
                             inStream
                         ),
                     description = "Alueelta löytyi ilves, torakka, jänis ja perhonen.",
-                    documentType = DocumentType.ALUERAJAUS_LUONTOSELVITYS
+                    documentType = DocumentType.ALUERAJAUS_LUONTOSELVITYS,
+                    id = UUID.randomUUID().toString()
                 ).statusCode.value(),
                 201
             )
@@ -232,7 +236,8 @@ class ReportTests : FullApplicationTest() {
                         "LUONTOSELVITYSRAPORTTI".toByteArray()
                     ),
                 description = null,
-                documentType = DocumentType.REPORT
+                documentType = DocumentType.REPORT,
+                id = UUID.randomUUID().toString()
             ).statusCode.value(),
             201
         )
@@ -356,7 +361,8 @@ class ReportTests : FullApplicationTest() {
                             "This is a text file".toByteArray()
                         ),
                     description = null,
-                    documentType = documentType
+                    documentType = documentType,
+                    id = UUID.randomUUID().toString()
                 )
             }
         }
