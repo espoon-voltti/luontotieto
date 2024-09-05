@@ -200,6 +200,7 @@ class OrderController {
         user: AuthenticatedUser,
         @PathVariable orderId: UUID,
         @RequestPart("file") file: MultipartFile,
+        @RequestPart("id") id: String,
         @RequestPart("description") description: String?,
         @RequestParam("documentType") documentType: OrderDocumentType
     ): ResponseEntity<List<GpkgValidationError>> {
@@ -210,7 +211,9 @@ class OrderController {
         val fileName = getAndCheckFileName(file)
         val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
 
-        var id: UUID? = null
+        val fileId = UUID.fromString(id)
+        var savedId: UUID? = null
+
         try {
             if (documentType == OrderDocumentType.ORDER_AREA) {
                 val tableDefinition = TableDefinition.ALUERAJAUS_LUONTOSELVITYSTILAUS
@@ -266,28 +269,28 @@ class OrderController {
                 }
             }
 
-            id =
+            savedId =
                 jdbi.inTransactionUnchecked { tx ->
                     tx.insertOrderFile(
-                        OrderFileInput(orderId, description, contentType, fileName, documentType),
+                        OrderFileInput(fileId, orderId, description, contentType, fileName, documentType),
                         user
                     )
                 }
 
             documentClient.upload(
                 dataBucket,
-                MultipartDocument(name = "$orderId/$id", file = file, contentType = contentType)
+                MultipartDocument(name = "$orderId/$savedId", file = file, contentType = contentType)
             )
 
             logger.audit(
                 user,
                 AuditEvent.ADD_ORDER_FILE,
-                mapOf("id" to "$orderId", "file" to "$id")
+                mapOf("id" to "$orderId", "file" to "$savedId")
             )
         } catch (e: Exception) {
             logger.error("Error uploading file: ", e)
-            if (id != null) {
-                jdbi.inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, id) }
+            if (savedId != null) {
+                jdbi.inTransactionUnchecked { tx -> tx.deleteOrderFile(orderId, fileId) }
             }
             throw BadRequest("Error uploading file")
         }

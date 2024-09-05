@@ -83,41 +83,105 @@ type OrderFileInputElement =
   | OrderFileInputElementNew
   | OrderFileInputElementExisting
 
-function createFileInputs(orderFiles: OrderFile[]): OrderFileInputElement[] {
-  const files: OrderFileInputElement[] = orderFileTypes.map((documentType) => {
-    const orderFile = orderFiles.find(
-      (file) => file.documentType === documentType
-    )
-    return orderFile
-      ? {
+function createExistingFileInputs(
+  orderFiles: OrderFile[]
+): OrderFileInputElementExisting[] {
+  return orderFiles.map((of) => ({
+    documentType: of.documentType,
+    type: 'EXISTING',
+    orderFile: of
+  }))
+}
+
+function createFileInputs(
+  orderFiles: OrderFile[],
+  inMemoryFiles: OrderFileInputElement[]
+): OrderFileInputElement[] {
+  const requiredFiles: OrderFileInputElement[] = orderFileTypes.map(
+    (documentType) => {
+      const existingFile = orderFiles.find(
+        (file) => file.documentType === documentType
+      )
+      const existingInMemoryFile = inMemoryFiles.find(
+        (i) => documentType === i.documentType
+      )
+      if (existingFile) {
+        if (
+          existingInMemoryFile &&
+          existingInMemoryFile.type === 'NEW' &&
+          existingInMemoryFile.id !== existingFile.id
+        ) {
+          return existingInMemoryFile
+        }
+        return {
           documentType,
           type: 'EXISTING',
-          orderFile
+          orderFile: existingFile
         }
-      : {
-          documentType,
-          type: 'NEW',
-          description: '',
-          file: null,
-          id: uuidv4()
-        }
-  })
+      }
+      if (existingInMemoryFile) {
+        return existingInMemoryFile
+      }
+      // If none of these are found return new
+      return {
+        documentType,
+        type: 'NEW',
+        description: '',
+        file: null,
+        id: uuidv4(),
+        primaryOrderInfoFile: true
+      }
+    }
+  )
+  if (inMemoryFiles.length === 0) {
+    return requiredFiles
+  }
 
-  const additionalFiles = orderFiles
+  const requiredFileIds = requiredFiles.map((rf) =>
+    rf.type === 'NEW' ? rf.id : rf.orderFile.id
+  )
+
+  // This is the order we want to hold for the additional in memory files
+  const inMemoryAdditionalFileIds = inMemoryFiles
+    .map((imf) => (imf.type === 'NEW' ? imf.id : imf.orderFile.id))
+    .filter((id) => !requiredFileIds.some((rfId) => rfId === id))
+
+  const existingAdditionalFileIds = orderFiles
     .filter(
       (file) =>
-        !files.some((f) => f.type === 'EXISTING' && f.orderFile.id === file.id)
+        !requiredFiles.some(
+          (f) => f.type === 'EXISTING' && f.orderFile.id === file.id
+        )
     )
-    .map(
-      (orderFile) =>
-        ({
-          documentType: orderFile.documentType,
-          type: 'EXISTING',
-          orderFile
-        }) as OrderFileInputElementExisting
-    )
+    .map((orderFile) => orderFile.id)
 
-  return [...files, ...additionalFiles]
+  const additionalFileIds = [
+    ...new Set([...inMemoryAdditionalFileIds, ...existingAdditionalFileIds])
+  ]
+
+  const additionalFiles: (OrderFileInputElement | null)[] =
+    additionalFileIds.map((fileId) => {
+      const existingFile = orderFiles.find((of) => of.id === fileId)
+      if (existingFile) {
+        return {
+          documentType: existingFile.documentType,
+          type: 'EXISTING',
+          orderFile: existingFile
+        }
+      }
+      const inMemoryFile = inMemoryFiles.find(
+        (imf) => imf.type === 'NEW' && imf.id === fileId
+      )
+      if (inMemoryFile && inMemoryFile.type === 'NEW') {
+        return inMemoryFile
+      }
+      return null
+    })
+
+  return [
+    ...requiredFiles,
+    ...additionalFiles.flatMap((af) => (af !== null ? [af] : []))
+  ]
 }
 
 function filesAreValid(fileInputs: OrderFileInputElement[]): boolean {
@@ -208,8 +272,12 @@ function createOrderFormInput(order: Order | undefined): OrderFormInput {
 
 export const OrderForm = React.memo(function OrderForm(props: Props) {
   const originalFileInputs = useMemo(
-    () => createFileInputs(props.mode === 'EDIT' ? props.orderFiles : []),
+    () =>
+      createExistingFileInputs(props.mode === 'EDIT' ? props.orderFiles : []),
     [props]
+  )
+  const [orderFiles, setOrderFiles] = useState<OrderFileInputElement[]>(
+    createFileInputs(props.mode === 'EDIT' ? props.orderFiles : [], [])
   )
 
   const [orderInput, setOrderInput] = useDebouncedState<OrderFormInput>(
@@ -245,10 +313,6 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           }
         : undefined,
     [orderInput.assigneeContactEmail]
-  )
-
-  const [orderFiles, setOrderFiles] = useState<OrderFileInputElement[]>(
-    createFileInputs(props.mode === 'EDIT' ? props.orderFiles : [])
   )
 
   const orderAreaFile = useMemo(
@@ -412,6 +476,15 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   useEffect(() => {
     props.onChange(validInput)
   }, [validInput, props, orderFiles])
+
+  useEffect(() => {
+    setOrderFiles(
+      createFileInputs(
+        props.mode === 'EDIT' ? props.orderFiles : [],
+        orderFiles
+      )
+    )
+  }, [originalFileInputs])
 
   const uniquePlanNumbers = [...new Set([...planNumbers, ...props.planNumbers])]
   const planNumberSuggestions = uniquePlanNumbers.map((pn) => ({

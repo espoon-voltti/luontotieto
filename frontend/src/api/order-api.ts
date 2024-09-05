@@ -191,6 +191,7 @@ const apiPostOrderFile = async (
 ): Promise<OrderFileSuccessResponse | OrderFileValidationErrorResponse> => {
   const formData = new FormData()
   formData.append('file', file.file)
+  formData.append('id', file.id)
   formData.append('description', file.description)
   formData.append('documentType', OrderFileDocumentType[file.documentType])
 

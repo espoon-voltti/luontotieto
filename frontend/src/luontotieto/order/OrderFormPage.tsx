@@ -19,6 +19,7 @@ import {
   OrderFileValidationErrorResponse,
   OrderFormInput
 } from 'api/order-api'
+import { getDocumentTypeTitle } from 'api/report-api'
 import { hasOrdererRole, UserContext } from 'auth/UserContext'
 import { AxiosError } from 'axios'
 import React, { useContext, useMemo, useState } from 'react'
@@ -37,7 +38,6 @@ import {
 } from '../../shared/layout'
 
 import { OrderForm } from './OrderForm'
-import { getDocumentTypeTitle } from 'api/report-api'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -70,7 +70,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
   // Use this to store the files that saved succesfully when creating a new order
   const [savedFileIds, setSavedFileIds] = useState<string[]>([])
   // Use this to store order id in case of order file saving error
-  const [orderId, setOrderId] = useState<string | undefined>(undefined)
+  const [orderId, setOrderId] = useState<string | undefined>(id)
 
   const { data: order, isLoading: isLoadingOrder } = useGetOrderQuery(id)
   const { data: orderFiles, isLoading: isLoadingOrderFiles } =
@@ -90,21 +90,35 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
     OrderFileValidationErrorResponse[]
   >([])
 
+  const invalidateQueries = async (
+    orderId: string | undefined,
+    reloadOrder = true
+  ) => {
+    if (reloadOrder) {
+      void queryClient.invalidateQueries({ queryKey: ['order', orderId ?? id] })
+    }
+    void queryClient.invalidateQueries({
+      queryKey: ['orderFiles', orderId ?? id]
+    })
+    void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
+    void queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
+  }
+  const resetFormState = async (orderId: string | undefined) => {
+    setOrderFileErrors([])
+    await invalidateQueries(orderId)
+  }
+
   const { mutateAsync: createOrderMutation, isPending: savingOrder } =
     useMutation({
       mutationFn: apiUpsertOrder,
-      onSuccess: ({ orderId, reportId }) => {
-        void queryClient.invalidateQueries({ queryKey: ['order', id] })
-        void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
-        void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
-        void queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
-        setOrderFileErrors([])
+      onSuccess: async ({ orderId, reportId }) => {
+        await resetFormState(orderId)
         setOrderId(orderId)
-
         setShowModal({
           title: 'Tilaus luotu',
           resolve: {
             action: () => {
+              resetFormState(orderId)
               setShowModal(null)
               navigate(`/luontotieto/selvitys/${reportId}`)
             },
@@ -118,12 +132,18 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
           | OrderFileValidationErrorResponse
         )[]
       ) => {
-        const successResponses = responses.filter((r) => r.type === 'success')
-        setSavedFileIds(successResponses.map((r) => r.id))
+        const saved = responses
+          .filter((r) => r.type === 'success')
+          .map((r) => r.id)
 
-        const errors = responses.filter(
-          (r) => r.type === 'error'
-        ) as OrderFileValidationErrorResponse[]
+        setSavedFileIds([...new Set([...saved, ...savedFileIds])])
+
+        const errors = responses.flatMap((r) => {
+          if (r.type === 'error') {
+            return [r satisfies OrderFileValidationErrorResponse]
+          }
+          return []
+        })
 
         errors && setOrderFileErrors(errors)
 
@@ -138,7 +158,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
           : ''
 
         setShowModal({
-          title: 'Tilauksen luonti onnistui',
+          title: 'Tilauksen luonti epäonnistui',
           text: text,
           resolve: {
             action: () => {
@@ -154,10 +174,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
     useMutation({
       mutationFn: apiPutOrder,
       onSuccess: (_order): void => {
-        void queryClient.invalidateQueries({ queryKey: ['order', id] })
-        void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
-        void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
-        void queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
+        resetFormState(orderId)
         setShowModal({
           title: 'Tilaus päivitetty',
           resolve: {
@@ -168,22 +185,27 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
           }
         })
       },
-      onError: (
+      onError: async (
         responses: (
           | OrderFileSuccessResponse
           | OrderFileValidationErrorResponse
         )[]
       ) => {
-        const errors = responses.filter(
-          (r) => r.type === 'error'
-        ) as OrderFileValidationErrorResponse[]
+        await invalidateQueries(id, false)
+
+        const errors = responses.flatMap((r) => {
+          if (r.type === 'error') {
+            return [r satisfies OrderFileValidationErrorResponse]
+          }
+          return []
+        })
 
         errors && setOrderFileErrors(errors)
 
         setShowModal({
           title: 'Tilauksen päivitys epäonnistui',
           text: `Seuravien tiedostojen tallennus epäonnistui: ${errors
-            .map((e) => `${getDocumentTypeTitle(e.documentType)}:${e.name}`)
+            .map((e) => `${getDocumentTypeTitle(e.documentType)}:${e.name} `)
             .join(', ')}`,
           resolve: {
             action: () => {
@@ -199,10 +221,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
     useMutation({
       mutationFn: apiDeleteOrder,
       onSuccess: (_order): void => {
-        void queryClient.invalidateQueries({ queryKey: ['order', id] })
-        void queryClient.invalidateQueries({ queryKey: ['orderFiles', id] })
-        void queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
-        void queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
+        resetFormState(orderId)
         setShowModal({
           title: 'Tilaus poistettu',
           resolve: {
