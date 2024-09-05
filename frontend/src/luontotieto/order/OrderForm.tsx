@@ -106,13 +106,6 @@ function createFileInputs(
         (i) => documentType === i.documentType
       )
       if (existingFile) {
-        if (
-          existingInMemoryFile &&
-          existingInMemoryFile.type === 'NEW' &&
-          existingInMemoryFile.id !== existingFile.id
-        ) {
-          return existingInMemoryFile
-        }
         return {
           documentType,
           type: 'EXISTING',
