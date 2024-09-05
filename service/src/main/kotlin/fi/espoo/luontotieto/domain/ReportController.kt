@@ -96,6 +96,7 @@ class ReportController {
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
         @RequestPart("file") file: MultipartFile,
+        @RequestPart("id") id: String,
         @RequestPart("description") description: String?,
         @RequestParam("documentType") documentType: DocumentType
     ): ResponseEntity<List<GpkgValidationError>> {
@@ -124,12 +125,13 @@ class ReportController {
                 ?: emptyList()
 
         if (errors.isEmpty()) {
-            val id =
+            val savedId =
                 jdbi.inTransactionUnchecked { tx ->
                     // Check that user has permission to report
                     val report = tx.getReport(reportId, user)
                     tx.insertReportFile(
                         ReportFileInput(
+                            UUID.fromString(id),
                             report.id,
                             description,
                             contentType,
@@ -144,7 +146,7 @@ class ReportController {
                 documentClient.upload(
                     dataBucket,
                     MultipartDocument(
-                        name = "$reportId/$id",
+                        name = "$reportId/$savedId",
                         file = file,
                         contentType = contentType
                     )
@@ -152,12 +154,12 @@ class ReportController {
                 logger.audit(
                     user,
                     AuditEvent.ADD_REPORT_FILE,
-                    mapOf("id" to "$reportId", "file" to "$id")
+                    mapOf("id" to "$reportId", "file" to "$savedId")
                 )
                 return ResponseEntity.status(HttpStatus.CREATED).body(errors)
             } catch (e: Exception) {
                 logger.error("Error uploading file: ", e)
-                jdbi.inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, id) }
+                jdbi.inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, savedId) }
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors)
             }
         }

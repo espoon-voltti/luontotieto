@@ -164,7 +164,8 @@ class OrderTests : FullApplicationTest() {
                     "ORDER INFO CONTENT".toByteArray()
                 ),
             documentType = OrderDocumentType.ORDER_INFO,
-            description = "Test Description"
+            description = "Test Description",
+            id = UUID.randomUUID().toString()
         )
 
         createLiitoOravaPisteetReportFile(reportController, createdOrder.reportId)
@@ -211,7 +212,8 @@ class OrderTests : FullApplicationTest() {
                         "ORDER INFO CONTENT".toByteArray()
                     ),
                 documentType = OrderDocumentType.ORDER_INFO,
-                description = "Test Description"
+                description = "Test Description",
+                id = UUID.randomUUID().toString()
             )
         }
         val orderFileResponse = controller.getOrderFiles(adminUser, createdOrder.orderId)

@@ -9,14 +9,17 @@ import {
   apiPutReport,
   apiReOpenReport,
   ApproveReportError,
+  ReportFileSuccessResponse,
   ReportFileValidationErrorResponse,
-  ReportFormInput
+  ReportFormInput,
+  getDocumentTypeTitle
 } from 'api/report-api'
 import { UserRole } from 'api/users-api'
 import { hasViewerRole, UserContext } from 'auth/UserContext'
 import React, { useContext, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
+import { AlertBox } from 'shared/MessageBoxes'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
 import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
@@ -34,7 +37,6 @@ import { OrderDetails } from './OrderDetails'
 import { ReportApproval } from './ReportApproval'
 import { ReportForm } from './ReportForm'
 import { ReportReOpen } from './ReportReOpen'
-import { AlertBox } from 'shared/MessageBoxes'
 
 const StyledButton = styled(Button)`
   margin-right: 20px;
@@ -75,13 +77,15 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
     useMutation({
       mutationFn: apiPutReport,
       onSuccess: (_report) => {
-        void queryClient.invalidateQueries({ queryKey: ['report', id] })
-        void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
         setReportFileErrors([])
         setShowModal({
           title: 'Tiedot tallennettu',
           resolve: {
-            action: () => {
+            action: async () => {
+              await queryClient.invalidateQueries({ queryKey: ['report', id] })
+              await queryClient.invalidateQueries({
+                queryKey: ['reportFiles', id]
+              })
               closeModal()
               navigate(`/luontotieto`)
             },
@@ -89,10 +93,29 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
           }
         })
       },
-      onError: (error: ReportFileValidationErrorResponse) => {
-        setReportFileErrors([error])
+      onError: (
+        responses: (
+          | ReportFileSuccessResponse
+          | ReportFileValidationErrorResponse
+        )[]
+      ) => {
+        // void queryClient.invalidateQueries({ queryKey: ['report', id] })
+        void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+        const errors = responses.flatMap((r) => {
+          if (r.type === 'error') {
+            return [r satisfies ReportFileValidationErrorResponse]
+          }
+          return []
+        })
+        errors && setReportFileErrors(errors)
+
         setShowModal({
           title: 'Tietojen tallennus epäonnistui',
+          text: `Seuravien tiedostojen tallennus epäonnistui: ${errors
+            .map(
+              (e) => `${getDocumentTypeTitle(e.documentType)}:${e.name} \r\n`
+            )
+            .join(',')}`,
           resolve: {
             action: () => closeModal(),
             label: 'Sulje'
@@ -141,11 +164,8 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
       })
     }
   })
-  console.log()
 
   const onSubmit = async (reportInput: ReportFormInput) => {
-    console.log('ON SUBMIT RENDER???')
-    console.log(overrideReportName)
     if (report && report.approved && reOpen) {
       setShowModal({
         title: 'Avaa selvitys uudelleen',
@@ -274,7 +294,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
           disabled={approving}
         >
           {showModal.text}
-          {approveError && (
+          {!!approveError && (
             <>
               <VerticalGap $size="L" />
               <AlertBox title="Virhe" message={approveError} />
