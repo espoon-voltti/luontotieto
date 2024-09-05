@@ -204,6 +204,7 @@ const apiPostReportFile = async (
 ): Promise<ReportFileSuccessResponse | ReportFileValidationErrorResponse> => {
   const formData = new FormData()
   formData.append('file', file.file)
+  formData.append('id', file.id)
   formData.append('description', file.description)
   formData.append('documentType', ReportFileDocumentType[file.documentType])
 

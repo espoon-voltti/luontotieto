@@ -19,6 +19,7 @@ import { hasViewerRole, UserContext } from 'auth/UserContext'
 import React, { useContext, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
+import { AlertBox } from 'shared/MessageBoxes'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
 import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
@@ -36,7 +37,6 @@ import { OrderDetails } from './OrderDetails'
 import { ReportApproval } from './ReportApproval'
 import { ReportForm } from './ReportForm'
 import { ReportReOpen } from './ReportReOpen'
-import { AlertBox } from 'shared/MessageBoxes'
 
 const StyledButton = styled(Button)`
   margin-right: 20px;
@@ -77,13 +77,15 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
     useMutation({
       mutationFn: apiPutReport,
       onSuccess: (_report) => {
-        void queryClient.invalidateQueries({ queryKey: ['report', id] })
-        void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
         setReportFileErrors([])
         setShowModal({
           title: 'Tiedot tallennettu',
           resolve: {
-            action: () => {
+            action: async () => {
+              void queryClient.invalidateQueries({ queryKey: ['report', id] })
+              void queryClient.invalidateQueries({
+                queryKey: ['reportFiles', id]
+              })
               closeModal()
               navigate(`/luontotieto`)
             },
@@ -97,11 +99,14 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
           | ReportFileValidationErrorResponse
         )[]
       ) => {
-        void queryClient.invalidateQueries({ queryKey: ['report', id] })
+        // void queryClient.invalidateQueries({ queryKey: ['report', id] })
         void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-        const errors = responses.filter(
-          (r) => r.type === 'error'
-        ) as ReportFileValidationErrorResponse[]
+        const errors = responses.flatMap((r) => {
+          if (r.type === 'error') {
+            return [r satisfies ReportFileValidationErrorResponse]
+          }
+          return []
+        })
         errors && setReportFileErrors(errors)
 
         setShowModal({
@@ -289,7 +294,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
           disabled={approving}
         >
           {showModal.text}
-          {approveError && (
+          {!!approveError && (
             <>
               <VerticalGap $size="L" />
               <AlertBox title="Virhe" message={approveError} />

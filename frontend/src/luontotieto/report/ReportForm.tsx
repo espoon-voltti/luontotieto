@@ -69,6 +69,7 @@ interface ReportFileInputElementExisting {
   documentType: ReportFileDocumentType
   details: ReportFileDetails
   noObservation: boolean
+  id: string
 }
 
 type ReportFileInputElement =
@@ -88,32 +89,57 @@ function getAcceptedFileTypes(
   }
 }
 
+function createFileInputElement(
+  documentType: ReportFileDocumentType,
+  reportFiles: ReportFileDetails[],
+  inMemoryFiles: ReportFileInputElement[]
+): ReportFileInputElement {
+  const existingFile = reportFiles.find(
+    (rf) => rf.documentType === documentType
+  )
+  if (existingFile) {
+    return {
+      type: 'EXISTING' as const,
+      userDescription: existingFile.description,
+      documentType: existingFile.documentType,
+      details: existingFile,
+      noObservation: false,
+      id: existingFile.id
+    } satisfies ReportFileInputElement
+  }
+  const inMemoryFile = inMemoryFiles.find(
+    (imf) => documentType === imf.documentType
+  )
+  if (inMemoryFile) {
+    return inMemoryFile satisfies ReportFileInputElement
+  }
+
+  return {
+    type: 'NEW' as const,
+    userDescription: '',
+    documentType: documentType,
+    file: null,
+    id: uuidv4(),
+    noObservation: false
+  } satisfies ReportFileInputElement
+}
+
 function createFileInputs(
   reportFiles: ReportFileDetails[],
   requiredFiles: OrderReportDocumentInput[],
-  noObservations: string[]
+  noObservations: string[],
+  inMemoryFiles: ReportFileInputElement[]
 ): ReportFileInputElement[] {
   const requiredFileInputs = requiredFiles.map((required) => {
-    const reportFile = reportFiles.find(
-      (reportFile) => reportFile.documentType === required.documentType
-    )
     const noObservation = noObservations.includes(required.documentType)
-    return reportFile
-      ? {
-          type: 'EXISTING' as const,
-          userDescription: reportFile.description,
-          documentType: required.documentType,
-          details: reportFile,
-          noObservation
-        }
-      : {
-          type: 'NEW' as const,
-          userDescription: '',
-          documentType: required.documentType,
-          file: null,
-          id: uuidv4(),
-          noObservation
-        }
+    return {
+      ...createFileInputElement(
+        required.documentType,
+        reportFiles,
+        inMemoryFiles
+      ),
+      noObservation
+    }
   })
   const otherFiles = reportFiles
     .filter((rf) => rf.documentType === ReportFileDocumentType.OTHER)
@@ -122,56 +148,26 @@ function createFileInputs(
       userDescription: rf.description,
       documentType: rf.documentType,
       details: rf,
-      noObservation: false
+      noObservation: false,
+      id: rf.id
     }))
 
-  const reportInfo = reportFiles.find(
-    (rf) => rf.documentType === ReportFileDocumentType.REPORT
+  const mappedReportInfo = createFileInputElement(
+    ReportFileDocumentType.REPORT,
+    reportFiles,
+    inMemoryFiles
   )
-
-  const mappedReportInfo = reportInfo
-    ? {
-        type: 'EXISTING' as const,
-        userDescription: reportInfo.description,
-        documentType: reportInfo.documentType,
-        details: reportInfo,
-        noObservation: false
-      }
-    : {
-        type: 'NEW' as const,
-        userDescription: '',
-        documentType: ReportFileDocumentType.REPORT,
-        file: null,
-        id: uuidv4(),
-        noObservation: false
-      }
-
-  const aluerajaus = reportFiles.find(
-    (rf) => rf.documentType === ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS
+  const mappedAluerajaus = createFileInputElement(
+    ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS,
+    reportFiles,
+    inMemoryFiles
   )
-
-  const mappedAluerajaus = aluerajaus
-    ? {
-        type: 'EXISTING' as const,
-        userDescription: aluerajaus.description,
-        documentType: aluerajaus.documentType,
-        details: aluerajaus,
-        noObservation: false
-      }
-    : {
-        type: 'NEW' as const,
-        userDescription: '',
-        documentType: ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS,
-        file: null,
-        id: uuidv4(),
-        noObservation: false
-      }
 
   return [
     ...requiredFileInputs,
-    ...otherFiles,
     mappedReportInfo,
-    mappedAluerajaus
+    mappedAluerajaus,
+    ...otherFiles
   ]
 }
 
@@ -232,7 +228,8 @@ export const ReportForm = React.memo(function ReportForm(
       createFileInputs(
         props.reportFiles ?? [],
         requiredFiles,
-        noObservations ?? []
+        noObservations ?? [],
+        []
       ),
     [requiredFiles, props.reportFiles, noObservations]
   )
@@ -347,7 +344,14 @@ export const ReportForm = React.memo(function ReportForm(
   }, [validInput, props])
 
   useEffect(() => {
-    setFileInputs(originalFileInputs)
+    setFileInputs(
+      createFileInputs(
+        props.reportFiles ?? [],
+        requiredFiles,
+        noObservations ?? [],
+        fileInputs
+      )
+    )
   }, [originalFileInputs])
 
   return (
