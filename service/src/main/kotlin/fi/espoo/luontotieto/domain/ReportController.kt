@@ -218,13 +218,13 @@ class ReportController {
             }
 
         if (emailEnv.enabled) {
-            val reportApprovedEmail =
+            val reportUpdatedEmail =
                 Emails.getReportUpdatedEmail(
                     HtmlSafe(reportResponse.name),
                     HtmlSafe(reportResponse.order?.assignee ?: ""),
                     luontotietoHost.getReportUrl(reportResponse.id)
                 )
-            sendReportEmails(reportApprovedEmail, reportResponse)
+            sendReportEmails(reportUpdatedEmail, reportResponse)
         }
         return reportResponse
     }
