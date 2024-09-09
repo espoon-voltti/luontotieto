@@ -39,7 +39,11 @@ import {
 export const UserSettingsPage = React.memo(function UserSettingsPage() {
   const { user } = useContext(UserContext)
 
-  const [showChangePassword, setShowChangePassword] = useState(false)
+  const passwordChangeRequired = user?.passwordUpdated === false
+
+  const [showChangePassword, setShowChangePassword] = useState(
+    passwordChangeRequired
+  )
   if (!user) {
     return null
   }
@@ -49,6 +53,16 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
 
       <SectionContainer>
         <GroupOfInputRows>
+          {user.role === UserRole.CUSTOMER && passwordChangeRequired && (
+            <LabeledInput $cols={10}>
+              <InfoBox
+                message="Järjestelmämme on havainnut, että käytät automaattisesti 
+           luotua salasanaa. Turvallisuutesi parantamiseksi pyydämme sinua päivittämään salasanasi,
+           jonka jälkeen voit jatkaa palvelun käyttöä."
+              />
+            </LabeledInput>
+          )}
+
           <LabeledInput $cols={3}>
             <Label>Yritys *</Label>
             <InputField value={user.name} readonly={true} />
