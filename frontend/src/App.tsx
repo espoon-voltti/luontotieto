@@ -98,7 +98,7 @@ export const appRouter = createBrowserRouter([
       {
         path: '/luontotieto',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <FrontPage />
           </AuthGuard>
         )
@@ -106,7 +106,7 @@ export const appRouter = createBrowserRouter([
       {
         path: '/luontotieto/tilaus/uusi',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <OrderFormPage mode="CREATE" />
           </AuthGuard>
         )
@@ -114,7 +114,7 @@ export const appRouter = createBrowserRouter([
       {
         path: '/luontotieto/tilaus/:id/muokkaa',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <OrderFormPage mode="EDIT" />
           </AuthGuard>
         )
@@ -122,7 +122,7 @@ export const appRouter = createBrowserRouter([
       {
         path: '/luontotieto/selvitys/:id',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <ReportFormPage />
           </AuthGuard>
         )
@@ -130,7 +130,7 @@ export const appRouter = createBrowserRouter([
       {
         path: '/luontotieto/käyttäjät',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <UserListPage />
           </AuthGuard>
         )
@@ -138,7 +138,7 @@ export const appRouter = createBrowserRouter([
       {
         path: '/luontotieto/käyttäjät/:id',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <UserManagementPage />
           </AuthGuard>
         )
@@ -146,7 +146,7 @@ export const appRouter = createBrowserRouter([
       {
         path: '/luontotieto/käyttäjät/uusi',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <NewUserPage />
           </AuthGuard>
         )

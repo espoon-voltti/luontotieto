@@ -114,6 +114,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
   const { mutateAsync: changePassword, isPending } = useMutation({
     mutationFn: apiChangeUserPassword,
     onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['auth-status'] })
       void queryClient.invalidateQueries({ queryKey: ['users', userId] })
       setShowModal({
         title: 'Salasana muutettu',

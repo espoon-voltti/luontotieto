@@ -38,6 +38,7 @@ data class User(
     val created: OffsetDateTime,
     val updated: OffsetDateTime,
     val active: Boolean,
+    val passwordUpdated: Boolean?,
     val email: String?,
     val externalId: String?,
     val createdBy: String?,
@@ -73,6 +74,7 @@ private const val SELECT_USER_SQL =
            u.updated                                  AS "updated",
            u.active                                   AS "active",
            u.external_id                              AS "externalId",
+           u.password_updated                         AS "passwordUpdated",
            uc.name                                    AS "createdBy",
            uu.name                                    AS "updatedBy"
     FROM users u
@@ -89,8 +91,8 @@ fun Handle.insertUser(
     return createQuery(
         """
             WITH users AS (
-                INSERT INTO users (email, name, role, password_hash, created_by, updated_by) 
-                VALUES (:email, :name, :role, :passwordHash, :createdBy, :updatedBy)
+                INSERT INTO users (email, name, role, password_hash, created_by, updated_by, password_updated) 
+                VALUES (:email, :name, :role, :passwordHash, :createdBy, :updatedBy, false)
                 RETURNING *
                 ) 
             $SELECT_USER_SQL
@@ -150,12 +152,13 @@ data class UpdatePasswordResult(val id: UUID, val email: String)
 fun Handle.putPassword(
     id: UUID,
     password: String,
-    user: AuthenticatedUser
+    user: AuthenticatedUser,
+    passwordUpdated: Boolean
 ): UpdatePasswordResult {
     return createQuery(
         """
                 UPDATE users 
-                 SET password_hash = :password, updated_by = :updatedBy
+                 SET password_hash = :password, updated_by = :updatedBy, password_updated = :passwordUpdated
                  WHERE id = :id
                  RETURNING id, email
             """
@@ -163,6 +166,7 @@ fun Handle.putPassword(
         .bind("id", id)
         .bind("updatedBy", user.id)
         .bind("password", password)
+        .bind("passwordUpdated", passwordUpdated)
         .mapTo<UpdatePasswordResult>()
         .findOne()
         .getOrNull() ?: throw NotFound()
