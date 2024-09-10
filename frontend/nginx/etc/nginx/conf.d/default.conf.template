@@ -238,7 +238,7 @@ server {
   location ~ /internal/api/reports/([0-9a-zA-Z-]+)/approve$ {
     limit_req zone=limit_zone;
     include     proxy_params;
-    proxy_pass $apiGatewayURL/api/reports/$1/approve$is_args$args;;
+    proxy_pass $apiGatewayURL/api/reports/$1/approve$is_args$args;
   }
 
   
