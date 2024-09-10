@@ -210,7 +210,7 @@ server {
   location ~ ^/api/reports/([0-9a-zA-Z-]+)$ {
     if ($request_method = PUT) {
       # Internally redirect PUT requests to a rate-limited location
-        rewrite ^/api/reports/[0-9a-zA-Z-]+ /internal/api/reports/$1 break;
+        rewrite ^/api/reports/([0-9a-zA-Z-]+) /internal/api/reports/$1 break;
     }
     include     proxy_params;
     proxy_pass  $apiGatewayURL;
