@@ -32,7 +32,8 @@ data class AppUser(
     val externalId: String?,
     val email: String?,
     val role: UserRole,
-    val active: Boolean
+    val active: Boolean,
+    val passwordUpdated: Boolean?
 )
 
 data class AppUserWithPassword(
@@ -43,6 +44,7 @@ data class AppUserWithPassword(
     val externalId: String?,
     val role: UserRole,
     val active: Boolean,
+    val passwordUpdated: Boolean?
 ) {
     fun toAppUser(): AppUser {
         return AppUser(
@@ -51,7 +53,8 @@ data class AppUserWithPassword(
             name = this.name,
             email = this.email,
             role = this.role,
-            active = this.active
+            active = this.active,
+            passwordUpdated = this.passwordUpdated
         )
     }
 }
@@ -81,7 +84,7 @@ fun Handle.getAppUser(id: UUID) =
     createQuery(
         // language=SQL
         """
-        SELECT id, external_id, name, email, role, active
+        SELECT id, external_id, name, email, role, active, password_updated as "passwordUpdated"
         FROM users 
         WHERE id = :id AND NOT system_user
         """
@@ -96,7 +99,8 @@ fun Handle.getAppUserWithPassword(email: String) =
     createQuery(
         // language=SQL
         """
-        SELECT id, external_id, name, email, password_hash AS password, role, active
+        SELECT id, external_id, name, email, password_hash AS password, role, 
+        active, password_updated as "passwordUpdated"
         FROM users 
         WHERE email = :email AND NOT system_user AND password_hash IS NOT NULL
         """

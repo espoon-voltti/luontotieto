@@ -40,11 +40,9 @@ class UserController {
     @Autowired
     lateinit var jdbi: Jdbi
 
-    @Autowired
-    lateinit var sesEmailClient: SESEmailClient
+    @Autowired lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired
-    lateinit var luontotietoHost: LuontotietoHost
+    @Autowired lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -155,7 +153,7 @@ class UserController {
                 }
 
                 val passwordHash = encoder.encode(data.newPassword)
-                val result = tx.putPassword(user.id, passwordHash, user)
+                val result = tx.putPassword(user.id, passwordHash, user, true)
                 sesEmailClient.send(
                     Email(
                         result.email,
@@ -182,7 +180,7 @@ class UserController {
         val passwordHash = encoder.encode(generatedString)
         return jdbi
             .inTransactionUnchecked { tx ->
-                val result = tx.putPassword(id, passwordHash, user)
+                val result = tx.putPassword(id, passwordHash, user, false)
                 sesEmailClient.send(
                     Email(
                         result.email,
