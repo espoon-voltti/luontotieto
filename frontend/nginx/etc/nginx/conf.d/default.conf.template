@@ -87,7 +87,6 @@ limit_req_zone $binary_remote_addr zone=req_zone_wl:1m rate=100r/s;
 limit_req_zone $binary_remote_addr zone=limit_zone:1m rate=2r/m;
 
 
-
 # Logging
 
 # As nginx does not currently have a built-in variable for outputting ISO 8601
@@ -220,29 +219,16 @@ server {
   # Internal location for rate-limited PUT requests to /api/reports/{id}
   location ~ /internal/api/reports/([0-9]+) {
     limit_req zone=limit_zone;
-    # Proxy the request to backend with the original /api/reports/{id} structure
     include     proxy_params;
     proxy_pass $apiGatewayURL/api/reports/$1;
   }
 
   # Approve report route
   location ~ ^/api/reports/[0-9a-zA-Z-]+/approve$ {
-    if ($request_method = POST) {
-      rewrite ^/api/reports/([0-9a-zA-Z-]+)/approve$ /internal/api/reports/$1/approve$is_args$args break;
-    }
+    limit_req zone=limit_zone;
     include     proxy_params;
     proxy_pass  $apiGatewayURL;
   }
-
-  # Internal location for rate-limited POST requests to /api/reports/{id}/approve
-  location ~ /internal/api/reports/([0-9a-zA-Z-]+)/approve$ {
-    limit_req zone=limit_zone;
-    include     proxy_params;
-    proxy_pass $apiGatewayURL/api/reports/$1/approve$is_args$args;
-  }
-
-  
-
 
   location / {
     try_files $uri $uri/ @indexPage;
