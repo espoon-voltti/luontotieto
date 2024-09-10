@@ -37,6 +37,7 @@ class UserControllerTests : FullApplicationTest() {
         assertEquals("new-user@example.com", createdUser.email)
         assertEquals("Company Oy", createdUser.name)
         assertTrue(createdUser.active)
+        createdUser.passwordUpdated?.let { assertFalse(it) }
     }
 
     @Test
@@ -139,6 +140,9 @@ class UserControllerTests : FullApplicationTest() {
         val updatedHash = jdbi.inTransactionUnchecked { it.getUserPasswordHash(customerUser.id) }
         val matches = encoder.matches(newPassword, updatedHash)
         assertTrue(matches)
+
+        val user = controller.getUser(systemUser, customerUser.id)
+        assertTrue(user.passwordUpdated!!)
     }
 
     @Test
