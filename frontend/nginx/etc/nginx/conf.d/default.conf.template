@@ -84,7 +84,7 @@ limit_req_zone $binary_remote_addr zone=req_zone_wl:1m rate=100r/s;
 
 # Explicitly define limit request for specific endpoints
 # Limits requests to 2 requests per second.
-limit_req_zone $binary_remote_addr zone=limit_zone:1m rate=10r/m;
+limit_req_zone $binary_remote_addr zone=limit_zone:1m rate=2r/m;
 
 
 
@@ -224,6 +224,24 @@ server {
         include     proxy_params;
         proxy_pass $apiGatewayURL/api/reports/$1;
   }
+
+  # Approve report route
+  location ~ ^/api/reports/[0-9a-zA-Z-]+/approve$ {
+    if ($request_method = POST) {
+      rewrite ^/api/reports/([0-9a-zA-Z-]+)/approve$ /internal/api/reports_approve/$1 break;
+    }
+    include     proxy_params;
+    proxy_pass  $apiGatewayURL;
+  }
+  
+  # Internal location for rate-limited POST requests to /api/reports/{id}/approve
+  location ~ /internal/api/reports_approve/([0-9a-zA-Z-]+) {
+    limit_req zone=limit_zone;
+    include     proxy_params;
+    proxy_pass $apiGatewayURL/api/reports/$1/approve;
+  }
+
+  
 
 
   location / {
