@@ -219,23 +219,23 @@ server {
 
   # Internal location for rate-limited PUT requests to /api/reports/{id}
   location ~ /internal/api/reports/([0-9]+) {
-        limit_req zone=limit_zone;
-        # Proxy the request to backend with the original /api/reports/{id} structure
-        include     proxy_params;
-        proxy_pass $apiGatewayURL/api/reports/$1;
+    limit_req zone=limit_zone;
+    # Proxy the request to backend with the original /api/reports/{id} structure
+    include     proxy_params;
+    proxy_pass $apiGatewayURL/api/reports/$1;
   }
 
   # Approve report route
   location ~ ^/api/reports/[0-9a-zA-Z-]+/approve$ {
     if ($request_method = POST) {
-      rewrite ^/api/reports/([0-9a-zA-Z-]+)/approve$ /internal/api/reports_approve/$1 break;
+      rewrite ^/api/reports/([0-9a-zA-Z-]+)/approve$ /internal/api/reports/$1/approve break;
     }
     include     proxy_params;
     proxy_pass  $apiGatewayURL;
   }
-  
+
   # Internal location for rate-limited POST requests to /api/reports/{id}/approve
-  location ~ /internal/api/reports_approve/([0-9a-zA-Z-]+) {
+  location ~ /internal/api/reports/([0-9a-zA-Z-]+)/approve$ {
     limit_req zone=limit_zone;
     include     proxy_params;
     proxy_pass $apiGatewayURL/api/reports/$1/approve;
