@@ -207,21 +207,22 @@ server {
   }
 
   # Update report route
-  location ~ ^/api/reports/[0-9a-zA-Z-]+$ {
+  location ~ ^/api/reports/([0-9a-zA-Z-]+)$ {
     if ($request_method = PUT) {
       # Internally redirect PUT requests to a rate-limited location
-        rewrite ^/api/reports/([0-9]+)$ /internal/api/reports/$1 break;
+        rewrite ^/api/reports/([0-9a-zA-Z-]+)$ /internal/api/reports/$1 break;
     }
     include     proxy_params;
     proxy_pass  $apiGatewayURL;
   }
 
-  # Internal location for rate-limited PUT requests to /api/reports/{id}
-  location ~ /internal/api/reports/([0-9]+) {
+  location ~ ^/internal/api/reports/([0-9a-zA-Z-]+)$ {
+    internal;
     limit_req zone=limit_zone;
     include     proxy_params;
     proxy_pass $apiGatewayURL/api/reports/$1;
   }
+
 
   # Approve report route
   location ~ ^/api/reports/[0-9a-zA-Z-]+/approve$ {
