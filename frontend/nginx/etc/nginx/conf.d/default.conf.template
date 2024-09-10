@@ -72,13 +72,21 @@ map $limit $limit_key {
   1 $binary_remote_addr;
 }
 
-# When $limit_key is an empty string (whitelisted CIDR), the first limit_req_zone
-# WON'T be applied. That means all whitelisted CIDR(s) are handled by the second
-# limit_req_zone with a higher limit, as $binary_remote_addr is always defined.
-# The more restrictive limit is applied, so even though all clients will match
-# the second limit_req_zone, the first will be applied to non-whitelisted clients.
+# Normal configuration allows up to:
+# - 10 requests per second (rate=10r/s)
+# - Burst of 20 additional requests (burst=20) without delay
 limit_req_zone $limit_key zone=req_zone:10m rate=10r/s;
+
+# Whitelisted configuration allows up to:
+# - 100 requests per second (rate=100r/s)
+# - Burst of 50 additional requests (burst=50) without delay
 limit_req_zone $binary_remote_addr zone=req_zone_wl:1m rate=100r/s;
+
+# Explicitly define limit request for specific endpoints
+# Limits requests to 2 requests per second.
+limit_req_zone $binary_remote_addr zone=limit_zone:1m rate=10r/m;
+
+
 
 # Logging
 
@@ -198,6 +206,25 @@ server {
     include     proxy_params;
     proxy_pass  $apiGatewayURL;
   }
+
+  # Update report route
+  location ~ ^/api/reports/[0-9a-zA-Z-]+$ {
+    if ($request_method = PUT) {
+      # Internally redirect PUT requests to a rate-limited location
+        rewrite ^/api/reports/([0-9]+)$ /internal/reports/$1 break;
+    }
+    include     proxy_params;
+    proxy_pass  $apiGatewayURL;
+  }
+
+  # Internal location for rate-limited PUT requests to /api/reports/{id}
+  location ~ /internal/api/reports/([0-9]+) {
+        limit_req zone=limit_zone;
+        # Proxy the request to backend with the original /api/reports/{id} structure
+        include     proxy_params;
+        proxy_pass $apiGatewayURL/api/reports/$1;
+  }
+
 
   location / {
     try_files $uri $uri/ @indexPage;
