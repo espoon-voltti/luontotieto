@@ -228,7 +228,7 @@ server {
   # Approve report route
   location ~ ^/api/reports/[0-9a-zA-Z-]+/approve$ {
     if ($request_method = POST) {
-      rewrite ^/api/reports/([0-9a-zA-Z-]+)/approve$ /internal/api/reports/$1/approve break;
+      rewrite ^/api/reports/([0-9a-zA-Z-]+)/approve$ /internal/api/reports/$1/approve$is_args$args break;
     }
     include     proxy_params;
     proxy_pass  $apiGatewayURL;
@@ -238,7 +238,7 @@ server {
   location ~ /internal/api/reports/([0-9a-zA-Z-]+)/approve$ {
     limit_req zone=limit_zone;
     include     proxy_params;
-    proxy_pass $apiGatewayURL/api/reports/$1/approve;
+    proxy_pass $apiGatewayURL/api/reports/$1/approve$is_args$args;;
   }
 
   
