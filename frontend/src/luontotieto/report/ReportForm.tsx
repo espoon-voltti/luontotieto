@@ -389,7 +389,7 @@ export const ReportForm = React.memo(function ReportForm(
       <A
         href="https://www.espoo.fi/fi/espoon-luontotietoaineistot#paikkatietojen-toimittaminen-luontoselvitysten-yhteydess-61377"
         target="_blank"
-        aria-label="Ohjeet paikkatietojen toimittamisesta luontoselvitysten yhteydessä ulkoinen linkki"
+        aria-description="External link"
       >
         <InstructionsLink>
           Ohjeet paikkatietojen toimittamisesta luontoselvitysten yhteydessä
