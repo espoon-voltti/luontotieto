@@ -213,6 +213,9 @@ export const TagAutoComplete = ({
         onDelete={onDelete}
         noOptionsText="Ei hakutuloksia"
         isDisabled={disabled}
+        ariaAddedText="%value% lisätty"
+        ariaDeletedText="%value% poistettu"
+        aria-ariaDescribedBy="Syötä tai lisää uusi"
       />
     </Wrapper>
   )

@@ -61,6 +61,7 @@ interface ReportFileInputElementNew {
   file: File | null
   id: string
   noObservation: boolean
+  focus?: boolean
 }
 
 interface ReportFileInputElementExisting {
@@ -317,7 +318,8 @@ export const ReportForm = React.memo(function ReportForm(
         userDescription: '',
         documentType: documentType,
         id: uuidv4(),
-        noObservation: false
+        noObservation: false,
+        focus: true
       }
     ])
   }
@@ -387,6 +389,7 @@ export const ReportForm = React.memo(function ReportForm(
       <A
         href="https://www.espoo.fi/fi/espoon-luontotietoaineistot#paikkatietojen-toimittaminen-luontoselvitysten-yhteydess-61377"
         target="_blank"
+        aria-description="External link"
       >
         <InstructionsLink>
           Ohjeet paikkatietojen toimittamisesta luontoselvitysten yhteydessä
@@ -415,7 +418,8 @@ export const ReportForm = React.memo(function ReportForm(
                     data={{
                       description: fInput.userDescription,
                       file: fInput.file,
-                      id: fInput.id
+                      id: fInput.id,
+                      focus: fInput.focus
                     }}
                     noObservation={fInput.noObservation}
                     onChange={(data) => {

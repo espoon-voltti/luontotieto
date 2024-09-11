@@ -25,7 +25,7 @@ import { Button } from 'shared/buttons/Button'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { InputField } from 'shared/form/InputField'
 import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
-import { Label } from 'shared/typography'
+import { H2, Label } from 'shared/typography'
 
 import {
   FlexRowWithGaps,
@@ -53,6 +53,7 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
 
       <SectionContainer>
         <GroupOfInputRows>
+          <H2>Käyttäjän tiedot</H2>
           {user.role === UserRole.CUSTOMER && passwordChangeRequired && (
             <LabeledInput $cols={10}>
               <InfoBox

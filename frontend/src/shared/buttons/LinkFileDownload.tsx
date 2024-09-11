@@ -28,6 +28,7 @@ export const LinkFileDownload = React.memo(function LinkFileDownload({
         }
       }}
       tabIndex={0}
+      aria-label={`Lataa tiedosto ${fileName}`}
     >{`${fileName}`}</StyledLink>
   )
 })

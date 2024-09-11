@@ -52,6 +52,7 @@ export const FileTitle = React.memo(function FileTitle(props: Props) {
               }
             }}
             tabIndex={0}
+            aria-label={`Lataa ${getDocumentTypeTitle(props.documentType)} tiedostopohja`}
           >
             <FontAwesomeIcon
               icon={faDownload}

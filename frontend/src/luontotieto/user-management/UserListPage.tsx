@@ -74,7 +74,7 @@ export const UserListPage = React.memo(function UserListPage() {
       <BackNavigation text="Käyttäjähallinta" navigationText="Etusivulle" />
 
       <SectionContainer>
-        <H2>Käyttäjähallinta</H2>
+        <H2>Käyttäjät</H2>
         <VerticalGap $size="m" />
         <FlexLeftRight>
           <FlexRowWithGaps $gapSize="s">

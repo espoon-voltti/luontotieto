@@ -71,6 +71,7 @@ interface OrderFileInputElementNew {
   documentType: OrderFileDocumentType
   file: File | null
   id: string
+  focus?: boolean
 }
 
 interface OrderFileInputElementExisting {
@@ -121,8 +122,7 @@ function createFileInputs(
         type: 'NEW',
         description: '',
         file: null,
-        id: uuidv4(),
-        primaryOrderInfoFile: true
+        id: uuidv4()
       }
     }
   )
@@ -553,6 +553,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 value={orderInput.returnDate}
                 type="date"
                 readonly={props.disabled}
+                aria-describedby="date-picker-input"
               />
             </LabeledInput>
           </RowOfInputs>
@@ -766,7 +767,8 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 documentType: OrderFileDocumentType.ORDER_INFO,
                 type: 'NEW',
                 description: '',
-                file: null
+                file: null,
+                focus: true
               }
             ])
           }

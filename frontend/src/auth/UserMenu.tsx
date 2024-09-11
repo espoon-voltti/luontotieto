@@ -101,7 +101,14 @@ export const UserMenu = React.memo(function LanguageMenu({
   })
 
   return (
-    <DropDownContainer ref={dropDownContainerRef}>
+    <DropDownContainer
+      ref={dropDownContainerRef}
+      onKeyUp={(ev) => {
+        if (ev.key === 'Escape') {
+          setOpen(false)
+        }
+      }}
+    >
       <DropDownButton
         onClick={toggleOpen}
         data-qa="button-select-language"
