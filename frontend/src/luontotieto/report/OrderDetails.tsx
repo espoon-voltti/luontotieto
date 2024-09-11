@@ -114,11 +114,11 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
             <Label>Tilaajan yhteyshenkilö</Label>
             <P>
               {order.contactPerson}
-              <br />
+              <br aria-hidden />
               {order.contactEmail}
-              <br />
+              <br aria-hidden />
               {order.contactPhone}
-              <br />
+              <br aria-hidden />
               {order.orderingUnit?.join(', ')}
             </P>
           </GridItem>
@@ -126,7 +126,7 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
             <Label>Selvityksen tekijän yhteyshenkilö</Label>
             <P>
               {order.assigneeContactPerson}
-              <br />
+              <br aria-hidden />
               {order.assigneeContactEmail}
             </P>
           </GridItem>
