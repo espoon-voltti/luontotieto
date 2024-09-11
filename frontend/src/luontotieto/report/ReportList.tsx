@@ -20,7 +20,7 @@ import { DateRange } from 'shared/form/DateRange'
 import { InputField } from 'shared/form/InputField'
 import { Select } from 'shared/form/Select'
 import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
-import { Label, P } from 'shared/typography'
+import { H2, Label, P } from 'shared/typography'
 import { useDebouncedState } from 'shared/useDebouncedState'
 import styled from 'styled-components'
 
@@ -113,6 +113,7 @@ export const ReportList = React.memo(function ReportList() {
   return (
     <PageContainer>
       <SectionContainer>
+        <H2>Selvitykset</H2>
         <VerticalGap $size="m" />
         <FlexLeftRight>
           <FlexRowWithGaps $gapSize="s">

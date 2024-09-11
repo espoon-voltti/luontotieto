@@ -12,7 +12,7 @@ import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
 import { InputField } from 'shared/form/InputField'
 import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
-import { H3, Label } from 'shared/typography'
+import { H2, Label } from 'shared/typography'
 
 import {
   FixedWidthDiv,
@@ -96,7 +96,7 @@ export const NewUserPage = React.memo(function NewUserPage() {
       <SectionContainer>
         <form onSubmit={onSubmit}>
           <GroupOfInputRows>
-            <H3>Yrityksen tiedot</H3>
+            <H2>Käyttäjän tiedot</H2>
             <LabeledInput $cols={4}>
               <Label>Yritys *</Label>
               <InputField
