@@ -22,6 +22,7 @@ import {
 } from '../shared/layout'
 import { colors } from '../shared/theme'
 import { H2, Label } from '../shared/typography'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 const LoginMessage = styled.label`
   color: ${colors.status.danger};
@@ -94,6 +95,7 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
           </GroupOfInputRows>
         </SectionContainer>
       </form>
+      <AccessibilityFooter />
     </PageContainer>
   )
 })

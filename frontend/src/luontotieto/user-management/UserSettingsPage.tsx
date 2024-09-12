@@ -32,9 +32,9 @@ import {
   GroupOfInputRows,
   LabeledInput,
   PageContainer,
-  SectionContainer,
-  VerticalGap
+  SectionContainer
 } from '../../shared/layout'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 export const UserSettingsPage = React.memo(function UserSettingsPage() {
   const { user } = useContext(UserContext)
@@ -50,7 +50,6 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
   return (
     <PageContainer>
       <BackNavigation text={user.name} navigationText="Etusivulle" />
-
       <SectionContainer>
         <GroupOfInputRows>
           <H2>Käyttäjän tiedot</H2>
@@ -103,7 +102,7 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
           )}
         </GroupOfInputRows>
       </SectionContainer>
-      <VerticalGap $size="XL" />
+      <AccessibilityFooter />
     </PageContainer>
   )
 })

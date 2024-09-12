@@ -35,11 +35,12 @@ import {
   Table,
   VerticalGap
 } from '../../shared/layout'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 export type ReportSortColumn = 'updated' | 'name' | 'approved'
 export type SortDirection = 'ASC' | 'DESC'
 
-export const ReportList = React.memo(function ReportList() {
+export const ReportListPage = React.memo(function ReportList() {
   const navigate = useNavigate()
   const { user } = useContext(UserContext)
 
@@ -214,6 +215,7 @@ export const ReportList = React.memo(function ReportList() {
           </tbody>
         </Table>
       </SectionContainer>
+      <AccessibilityFooter />
       {showModal && (
         <InfoModal
           close={() => setShowModal(null)}

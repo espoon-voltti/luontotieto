@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { UserLoginPage } from 'auth/UserLoginPage'
-import { FrontPage } from 'luontotieto/FrontPage'
 import { OrderFormPage } from 'luontotieto/order/OrderFormPage'
 import { ReportFormPage } from 'luontotieto/report/ReportFormPage'
 import { NewUserPage } from 'luontotieto/user-management/NewUserPage'
@@ -22,6 +21,8 @@ import { UserContextProvider } from './auth/UserContext'
 import { UserHeader } from './auth/UserHeader'
 import { FlexRowWithGaps } from './shared/layout'
 import { H1 } from './shared/typography'
+import { ReportListPage } from 'luontotieto/report/ReportListPage'
+import AccessibilityStatement from 'luontotieto/accessibility/AccessibilityStatement'
 
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
@@ -99,7 +100,7 @@ export const appRouter = createBrowserRouter([
         path: '/luontotieto',
         element: (
           <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
-            <FrontPage />
+            <ReportListPage />
           </AuthGuard>
         )
       },
@@ -156,6 +157,14 @@ export const appRouter = createBrowserRouter([
         element: (
           <AuthGuard allow="AUTHENTICATED_ONLY">
             <UserSettingsPage />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/accessibility',
+        element: (
+          <AuthGuard allow="ALL">
+            <AccessibilityStatement />
           </AuthGuard>
         )
       },
