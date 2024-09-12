@@ -23,6 +23,7 @@ import {
   Table,
   VerticalGap
 } from '../../shared/layout'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 export type UserSortColumn = 'role' | 'active'
 export type SortDirection = 'ASC' | 'DESC'
@@ -138,6 +139,7 @@ export const UserListPage = React.memo(function UserListPage() {
           </tbody>
         </Table>
       </SectionContainer>
+      <AccessibilityFooter />
     </PageContainer>
   )
 })

@@ -20,8 +20,7 @@ import {
   GroupOfInputRows,
   LabeledInput,
   PageContainer,
-  SectionContainer,
-  VerticalGap
+  SectionContainer
 } from '../../shared/layout'
 
 import { emailRegex } from './common'
@@ -92,7 +91,6 @@ export const NewUserPage = React.memo(function NewUserPage() {
         navigationText="Käyttäjänhallinta"
         destination="/luontotieto/käyttäjät"
       />
-
       <SectionContainer>
         <form onSubmit={onSubmit}>
           <GroupOfInputRows>
@@ -137,7 +135,6 @@ export const NewUserPage = React.memo(function NewUserPage() {
           </GroupOfInputRows>
         </form>
       </SectionContainer>
-      <VerticalGap $size="XL" />
       {showModal && (
         <InfoModal
           close={() => setShowModal(null)}
