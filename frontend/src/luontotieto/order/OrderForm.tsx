@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faInfo, faPlus } from '@fortawesome/free-solid-svg-icons'
 import {
   Order,
   OrderFile,
@@ -13,7 +13,13 @@ import {
 } from 'api/order-api'
 import { getDocumentTypeTitle, ReportFileDocumentType } from 'api/report-api'
 import { emailRegex } from 'luontotieto/user-management/common'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from 'react'
 import { Tag } from 'react-tag-autocomplete'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { Checkbox } from 'shared/form/Checkbox'
@@ -30,13 +36,20 @@ import { DATE_PATTERN } from '../../shared/dates'
 import { Select } from '../../shared/form/Select'
 import {
   FlexCol,
+  FlexRow,
   GroupOfInputRows,
   LabeledInput,
   RowOfInputs,
   SectionContainer,
   VerticalGap
 } from '../../shared/layout'
-import { H3, Label } from '../../shared/typography'
+import { H3, Label, P } from '../../shared/typography'
+import { InfoBox } from 'shared/MessageBoxes'
+import styled from 'styled-components'
+import { colors } from 'shared/theme'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { UserContext } from 'auth/UserContext'
+import { UserRole } from 'api/users-api'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -254,6 +267,7 @@ function createOrderFormInput(order: Order | undefined): OrderFormInput {
     assigneeId: order?.assigneeId ?? '',
     assigneeContactEmail: order?.assigneeContactEmail ?? '',
     assigneeContactPerson: order?.assigneeContactPerson ?? '',
+    assigneeCompanyName: order?.assigneeCompanyName ?? '',
     contactPhone: order?.contactPhone ?? '',
     contactPerson: order?.contactPerson ?? '',
     contactEmail: order?.contactEmail ?? '',
@@ -264,11 +278,19 @@ function createOrderFormInput(order: Order | undefined): OrderFormInput {
 }
 
 export const OrderForm = React.memo(function OrderForm(props: Props) {
+  const { user } = useContext(UserContext)
+
   const originalFileInputs = useMemo(
     () =>
       createExistingFileInputs(props.mode === 'EDIT' ? props.orderFiles : []),
     [props]
   )
+
+  const [
+    showOrderAssigneeCompanyNameInfo,
+    setShowOrderAssigneeCompanyNameInfo
+  ] = useState(false)
+
   const [orderFiles, setOrderFiles] = useState<OrderFileInputElement[]>(
     createFileInputs(props.mode === 'EDIT' ? props.orderFiles : [], [])
   )
@@ -426,6 +448,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       contactPerson: orderInput.contactPerson.trim(),
       assigneeContactEmail: orderInput.assigneeContactEmail.trim(),
       assigneeContactPerson: orderInput.assigneeContactPerson.trim(),
+      assigneeCompanyName: orderInput.assigneeCompanyName?.trim() ?? null,
       planNumber: planNumbers,
       orderingUnit: orderingUnit,
       reportDocuments: reportDocuments
@@ -492,6 +515,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     value: pn,
     label: pn
   }))
+
+  const showOrderAssigneeCompanyName =
+    props.mode === 'CREATE' ? user?.role === UserRole.ADMIN : true
+
   return (
     <FlexCol>
       <SectionContainer>
@@ -639,6 +666,49 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               />
             </LabeledInput>
           </RowOfInputs>
+          {showOrderAssigneeCompanyName && (
+            <RowOfInputs>
+              <LabeledInput $cols={4}>
+                <FlexRow>
+                  <Label>Yhteysyritys </Label>
+                  <StyledIconButton
+                    onClick={() =>
+                      setShowOrderAssigneeCompanyNameInfo(
+                        !showOrderAssigneeCompanyNameInfo
+                      )
+                    }
+                  >
+                    <StyledIconContainer $color={colors.main.m1}>
+                      <FontAwesomeIcon
+                        icon={faInfo}
+                        size="1x"
+                        color={colors.main.m1}
+                        inverse
+                      />
+                    </StyledIconContainer>
+                  </StyledIconButton>
+                </FlexRow>
+                {showOrderAssigneeCompanyNameInfo && (
+                  <InfoBox
+                    message={
+                      <P>{`Tällä kentällä pääkäyttäjä voi ylikirjoittaa aluerajaukseen tallentuvan selvittäjän nimen.`}</P>
+                    }
+                  />
+                )}
+                <InputField
+                  onChange={(assigneeCompanyName) =>
+                    setOrderInput({
+                      ...orderInput,
+                      assigneeCompanyName
+                    })
+                  }
+                  value={orderInput.assigneeCompanyName ?? ''}
+                  readonly={props.disabled || user?.role !== UserRole.ADMIN}
+                />
+              </LabeledInput>
+            </RowOfInputs>
+          )}
+
           <RowOfInputs>
             <LabeledInput $cols={4}>
               <Label>Yhteyshenkilö *</Label>
@@ -809,3 +879,26 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
 interface OrderCheckBoxComponentInput extends OrderReportDocumentInput {
   checked: boolean
 }
+
+const StyledIconContainer = styled.div<{ $color: string }>`
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  background: ${(props) => props.$color};
+  border-radius: 100%;
+`
+
+const StyledIconButton = styled.button`
+  margin-left: 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  &:focus {
+    outline: 2px solid ${colors.main.m3};
+  }
+`

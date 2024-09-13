@@ -13,6 +13,7 @@ import fi.espoo.luontotieto.domain.OrderReportDocument
 import fi.espoo.luontotieto.domain.Report
 import fi.espoo.luontotieto.domain.ReportController
 import fi.espoo.luontotieto.domain.UserRole
+import fi.espoo.luontotieto.domain.getAluerajausLuontoselvitysParams
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.jdbi.v3.core.kotlin.mapTo
 import org.springframework.beans.factory.annotation.Autowired
@@ -366,5 +367,81 @@ class ReportTests : FullApplicationTest() {
                 )
             }
         }
+    }
+
+    @Test
+    fun `test that getAluerajausLuontoselvitysParams returns correct parameters`() {
+        val createOrderResponse =
+            createOrderAndReport(controller = orderController, name = "Test report")
+        val reportResponse = reportController.getReportById(adminUser, createOrderResponse.reportId)
+
+        val expected =
+            mapOf(
+                "name" to reportResponse.name,
+                "year" to reportResponse.order?.returnDate?.year,
+                "contactPerson" to reportResponse.order?.assignee,
+                "unit" to reportResponse.order?.orderingUnit?.joinToString(","),
+                "additionalInformation" to null,
+                "reportLink" to "linkki",
+                "reportDocumentLink" to "raporttilinkki",
+                "surveyedData" to arrayOf("Tiikeri")
+            )
+        val params =
+            reportController.jdbi.inTransactionUnchecked { tx ->
+                tx.getAluerajausLuontoselvitysParams(
+                    adminUser,
+                    reportResponse.id,
+                    listOf("Tiikeri").toSet(),
+                    "linkki",
+                    "raporttilinkki"
+                )
+            }
+        assertEquals(expected["name"], params["name"])
+        assertEquals(expected["year"], params["year"])
+        assertEquals(expected["contactPerson"], params["contactPerson"])
+        assertEquals(expected["unit"], params["unit"])
+        assertEquals(expected["additionalInformation"], params["additionalInformation"])
+        assertEquals(expected["reportLink"], params["reportLink"])
+        assertEquals(expected["reportDocumentLink"], params["reportDocumentLink"])
+    }
+
+    @Test
+    fun `test that getAluerajausLuontoselvitysParams contact person overwriting works`() {
+        val createOrderResponse =
+            createOrderAndReport(
+                controller = orderController,
+                name = "Test report",
+                assigneeCompanyName = "Ylikirjoitus Oy"
+            )
+        val reportResponse = reportController.getReportById(adminUser, createOrderResponse.reportId)
+
+        val expected =
+            mapOf(
+                "name" to reportResponse.name,
+                "year" to reportResponse.order?.returnDate?.year,
+                "contactPerson" to "Ylikirjoitus Oy",
+                "unit" to reportResponse.order?.orderingUnit?.joinToString(","),
+                "additionalInformation" to null,
+                "reportLink" to "linkki",
+                "reportDocumentLink" to "raporttilinkki",
+                "surveyedData" to arrayOf("Tiikeri")
+            )
+        val params =
+            reportController.jdbi.inTransactionUnchecked { tx ->
+                tx.getAluerajausLuontoselvitysParams(
+                    adminUser,
+                    reportResponse.id,
+                    listOf("Tiikeri").toSet(),
+                    "linkki",
+                    "raporttilinkki"
+                )
+            }
+        assertEquals(expected["name"], params["name"])
+        assertEquals(expected["year"], params["year"])
+        assertEquals(expected["contactPerson"], params["contactPerson"])
+        assertEquals(expected["unit"], params["unit"])
+        assertEquals(expected["additionalInformation"], params["additionalInformation"])
+        assertEquals(expected["reportLink"], params["reportLink"])
+        assertEquals(expected["reportDocumentLink"], params["reportDocumentLink"])
     }
 }

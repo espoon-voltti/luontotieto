@@ -32,6 +32,7 @@ data class Order(
     val assigneeId: UUID,
     val assigneeContactPerson: String,
     val assigneeContactEmail: String,
+    val assigneeCompanyName: String?,
     val returnDate: LocalDate,
     val contactPerson: String,
     val contactPhone: String,
@@ -48,6 +49,7 @@ data class OrderInput(
     val assigneeId: UUID,
     val assigneeContactPerson: String,
     val assigneeContactEmail: String,
+    val assigneeCompanyName: String?,
     @Json val reportDocuments: List<OrderReportDocument>,
     val returnDate: LocalDate,
     val contactPerson: String,
@@ -66,6 +68,7 @@ private const val SELECT_ORDER_SQL =
            o.updated,
            o.assignee_contact_person AS "assigneeContactPerson",
            o.assignee_contact_email AS "assigneeContactEmail",
+           o.assignee_company_name AS "assigneeCompanyName",
            o.return_date AS "returnDate",
            o.contact_person AS "contactPerson",
            o.contact_phone AS "contactPhone",
@@ -92,8 +95,8 @@ fun Handle.insertOrder(
 ): UUID {
     return createUpdate(
         """
-            INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents, assignee_id, assignee_contact_person, assignee_contact_email, return_date, contact_person, contact_phone, contact_email, ordering_unit) 
-            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments, :assigneeId, :assigneeContactPerson, :assigneeContactEmail, :returnDate, :contactPerson, :contactPhone, :contactEmail, :orderingUnit)
+            INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents, assignee_id, assignee_contact_person, assignee_contact_email, assignee_company_name, return_date, contact_person, contact_phone, contact_email, ordering_unit) 
+            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments, :assigneeId, :assigneeContactPerson, :assigneeContactEmail, :assigneeCompanyName, :returnDate, :contactPerson, :contactPhone, :contactEmail, :orderingUnit)
             RETURNING id
             """
     )
@@ -120,7 +123,8 @@ fun Handle.putOrder(
                  SET name = :name, description = :description, updated_by = :updatedBy,
                   plan_number = :planNumber, report_documents = :reportDocuments, assignee_id = :assigneeId,
                   assignee_contact_person = :assigneeContactPerson, assignee_contact_email = :assigneeContactEmail,
-                  return_date = :returnDate, contact_person = :contactPerson, contact_phone = :contactPhone,
+                  assignee_company_name = :assigneeCompanyName, return_date = :returnDate,
+                  contact_person = :contactPerson, contact_phone = :contactPhone,
                   contact_email = :contactEmail, ordering_unit = :orderingUnit
                  WHERE id = :id
                 RETURNING *

@@ -108,6 +108,7 @@ class OrderTests : FullApplicationTest() {
                     reportDocuments = updatedReportDocuments,
                     assigneeContactEmail = "email@example.com",
                     assigneeContactPerson = "Person Name",
+                    assigneeCompanyName = "Ylikirjoitus Oy",
                     contactEmail = "contact@example.com",
                     contactPerson = "Contact Person",
                     contactPhone = "040123456789",
@@ -119,6 +120,7 @@ class OrderTests : FullApplicationTest() {
         assertEquals("New name", updatedReport.order?.name)
         assertEquals("New description", updatedReport.order?.description)
         assertEquals("Yritys Oy", updatedReport.order?.assignee)
+        assertEquals("Ylikirjoitus Oy", updatedReport.order?.assigneeCompanyName)
         assertEquals(customerUser.id, updatedReport.order?.assigneeId)
         assertEquals(updatedReportDocuments, updatedReport.order?.reportDocuments)
     }
@@ -190,6 +192,7 @@ class OrderTests : FullApplicationTest() {
                         ),
                     assigneeContactEmail = "email@example.com",
                     assigneeContactPerson = "Person Name",
+                    assigneeCompanyName = "Ylikirjoitus Oy",
                     contactEmail = "contact@example.com",
                     contactPerson = "Contact Person",
                     contactPhone = "040123456789",

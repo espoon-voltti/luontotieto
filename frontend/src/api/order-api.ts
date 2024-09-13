@@ -31,6 +31,7 @@ export interface OrderFormInput {
   contactPhone: string
   assigneeContactPerson: string
   assigneeContactEmail: string
+  assigneeCompanyName: string | null
   returnDate: string
   orderingUnit?: string[]
 }

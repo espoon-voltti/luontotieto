@@ -74,6 +74,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
           title: 'Käyttäjän tiedot päivitetty',
           resolve: {
             action: () => {
+              setErrorMessage(null)
               setShowModal(null)
               setEnableEdit(false)
             },
