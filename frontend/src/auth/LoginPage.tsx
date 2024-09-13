@@ -13,6 +13,7 @@ import {
   SectionContainer
 } from '../shared/layout'
 import { H2 } from '../shared/typography'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 const Wrapper = styled.div`
   width: 100%;
@@ -63,6 +64,7 @@ export const LoginPage = React.memo(function LoginPage() {
           </FlexColWithGaps>
         </Wrapper>
       </SectionContainer>
+      <AccessibilityFooter />
     </PageContainer>
   )
 })

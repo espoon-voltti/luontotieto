@@ -12,7 +12,7 @@ import { H2 } from 'shared/typography'
 import { InlineButton } from './InlineButton'
 
 interface Props extends BaseProps {
-  text: string
+  text?: string
   navigationText?: string
   destination?: string
 }
@@ -33,7 +33,7 @@ export const BackNavigation = React.memo(function BackNavigation({
             text={props.navigationText ?? 'Takaisin'}
             onClick={() => navigate(props.destination ?? '/luontotieto')}
           />
-          <H2>{props.text}</H2>
+          {props.text && <H2>{props.text}</H2>}
         </FlexColWithGaps>
       </SectionContainer>
       <VerticalGap $size="m" />

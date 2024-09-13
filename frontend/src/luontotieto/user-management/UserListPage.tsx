@@ -23,6 +23,7 @@ import {
   Table,
   VerticalGap
 } from '../../shared/layout'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 export type UserSortColumn = 'role' | 'active'
 export type SortDirection = 'ASC' | 'DESC'
@@ -74,7 +75,7 @@ export const UserListPage = React.memo(function UserListPage() {
       <BackNavigation text="Käyttäjähallinta" navigationText="Etusivulle" />
 
       <SectionContainer>
-        <H2>Käyttäjähallinta</H2>
+        <H2>Käyttäjät</H2>
         <VerticalGap $size="m" />
         <FlexLeftRight>
           <FlexRowWithGaps $gapSize="s">
@@ -138,6 +139,7 @@ export const UserListPage = React.memo(function UserListPage() {
           </tbody>
         </Table>
       </SectionContainer>
+      <AccessibilityFooter />
     </PageContainer>
   )
 })

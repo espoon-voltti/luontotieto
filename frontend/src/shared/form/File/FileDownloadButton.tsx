@@ -76,7 +76,11 @@ export default React.memo(function FileDownloadButton({
   readonly
 }: FileDownloadButtonProps) {
   return (
-    <DownloadButton onClick={() => onClick(file.id)} data-qa={dataQa}>
+    <DownloadButton
+      onClick={() => onClick(file.id)}
+      data-qa={dataQa}
+      aria-description="file-download-button"
+    >
       {icon && <FontAwesomeIcon icon={icon === true ? fileIcon(file) : icon} />}
       <FileName title={text ?? file.fileName}>{text ?? file.fileName}</FileName>
       {!readonly && (

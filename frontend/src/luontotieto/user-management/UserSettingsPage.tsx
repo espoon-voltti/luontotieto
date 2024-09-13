@@ -25,30 +25,44 @@ import { Button } from 'shared/buttons/Button'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { InputField } from 'shared/form/InputField'
 import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
-import { Label } from 'shared/typography'
+import { H2, Label } from 'shared/typography'
 
 import {
   FlexRowWithGaps,
   GroupOfInputRows,
   LabeledInput,
   PageContainer,
-  SectionContainer,
-  VerticalGap
+  SectionContainer
 } from '../../shared/layout'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 export const UserSettingsPage = React.memo(function UserSettingsPage() {
   const { user } = useContext(UserContext)
 
-  const [showChangePassword, setShowChangePassword] = useState(false)
+  const passwordChangeRequired = user?.passwordUpdated === false
+
+  const [showChangePassword, setShowChangePassword] = useState(
+    passwordChangeRequired
+  )
   if (!user) {
     return null
   }
   return (
     <PageContainer>
       <BackNavigation text={user.name} navigationText="Etusivulle" />
-
       <SectionContainer>
         <GroupOfInputRows>
+          <H2>Käyttäjän tiedot</H2>
+          {user.role === UserRole.CUSTOMER && passwordChangeRequired && (
+            <LabeledInput $cols={10}>
+              <InfoBox
+                message="Järjestelmämme on havainnut, että käytät automaattisesti 
+           luotua salasanaa. Turvallisuutesi parantamiseksi pyydämme sinua päivittämään salasanasi,
+           jonka jälkeen voit jatkaa palvelun käyttöä."
+              />
+            </LabeledInput>
+          )}
+
           <LabeledInput $cols={3}>
             <Label>Yritys *</Label>
             <InputField value={user.name} readonly={true} />
@@ -88,7 +102,7 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
           )}
         </GroupOfInputRows>
       </SectionContainer>
-      <VerticalGap $size="XL" />
+      <AccessibilityFooter />
     </PageContainer>
   )
 })
@@ -114,6 +128,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
   const { mutateAsync: changePassword, isPending } = useMutation({
     mutationFn: apiChangeUserPassword,
     onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['auth-status'] })
       void queryClient.invalidateQueries({ queryKey: ['users', userId] })
       setShowModal({
         title: 'Salasana muutettu',

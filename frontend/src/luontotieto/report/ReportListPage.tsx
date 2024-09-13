@@ -20,7 +20,7 @@ import { DateRange } from 'shared/form/DateRange'
 import { InputField } from 'shared/form/InputField'
 import { Select } from 'shared/form/Select'
 import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
-import { Label, P } from 'shared/typography'
+import { H2, Label, P } from 'shared/typography'
 import { useDebouncedState } from 'shared/useDebouncedState'
 import styled from 'styled-components'
 
@@ -35,11 +35,12 @@ import {
   Table,
   VerticalGap
 } from '../../shared/layout'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 export type ReportSortColumn = 'updated' | 'name' | 'approved'
 export type SortDirection = 'ASC' | 'DESC'
 
-export const ReportList = React.memo(function ReportList() {
+export const ReportListPage = React.memo(function ReportList() {
   const navigate = useNavigate()
   const { user } = useContext(UserContext)
 
@@ -113,6 +114,7 @@ export const ReportList = React.memo(function ReportList() {
   return (
     <PageContainer>
       <SectionContainer>
+        <H2>Selvitykset</H2>
         <VerticalGap $size="m" />
         <FlexLeftRight>
           <FlexRowWithGaps $gapSize="s">
@@ -213,6 +215,7 @@ export const ReportList = React.memo(function ReportList() {
           </tbody>
         </Table>
       </SectionContainer>
+      <AccessibilityFooter />
       {showModal && (
         <InfoModal
           close={() => setShowModal(null)}

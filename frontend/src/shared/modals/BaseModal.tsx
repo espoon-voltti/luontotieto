@@ -50,6 +50,7 @@ export default React.memo(function BaseModal(props: Props) {
           data-qa="modal"
           width={props.width}
           padding={props.padding}
+          role="alert"
         >
           <ModalTitle>
             {props.icon && (
