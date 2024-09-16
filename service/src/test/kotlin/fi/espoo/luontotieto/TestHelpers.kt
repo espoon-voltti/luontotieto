@@ -34,6 +34,7 @@ fun createOrderAndReport(
     contactPerson: String = "Contact Person",
     contactPhone: String = "04012345678",
     orderingUnit: List<String> = listOf("Orava yksikkö", "Karhuryhmä"),
+    assigneeCompanyName: String? = null
 ): OrderController.CreateOrderResponse {
     return controller.createOrderFromScratch(
         user = adminUser,
@@ -46,6 +47,7 @@ fun createOrderAndReport(
                 reportDocuments = reportDocuments,
                 assigneeContactPerson = assigneeContactPerson,
                 assigneeContactEmail = assigneeContactEmail,
+                assigneeCompanyName = assigneeCompanyName,
                 returnDate = returnDate,
                 contactEmail = contactEmail,
                 contactPhone = contactPhone,

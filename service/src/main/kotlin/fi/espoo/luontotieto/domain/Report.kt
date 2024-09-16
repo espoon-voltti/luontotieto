@@ -60,6 +60,7 @@ private const val SELECT_REPORT_SQL =
            ouu.name                                   AS "o_updatedBy",
            o.assignee_contact_person                  AS "o_assigneeContactPerson",
            o.assignee_contact_email                   AS "o_assigneeContactEmail",
+           o.assignee_company_name                    AS "o_assigneeCompanyName",
            o.return_date                              AS "o_returnDate",
            o.contact_person                           AS "o_contactPerson",
            o.contact_phone                            AS "o_contactPhone",
@@ -281,10 +282,12 @@ fun Handle.getAluerajausLuontoselvitysParams(
             .sorted()
             .toTypedArray()
 
+    val contactPerson = report.order?.assigneeCompanyName ?: report.order?.assignee
+
     return mapOf(
         "name" to report.name,
         "year" to report.order?.returnDate?.year,
-        "contactPerson" to report.order?.assigneeContactPerson,
+        "contactPerson" to contactPerson,
         "unit" to report.order?.orderingUnit?.joinToString(","),
         "additionalInformation" to reportAreaFile?.description,
         "reportLink" to reportLink,
