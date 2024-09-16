@@ -86,7 +86,7 @@ dependencies {
     api(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("com.microsoft.playwright:playwright:1.44.0")
+    testImplementation("com.microsoft.playwright:playwright:1.47.0")
 
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
 
