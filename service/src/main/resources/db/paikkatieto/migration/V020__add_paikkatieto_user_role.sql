@@ -17,7 +17,3 @@ ALTER TABLE arvokkaat_luontokohteet_alueet
     OWNER TO paikkatieto_user;
 ALTER TABLE arvokkaat_vesikohteet_alueet
     OWNER TO paikkatieto_user;
-
-
-
-
