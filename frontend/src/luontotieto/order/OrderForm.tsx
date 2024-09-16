@@ -448,7 +448,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       contactPerson: orderInput.contactPerson.trim(),
       assigneeContactEmail: orderInput.assigneeContactEmail.trim(),
       assigneeContactPerson: orderInput.assigneeContactPerson.trim(),
-      assigneeCompanyName: orderInput.assigneeCompanyName?.trim() ?? null,
+      assigneeCompanyName:
+        orderInput.assigneeCompanyName?.trim() === ''
+          ? null
+          : orderInput.assigneeCompanyName?.trim() ?? null,
       planNumber: planNumbers,
       orderingUnit: orderingUnit,
       reportDocuments: reportDocuments

@@ -125,6 +125,12 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
           <GridItem $col={3} $row={2}>
             <Label>Selvityksen tekijän yhteyshenkilö</Label>
             <P>
+              {order.assigneeCompanyName && (
+                <>
+                  {order.assigneeCompanyName} <br aria-hidden />
+                </>
+              )}
+
               {order.assigneeContactPerson}
               <br aria-hidden />
               {order.assigneeContactEmail}
