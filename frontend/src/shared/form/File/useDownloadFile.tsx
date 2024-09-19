@@ -16,8 +16,9 @@ const useDownloadFile = (
 
   const downloadFile = async (entityId: string, fileUrl: string) => {
     try {
-      await download(entityId, fileUrl) // Use the custom download function
+      const url = await download(entityId, fileUrl) // Use the custom download function
       setErrorMessage(null) // Clear any previous error messages
+      window.open(url)
     } catch (err: unknown) {
       if (err instanceof AxiosError) {
         const errorMessage =
