@@ -36,27 +36,30 @@ class S3DocumentService(
     private val s3Presigner: S3Presigner,
     private val env: BucketEnv
 ) : DocumentService {
-
-    fun checkIfFileExists(bucketName: String, keyName: String) {
+    fun checkIfFileExists(
+        bucketName: String,
+        keyName: String
+    ) {
         try {
-            val headObjectRequest = HeadObjectRequest.builder()
-                .bucket(bucketName)
-                .key(keyName)
-                .build()
+            val headObjectRequest =
+                HeadObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(keyName)
+                    .build()
 
             s3Client.headObject(headObjectRequest)
-
         } catch (e: NoSuchKeyException) {
-            println("File not found NoSuchKeyException: ${e.message}")
+            logger.error("checkIfFileExists: File not found NoSuchKeyException", e)
             throw NotFound()
         } catch (e: S3Exception) {
+            logger.error("checkIfFileExists: S3Exception", e)
             // If the file is still undergoing antivirus scan this will be the returned code
             if (e.statusCode() == 403 && e.awsErrorDetails().errorCode() == "AccessDenied") {
                 // Handle AccessDenied error
                 throw NotFound("Access denied", "access-denied")
             }
         } catch (e: Exception) {
-            println("Error checking file existence: ${e.message}")
+            logger.error("checkIfFileExists Error", e)
             throw e
         }
     }
