@@ -19,6 +19,7 @@ import React, {
   useMemo,
   useState
 } from 'react'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 import { AlertBox, InfoBox } from 'shared/MessageBoxes'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
@@ -34,7 +35,6 @@ import {
   PageContainer,
   SectionContainer
 } from '../../shared/layout'
-import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 export const UserSettingsPage = React.memo(function UserSettingsPage() {
   const { user } = useContext(UserContext)

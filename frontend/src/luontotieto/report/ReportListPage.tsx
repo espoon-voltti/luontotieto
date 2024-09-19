@@ -12,6 +12,7 @@ import {
 import orderBy from 'lodash/orderBy'
 import React, { useCallback, useContext, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 import { SortableTh, Th } from 'shared/Table'
 import { AddButton } from 'shared/buttons/AddButton'
 import { InlineButton } from 'shared/buttons/InlineButton'
@@ -35,7 +36,6 @@ import {
   Table,
   VerticalGap
 } from '../../shared/layout'
-import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 export type ReportSortColumn = 'updated' | 'name' | 'approved'
 export type SortDirection = 'ASC' | 'DESC'

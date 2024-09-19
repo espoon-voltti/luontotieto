@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { faInfo, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Order,
   OrderFile,
@@ -12,6 +13,8 @@ import {
   OrderReportDocumentInput
 } from 'api/order-api'
 import { getDocumentTypeTitle, ReportFileDocumentType } from 'api/report-api'
+import { UserRole } from 'api/users-api'
+import { UserContext } from 'auth/UserContext'
 import { emailRegex } from 'luontotieto/user-management/common'
 import React, {
   useCallback,
@@ -21,6 +24,7 @@ import React, {
   useState
 } from 'react'
 import { Tag } from 'react-tag-autocomplete'
+import { InfoBox } from 'shared/MessageBoxes'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { Checkbox } from 'shared/form/Checkbox'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
@@ -28,7 +32,9 @@ import { FileInput, FileInputData } from 'shared/form/File/FileInput'
 import { InputField } from 'shared/form/InputField'
 import { TagAutoComplete } from 'shared/form/TagAutoComplete/TagAutoComplete'
 import { TextArea } from 'shared/form/TextArea'
+import { colors } from 'shared/theme'
 import { useDebouncedState } from 'shared/useDebouncedState'
+import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 
 import { useGetAssigneeUsersQuery } from '../../api/hooks/users'
@@ -44,12 +50,6 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H3, Label, P } from '../../shared/typography'
-import { InfoBox } from 'shared/MessageBoxes'
-import styled from 'styled-components'
-import { colors } from 'shared/theme'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { UserContext } from 'auth/UserContext'
-import { UserRole } from 'api/users-api'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -694,7 +694,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 {showOrderAssigneeCompanyNameInfo && (
                   <InfoBox
                     message={
-                      <P>{`Tällä kentällä pääkäyttäjä voi ylikirjoittaa aluerajaukseen tallentuvan selvittäjän nimen.`}</P>
+                      <P>
+                        Tällä kentällä pääkäyttäjä voi ylikirjoittaa
+                        aluerajaukseen tallentuvan selvittäjän nimen.
+                      </P>
                     }
                   />
                 )}

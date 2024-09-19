@@ -5,23 +5,22 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { colors, tabletMin } from './theme'
+
 import { PageContainer } from './layout'
+import { colors, tabletMin } from './theme'
 
 export const FooterContent = React.memo(function FooterContent() {
   return (
     <>
       <FooterItem data-qa="footer-citylabel">© Espoon kaupunki</FooterItem>
       <FooterItem>
-        {
-          <a
-            href="https://www.espoo.fi/fi/espoon-kaupunki/tietosuoja"
-            data-qa="footer-policy-link"
-            style={{ color: colors.main.m2 }}
-          >
-            Tietosuojaselosteet
-          </a>
-        }
+        <a
+          href="https://www.espoo.fi/fi/espoon-kaupunki/tietosuoja"
+          data-qa="footer-policy-link"
+          style={{ color: colors.main.m2 }}
+        >
+          Tietosuojaselosteet
+        </a>
       </FooterItem>
       <FooterItem>
         <Link to="/accessibility">Saavutettavuusseloste</Link>
