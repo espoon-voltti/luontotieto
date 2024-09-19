@@ -152,7 +152,7 @@ export const apiPutReport = async (
 }
 
 export interface ApproveReportError {
-  errorCode: 'error-saving-paikkatieto-data'
+  errorCode: 'error-saving-paikkatieto-data' | 'access-denied'
 }
 
 export const apiApproveReport = async (input: {

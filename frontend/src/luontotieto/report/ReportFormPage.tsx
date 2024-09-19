@@ -140,6 +140,10 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
     onError: (error: ApproveReportError) => {
       if (error?.errorCode === 'error-saving-paikkatieto-data') {
         setApproveError('Virhe tallentaessa paikkatietoja paikkatietokantaan.')
+      } else if (error?.errorCode === 'access-denied') {
+        setApproveError(
+          'Hyväksyminen epäonnistui koska taustalla suoritettava tiedostojen virustarkistus on todennäköisesti vielä kesken. Yritä hetken kuluttua uudelleen.'
+        )
       } else {
         setApproveError('Virhe hyväksyttäessä selvitystä')
       }
