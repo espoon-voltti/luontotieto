@@ -18,7 +18,10 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectResponse
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.model.S3Exception
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
 import java.net.URL
@@ -33,10 +36,36 @@ class S3DocumentService(
     private val s3Presigner: S3Presigner,
     private val env: BucketEnv
 ) : DocumentService {
+
+    fun checkIfFileExists(bucketName: String, keyName: String) {
+        try {
+            val headObjectRequest = HeadObjectRequest.builder()
+                .bucket(bucketName)
+                .key(keyName)
+                .build()
+
+            s3Client.headObject(headObjectRequest)
+
+        } catch (e: NoSuchKeyException) {
+            println("File not found NoSuchKeyException: ${e.message}")
+            throw NotFound()
+        } catch (e: S3Exception) {
+            // If the file is still undergoing antivirus scan this will be the returned code
+            if (e.statusCode() == 403 && e.awsErrorDetails().errorCode() == "AccessDenied") {
+                // Handle AccessDenied error
+                throw NotFound("Access denied", "access-denied")
+            }
+        } catch (e: Exception) {
+            println("Error checking file existence: ${e.message}")
+            throw e
+        }
+    }
+
     override fun get(
         bucketName: String,
         key: String
     ): Document {
+        checkIfFileExists(bucketName, key)
         val request = GetObjectRequest.builder().bucket(bucketName).key(key).build()
         val stream = s3Client.getObject(request) ?: throw NotFound("File not found")
         return stream.use {
@@ -61,6 +90,7 @@ class S3DocumentService(
         key: String,
         contentDisposition: ContentDisposition
     ): URL {
+        checkIfFileExists(bucketName, key)
         val request =
             GetObjectRequest.builder()
                 .bucket(bucketName)
