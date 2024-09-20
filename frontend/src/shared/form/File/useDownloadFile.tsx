@@ -20,14 +20,15 @@ const useDownloadFile = (
       setErrorMessage(null) // Clear any previous error messages
       window.open(url)
     } catch (err: unknown) {
+      let errorMessage = 'Tiedoston lataamisessa tapahtui odottamon virhe.'
       if (err instanceof AxiosError) {
-        const errorMessage =
+        errorMessage =
           (err as AxiosError<{ errorCode?: string }>).response?.data
             ?.errorCode === 'access-denied'
             ? 'Tiedosto ei ole vielä ladattavissa, koska taustalla suoritettava virustarkistus on todennäköisesti vielä kesken. Yritä hetken kuluttua uudelleen.'
-            : 'Tiedoston lataamisessa tapahtui odottamon virhe.'
-        setErrorMessage(errorMessage)
+            : errorMessage
       }
+      setErrorMessage(errorMessage)
     }
   }
 
