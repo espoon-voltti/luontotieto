@@ -18,7 +18,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectResponse
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest
+import software.amazon.awssdk.services.s3.model.GetObjectTaggingRequest
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.model.S3Exception
@@ -41,13 +41,15 @@ class S3DocumentService(
         keyName: String
     ) {
         try {
-            val headObjectRequest =
-                HeadObjectRequest.builder()
+            val objectTaggingRequest =
+                GetObjectTaggingRequest.builder()
                     .bucket(bucketName)
                     .key(keyName)
                     .build()
 
-            s3Client.headObject(headObjectRequest)
+            val tags = s3Client.getObjectTagging(objectTaggingRequest)
+
+            println("tags: $tags")
         } catch (e: NoSuchKeyException) {
             logger.error("checkIfFileExists: File not found NoSuchKeyException", e)
             throw NotFound()
