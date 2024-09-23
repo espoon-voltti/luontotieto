@@ -8,6 +8,7 @@ luontotieto:
   bucket:
     data: ${DATA_BUCKET}
     proxy_through_nginx: true
+    verify_file_av_tagged: true
   email:
     enabled: ${EMAIL_ENABLED}
     region: ${EMAIL_AWS_REGION}

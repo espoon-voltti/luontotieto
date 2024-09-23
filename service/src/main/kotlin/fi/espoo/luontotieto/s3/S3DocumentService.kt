@@ -18,7 +18,10 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectResponse
+import software.amazon.awssdk.services.s3.model.GetObjectTaggingRequest
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.model.S3Exception
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
 import java.net.URL
@@ -33,10 +36,48 @@ class S3DocumentService(
     private val s3Presigner: S3Presigner,
     private val env: BucketEnv
 ) : DocumentService {
+    fun checkFileIsClean(
+        bucketName: String,
+        keyName: String,
+    ) {
+        logger.info { "Check file $keyName has av tag" }
+        try {
+            val objectTaggingRequest =
+                GetObjectTaggingRequest.builder().bucket(bucketName).key(keyName).build()
+
+            val tags = s3Client.getObjectTagging(objectTaggingRequest)
+
+            logger.info { "Found $tags for the file" }
+
+            val hasTag = tags.tagSet().any { tag -> tag.key() == "av-status" && tag.value() == "CLEAN" }
+
+            if (!hasTag) {
+                logger.warn { "No clean tag found for the file" }
+                throw NotFound("Access denied", "access-denied")
+            }
+        } catch (e: NoSuchKeyException) {
+            logger.error("checkIfFileExists: File not found NoSuchKeyException", e)
+            throw NotFound()
+        } catch (e: S3Exception) {
+            logger.error("checkIfFileExists: S3Exception", e)
+            // If the file is still undergoing antivirus scan this will be the returned code
+            if (e.statusCode() == 403 && e.awsErrorDetails().errorCode() == "AccessDenied") {
+                // Handle AccessDenied error
+                throw NotFound("Access denied", "access-denied")
+            }
+        } catch (e: Exception) {
+            logger.error("checkIfFileExists Error", e)
+            throw e
+        }
+    }
+
     override fun get(
         bucketName: String,
         key: String
     ): Document {
+        if (env.verifyFileAvTagged) {
+            checkFileIsClean(bucketName, key)
+        }
         val request = GetObjectRequest.builder().bucket(bucketName).key(key).build()
         val stream = s3Client.getObject(request) ?: throw NotFound("File not found")
         return stream.use {
@@ -61,6 +102,9 @@ class S3DocumentService(
         key: String,
         contentDisposition: ContentDisposition
     ): URL {
+        if (env.verifyFileAvTagged) {
+            checkFileIsClean(bucketName, key)
+        }
         val request =
             GetObjectRequest.builder()
                 .bucket(bucketName)

@@ -8,6 +8,7 @@ import { getUserRole, User } from 'api/users-api'
 import orderBy from 'lodash/orderBy'
 import React, { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 import { SortableTh, Th } from 'shared/Table'
 import { AddButton } from 'shared/buttons/AddButton'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
@@ -23,7 +24,6 @@ import {
   Table,
   VerticalGap
 } from '../../shared/layout'
-import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 export type UserSortColumn = 'role' | 'active'
 export type SortDirection = 'ASC' | 'DESC'

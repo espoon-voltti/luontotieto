@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import React from 'react'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 import styled from 'styled-components'
 
 import { LinkStyledAsButton } from '../shared/buttons/LinkStyledAsButton'
@@ -13,7 +14,6 @@ import {
   SectionContainer
 } from '../shared/layout'
 import { H2 } from '../shared/typography'
-import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 const Wrapper = styled.div`
   width: 100%;

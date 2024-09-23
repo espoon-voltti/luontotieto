@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { FormEvent, useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 import { Button } from 'shared/buttons/Button'
 import { InputField } from 'shared/form/InputField'
 import { PageContainer } from 'shared/layout'
@@ -22,7 +23,6 @@ import {
 } from '../shared/layout'
 import { colors } from '../shared/theme'
 import { H2, Label } from '../shared/typography'
-import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 const LoginMessage = styled.label`
   color: ${colors.status.danger};

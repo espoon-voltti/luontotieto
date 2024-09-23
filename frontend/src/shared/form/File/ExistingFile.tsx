@@ -20,12 +20,14 @@ import {
   LabeledInput,
   VerticalGap
 } from 'shared/layout'
+import InfoModal from 'shared/modals/InfoModal'
 import { I, Label } from 'shared/typography'
 
 import { InputField } from '../InputField'
 
 import FileDownloadButton from './FileDownloadButton'
 import { FileTitle } from './FileTitle'
+import useDownloadFile from './useDownloadFile'
 
 interface Props {
   data:
@@ -53,18 +55,20 @@ export const ExistingFile = React.memo(function ExistingFile({
 }: Props) {
   const updatedStr = useMemo(() => formatDate(props.data.updated), [props])
 
-  const handleClick = async (fileId: string) => {
-    let url = ''
-    if (props.data.type === 'ORDER') {
-      url = await apiGetOrderFileUrl(props.data.file.orderId, fileId)
-    } else {
-      url = await apiGetReportFileUrl(props.data.file.reportId, fileId)
-    }
+  const downloadFunction =
+    props.data.type === 'ORDER' ? apiGetOrderFileUrl : apiGetReportFileUrl
 
-    if (url) {
-      window.open(url)
+  const { downloadFile, acknowledgeError, errorMessage } =
+    useDownloadFile(downloadFunction)
+
+  const handleClick = async (fileId: string) => {
+    if (props.data.type === 'ORDER') {
+      await downloadFile(props.data.file.orderId, fileId)
+    } else {
+      await downloadFile(props.data.file.reportId, fileId)
     }
   }
+
   return (
     <FlexColWithGaps>
       <FlexRowWithGaps>
@@ -93,6 +97,21 @@ export const ExistingFile = React.memo(function ExistingFile({
       <FlexRowWithGaps>
         <I>{`Lisätty ${updatedStr}`}</I>
       </FlexRowWithGaps>
+      {!!errorMessage && (
+        <InfoModal
+          close={() => acknowledgeError()}
+          closeLabel="Sulje"
+          title="Virhe ladattaessa tiedostoa"
+          resolve={{
+            action: () => {
+              acknowledgeError()
+            },
+            label: 'Ok'
+          }}
+        >
+          {errorMessage}
+        </InfoModal>
+      )}
     </FlexColWithGaps>
   )
 })
