@@ -193,8 +193,10 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
         title: 'Hyväksy selvitys',
         text: 'Selvityksen hyväksyminen lukitsee selvityksen ja tallentaa paikkatiedot paikkatietokantaan',
         resolve: {
-          action: () =>
-            approveReport({ reportId: report.id, overrideReportName }),
+          action: async () => {
+            setApproveError(null)
+            await approveReport({ reportId: report.id, overrideReportName })
+          },
           label: 'Hyväksy'
         },
         reject: {
