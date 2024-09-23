@@ -47,9 +47,8 @@ class S3DocumentService(
                     .key(keyName)
                     .build()
 
-            val tags = s3Client.getObjectTagging(objectTaggingRequest)
+            s3Client.getObjectTagging(objectTaggingRequest)
 
-            println("tags: $tags")
         } catch (e: NoSuchKeyException) {
             logger.error("checkIfFileExists: File not found NoSuchKeyException", e)
             throw NotFound()
