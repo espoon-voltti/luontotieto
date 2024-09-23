@@ -22,6 +22,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectTaggingRequest
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.model.S3Exception
+import software.amazon.awssdk.services.s3.model.Tag
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
 import java.net.URL
@@ -36,19 +37,25 @@ class S3DocumentService(
     private val s3Presigner: S3Presigner,
     private val env: BucketEnv
 ) : DocumentService {
-    fun checkIfFileExists(
+    fun checkFileIsClean(
         bucketName: String,
-        keyName: String
+        keyName: String,
     ) {
+        logger.info { "Check file $keyName has av tag" }
         try {
             val objectTaggingRequest =
-                GetObjectTaggingRequest.builder()
-                    .bucket(bucketName)
-                    .key(keyName)
-                    .build()
+                GetObjectTaggingRequest.builder().bucket(bucketName).key(keyName).build()
 
-            s3Client.getObjectTagging(objectTaggingRequest)
+            val tags = s3Client.getObjectTagging(objectTaggingRequest)
 
+            logger.info { "Found $tags for the file" }
+
+            val hasTag = tags.tagSet().any { tag -> tag.key() == "av-status" && tag.value() == "CLEAN" }
+
+            if (!hasTag) {
+                logger.warn { "No clean tag found for the file" }
+                throw NotFound("Access denied", "access-denied")
+            }
         } catch (e: NoSuchKeyException) {
             logger.error("checkIfFileExists: File not found NoSuchKeyException", e)
             throw NotFound()
@@ -69,7 +76,9 @@ class S3DocumentService(
         bucketName: String,
         key: String
     ): Document {
-        checkIfFileExists(bucketName, key)
+        if (env.verifyFileAvTagged) {
+            checkFileIsClean(bucketName, key)
+        }
         val request = GetObjectRequest.builder().bucket(bucketName).key(key).build()
         val stream = s3Client.getObject(request) ?: throw NotFound("File not found")
         return stream.use {
@@ -94,7 +103,9 @@ class S3DocumentService(
         key: String,
         contentDisposition: ContentDisposition
     ): URL {
-        checkIfFileExists(bucketName, key)
+        if (env.verifyFileAvTagged) {
+            checkFileIsClean(bucketName, key)
+        }
         val request =
             GetObjectRequest.builder()
                 .bucket(bucketName)

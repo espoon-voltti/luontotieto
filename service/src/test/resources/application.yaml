@@ -10,6 +10,7 @@ luontotieto:
   bucket:
     data: "data"
     proxy_through_nginx: false
+    verify_file_av_tagged: false
   email:
     enabled: "false"
     region: "fake"
