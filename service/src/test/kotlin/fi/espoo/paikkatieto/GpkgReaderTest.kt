@@ -32,40 +32,40 @@ class GpkgReaderTest {
             listOf(
                 GpkgFeature(
                     columns =
-                    mapOf<String, Any?>(
-                        "geom" to point1,
-                        "pvm" to Date.valueOf("2024-03-17"),
-                        "havaitsija" to "Hannu Havaitsija",
-                        "puulaji" to "Koivu",
-                        "halkaisija" to 60,
-                        "papanamaara" to 1,
-                        "pesa" to false,
-                        "pesatyyppi" to "Pönttö",
-                        "pesankorkeus" to 2,
-                        "lisatieto" to null,
-                        "kunta" to 79,
-                        "tarkkuus" to "GPS",
-                        "viite" to "11"
-                    ),
+                        mapOf<String, Any?>(
+                            "geom" to point1,
+                            "pvm" to Date.valueOf("2024-03-17"),
+                            "havaitsija" to "Hannu Havaitsija",
+                            "puulaji" to "Koivu",
+                            "halkaisija" to 60,
+                            "papanamaara" to 1,
+                            "pesa" to false,
+                            "pesatyyppi" to "Pönttö",
+                            "pesankorkeus" to 2,
+                            "lisatieto" to null,
+                            "kunta" to 79,
+                            "tarkkuus" to "GPS",
+                            "viite" to "11"
+                        ),
                     errors = emptyList()
                 ),
                 GpkgFeature(
                     columns =
-                    mapOf<String, Any?>(
-                        "geom" to point2,
-                        "pvm" to Date.valueOf("2024-03-10"),
-                        "havaitsija" to "Hannu Havaitsija",
-                        "puulaji" to "Mänty",
-                        "halkaisija" to 34,
-                        "papanamaara" to 1,
-                        "pesa" to true,
-                        "pesatyyppi" to "Kolo",
-                        "pesankorkeus" to 11,
-                        "lisatieto" to null,
-                        "kunta" to 79,
-                        "tarkkuus" to "Muu",
-                        "viite" to "Espoo"
-                    ),
+                        mapOf<String, Any?>(
+                            "geom" to point2,
+                            "pvm" to Date.valueOf("2024-03-10"),
+                            "havaitsija" to "Hannu Havaitsija",
+                            "puulaji" to "Mänty",
+                            "halkaisija" to 34,
+                            "papanamaara" to 1,
+                            "pesa" to true,
+                            "pesatyyppi" to "Kolo",
+                            "pesankorkeus" to 11,
+                            "lisatieto" to null,
+                            "kunta" to 79,
+                            "tarkkuus" to "Muu",
+                            "viite" to "Espoo"
+                        ),
                     errors = emptyList()
                 )
             )
@@ -92,17 +92,17 @@ class GpkgReaderTest {
             listOf(
                 GpkgFeature(
                     columns =
-                    mapOf<String, Any?>(
-                        "geom" to polygon,
-                        "pvm" to Date.valueOf("2024-04-20"),
-                        "havaitsija" to "Harri Havaitsija",
-                        "aluetyyppi" to "Elinalue",
-                        "aluekuvaus" to "Alue oravalle",
-                        "lisatieto" to null,
-                        "kunta" to 79,
-                        "tarkkuus" to "Muu",
-                        "viite" to "Espoo 4/2024"
-                    ),
+                        mapOf<String, Any?>(
+                            "geom" to polygon,
+                            "pvm" to Date.valueOf("2024-04-20"),
+                            "havaitsija" to "Harri Havaitsija",
+                            "aluetyyppi" to "Elinalue",
+                            "aluekuvaus" to "Alue oravalle",
+                            "lisatieto" to null,
+                            "kunta" to 79,
+                            "tarkkuus" to "Muu",
+                            "viite" to "Espoo 4/2024"
+                        ),
                     errors = emptyList()
                 )
             )
@@ -129,38 +129,38 @@ class GpkgReaderTest {
             listOf(
                 GpkgFeature(
                     columns =
-                    mapOf<String, Any?>(
-                        "geom" to polygon,
-                        "pvm" to Date.valueOf("2024-04-20"),
-                        "havaitsija" to "Harri Havaitsija",
-                        "aluetyyppi" to "Elinalue",
-                        "aluekuvaus" to "Alue oravalle",
-                        "lisatieto" to null,
-                        "kunta" to "79",
-                        "tarkkuus" to null,
-                        "viite" to "Espoo 4/2024"
-                    ),
+                        mapOf<String, Any?>(
+                            "geom" to polygon,
+                            "pvm" to Date.valueOf("2024-04-20"),
+                            "havaitsija" to "Harri Havaitsija",
+                            "aluetyyppi" to "Elinalue",
+                            "aluekuvaus" to "Alue oravalle",
+                            "lisatieto" to null,
+                            "kunta" to "79",
+                            "tarkkuus" to null,
+                            "viite" to "Espoo 4/2024"
+                        ),
                     errors =
-                    listOf(
-                        GpkgValidationError(
-                            id = "liito_orava_alueet.1",
-                            column = "aluetyyppi",
-                            value = "Elinalue",
-                            reason = GpkgValidationErrorReason.INVALID_VALUE
-                        ),
-                        GpkgValidationError(
-                            id = "liito_orava_alueet.1",
-                            column = "kunta",
-                            value = "79",
-                            reason = GpkgValidationErrorReason.WRONG_TYPE
-                        ),
-                        GpkgValidationError(
-                            id = "liito_orava_alueet.1",
-                            column = "tarkkuus",
-                            value = null,
-                            reason = GpkgValidationErrorReason.IS_NULL
+                        listOf(
+                            GpkgValidationError(
+                                id = "liito_orava_alueet.1",
+                                column = "aluetyyppi",
+                                value = "Elinalue",
+                                reason = GpkgValidationErrorReason.INVALID_VALUE
+                            ),
+                            GpkgValidationError(
+                                id = "liito_orava_alueet.1",
+                                column = "kunta",
+                                value = "79",
+                                reason = GpkgValidationErrorReason.WRONG_TYPE
+                            ),
+                            GpkgValidationError(
+                                id = "liito_orava_alueet.1",
+                                column = "tarkkuus",
+                                value = null,
+                                reason = GpkgValidationErrorReason.IS_NULL
+                            )
                         )
-                    )
                 )
             )
         GpkgReader(
