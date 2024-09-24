@@ -106,6 +106,11 @@ class ReportController {
         val fileName = getAndCheckFileName(file)
         val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
 
+        val paikkatietoEnums =
+            paikkatietoJdbi.inTransactionUnchecked { ptx ->
+                ptx.getPaikkaTietoEnums()
+            }
+
         val tableDefinition = documentType.tableDefinition
 
         val errors =
@@ -114,7 +119,7 @@ class ReportController {
                 file.transferTo(tmpGpkgFile)
                 val gpkgReader: GpkgReader
                 try {
-                    gpkgReader = GpkgReader(File(tmpGpkgFile.toUri()), td)
+                    gpkgReader = GpkgReader(File(tmpGpkgFile.toUri()), td, paikkatietoEnums)
                 } catch (e: IOException) {
                     logger.error("Invalid GeoPackage file: ${file.originalFilename}", e)
                     throw BadRequest("Invalid GeoPackage file: ${file.originalFilename}")
@@ -239,6 +244,10 @@ class ReportController {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         val dataBucket = bucketEnv.data
 
+        val paikkatietoEnums =
+            paikkatietoJdbi.inTransactionUnchecked { ptx ->
+                ptx.getPaikkaTietoEnums()
+            }
         val reportFiles =
             jdbi.inTransactionUnchecked { tx ->
                 tx.getPaikkaTietoReportFiles(
@@ -249,7 +258,7 @@ class ReportController {
         val report = jdbi.inTransactionUnchecked { tx -> tx.getReport(reportId, user) }
         val readers =
             reportFiles.mapNotNull { rf ->
-                getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf)
+                getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf, paikkatietoEnums)
             }
 
         val observed = mutableListOf<String>()
@@ -260,39 +269,48 @@ class ReportController {
          * to be inserted first. */
         val sortedReaders = readers.sortedBy { it.tableDefinition.layerName.contains("aluerajaus") }
 
-        try {
-            paikkatietoJdbi.inTransactionUnchecked { ptx ->
-                sortedReaders.forEach {
-                    it.use { reader ->
+        paikkatietoJdbi.inTransactionUnchecked { ptx ->
+            sortedReaders.forEach {
+                it.use { reader ->
 
-                        val params =
-                            when (reader.tableDefinition) {
-                                TableDefinition.ALUERAJAUS_LUONTOSELVITYS -> {
-                                    val observedSpecies = ptx.getObservedSpecies(reportId)
-                                    val reportDocumentLink =
-                                        if (report.isPublic == true) {
-                                            luontotietoHost.getReportDocumentDownloadUrl(
-                                                reportId
-                                            )
-                                        } else {
-                                            "Ei julkinen"
-                                        }
-                                    observed.addAll(observedSpecies)
-                                    jdbi.inTransactionUnchecked { tx ->
-                                        tx.getAluerajausLuontoselvitysParams(
-                                            user = user,
-                                            id = reportId,
-                                            observedSpecies = observedSpecies.toSet(),
-                                            reportLink =
-                                                luontotietoHost.getReportUrl(reportId),
-                                            reportDocumentLink = reportDocumentLink
+                    reader.asSequence().flatMap { it.errors }.toList().let { errors ->
+                        if (errors.isNotEmpty()) {
+                            throw BadRequest(
+                                "Error validating paikkatieto files",
+                                "error-validating-paikkatieto-data",
+                                errors.map { e -> "${e.id}:${e.column}:${e.value}:${e.reason}" }
+                            )
+                        }
+                    }
+
+                    val params =
+                        when (reader.tableDefinition) {
+                            TableDefinition.ALUERAJAUS_LUONTOSELVITYS -> {
+                                val observedSpecies = ptx.getObservedSpecies(reportId)
+                                val reportDocumentLink =
+                                    if (report.isPublic == true) {
+                                        luontotietoHost.getReportDocumentDownloadUrl(
+                                            reportId
                                         )
+                                    } else {
+                                        "Ei julkinen"
                                     }
+                                observed.addAll(observedSpecies)
+                                jdbi.inTransactionUnchecked { tx ->
+                                    tx.getAluerajausLuontoselvitysParams(
+                                        user = user,
+                                        id = reportId,
+                                        observedSpecies = observedSpecies.toSet(),
+                                        reportLink =
+                                            luontotietoHost.getReportUrl(reportId),
+                                        reportDocumentLink = reportDocumentLink
+                                    )
                                 }
-
-                                else -> emptyMap()
                             }
 
+                            else -> emptyMap()
+                        }
+                    try {
                         ptx.insertPaikkatieto(
                             reader.tableDefinition,
                             report,
@@ -300,16 +318,12 @@ class ReportController {
                             params,
                             user.isAdmin() && overrideReportName == true
                         )
+                    } catch (e: Exception) {
+                        logger.error("Error saving paikkatieto data", e)
+                        throw BadRequest("Error saving paikkatietodata", "error-saving-paikkatieto-data")
                     }
                 }
             }
-        } catch (e: Exception) {
-            /**
-             * TODO: This could be imrpoved by trying to parse the exact error, for example which
-             * row and which column fails
-             */
-            logger.error("Error saving paikkatieto data", e)
-            throw BadRequest("Error saving paikkatietodata", "error-saving-paikkatieto-data")
         }
 
         jdbi
@@ -490,17 +504,17 @@ class ReportController {
     private fun getPaikkatietoReader(
         bucketName: String,
         fileName: String,
-        reportFile: ReportFile
+        reportFile: ReportFile,
+        paikkaTietoEnums: List<PaikkaTietoEnum>
     ): GpkgReader? {
         val tableDefinition = reportFile.documentType.tableDefinition ?: return null
-
         val document = documentClient.get(bucketName, fileName)
 
         val file = File.createTempFile(reportFile.fileName, "gpkg")
         file.writeBytes(document.bytes)
 
         try {
-            return GpkgReader(file, tableDefinition)
+            return GpkgReader(file, tableDefinition, paikkaTietoEnums)
         } catch (e: IOException) {
             logger.error("Invalid GeoPackage file: ${reportFile.fileName}", e)
             throw BadRequest("Invalid GeoPackage file: ${reportFile.fileName}")

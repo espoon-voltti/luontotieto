@@ -11,6 +11,7 @@ fun UnableToExecuteStatementException.isUniqueConstraintViolation() = message?.c
 data class BadRequest(
     override val message: String,
     val errorCode: String? = null,
+    val errorMessages: List<String>? = null,
     override val cause: Throwable? = null
 ) : RuntimeException(message, cause)
 
