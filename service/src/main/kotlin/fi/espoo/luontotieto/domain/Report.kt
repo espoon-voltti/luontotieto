@@ -250,6 +250,29 @@ fun Handle.getObservedSpecies(reportId: UUID): List<String> {
         .toList()
 }
 
+data class PaikkaTietoEnum(
+    val name: String,
+    val value: String
+)
+
+fun Handle.getPaikkaTietoEnums(): List<PaikkaTietoEnum> {
+    return createQuery(
+        """
+            SELECT
+                t.typname AS name,
+                e.enumlabel AS value
+            FROM
+                pg_type t
+            JOIN
+                pg_enum e ON t.oid = e.enumtypid
+            JOIN
+                pg_namespace n ON n.oid = t.typnamespace
+            """
+    )
+        .mapTo<PaikkaTietoEnum>()
+        .toList()
+}
+
 fun Handle.getAluerajausLuontoselvitysParams(
     user: AuthenticatedUser,
     id: UUID,
