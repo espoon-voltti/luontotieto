@@ -107,9 +107,7 @@ class ReportController {
         val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
 
         val paikkatietoEnums =
-            paikkatietoJdbi.inTransactionUnchecked { ptx ->
-                ptx.getPaikkaTietoEnums()
-            }
+            paikkatietoJdbi.inTransactionUnchecked { ptx -> ptx.getPaikkaTietoEnums() }
 
         val tableDefinition = documentType.tableDefinition
 
@@ -245,9 +243,7 @@ class ReportController {
         val dataBucket = bucketEnv.data
 
         val paikkatietoEnums =
-            paikkatietoJdbi.inTransactionUnchecked { ptx ->
-                ptx.getPaikkaTietoEnums()
-            }
+            paikkatietoJdbi.inTransactionUnchecked { ptx -> ptx.getPaikkaTietoEnums() }
         val reportFiles =
             jdbi.inTransactionUnchecked { tx ->
                 tx.getPaikkaTietoReportFiles(
@@ -263,26 +259,16 @@ class ReportController {
 
         val observed = mutableListOf<String>()
 
-        /** Sort readers so that we make sure to insert the aluerajaus definitions last,
-         * this is done because the observed species value is deferred from
-         * the muut_huomioitavat_lajit tables that need
-         * to be inserted first. */
+        /**
+         * Sort readers so that we make sure to insert the aluerajaus definitions last, this is done
+         * because the observed species value is deferred from the muut_huomioitavat_lajit tables
+         * that need to be inserted first.
+         */
         val sortedReaders = readers.sortedBy { it.tableDefinition.layerName.contains("aluerajaus") }
 
         paikkatietoJdbi.inTransactionUnchecked { ptx ->
             sortedReaders.forEach {
                 it.use { reader ->
-
-                    reader.asSequence().flatMap { it.errors }.toList().let { errors ->
-                        if (errors.isNotEmpty()) {
-                            throw BadRequest(
-                                "Error validating paikkatieto files",
-                                "error-validating-paikkatieto-data",
-                                errors.map { e -> "${e.id}:${e.column}:${e.value}:${e.reason}" }
-                            )
-                        }
-                    }
-
                     val params =
                         when (reader.tableDefinition) {
                             TableDefinition.ALUERAJAUS_LUONTOSELVITYS -> {
@@ -301,8 +287,7 @@ class ReportController {
                                         user = user,
                                         id = reportId,
                                         observedSpecies = observedSpecies.toSet(),
-                                        reportLink =
-                                            luontotietoHost.getReportUrl(reportId),
+                                        reportLink = luontotietoHost.getReportUrl(reportId),
                                         reportDocumentLink = reportDocumentLink
                                     )
                                 }
@@ -310,17 +295,32 @@ class ReportController {
 
                             else -> emptyMap()
                         }
+
+                    val data = reader.asSequence().toList()
+                    val errors = data.filter { it.errors.isNotEmpty() }.flatMap { it.errors }
+
+                    if (errors.isNotEmpty()) {
+                        throw BadRequest(
+                            "Error validating paikkatieto files",
+                            "error-validating-paikkatieto-data",
+                            errors.map { e -> "${e.id}:${e.column}:${e.value}:${e.reason}" }
+                        )
+                    }
+
                     try {
                         ptx.insertPaikkatieto(
                             reader.tableDefinition,
                             report,
-                            reader.asSequence(),
+                            data.asSequence(),
                             params,
                             user.isAdmin() && overrideReportName == true
                         )
                     } catch (e: Exception) {
                         logger.error("Error saving paikkatieto data", e)
-                        throw BadRequest("Error saving paikkatietodata", "error-saving-paikkatieto-data")
+                        throw BadRequest(
+                            "Error saving paikkatietodata",
+                            "error-saving-paikkatieto-data"
+                        )
                     }
                 }
             }
@@ -359,10 +359,12 @@ class ReportController {
         }
         paikkatietoJdbi.inTransactionUnchecked { ptx ->
             /**
-             * Delete all paikkatieto data for the report except for the aluerajaus_luontoselvitystilaus
-             * table. The order data is updated only when order is modified.
+             * Delete all paikkatieto data for the report except for the
+             * aluerajaus_luontoselvitystilaus table. The order data is updated only when order is
+             * modified.
              */
-            TableDefinition.entries.filter { td -> td.layerName !== "aluerajaus_luontoselvitystilaus" }
+            TableDefinition.entries
+                .filter { td -> td.layerName !== "aluerajaus_luontoselvitystilaus" }
                 .forEach { td -> ptx.deletePaikkatieto(td, report.id) }
         }
 
