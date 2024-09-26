@@ -211,6 +211,11 @@ class OrderController {
         val fileName = getAndCheckFileName(file)
         val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
 
+        val paikkatietoEnums =
+            paikkatietoJdbi.inTransactionUnchecked { ptx ->
+                ptx.getPaikkaTietoEnums()
+            }
+
         val fileId = UUID.fromString(id)
         var savedId: UUID? = null
 
@@ -221,7 +226,7 @@ class OrderController {
                 file.transferTo(tmpGpkgFile)
                 val gpkgReader: GpkgReader?
                 try {
-                    gpkgReader = GpkgReader(File(tmpGpkgFile.toUri()), tableDefinition)
+                    gpkgReader = GpkgReader(File(tmpGpkgFile.toUri()), tableDefinition, paikkatietoEnums)
                 } catch (e: IOException) {
                     logger.error("Error reading GeoPackage file: $fileName", e)
                     throw BadRequest("Error reading GeoPackage file: ${file.name}")

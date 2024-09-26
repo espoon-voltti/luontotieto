@@ -34,6 +34,7 @@ const MessageBoxContainer = styled.div<MessageBoxContainerProps>`
   .message-container {
     display: flex;
     align-items: center;
+    word-break: break-word;
   }
 
   .icon-wrapper {

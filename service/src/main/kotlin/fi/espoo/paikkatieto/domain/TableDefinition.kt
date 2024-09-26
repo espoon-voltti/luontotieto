@@ -29,7 +29,8 @@ data class Column(
 ) {
     fun validate(
         id: String,
-        value: Any?
+        value: Any?,
+        allowedValues: List<String> = emptyList()
     ): GpkgValidationError? =
         when {
             value == null && !isNullable ->
@@ -54,6 +55,15 @@ data class Column(
                     column = name,
                     value = errorValue,
                     reason = GpkgValidationErrorReason.WRONG_TYPE
+                )
+            }
+
+            value != null && allowedValues.isNotEmpty() && !allowedValues.contains(value) -> {
+                GpkgValidationError(
+                    id = id,
+                    column = name,
+                    value = value,
+                    reason = GpkgValidationErrorReason.INVALID_VALUE
                 )
             }
 
