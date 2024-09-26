@@ -23,19 +23,21 @@ const StyledButton = styled.button`
   padding: 0 24px;
   min-width: 100px;
 
-  display: block;
-  text-align: center;
-  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   border: 1px solid ${colors.main.m2};
   border-radius: 4px;
   background: ${colors.grayscale.g0};
+  background: #fff;
 
   outline: none;
   cursor: pointer;
 
   &.disabled {
     cursor: not-allowed;
+    opacity: 0.5;
   }
 
   &:focus {
@@ -53,11 +55,6 @@ const StyledButton = styled.button`
     border-color: ${colors.main.m2Active};
   }
 
-  &.disabled {
-    color: ${colors.grayscale.g70};
-    border-color: ${colors.grayscale.g70};
-  }
-
   &.primary {
     color: ${colors.grayscale.g0};
     background: ${colors.main.m2};
@@ -68,11 +65,6 @@ const StyledButton = styled.button`
 
     &:active {
       background: ${colors.main.m2Active};
-    }
-
-    &.disabled {
-      border-color: ${colors.grayscale.g35};
-      background: ${colors.grayscale.g35};
     }
   }
   &.danger {
@@ -87,11 +79,6 @@ const StyledButton = styled.button`
     &:active {
       background: ${colors.grayscale.g0};
     }
-
-    &.disabled {
-      border-color: ${colors.grayscale.g35};
-      background: ${colors.grayscale.g35};
-    }
   }
 
   @media (min-width: ${tabletMin}) {
@@ -103,6 +90,7 @@ const StyledButton = styled.button`
 `
 
 export interface ButtonProps extends BaseProps {
+  children?: React.ReactNode
   text: string
   onClick?: (e: React.MouseEvent) => unknown
   primary?: boolean
@@ -117,6 +105,7 @@ export const Button = React.memo(function Button({
   primary = false,
   disabled = false,
   type = 'button',
+  children,
   ...props
 }: ButtonProps) {
   return (
@@ -127,6 +116,7 @@ export const Button = React.memo(function Button({
       disabled={disabled}
       type={type}
     >
+      {children}
       {props.text}
     </StyledButton>
   )
