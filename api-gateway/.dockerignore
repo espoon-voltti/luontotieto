@@ -1,11 +1,19 @@
-# SPDX-FileCopyrightText: 2023-2024 City of Espoo
+# SPDX-FileCopyrightText: 2017-2020 City of Espoo
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
 *
-
 !src
-!*.json
-!*.lock
 !config
+!package.json
+!yarn.lock
+!yarnrc.yml
+!tsconfig.lock
 !entrypoint.sh
+!.yarn/releases
+!.yarn/plugins
+!.yarnrc.yml
+!tsconfig.json
+!tsconfig.test.json
+!eslint.config.js
+!jest.config.js
