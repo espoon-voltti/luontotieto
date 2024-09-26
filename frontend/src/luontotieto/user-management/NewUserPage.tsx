@@ -3,13 +3,13 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { apiPostUser } from 'api/users-api'
+import { apiPostUser, User } from 'api/users-api'
 import { AxiosError } from 'axios'
 import React, { FormEvent, useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertBox, InfoBox } from 'shared/MessageBoxes'
+import { AsyncButton } from 'shared/buttons/AsyncButton'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
-import { Button } from 'shared/buttons/Button'
 import { InputField } from 'shared/form/InputField'
 import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
 import { H2, Label } from 'shared/typography'
@@ -35,21 +35,23 @@ export const NewUserPage = React.memo(function NewUserPage() {
   const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const { mutateAsync: createUser, isPending } = useMutation({
+  const onCreateUserSuccess = useCallback((user: User) => {
+    setShowModal({
+      title: 'Käyttäjän luotu',
+      resolve: {
+        action: () => {
+          setShowModal(null)
+          navigate(`/luontotieto/käyttäjät/${user.id}`)
+        },
+        label: 'Ok'
+      }
+    })
+    void queryClient.invalidateQueries({ queryKey: ['users'] })
+  }, [])
+
+  const { mutateAsync: createUser, isPending: isSaving } = useMutation({
     mutationFn: apiPostUser,
-    onSuccess: (user) => {
-      void queryClient.invalidateQueries({ queryKey: ['users'] })
-      setShowModal({
-        title: 'Käyttäjän luotu',
-        resolve: {
-          action: () => {
-            setShowModal(null)
-            navigate(`/luontotieto/käyttäjät/${user.id}`)
-          },
-          label: 'Ok'
-        }
-      })
-    },
+    onSuccess: onCreateUserSuccess,
     onError: (e: AxiosError<{ errorCode: string }>) => {
       if (e instanceof AxiosError) {
         const errorCode = e.response?.data.errorCode
@@ -92,7 +94,13 @@ export const NewUserPage = React.memo(function NewUserPage() {
         destination="/luontotieto/käyttäjät"
       />
       <SectionContainer>
-        <form onSubmit={onSubmit}>
+        <form
+          onSubmit={async (e) => {
+            if (!isSaving) {
+              await onSubmit(e)
+            }
+          }}
+        >
           <GroupOfInputRows>
             <H2>Käyttäjän tiedot</H2>
             <LabeledInput $cols={4}>
@@ -118,11 +126,13 @@ export const NewUserPage = React.memo(function NewUserPage() {
               <AlertBox title="Virhe" message={errorMessage} />
             )}
             <FlexRowWithGaps>
-              <Button
+              <AsyncButton
+                text="Tallenna muutokset"
+                data-qa="save-button"
                 primary
-                type="submit"
-                text="Luo yrityskäyttäjä"
-                disabled={!isValid || isPending}
+                disabled={!isValid}
+                onSuccess={onCreateUserSuccess}
+                onClick={() => createUser(userInput)}
               />
             </FlexRowWithGaps>
 
