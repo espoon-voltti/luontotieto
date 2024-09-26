@@ -9,7 +9,7 @@ import { VerticalGap } from 'shared/layout'
 
 import BaseModal, { ModalBaseProps, ModalButtons } from './BaseModal'
 
-export interface InfoModalStateProps extends InfoModalActions<T> {
+export interface InfoModalStateProps extends InfoModalActions<unknown> {
   title: string
   text?: string
 }

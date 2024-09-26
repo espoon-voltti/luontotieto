@@ -77,11 +77,7 @@ export function useAsyncButtonBehavior<T>({
       if (stopPropagation) e.stopPropagation()
 
       if (!mountedRef.current) return
-      if (
-        buttonState.state === 'in-progress' ||
-        buttonState.state === 'success'
-      )
-        return
+      if (buttonState.state === 'in-progress') return
 
       const maybePromise = onClick()
       if (maybePromise === undefined) {
@@ -92,16 +88,6 @@ export function useAsyncButtonBehavior<T>({
           .then((result) => {
             if (!mountedRef.current) return
             handleSuccess(result)
-            // if (result.isSuccess) {
-            //   handleSuccess(result.value)
-            // }
-            // if (result.isLoading) {
-            //   handleFailure(undefined)
-            // } else if (result.isFailure) {
-            //   handleFailure(result)
-            // } else {
-            //   handleSuccess(result.value)
-            // }
           })
           .catch((originalErr: unknown) => {
             handleFailure(undefined)
