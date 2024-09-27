@@ -300,11 +300,11 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   )
 
   const [planNumbers, setPlanNumbers] = useDebouncedState(
-    props.mode === 'CREATE' ? [] : props.order.planNumber ?? []
+    props.mode === 'CREATE' ? [] : (props.order.planNumber ?? [])
   )
 
   const [orderingUnit, setorderingUnit] = useDebouncedState(
-    props.mode === 'CREATE' ? [] : props.order.orderingUnit ?? []
+    props.mode === 'CREATE' ? [] : (props.order.orderingUnit ?? [])
   )
 
   const invalidContactEmailInfo = useMemo(
@@ -451,7 +451,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       assigneeCompanyName:
         orderInput.assigneeCompanyName?.trim() === ''
           ? null
-          : orderInput.assigneeCompanyName?.trim() ?? null,
+          : (orderInput.assigneeCompanyName?.trim() ?? null),
       planNumber: planNumbers,
       orderingUnit: orderingUnit,
       reportDocuments: reportDocuments

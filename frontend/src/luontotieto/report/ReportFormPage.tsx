@@ -152,6 +152,10 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
         } else {
           setApproveError('Virhe selvityksen tiedostojen validoinnissa')
         }
+      } else if (error?.errorCode === 'access-denied') {
+        setApproveError(
+          'Hyväksyminen epäonnistui koska taustalla suoritettava tiedostojen virustarkistus on todennäköisesti vielä kesken. Yritä hetken kuluttua uudelleen.'
+        )
       } else {
         setApproveError('Virhe hyväksyttäessä selvitystä')
       }
