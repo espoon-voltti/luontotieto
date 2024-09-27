@@ -191,7 +191,11 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
 
   const onApproveReport = async (reportInput: ReportFormInput) => {
     setApproveError(null)
-    await updateReportMutation({ ...reportInput, reportId: id })
+    await updateReportMutation({
+      ...reportInput,
+      reportId: id,
+      sendUpdatedEmail: false
+    })
 
     if (report && approve) {
       setShowModal({
@@ -213,7 +217,11 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
 
   const onReopenReport = async (reportInput: ReportFormInput) => {
     setApproveError(null)
-    await updateReportMutation({ ...reportInput, reportId: id })
+    await updateReportMutation({
+      ...reportInput,
+      reportId: id,
+      sendUpdatedEmail: false
+    })
     if (report && report.approved && reOpen) {
       setShowModal({
         title: 'Avaa selvitys uudelleen',
