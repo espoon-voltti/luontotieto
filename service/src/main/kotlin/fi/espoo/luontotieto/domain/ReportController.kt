@@ -211,7 +211,6 @@ class ReportController {
         @RequestBody report: Report.Companion.ReportInput,
         @RequestParam("sendUpdatedEmail") sendUpdatedEmail: Boolean? = true
     ): Report {
-        println("sendUpdatedEmail $sendUpdatedEmail")
         val reportResponse =
             jdbi.inTransactionUnchecked { tx -> tx.putReport(id, report, user) }.also {
                 logger.audit(user, AuditEvent.UPDATE_REPORT, mapOf("id" to "$id"))
