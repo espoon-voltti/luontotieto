@@ -16,7 +16,7 @@ data class GeoserverEnv(
             GeoserverEnv(
                 baseUrl =
                     env.lookup(
-                        "luontotieto.geoserver.baseurl",
+                        "luontotieto.geoserver.base_url",
                     ),
                 userName =
                     env.lookup(

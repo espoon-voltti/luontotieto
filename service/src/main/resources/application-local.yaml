@@ -22,7 +22,7 @@ luontotieto:
     sender_arn: "arn:aws:ses:eu-west-1:758397969161:identity/luontotieto@espoo.fi"
   host: "http://localhost:9000"
   geoserver:
-    baseUrl: "http://localhost:8000/geoserver"
+    base_url: "http://localhost:8000/geoserver"
     username: "admin"
     password: "password"
 
