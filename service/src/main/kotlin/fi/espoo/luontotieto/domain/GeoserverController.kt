@@ -31,7 +31,7 @@ class GeoserverController {
     @GetMapping("/reload-configuration")
     fun reloadSchemas(user: AuthenticatedUser): GeoServerReponseStatus {
         user.checkRoles(UserRole.ADMIN)
-        logger.audit(user, AuditEvent.RELOAD_GEOSEVER_CONFIGURATION, mapOf("id" to "${user.id}"))
+        logger.audit(user, AuditEvent.RELOAD_GEOSERVER_CONFIGURATION, mapOf("id" to "${user.id}"))
 
         val client = OkHttpClient()
 
