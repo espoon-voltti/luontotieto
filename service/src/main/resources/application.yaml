@@ -15,6 +15,10 @@ luontotieto:
     sender_address: ${EMAIL_SENDER_ADDRESS}
     sender_arn: ${EMAIL_SENDER_ARN}
   host: ${BASE_URL}
+  geoserver:
+    baseUrl: ${GEOSERVER_URL}
+    username: ${GEOSERVER_USERNAME}
+    password: ${GEOSERVER_PASSWORD}
 
 spring:
   main:
