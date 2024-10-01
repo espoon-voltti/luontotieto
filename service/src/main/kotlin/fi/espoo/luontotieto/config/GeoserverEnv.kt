@@ -5,7 +5,6 @@
 package fi.espoo.luontotieto.config
 
 import org.springframework.core.env.Environment
-import software.amazon.awssdk.regions.Region
 
 data class GeoserverEnv(
     val baseUrl: String,

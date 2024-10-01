@@ -4,8 +4,10 @@
 
 package fi.espoo.luontotieto.domain
 
-import fi.espoo.luontotieto.config.*
-
+import fi.espoo.luontotieto.config.AuditEvent
+import fi.espoo.luontotieto.config.AuthenticatedUser
+import fi.espoo.luontotieto.config.GeoserverEnv
+import fi.espoo.luontotieto.config.audit
 import mu.KotlinLogging
 import okhttp3.Credentials
 import okhttp3.MediaType.Companion.toMediaType
@@ -19,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/geoserver")
 class GeoserverController {
-
     data class GeoServerReponseStatus(val isSuccess: Boolean)
 
     @Autowired
@@ -37,17 +38,17 @@ class GeoserverController {
         // Create Basic Auth credentials
         val credentials = Credentials.basic(env.userName, env.password)
 
-        val request = Request.Builder()
-            .url("${env.baseUrl}/rest/reload")
-            .header("Authorization", credentials)
-            .post(okhttp3.RequestBody.create("application/xml".toMediaType(), ""))
-            .build()
+        val request =
+            Request.Builder()
+                .url("${env.baseUrl}/rest/reload")
+                .header("Authorization", credentials)
+                .post(okhttp3.RequestBody.create("application/xml".toMediaType(), ""))
+                .build()
 
         // Execute the request
         client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful)
-            {
-                logger.error("Failed to reload GeoServer: ${response}")
+            if (!response.isSuccessful) {
+                logger.error("Failed to reload GeoServer: $response")
             }
             return GeoServerReponseStatus(response.isSuccessful)
         }
