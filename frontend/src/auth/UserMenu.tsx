@@ -135,6 +135,21 @@ export const UserMenu = React.memo(function LanguageMenu({
               Käyttäjänhallinta
             </DropDownItemButton>
           )}
+          {user.role === UserRole.ADMIN && (
+            <DropDownItemButton
+              ref={firstButtonRef}
+              key="admin-settings"
+              className={classNames({ active: true })}
+              onClick={() => {
+                navigate(`/luontotieto/pääkäyttäjän-asetukset`)
+                setOpen(false)
+              }}
+              role="menuitemradio"
+              aria-checked={true}
+            >
+              Pääkäyttäjän asetukset
+            </DropDownItemButton>
+          )}
           <DropDownItemButton
             ref={firstButtonRef}
             key="user-settings"
