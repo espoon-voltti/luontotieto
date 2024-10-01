@@ -33,7 +33,7 @@ export const AdminSettingsPage = React.memo(function AdminSettingsPage() {
           <H2>Pääkäyttäjän asetukset</H2>
           <LabeledInput $cols={6}>
             <FlexRow>
-              <Label>Geoserver kongifuraation uudelleen lataus</Label>
+              <Label>GeoServer-konfiguraation uudelleenlataus</Label>
               <StyledIconButton
                 onClick={() =>
                   setShowGeoserverReloadInfo(!showGeoserverReloadInfo)
