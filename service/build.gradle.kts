@@ -93,6 +93,8 @@ dependencies {
     api("org.jsoup:jsoup:1.17.1")
 
     implementation("org.unbescape:unbescape:1.1.6.RELEASE")
+
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
 }
 
 tasks.withType<KotlinCompile> {
