@@ -5,10 +5,15 @@
 import { apiClient } from 'api-client'
 
 interface GeoServerReloadResponse {
-  isSuccess: true
+  isSuccess: boolean
 }
 export const apiGeoserverReloadConfiguration =
   async (): Promise<GeoServerReloadResponse> =>
     apiClient
       .get<GeoServerReloadResponse>('/geoserver/reload-configuration')
-      .then((r) => r.data)
+      .then((r) => {
+        if (r.data.isSuccess === false) {
+          throw new Error('Failed to reload GeoServer configuration')
+        }
+        return r.data
+      })
