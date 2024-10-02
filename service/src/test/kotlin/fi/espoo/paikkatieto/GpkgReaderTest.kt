@@ -4,6 +4,7 @@
 
 package fi.espoo.paikkatieto
 
+import fi.espoo.luontotieto.domain.PaikkaTietoEnum
 import fi.espoo.paikkatieto.domain.TableDefinition
 import fi.espoo.paikkatieto.reader.GpkgFeature
 import fi.espoo.paikkatieto.reader.GpkgReader
@@ -68,7 +69,7 @@ class GpkgReaderTest {
                     errors = emptyList()
                 )
             )
-        GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET).use { reader ->
+        GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET, emptyList()).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
         }
@@ -105,7 +106,7 @@ class GpkgReaderTest {
                     errors = emptyList()
                 )
             )
-        GpkgReader(file, TableDefinition.LIITO_ORAVA_ALUEET).use { reader ->
+        GpkgReader(file, TableDefinition.LIITO_ORAVA_ALUEET, emptyList()).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
         }
@@ -143,6 +144,12 @@ class GpkgReaderTest {
                         listOf(
                             GpkgValidationError(
                                 id = "liito_orava_alueet.1",
+                                column = "aluetyyppi",
+                                value = "Elinalue",
+                                reason = GpkgValidationErrorReason.INVALID_VALUE
+                            ),
+                            GpkgValidationError(
+                                id = "liito_orava_alueet.1",
                                 column = "kunta",
                                 value = "79",
                                 reason = GpkgValidationErrorReason.WRONG_TYPE
@@ -156,7 +163,11 @@ class GpkgReaderTest {
                         )
                 )
             )
-        GpkgReader(file, TableDefinition.LIITO_ORAVA_ALUEET).use { reader ->
+        GpkgReader(
+            file,
+            TableDefinition.LIITO_ORAVA_ALUEET,
+            listOf(PaikkaTietoEnum("liito_orava_aluetyyppi", "Ydinalue"))
+        ).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(expected, actual)
         }
@@ -166,7 +177,7 @@ class GpkgReaderTest {
     fun `reads lepakko_alueet GeoPackage file`() {
         val file = File("src/test/resources/test-data/lepakko_alueet.gpkg")
         val geomHash = mutableSetOf<Int>()
-        GpkgReader(file, TableDefinition.LEPAKKO_ALUEET).use { reader ->
+        GpkgReader(file, TableDefinition.LEPAKKO_ALUEET, emptyList()).use { reader ->
             val actual = reader.asSequence().toList()
             assertEquals(150, actual.size)
             for (feat in actual) {
@@ -182,14 +193,14 @@ class GpkgReaderTest {
     fun `throws exception when file does not exist`() {
         val file = File("src/test/resources/test-data/non_existent_file.gpkg")
         assertFailsWith(IOException::class) {
-            GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET).use { reader -> reader.hasNext() }
+            GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET, emptyList()).use { reader -> reader.hasNext() }
         }
     }
 
     @Test
     fun `throws exception when file is empty`() {
         val file = File("src/test/resources/test-data/lumo_alueet_empty.gpkg")
-        GpkgReader(file, TableDefinition.LUMO_ALUEET).use { reader ->
+        GpkgReader(file, TableDefinition.LUMO_ALUEET, emptyList()).use { reader ->
             assertFalse(reader.hasNext())
         }
     }
@@ -198,14 +209,14 @@ class GpkgReaderTest {
     fun `throws exception when file is not a valid GeoPackage file`() {
         val file = File("src/test/resources/test-data/broken_file.gpkg")
         assertFailsWith(IOException::class) {
-            GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET).use { reader -> reader.hasNext() }
+            GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET, emptyList()).use { reader -> reader.hasNext() }
         }
     }
 
     @Test
     fun `hasNext returns false when there are no more features to read`() {
         val file = File("src/test/resources/test-data/liito_orava_pisteet.gpkg")
-        GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET).use { reader ->
+        GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET, emptyList()).use { reader ->
             while (reader.hasNext()) {
                 reader.next()
             }
@@ -217,7 +228,7 @@ class GpkgReaderTest {
     fun `next throws exception when there are no more features to read`() {
         val file = File("src/test/resources/test-data/liito_orava_pisteet.gpkg")
         assertFailsWith(NoSuchElementException::class) {
-            GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET).use { reader ->
+            GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET, emptyList()).use { reader ->
                 while (reader.hasNext()) {
                     reader.next()
                 }

@@ -13,7 +13,8 @@ data class BucketEnv(
     val s3MockUrl: URI?,
     val proxyThroughNginx: Boolean,
     val data: String,
-    val region: Region
+    val region: Region,
+    val verifyFileAvTagged: Boolean
 ) {
     fun allBuckets() = listOf(data)
 
@@ -23,7 +24,8 @@ data class BucketEnv(
                 s3MockUrl = env.lookup("luontotieto.s3mock.url"),
                 proxyThroughNginx = env.lookup("luontotieto.bucket.proxy_through_nginx"),
                 data = env.lookup("luontotieto.bucket.data"),
-                region = Region.of(env.lookup("luontotieto.aws.region"))
+                region = Region.of(env.lookup("luontotieto.aws.region")),
+                verifyFileAvTagged = env.lookup("luontotieto.bucket.verify_file_av_tagged")
             )
     }
 }

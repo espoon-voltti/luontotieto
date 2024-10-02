@@ -52,7 +52,7 @@ dependencies {
     implementation("org.springframework.ws:spring-ws-security")
 
     implementation("org.geotools:gt-geopkg:31.2")
-    implementation("org.geotools:gt-epsg-hsql:31.2")
+    implementation("org.geotools:gt-epsg-hsql:32.0")
 
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.flywaydb:flyway-core:10.16.0")
@@ -93,6 +93,8 @@ dependencies {
     api("org.jsoup:jsoup:1.17.1")
 
     implementation("org.unbescape:unbescape:1.1.6.RELEASE")
+
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
 }
 
 tasks.withType<KotlinCompile> {

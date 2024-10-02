@@ -33,7 +33,7 @@ export const BackNavigation = React.memo(function BackNavigation({
             text={props.navigationText ?? 'Takaisin'}
             onClick={() => navigate(props.destination ?? '/luontotieto')}
           />
-          {props.text && <H2>{props.text}</H2>}
+          {!!props.text && <H2>{props.text}</H2>}
         </FlexColWithGaps>
       </SectionContainer>
       <VerticalGap $size="m" />

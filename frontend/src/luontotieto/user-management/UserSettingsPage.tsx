@@ -19,7 +19,9 @@ import React, {
   useMemo,
   useState
 } from 'react'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 import { AlertBox, InfoBox } from 'shared/MessageBoxes'
+import { AsyncButton } from 'shared/buttons/AsyncButton'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
 import { InlineButton } from 'shared/buttons/InlineButton'
@@ -34,7 +36,6 @@ import {
   PageContainer,
   SectionContainer
 } from '../../shared/layout'
-import AccessibilityFooter from 'shared/AccessibilityFooter'
 
 export const UserSettingsPage = React.memo(function UserSettingsPage() {
   const { user } = useContext(UserContext)
@@ -125,22 +126,24 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
+  const onChangePasswordSuccess = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ['auth-status'] })
+    void queryClient.invalidateQueries({ queryKey: ['users', userId] })
+    setShowModal({
+      title: 'Salasana muutettu',
+      resolve: {
+        action: () => {
+          setShowModal(null)
+          onClose()
+        },
+        label: 'Ok'
+      }
+    })
+  }, [userId])
+
   const { mutateAsync: changePassword, isPending } = useMutation({
     mutationFn: apiChangeUserPassword,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['auth-status'] })
-      void queryClient.invalidateQueries({ queryKey: ['users', userId] })
-      setShowModal({
-        title: 'Salasana muutettu',
-        resolve: {
-          action: () => {
-            setShowModal(null)
-            onClose()
-          },
-          label: 'Ok'
-        }
-      })
-    },
+    onSuccess: onChangePasswordSuccess,
     onError: (e: AxiosError<{ errorCode: ChangePasswordErrorCode }>) => {
       if (e instanceof AxiosError) {
         const errorCode = e.response?.data.errorCode
@@ -183,7 +186,13 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
   )
 
   return (
-    <form onSubmit={onSubmit}>
+    <form
+      onSubmit={async (e) => {
+        if (!isPending) {
+          await onSubmit(e)
+        }
+      }}
+    >
       <GroupOfInputRows>
         <LabeledInput $cols={3}>
           <Label>Nykyinen salasana</Label>
@@ -214,18 +223,21 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
         {!!errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
         <FlexRowWithGaps>
           <Button text="Peruuta" onClick={onClose} />
-          <Button
+          <AsyncButton
+            text="Tallenna"
+            data-qa="save-button"
+            primary
             disabled={
-              isPending ||
               !currentPassword ||
               !newPassword ||
               !newPassword2 ||
               !!newPassWordDoesNotMatchInfo ||
               !!passwordIsWeakInfo
             }
-            primary
-            type="submit"
-            text="Tallenna"
+            onSuccess={onChangePasswordSuccess}
+            onClick={() =>
+              changePassword({ userId, currentPassword, newPassword })
+            }
           />
         </FlexRowWithGaps>
       </GroupOfInputRows>

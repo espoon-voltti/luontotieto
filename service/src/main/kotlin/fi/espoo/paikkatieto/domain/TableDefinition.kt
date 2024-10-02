@@ -29,7 +29,8 @@ data class Column(
 ) {
     fun validate(
         id: String,
-        value: Any?
+        value: Any?,
+        allowedValues: List<String> = emptyList()
     ): GpkgValidationError? =
         when {
             value == null && !isNullable ->
@@ -54,6 +55,15 @@ data class Column(
                     column = name,
                     value = errorValue,
                     reason = GpkgValidationErrorReason.WRONG_TYPE
+                )
+            }
+
+            value != null && allowedValues.isNotEmpty() && !allowedValues.contains(value) -> {
+                GpkgValidationError(
+                    id = id,
+                    column = name,
+                    value = value,
+                    reason = GpkgValidationErrorReason.INVALID_VALUE
                 )
             }
 
@@ -173,7 +183,7 @@ enum class TableDefinition(
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
-                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka"),
+                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka_lajit"),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "paikan_nimi", kClass = String::class, isNullable = true),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
@@ -208,7 +218,7 @@ enum class TableDefinition(
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
-                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka"),
+                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka_lajit"),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
                 Column(name = "laji_luokitus", kClass = String::class),
@@ -237,7 +247,7 @@ enum class TableDefinition(
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
-                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka"),
+                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka_lajit"),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
                 Column(name = "laji_luokitus", kClass = String::class),
@@ -340,7 +350,7 @@ enum class TableDefinition(
                 Column(
                     name = "uhanalaisuusluokka",
                     kClass = String::class,
-                    sqlType = "IUCN_luokka"
+                    sqlType = "IUCN_luokka_luontotyypit"
                 ),
                 Column(name = "edustavuus", kClass = String::class, sqlType = "edustavuus_luokka"),
                 Column(name = "kuvaus", kClass = String::class),
@@ -638,7 +648,7 @@ private const val SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_PISTEET =
         :elioryhma::muut_huomioitavat_lajit_elioryhma,
         :tieteellinen_nimi,
         :suomenkielinen_nimi,
-        :IUCN_luokka::"IUCN_luokka",
+        :IUCN_luokka::"IUCN_luokka_lajit",
         :direktiivi,
         :paikan_nimi,
         :havaintopaikan_kuvaus,
@@ -677,7 +687,7 @@ private const val SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_VIIVAT =
         :elioryhma::muut_huomioitavat_lajit_elioryhma,
         :tieteellinen_nimi,
         :suomenkielinen_nimi,
-        :IUCN_luokka::"IUCN_luokka",
+        :IUCN_luokka::"IUCN_luokka_lajit",
         :direktiivi,
         :havaintopaikan_kuvaus,
         :laji_luokitus,
@@ -714,7 +724,7 @@ private const val SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_ALUEET =
         :elioryhma::muut_huomioitavat_lajit_elioryhma,
         :tieteellinen_nimi,
         :suomenkielinen_nimi,
-        :IUCN_luokka::"IUCN_luokka",
+        :IUCN_luokka::"IUCN_luokka_lajit",
         :direktiivi,
         :havaintopaikan_kuvaus,
         :laji_luokitus,
@@ -847,7 +857,7 @@ private const val SQL_INSERT_LUONTOTYYPIT_ALUEET =
         :nimi,
         :luontotyyppi_paaryhma::luontotyyppi_paaryhma,
         :luontotyyppi,
-        :uhanalaisuusluokka::"IUCN_luokka",
+        :uhanalaisuusluokka::"IUCN_luokka_luontotyypit",
         :edustavuus::edustavuus_luokka,
         :kuvaus,
         :lisatieto,

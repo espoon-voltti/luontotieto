@@ -3,13 +3,12 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import React from 'react'
-
-import { PageContainer, SectionContainer } from 'shared/layout'
-import styled from 'styled-components'
 import AccessibilityFooter from 'shared/AccessibilityFooter'
-import { H1, H2, P } from 'shared/typography'
 import ExternalLink from 'shared/ExternalLink'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
+import { PageContainer, SectionContainer } from 'shared/layout'
+import { H1, H2, P } from 'shared/typography'
+import styled from 'styled-components'
 
 const MainContainer = styled.main`
   outline: none;
