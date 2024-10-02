@@ -9,7 +9,9 @@ FROM node:22.2-bookworm-slim AS builder
 
 WORKDIR /project
 
-COPY ./package.json ./yarn.lock ./
+COPY ./.yarn ./.yarn
+COPY ./package.json ./yarn.lock ./.yarnrc.yml ./
+
 RUN yarn install --immutable
 
 COPY . .
