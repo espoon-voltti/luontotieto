@@ -183,7 +183,7 @@ export const FileInput = <
         )}
       </FlexRowWithGaps>
       {errorMessage && (
-        <FlexRowWithGaps>
+        <FlexRowWithGaps style={{ maxHeight: '300px', overflow: 'auto' }}>
           <InputFieldUnderRow className={classNames('warning')}>
             <span>
               {errorMessage.text.map((i) => (

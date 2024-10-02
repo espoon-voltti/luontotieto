@@ -7,7 +7,7 @@ import { AxiosError } from 'axios'
 import React, { FormEvent, useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AccessibilityFooter from 'shared/AccessibilityFooter'
-import { Button } from 'shared/buttons/Button'
+import { AsyncButton } from 'shared/buttons/AsyncButton'
 import { InputField } from 'shared/form/InputField'
 import { PageContainer } from 'shared/layout'
 import { useDebouncedState } from 'shared/useDebouncedState'
@@ -37,12 +37,14 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
+  const onLoginSuccess = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['auth-status'] })
+    navigate('/luontotieto')
+  }, [])
+
   const { mutateAsync: loginMutation, isPending } = useMutation({
     mutationFn: apiPostLogin,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['auth-status'] })
-      navigate('/luontotieto')
-    },
+    onSuccess: onLoginSuccess,
     onError: (e: AxiosError<{ errorCode: LoginErrorCode }>) => {
       if (e instanceof AxiosError) {
         const errorCode = e.response?.data.errorCode
@@ -64,7 +66,13 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
 
   return (
     <PageContainer>
-      <form onSubmit={onSubmit}>
+      <form
+        onSubmit={async (e) => {
+          if (!isPending) {
+            await onSubmit(e)
+          }
+        }}
+      >
         <SectionContainer>
           <H2>Kirjaudu sisään</H2>
           <VerticalGap $size="L" />
@@ -86,11 +94,13 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
               </LabeledInput>
             </RowOfInputs>
             {!!errorMsg && <LoginMessage>{errorMsg}</LoginMessage>}
-            <Button
+            <AsyncButton
               text="Kirjaudu sisään"
+              data-qa="save-button"
               primary
-              disabled={!email || !password || isPending}
-              type="submit"
+              disabled={!email || !password}
+              onSuccess={onLoginSuccess}
+              onClick={() => loginMutation({ email, password })}
             />
           </GroupOfInputRows>
         </SectionContainer>

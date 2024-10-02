@@ -73,20 +73,15 @@ class ReportController {
     @Autowired
     lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired
-    lateinit var documentClient: S3DocumentService
+    @Autowired lateinit var documentClient: S3DocumentService
 
-    @Autowired
-    lateinit var sesEmailClient: SESEmailClient
+    @Autowired lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired
-    lateinit var bucketEnv: BucketEnv
+    @Autowired lateinit var bucketEnv: BucketEnv
 
-    @Autowired
-    lateinit var luontotietoHost: LuontotietoHost
+    @Autowired lateinit var luontotietoHost: LuontotietoHost
 
-    @Autowired
-    lateinit var emailEnv: EmailEnv
+    @Autowired lateinit var emailEnv: EmailEnv
 
     private val logger = KotlinLogging.logger {}
 
@@ -213,14 +208,16 @@ class ReportController {
     fun updateReport(
         user: AuthenticatedUser,
         @PathVariable id: UUID,
-        @RequestBody report: Report.Companion.ReportInput
+        @RequestBody report: Report.Companion.ReportInput,
+        @RequestParam("sendUpdatedEmail") sendUpdatedEmail: Boolean? = true
     ): Report {
+        println("sendUpdatedEmail $sendUpdatedEmail")
         val reportResponse =
             jdbi.inTransactionUnchecked { tx -> tx.putReport(id, report, user) }.also {
                 logger.audit(user, AuditEvent.UPDATE_REPORT, mapOf("id" to "$id"))
             }
 
-        if (emailEnv.enabled) {
+        if (emailEnv.enabled && sendUpdatedEmail == true) {
             val reportUpdatedEmail =
                 Emails.getReportUpdatedEmail(
                     HtmlSafe(reportResponse.name),
@@ -292,7 +289,6 @@ class ReportController {
                                     )
                                 }
                             }
-
                             else -> emptyMap()
                         }
 
