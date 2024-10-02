@@ -27,6 +27,8 @@ const MessageBoxContainer = styled.div<MessageBoxContainerProps>`
   border-width: 1px;
   border-color: ${(props) => props.$color};
   border-radius: ${(props) => (props.$thin ? '0' : '4px')};
+  max-height: 350px;
+  overflow-y: auto;
 
   ${(props) =>
     props.$backGroundColor && `background-color: ${props.$backGroundColor};`}
@@ -34,6 +36,7 @@ const MessageBoxContainer = styled.div<MessageBoxContainerProps>`
   .message-container {
     display: flex;
     align-items: center;
+    word-break: break-word;
   }
 
   .icon-wrapper {

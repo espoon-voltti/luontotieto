@@ -4,6 +4,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { UserLoginPage } from 'auth/UserLoginPage'
 import AccessibilityStatement from 'luontotieto/accessibility/AccessibilityStatement'
+import { AdminSettingsPage } from 'luontotieto/admin/AdminSettingsPage'
 import { OrderFormPage } from 'luontotieto/order/OrderFormPage'
 import { ReportFormPage } from 'luontotieto/report/ReportFormPage'
 import { ReportListPage } from 'luontotieto/report/ReportListPage'
@@ -133,6 +134,14 @@ export const appRouter = createBrowserRouter([
         element: (
           <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <UserListPage />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/luontotieto/pääkäyttäjän-asetukset',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
+            <AdminSettingsPage />
           </AuthGuard>
         )
       },

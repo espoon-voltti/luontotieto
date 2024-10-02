@@ -117,7 +117,9 @@ export interface ReportFileDetails extends ReportFileInput {
 }
 
 export const apiPutReport = async (
-  reportInput: { reportId: string } & ReportFormInput
+  reportInput: { reportId: string } & ReportFormInput & {
+      sendUpdatedEmail?: false
+    }
 ): Promise<
   | ReportDetails
   | (ReportFileSuccessResponse | ReportFileValidationErrorResponse)[]
@@ -127,7 +129,12 @@ export const apiPutReport = async (
   }
 
   const report = await apiClient
-    .put<ReportDetails>(`/reports/${reportInput.reportId}`, body)
+    .put<ReportDetails>(`/reports/${reportInput.reportId}`, body, {
+      params:
+        reportInput.sendUpdatedEmail !== undefined
+          ? { sendUpdatedEmail: reportInput.sendUpdatedEmail }
+          : {}
+    })
     .then((r) => r.data)
 
   for (const id of reportInput.filesToRemove) {
@@ -152,7 +159,11 @@ export const apiPutReport = async (
 }
 
 export interface ApproveReportError {
-  errorCode: 'error-saving-paikkatieto-data' | 'access-denied'
+  errorCode:
+    | 'error-saving-paikkatieto-data'
+    | 'error-validating-paikkatieto-data'
+    | 'access-denied'
+  errorMessages?: string[]
 }
 
 export const apiApproveReport = async (input: {
@@ -168,7 +179,8 @@ export const apiApproveReport = async (input: {
     )
     .catch((error: { response: { data: ApproveReportError } }) => {
       const errorResponse = {
-        errorCode: error.response.data.errorCode
+        errorCode: error.response.data.errorCode,
+        errorMessages: error.response.data.errorMessages
       }
       return Promise.reject(errorResponse)
     })
