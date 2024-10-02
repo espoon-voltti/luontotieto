@@ -3,9 +3,11 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { UserLoginPage } from 'auth/UserLoginPage'
-import { FrontPage } from 'luontotieto/FrontPage'
+import AccessibilityStatement from 'luontotieto/accessibility/AccessibilityStatement'
+import { AdminSettingsPage } from 'luontotieto/admin/AdminSettingsPage'
 import { OrderFormPage } from 'luontotieto/order/OrderFormPage'
 import { ReportFormPage } from 'luontotieto/report/ReportFormPage'
+import { ReportListPage } from 'luontotieto/report/ReportListPage'
 import { NewUserPage } from 'luontotieto/user-management/NewUserPage'
 import { UserListPage } from 'luontotieto/user-management/UserListPage'
 import { UserManagementPage } from 'luontotieto/user-management/UserManagementPage'
@@ -98,15 +100,15 @@ export const appRouter = createBrowserRouter([
       {
         path: '/luontotieto',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
-            <FrontPage />
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
+            <ReportListPage />
           </AuthGuard>
         )
       },
       {
         path: '/luontotieto/tilaus/uusi',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <OrderFormPage mode="CREATE" />
           </AuthGuard>
         )
@@ -114,7 +116,7 @@ export const appRouter = createBrowserRouter([
       {
         path: '/luontotieto/tilaus/:id/muokkaa',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <OrderFormPage mode="EDIT" />
           </AuthGuard>
         )
@@ -122,7 +124,7 @@ export const appRouter = createBrowserRouter([
       {
         path: '/luontotieto/selvitys/:id',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <ReportFormPage />
           </AuthGuard>
         )
@@ -130,15 +132,23 @@ export const appRouter = createBrowserRouter([
       {
         path: '/luontotieto/käyttäjät',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <UserListPage />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/luontotieto/pääkäyttäjän-asetukset',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
+            <AdminSettingsPage />
           </AuthGuard>
         )
       },
       {
         path: '/luontotieto/käyttäjät/:id',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <UserManagementPage />
           </AuthGuard>
         )
@@ -146,7 +156,7 @@ export const appRouter = createBrowserRouter([
       {
         path: '/luontotieto/käyttäjät/uusi',
         element: (
-          <AuthGuard allow="AUTHENTICATED_ONLY">
+          <AuthGuard allow="AUTHENTICATED_WITH_UPDATED_PASSWORD_ONLY">
             <NewUserPage />
           </AuthGuard>
         )
@@ -156,6 +166,14 @@ export const appRouter = createBrowserRouter([
         element: (
           <AuthGuard allow="AUTHENTICATED_ONLY">
             <UserSettingsPage />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/accessibility',
+        element: (
+          <AuthGuard allow="ALL">
+            <AccessibilityStatement />
           </AuthGuard>
         )
       },

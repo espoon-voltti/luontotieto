@@ -11,6 +11,7 @@ export interface AppUser {
   email?: string | null
   role: UserRole
   externalId?: string
+  passwordUpdated?: boolean
 }
 
 export interface UserState {

@@ -52,7 +52,7 @@ dependencies {
     implementation("org.springframework.ws:spring-ws-security")
 
     implementation("org.geotools:gt-geopkg:31.2")
-    implementation("org.geotools:gt-epsg-hsql:31.2")
+    implementation("org.geotools:gt-epsg-hsql:32.0")
 
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.flywaydb:flyway-core:10.16.0")
@@ -70,7 +70,7 @@ dependencies {
     api(platform("com.fasterxml.jackson:jackson-bom:2.17.0"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    implementation("software.amazon.awssdk:s3:2.26.20")
+    implementation("software.amazon.awssdk:s3:2.27.22")
     implementation("software.amazon.awssdk:ses:2.25.23")
 
     implementation("org.apache.tika:tika-core:2.9.2")
@@ -91,6 +91,10 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
 
     api("org.jsoup:jsoup:1.17.1")
+
+    implementation("org.unbescape:unbescape:1.1.6.RELEASE")
+
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
 }
 
 tasks.withType<KotlinCompile> {

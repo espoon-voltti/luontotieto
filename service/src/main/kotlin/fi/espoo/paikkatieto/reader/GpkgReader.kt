@@ -4,6 +4,7 @@
 
 package fi.espoo.paikkatieto.reader
 
+import fi.espoo.luontotieto.domain.PaikkaTietoEnum
 import fi.espoo.paikkatieto.domain.TableDefinition
 import mu.KotlinLogging
 import org.geotools.api.data.SimpleFeatureReader
@@ -22,7 +23,8 @@ class GpkgReaderException(msg: String) : IOException(msg)
 
 enum class GpkgValidationErrorReason {
     IS_NULL,
-    WRONG_TYPE
+    WRONG_TYPE,
+    INVALID_VALUE
 }
 
 data class GpkgValidationError(
@@ -36,7 +38,11 @@ data class GpkgFeature(val columns: Map<String, Any?>, val errors: List<GpkgVali
     fun isValid() = errors.isEmpty()
 }
 
-class GpkgReader(private val file: File, val tableDefinition: TableDefinition) :
+class GpkgReader(
+    private val file: File,
+    val tableDefinition: TableDefinition,
+    private val validEnums: List<PaikkaTietoEnum>
+) :
     Iterator<GpkgFeature>, Closeable {
     private lateinit var gpkg: GeoPackage
     private var reader: SimpleFeatureReader
@@ -69,7 +75,6 @@ class GpkgReader(private val file: File, val tableDefinition: TableDefinition) :
 
     override fun next(): GpkgFeature {
         val gpkgFeature = reader.next()
-
         val columns =
             tableDefinition.columns.associate { column ->
                 val isGeometryColumn = column.kClass.isSubclassOf(Geometry::class)
@@ -90,7 +95,13 @@ class GpkgReader(private val file: File, val tableDefinition: TableDefinition) :
                     } else {
                         getAttribute(column.name, gpkgFeature)
                     }
-                column.validate(gpkgFeature.id, attr)
+
+                val allowedColumnValues =
+                    validEnums
+                        .filter { it.name == column.sqlType }
+                        .map { it.value }
+
+                column.validate(gpkgFeature.id, attr, allowedColumnValues)
             }
 
         return GpkgFeature(columns = columns, errors = errors)

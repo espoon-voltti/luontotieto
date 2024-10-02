@@ -56,7 +56,7 @@ class Emails {
     companion object {
         fun getUserCreatedEmail(
             link: String,
-            email: String,
+            email: HtmlSafe<String>,
             password: String
         ) = EmailContent.fromHtml(
             "Käyttäjätunnukset luotu Espoon Luontotietoportaaliin",
@@ -96,8 +96,8 @@ class Emails {
         )
 
         fun getReportApprovedEmail(
-            reportName: String,
-            approverName: String,
+            reportName: HtmlSafe<String>,
+            approverName: HtmlSafe<String>,
             link: String
         ) = EmailContent.fromHtml(
             "Hyväksytty selvitys: $reportName",
@@ -111,8 +111,8 @@ class Emails {
         )
 
         fun getReportCreatedEmail(
-            reportName: String,
-            reportDescription: String,
+            reportName: HtmlSafe<String>,
+            reportDescription: HtmlSafe<String>,
             link: String
         ) = EmailContent.fromHtml(
             "Uusi luontoselvitys",
@@ -127,8 +127,8 @@ class Emails {
         )
 
         fun getReportUpdatedEmail(
-            reportName: String,
-            reportAssignee: String,
+            reportName: HtmlSafe<String>,
+            reportAssignee: HtmlSafe<String>,
             link: String
         ) = EmailContent.fromHtml(
             "Päivitys selvitykseen $reportName",

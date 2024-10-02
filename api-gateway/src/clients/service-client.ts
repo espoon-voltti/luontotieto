@@ -3,9 +3,10 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import express from 'express'
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import { AppSessionUser, createAuthHeader } from '../auth/index.js'
 import { serviceUrl } from '../config.js'
+import { logError } from '../logging/index.js'
 
 export const client = axios.create({
   baseURL: serviceUrl
@@ -36,8 +37,12 @@ export interface AdUser {
   email?: string | null
 }
 
+export interface PasswordUser {
+  passwordUpdated: boolean
+}
+
 // currently same
-export interface AppUser extends AdUser {
+export interface AppUser extends AdUser, PasswordUser {
   id: string
 }
 
@@ -61,16 +66,28 @@ export async function getUserDetails(
   return data
 }
 
-export async function postPasswordLogin(
-  email: string,
-  password: string
-): Promise<AppUser | undefined> {
-  const { data } = await client.post<AppUser | undefined>(
-    `/system/password-login`,
-    { email, password },
-    {
-      headers: createServiceRequestHeaders(undefined, systemUser)
+export async function postPasswordLogin(email: string, password: string) {
+  try {
+    const { data } = await client.post<AppUser>(
+      `/system/password-login`,
+      { email, password },
+      {
+        headers: createServiceRequestHeaders(undefined, systemUser)
+      }
+    )
+    return data
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      logError('Login failed with expected error', undefined, undefined, e)
+      return { errorCode: e.response?.data?.errorCode ?? 'wrong-credentials' }
     }
-  )
-  return data
+
+    logError(
+      'Login failed with unexpected error',
+      undefined,
+      undefined,
+      e as Error
+    )
+    return { errorCode: 'unknown-error' }
+  }
 }

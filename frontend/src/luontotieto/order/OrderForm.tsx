@@ -2,7 +2,8 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faInfo, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Order,
   OrderFile,
@@ -12,9 +13,18 @@ import {
   OrderReportDocumentInput
 } from 'api/order-api'
 import { getDocumentTypeTitle, ReportFileDocumentType } from 'api/report-api'
+import { UserRole } from 'api/users-api'
+import { UserContext } from 'auth/UserContext'
 import { emailRegex } from 'luontotieto/user-management/common'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from 'react'
 import { Tag } from 'react-tag-autocomplete'
+import { InfoBox } from 'shared/MessageBoxes'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { Checkbox } from 'shared/form/Checkbox'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
@@ -22,7 +32,9 @@ import { FileInput, FileInputData } from 'shared/form/File/FileInput'
 import { InputField } from 'shared/form/InputField'
 import { TagAutoComplete } from 'shared/form/TagAutoComplete/TagAutoComplete'
 import { TextArea } from 'shared/form/TextArea'
+import { colors } from 'shared/theme'
 import { useDebouncedState } from 'shared/useDebouncedState'
+import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 
 import { useGetAssigneeUsersQuery } from '../../api/hooks/users'
@@ -30,13 +42,14 @@ import { DATE_PATTERN } from '../../shared/dates'
 import { Select } from '../../shared/form/Select'
 import {
   FlexCol,
+  FlexRow,
   GroupOfInputRows,
   LabeledInput,
   RowOfInputs,
   SectionContainer,
   VerticalGap
 } from '../../shared/layout'
-import { H3, Label } from '../../shared/typography'
+import { H3, Label, P } from '../../shared/typography'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -44,6 +57,7 @@ interface CreateProps {
   planNumbers: string[]
   orderingUnits: string[]
   errors: OrderFileValidationErrorResponse[]
+  disabled?: boolean
 }
 
 interface EditProps {
@@ -54,6 +68,7 @@ interface EditProps {
   planNumbers: string[]
   orderingUnits: string[]
   errors: OrderFileValidationErrorResponse[]
+  disabled?: boolean
 }
 
 type Props = CreateProps | EditProps
@@ -69,6 +84,7 @@ interface OrderFileInputElementNew {
   documentType: OrderFileDocumentType
   file: File | null
   id: string
+  focus?: boolean
 }
 
 interface OrderFileInputElementExisting {
@@ -81,41 +97,97 @@ type OrderFileInputElement =
   | OrderFileInputElementNew
   | OrderFileInputElementExisting
 
-function createFileInputs(orderFiles: OrderFile[]): OrderFileInputElement[] {
-  const files: OrderFileInputElement[] = orderFileTypes.map((documentType) => {
-    const orderFile = orderFiles.find(
-      (file) => file.documentType === documentType
-    )
-    return orderFile
-      ? {
+function createExistingFileInputs(
+  orderFiles: OrderFile[]
+): OrderFileInputElementExisting[] {
+  return orderFiles.map((of) => ({
+    documentType: of.documentType,
+    type: 'EXISTING',
+    orderFile: of
+  }))
+}
+
+function createFileInputs(
+  orderFiles: OrderFile[],
+  inMemoryFiles: OrderFileInputElement[]
+): OrderFileInputElement[] {
+  const requiredFiles: OrderFileInputElement[] = orderFileTypes.map(
+    (documentType) => {
+      const existingFile = orderFiles.find(
+        (file) => file.documentType === documentType
+      )
+      const existingInMemoryFile = inMemoryFiles.find(
+        (i) => documentType === i.documentType
+      )
+      if (existingFile) {
+        return {
           documentType,
           type: 'EXISTING',
-          orderFile
+          orderFile: existingFile
         }
-      : {
-          documentType,
-          type: 'NEW',
-          description: '',
-          file: null,
-          id: uuidv4()
-        }
-  })
+      }
+      if (existingInMemoryFile) {
+        return existingInMemoryFile
+      }
+      // If none of these are found return new
+      return {
+        documentType,
+        type: 'NEW',
+        description: '',
+        file: null,
+        id: uuidv4()
+      }
+    }
+  )
+  if (inMemoryFiles.length === 0) {
+    return requiredFiles
+  }
 
-  const additionalFiles = orderFiles
+  const requiredFileIds = requiredFiles.map((rf) =>
+    rf.type === 'NEW' ? rf.id : rf.orderFile.id
+  )
+
+  // This is the order we want to hold for the additional in memory files
+  const inMemoryAdditionalFileIds = inMemoryFiles
+    .map((imf) => (imf.type === 'NEW' ? imf.id : imf.orderFile.id))
+    .filter((id) => !requiredFileIds.some((rfId) => rfId === id))
+
+  const existingAdditionalFileIds = orderFiles
     .filter(
       (file) =>
-        !files.some((f) => f.type === 'EXISTING' && f.orderFile.id === file.id)
+        !requiredFiles.some(
+          (f) => f.type === 'EXISTING' && f.orderFile.id === file.id
+        )
     )
-    .map(
-      (orderFile) =>
-        ({
-          documentType: orderFile.documentType,
-          type: 'EXISTING',
-          orderFile
-        }) as OrderFileInputElementExisting
-    )
+    .map((orderFile) => orderFile.id)
 
-  return [...files, ...additionalFiles]
+  const additionalFileIds = [
+    ...new Set([...inMemoryAdditionalFileIds, ...existingAdditionalFileIds])
+  ]
+
+  const additionalFiles: (OrderFileInputElement | null)[] =
+    additionalFileIds.map((fileId) => {
+      const existingFile = orderFiles.find((of) => of.id === fileId)
+      if (existingFile) {
+        return {
+          documentType: existingFile.documentType,
+          type: 'EXISTING',
+          orderFile: existingFile
+        }
+      }
+      const inMemoryFile = inMemoryFiles.find(
+        (imf) => imf.type === 'NEW' && imf.id === fileId
+      )
+      if (inMemoryFile && inMemoryFile.type === 'NEW') {
+        return inMemoryFile
+      }
+      return null
+    })
+
+  return [
+    ...requiredFiles,
+    ...additionalFiles.flatMap((af) => (af !== null ? [af] : []))
+  ]
 }
 
 function filesAreValid(fileInputs: OrderFileInputElement[]): boolean {
@@ -195,6 +267,7 @@ function createOrderFormInput(order: Order | undefined): OrderFormInput {
     assigneeId: order?.assigneeId ?? '',
     assigneeContactEmail: order?.assigneeContactEmail ?? '',
     assigneeContactPerson: order?.assigneeContactPerson ?? '',
+    assigneeCompanyName: order?.assigneeCompanyName ?? '',
     contactPhone: order?.contactPhone ?? '',
     contactPerson: order?.contactPerson ?? '',
     contactEmail: order?.contactEmail ?? '',
@@ -205,9 +278,21 @@ function createOrderFormInput(order: Order | undefined): OrderFormInput {
 }
 
 export const OrderForm = React.memo(function OrderForm(props: Props) {
+  const { user } = useContext(UserContext)
+
   const originalFileInputs = useMemo(
-    () => createFileInputs(props.mode === 'EDIT' ? props.orderFiles : []),
+    () =>
+      createExistingFileInputs(props.mode === 'EDIT' ? props.orderFiles : []),
     [props]
+  )
+
+  const [
+    showOrderAssigneeCompanyNameInfo,
+    setShowOrderAssigneeCompanyNameInfo
+  ] = useState(false)
+
+  const [orderFiles, setOrderFiles] = useState<OrderFileInputElement[]>(
+    createFileInputs(props.mode === 'EDIT' ? props.orderFiles : [], [])
   )
 
   const [orderInput, setOrderInput] = useDebouncedState<OrderFormInput>(
@@ -215,11 +300,11 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   )
 
   const [planNumbers, setPlanNumbers] = useDebouncedState(
-    props.mode === 'CREATE' ? [] : props.order.planNumber ?? []
+    props.mode === 'CREATE' ? [] : (props.order.planNumber ?? [])
   )
 
   const [orderingUnit, setorderingUnit] = useDebouncedState(
-    props.mode === 'CREATE' ? [] : props.order.orderingUnit ?? []
+    props.mode === 'CREATE' ? [] : (props.order.orderingUnit ?? [])
   )
 
   const invalidContactEmailInfo = useMemo(
@@ -243,10 +328,6 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           }
         : undefined,
     [orderInput.assigneeContactEmail]
-  )
-
-  const [orderFiles, setOrderFiles] = useState<OrderFileInputElement[]>(
-    createFileInputs(props.mode === 'EDIT' ? props.orderFiles : [])
   )
 
   const orderAreaFile = useMemo(
@@ -358,7 +439,6 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     if (!orderInput.contactEmail.trim().match(emailRegex)) return null
     if (orderInput.assigneeContactPerson.trim() === '') return null
     if (!orderInput.assigneeContactEmail.trim().match(emailRegex)) return null
-
     return {
       name: orderInput.name.trim(),
       description: orderInput.description.trim(),
@@ -368,6 +448,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       contactPerson: orderInput.contactPerson.trim(),
       assigneeContactEmail: orderInput.assigneeContactEmail.trim(),
       assigneeContactPerson: orderInput.assigneeContactPerson.trim(),
+      assigneeCompanyName:
+        orderInput.assigneeCompanyName?.trim() === ''
+          ? null
+          : (orderInput.assigneeCompanyName?.trim() ?? null),
       planNumber: planNumbers,
       orderingUnit: orderingUnit,
       reportDocuments: reportDocuments
@@ -382,7 +466,8 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 description: e.description,
                 documentType: e.documentType,
                 file: e.file,
-                id: e.id
+                id: e.id,
+                name: e.file.name
               }
             ]
           : []
@@ -411,6 +496,15 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     props.onChange(validInput)
   }, [validInput, props, orderFiles])
 
+  useEffect(() => {
+    setOrderFiles(
+      createFileInputs(
+        props.mode === 'EDIT' ? props.orderFiles : [],
+        orderFiles
+      )
+    )
+  }, [originalFileInputs])
+
   const uniquePlanNumbers = [...new Set([...planNumbers, ...props.planNumbers])]
   const planNumberSuggestions = uniquePlanNumbers.map((pn) => ({
     value: pn,
@@ -424,6 +518,10 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     value: pn,
     label: pn
   }))
+
+  const showOrderAssigneeCompanyName =
+    props.mode === 'CREATE' ? user?.role === UserRole.ADMIN : true
+
   return (
     <FlexCol>
       <SectionContainer>
@@ -436,6 +534,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               <TextArea
                 onChange={(name) => setOrderInput({ ...orderInput, name })}
                 value={orderInput.name}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -452,6 +551,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 onChange={updateOrderingUnits}
                 placeholderText="Etsi tai lisää yksikkö"
+                disabled={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -468,6 +568,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 onChange={updatePlanNumbers}
                 placeholderText="Etsi tai lisää kaava"
+                disabled={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -481,6 +582,8 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 value={orderInput.returnDate}
                 type="date"
+                readonly={props.disabled}
+                aria-describedby="date-picker-input"
               />
             </LabeledInput>
           </RowOfInputs>
@@ -496,6 +599,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 value={orderInput.description}
                 rows={2}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -511,6 +615,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                   })
                 }
                 value={orderInput.contactPerson}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -526,6 +631,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 value={orderInput.contactEmail}
                 info={invalidContactEmailInfo}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -540,6 +646,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                   })
                 }
                 value={orderInput.contactPhone}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -558,9 +665,56 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 getItemLabel={(u) => u?.name ?? '-'}
                 getItemValue={(u) => u?.id ?? '-'}
+                disabled={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
+          {showOrderAssigneeCompanyName && (
+            <RowOfInputs>
+              <LabeledInput $cols={4}>
+                <FlexRow>
+                  <Label>Yhteysyritys </Label>
+                  <StyledIconButton
+                    onClick={() =>
+                      setShowOrderAssigneeCompanyNameInfo(
+                        !showOrderAssigneeCompanyNameInfo
+                      )
+                    }
+                  >
+                    <StyledIconContainer $color={colors.main.m1}>
+                      <FontAwesomeIcon
+                        icon={faInfo}
+                        size="1x"
+                        color={colors.main.m1}
+                        inverse
+                      />
+                    </StyledIconContainer>
+                  </StyledIconButton>
+                </FlexRow>
+                {showOrderAssigneeCompanyNameInfo && (
+                  <InfoBox
+                    message={
+                      <P>
+                        Tällä kentällä pääkäyttäjä voi ylikirjoittaa
+                        aluerajaukseen tallentuvan selvittäjän nimen.
+                      </P>
+                    }
+                  />
+                )}
+                <InputField
+                  onChange={(assigneeCompanyName) =>
+                    setOrderInput({
+                      ...orderInput,
+                      assigneeCompanyName
+                    })
+                  }
+                  value={orderInput.assigneeCompanyName ?? ''}
+                  readonly={props.disabled || user?.role !== UserRole.ADMIN}
+                />
+              </LabeledInput>
+            </RowOfInputs>
+          )}
+
           <RowOfInputs>
             <LabeledInput $cols={4}>
               <Label>Yhteyshenkilö *</Label>
@@ -572,6 +726,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                   })
                 }
                 value={orderInput.assigneeContactPerson}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -587,6 +742,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 }
                 value={orderInput.assigneeContactEmail}
                 info={invalidAssigneeContactEmailInfo}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>
@@ -612,6 +768,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               }
               accept=".gpkg"
               required={true}
+              readOnly={props.disabled}
             />
           )}
           {orderAreaFile && orderAreaFile.type === 'EXISTING' && (
@@ -620,7 +777,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               data={{
                 type: 'ORDER',
                 file: orderAreaFile.orderFile,
-                readonly: false,
+                readonly: props.disabled ?? false,
                 documentType: orderAreaFile.documentType,
                 updated: orderAreaFile.orderFile.updated
               }}
@@ -651,6 +808,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                       props.errors.find((error) => error.id === fInput.id)
                         ?.errors
                     }
+                    readOnly={props.disabled}
                   />
                 )
               case 'EXISTING':
@@ -661,7 +819,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                     data={{
                       type: 'ORDER',
                       file: fInput.orderFile,
-                      readonly: false,
+                      readonly: props.disabled ?? false,
                       documentType: fInput.documentType,
                       updated: fInput.orderFile.updated
                     }}
@@ -685,10 +843,12 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 documentType: OrderFileDocumentType.ORDER_INFO,
                 type: 'NEW',
                 description: '',
-                file: null
+                file: null,
+                focus: true
               }
             ])
           }
+          disabled={props.disabled}
         />
       </SectionContainer>
       <VerticalGap $size="m" />
@@ -710,6 +870,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                       documentType: rd.documentType
                     })
                   }
+                  disabled={props.disabled}
                 />
               ))}
             </LabeledInput>
@@ -724,3 +885,26 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
 interface OrderCheckBoxComponentInput extends OrderReportDocumentInput {
   checked: boolean
 }
+
+const StyledIconContainer = styled.div<{ $color: string }>`
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  background: ${(props) => props.$color};
+  border-radius: 100%;
+`
+
+const StyledIconButton = styled.button`
+  margin-left: 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  &:focus {
+    outline: 2px solid ${colors.main.m3};
+  }
+`

@@ -6,6 +6,7 @@ package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.common.databaseValue
+import fi.espoo.luontotieto.common.sanitizeCsvCellData
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
@@ -59,11 +60,13 @@ private const val SELECT_REPORT_SQL =
            ouu.name                                   AS "o_updatedBy",
            o.assignee_contact_person                  AS "o_assigneeContactPerson",
            o.assignee_contact_email                   AS "o_assigneeContactEmail",
+           o.assignee_company_name                    AS "o_assigneeCompanyName",
            o.return_date                              AS "o_returnDate",
            o.contact_person                           AS "o_contactPerson",
            o.contact_phone                            AS "o_contactPhone",
            o.contact_email                            AS "o_contactEmail",
-           o.ordering_unit                            AS "o_orderingUnit"
+           o.ordering_unit                            AS "o_orderingUnit",
+           r.approved                                 AS "o_hasApprovedReport"
     FROM report r
              LEFT JOIN users uc ON r.created_by = uc.id
              LEFT JOIN users uu ON r.updated_by = uu.id
@@ -247,6 +250,29 @@ fun Handle.getObservedSpecies(reportId: UUID): List<String> {
         .toList()
 }
 
+data class PaikkaTietoEnum(
+    val name: String,
+    val value: String
+)
+
+fun Handle.getPaikkaTietoEnums(): List<PaikkaTietoEnum> {
+    return createQuery(
+        """
+            SELECT
+                t.typname AS name,
+                e.enumlabel AS value
+            FROM
+                pg_type t
+            JOIN
+                pg_enum e ON t.oid = e.enumtypid
+            JOIN
+                pg_namespace n ON n.oid = t.typnamespace
+            """
+    )
+        .mapTo<PaikkaTietoEnum>()
+        .toList()
+}
+
 fun Handle.getAluerajausLuontoselvitysParams(
     user: AuthenticatedUser,
     id: UUID,
@@ -279,10 +305,12 @@ fun Handle.getAluerajausLuontoselvitysParams(
             .sorted()
             .toTypedArray()
 
+    val contactPerson = report.order?.assigneeCompanyName ?: report.order?.assignee
+
     return mapOf(
         "name" to report.name,
         "year" to report.order?.returnDate?.year,
-        "contactPerson" to report.order?.assigneeContactPerson,
+        "contactPerson" to contactPerson,
         "unit" to report.order?.orderingUnit?.joinToString(","),
         "additionalInformation" to reportAreaFile?.description,
         "reportLink" to reportLink,
@@ -290,6 +318,9 @@ fun Handle.getAluerajausLuontoselvitysParams(
         "surveyedData" to surveyedData
     )
 }
+
+const val CSV_FIELD_SEPARATOR = ";"
+const val CSV_RECORD_SEPARATOR = "\r\n"
 
 fun reportsToCsv(reports: List<Report>): String {
     val csvHeader =
@@ -306,29 +337,40 @@ fun reportsToCsv(reports: List<Report>): String {
             "selvitetyt tiedot",
             "muut huomioitavat lajit",
             "ei löydettyjä havaintoja"
-        ).joinToString(";") + "\n"
+        ).joinToString(CSV_FIELD_SEPARATOR, postfix = CSV_RECORD_SEPARATOR)
 
-    val delimiter = ";"
     val csvContent = StringBuilder()
     csvContent.append(csvHeader)
 
     for (report in reports) {
-        csvContent.append(report.id).append(delimiter)
-            .append(report.name).append(delimiter)
-            .append(report.approved).append(delimiter)
-            .append(report.order?.planNumber?.joinToString(",")).append(delimiter)
-            .append(report.order?.orderingUnit?.joinToString(",")).append(delimiter)
-            .append(report.createdBy).append(delimiter)
-            .append(report.created).append(delimiter)
-            .append(report.updatedBy).append(delimiter)
-            .append(report.updated).append(delimiter)
-            .append(
+        val planNumbers = sanitizeCsvCellData(report.order?.planNumber?.joinToString(",") ?: "")
+        val orderingUnits = sanitizeCsvCellData(report.order?.orderingUnit?.joinToString(",") ?: "")
+        val reportDocuments =
+
+            sanitizeCsvCellData(
                 report.order?.reportDocuments?.map { rd -> rd.documentType }
-                    ?.joinToString(",")
-            ).append(delimiter)
-            .append(report.observedSpecies?.joinToString(","))
-            .append(report.noObservations?.map { rd -> rd }?.joinToString(","))
-            .append("\n")
+                    ?.joinToString(",") ?: ""
+            )
+
+        val observedSpecies = sanitizeCsvCellData(report.observedSpecies?.joinToString(",") ?: "")
+
+        val noObservations = sanitizeCsvCellData(report.noObservations?.joinToString(",") ?: "")
+
+        csvContent.append(report.id).append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.name)).append(CSV_FIELD_SEPARATOR)
+            .append(report.approved).append(CSV_FIELD_SEPARATOR)
+            .append(planNumbers).append(CSV_FIELD_SEPARATOR)
+            .append(orderingUnits).append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.createdBy)).append(CSV_FIELD_SEPARATOR)
+            .append(report.created).append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.updatedBy)).append(CSV_FIELD_SEPARATOR)
+            .append(report.updated).append(CSV_FIELD_SEPARATOR)
+            .append(
+                reportDocuments
+            ).append(CSV_FIELD_SEPARATOR)
+            .append(observedSpecies).append(CSV_FIELD_SEPARATOR)
+            .append(noObservations)
+            .append(CSV_RECORD_SEPARATOR)
     }
 
     return csvContent.toString()

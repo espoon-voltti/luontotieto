@@ -13,6 +13,7 @@ import fi.espoo.luontotieto.domain.OrderReportDocument
 import fi.espoo.luontotieto.domain.Report
 import fi.espoo.luontotieto.domain.ReportController
 import fi.espoo.luontotieto.domain.UserRole
+import fi.espoo.luontotieto.domain.getAluerajausLuontoselvitysParams
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.jdbi.v3.core.kotlin.mapTo
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,11 +29,9 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ReportTests : FullApplicationTest() {
-    @Autowired
-    lateinit var reportController: ReportController
+    @Autowired lateinit var reportController: ReportController
 
-    @Autowired
-    lateinit var orderController: OrderController
+    @Autowired lateinit var orderController: OrderController
 
     @Test
     fun `create report with all data and fetch`() {
@@ -92,7 +91,11 @@ class ReportTests : FullApplicationTest() {
             reportController.updateReport(
                 adminUser,
                 report.id,
-                Report.Companion.ReportInput("New name", isPublic = true, listOf(DocumentType.LIITO_ORAVA_VIIVAT))
+                Report.Companion.ReportInput(
+                    "New name",
+                    isPublic = true,
+                    listOf(DocumentType.LIITO_ORAVA_VIIVAT)
+                )
             )
         assertEquals("New name", updatedReport.name)
         assertEquals(listOf(DocumentType.LIITO_ORAVA_VIIVAT), updatedReport.noObservations)
@@ -142,19 +145,24 @@ class ReportTests : FullApplicationTest() {
             .inputStream()
             .use { inStream ->
                 assertEquals(
-                    reportController.uploadReportFile(
-                        user = adminUser,
-                        reportId = createOrderResponse.reportId,
-                        file =
-                            MockMultipartFile(
-                                "muut_huomioitavat_lajit_alueet_torakka.gpkg",
-                                "muut_huomioitavat_lajit_alueet_torakka.gpkg",
-                                "application/geopackage+sqlite3",
-                                inStream
-                            ),
-                        description = null,
-                        documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET
-                    ).statusCode.value(),
+                    reportController
+                        .uploadReportFile(
+                            user = adminUser,
+                            reportId = createOrderResponse.reportId,
+                            file =
+                                MockMultipartFile(
+                                    "muut_huomioitavat_lajit_alueet_torakka.gpkg",
+                                    "muut_huomioitavat_lajit_alueet_torakka.gpkg",
+                                    "application/geopackage+sqlite3",
+                                    inStream
+                                ),
+                            description = null,
+                            documentType =
+                                DocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET,
+                            id = UUID.randomUUID().toString()
+                        )
+                        .statusCode
+                        .value(),
                     201
                 )
             }
@@ -163,19 +171,24 @@ class ReportTests : FullApplicationTest() {
             .inputStream()
             .use { inStream ->
                 assertEquals(
-                    reportController.uploadReportFile(
-                        user = adminUser,
-                        reportId = createOrderResponse.reportId,
-                        file =
-                            MockMultipartFile(
-                                "muut_huomioitavat_lajit_viivat_perhonen.gpkg",
-                                "muut_huomioitavat_lajit_viivat_perhonen.gpkg",
-                                "application/geopackage+sqlite3",
-                                inStream
-                            ),
-                        description = null,
-                        documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT
-                    ).statusCode.value(),
+                    reportController
+                        .uploadReportFile(
+                            user = adminUser,
+                            reportId = createOrderResponse.reportId,
+                            file =
+                                MockMultipartFile(
+                                    "muut_huomioitavat_lajit_viivat_perhonen.gpkg",
+                                    "muut_huomioitavat_lajit_viivat_perhonen.gpkg",
+                                    "application/geopackage+sqlite3",
+                                    inStream
+                                ),
+                            description = null,
+                            documentType =
+                                DocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT,
+                            id = UUID.randomUUID().toString()
+                        )
+                        .statusCode
+                        .value(),
                     201
                 )
             }
@@ -184,56 +197,71 @@ class ReportTests : FullApplicationTest() {
             .inputStream()
             .use { inStream ->
                 assertEquals(
-                    reportController.uploadReportFile(
-                        user = adminUser,
-                        reportId = createOrderResponse.reportId,
-                        file =
-                            MockMultipartFile(
-                                "muut_huomioitavat_lajit_pisteet_ilves.gpkg",
-                                "muut_huomioitavat_lajit_pisteet_ilves.gpkg",
-                                "application/geopackage+sqlite3",
-                                inStream
-                            ),
-                        description = null,
-                        documentType = DocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET
-                    ).statusCode.value(),
+                    reportController
+                        .uploadReportFile(
+                            user = adminUser,
+                            reportId = createOrderResponse.reportId,
+                            file =
+                                MockMultipartFile(
+                                    "muut_huomioitavat_lajit_pisteet_ilves.gpkg",
+                                    "muut_huomioitavat_lajit_pisteet_ilves.gpkg",
+                                    "application/geopackage+sqlite3",
+                                    inStream
+                                ),
+                            description = null,
+                            documentType =
+                                DocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET,
+                            id = UUID.randomUUID().toString()
+                        )
+                        .statusCode
+                        .value(),
                     201
                 )
             }
 
-        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use { inStream ->
+        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use {
+                inStream ->
             assertEquals(
-                reportController.uploadReportFile(
-                    user = adminUser,
-                    reportId = createOrderResponse.reportId,
-                    file =
-                        MockMultipartFile(
-                            "aluerajaus_luontoselvitys.gpkg",
-                            "aluerajaus_luontoselvitys.gpkg",
-                            "application/geopackage+sqlite3",
-                            inStream
-                        ),
-                    description = "Alueelta löytyi ilves, torakka, jänis ja perhonen.",
-                    documentType = DocumentType.ALUERAJAUS_LUONTOSELVITYS
-                ).statusCode.value(),
+                reportController
+                    .uploadReportFile(
+                        user = adminUser,
+                        reportId = createOrderResponse.reportId,
+                        file =
+                            MockMultipartFile(
+                                "aluerajaus_luontoselvitys.gpkg",
+                                "aluerajaus_luontoselvitys.gpkg",
+                                "application/geopackage+sqlite3",
+                                inStream
+                            ),
+                        description =
+                            "Alueelta löytyi ilves, torakka, jänis ja perhonen.",
+                        documentType = DocumentType.ALUERAJAUS_LUONTOSELVITYS,
+                        id = UUID.randomUUID().toString()
+                    )
+                    .statusCode
+                    .value(),
                 201
             )
         }
 
         assertEquals(
-            reportController.uploadReportFile(
-                user = adminUser,
-                reportId = createOrderResponse.reportId,
-                file =
-                    MockMultipartFile(
-                        "luontoselvitysraportti.pdf",
-                        "luontoselvitysraportti.pdf",
-                        "plain/text",
-                        "LUONTOSELVITYSRAPORTTI".toByteArray()
-                    ),
-                description = null,
-                documentType = DocumentType.REPORT
-            ).statusCode.value(),
+            reportController
+                .uploadReportFile(
+                    user = adminUser,
+                    reportId = createOrderResponse.reportId,
+                    file =
+                        MockMultipartFile(
+                            "luontoselvitysraportti.pdf",
+                            "luontoselvitysraportti.pdf",
+                            "plain/text",
+                            "LUONTOSELVITYSRAPORTTI".toByteArray()
+                        ),
+                    description = null,
+                    documentType = DocumentType.REPORT,
+                    id = UUID.randomUUID().toString()
+                )
+                .statusCode
+                .value(),
             201
         )
 
@@ -241,7 +269,10 @@ class ReportTests : FullApplicationTest() {
 
         val approvedReport = reportController.getReportById(adminUser, createOrderResponse.reportId)
         assertTrue(approvedReport.approved)
-        assertEquals(approvedReport.observedSpecies, listOf("Ilves", "Torakka", "Jänis", "Perhonen"))
+        assertEquals(
+            approvedReport.observedSpecies,
+            listOf("Ilves", "Torakka", "Jänis", "Perhonen")
+        )
 
         val reportFiles = reportController.getReportFiles(adminUser, createOrderResponse.reportId)
         assertEquals(5, reportFiles.size)
@@ -256,9 +287,8 @@ class ReportTests : FullApplicationTest() {
             val data =
                 ptx.createQuery(
                     """
-                            SELECT lisatieto, selvitetyt_tiedot AS "selvitetytTiedot", selvitys_raportti_linkki AS "selvitysRaporttiLinkki" FROM aluerajaus_luontoselvitys WHERE selvitys_id = :reportId
-                        """
-                        .trimIndent()
+                    SELECT lisatieto, selvitetyt_tiedot AS "selvitetytTiedot", selvitys_raportti_linkki AS "selvitysRaporttiLinkki" FROM aluerajaus_luontoselvitys WHERE selvitys_id = :reportId
+                    """.trimIndent()
                 )
                     .bind("reportId", createOrderResponse.reportId)
                     .mapTo<AluerajausResult>()
@@ -272,17 +302,13 @@ class ReportTests : FullApplicationTest() {
                 ),
                 data.selvitetytTiedot
             )
-            assertEquals(
-                "Ei julkinen",
-                data.selvitysRaporttiLinkki
-            )
+            assertEquals("Ei julkinen", data.selvitysRaporttiLinkki)
 
             val viitteet =
                 ptx.createQuery(
                     """
-                            SELECT viite FROM muut_huomioitavat_lajit_pisteet WHERE selvitys_id = :reportId
-                        """
-                        .trimIndent()
+                    SELECT viite FROM muut_huomioitavat_lajit_pisteet WHERE selvitys_id = :reportId
+                    """.trimIndent()
                 )
                     .bind("reportId", createOrderResponse.reportId)
                     .mapTo<String>()
@@ -300,9 +326,8 @@ class ReportTests : FullApplicationTest() {
             val aluerajausRows =
                 ptx.createQuery(
                     """
-                            SELECT selvitys_id FROM aluerajaus_luontoselvitys WHERE selvitys_id = :reportId
-                        """
-                        .trimIndent()
+                    SELECT selvitys_id FROM aluerajaus_luontoselvitys WHERE selvitys_id = :reportId
+                    """.trimIndent()
                 )
                     .bind("reportId", createOrderResponse.reportId)
                     .mapTo<String>()
@@ -312,9 +337,8 @@ class ReportTests : FullApplicationTest() {
             val muutHuomioitavatLajitPisteet =
                 ptx.createQuery(
                     """
-                            SELECT selvitys_id FROM muut_huomioitavat_lajit_pisteet WHERE selvitys_id = :reportId
-                        """
-                        .trimIndent()
+                    SELECT selvitys_id FROM muut_huomioitavat_lajit_pisteet WHERE selvitys_id = :reportId
+                    """.trimIndent()
                 )
                     .bind("reportId", createOrderResponse.reportId)
                     .mapTo<String>()
@@ -356,9 +380,86 @@ class ReportTests : FullApplicationTest() {
                             "This is a text file".toByteArray()
                         ),
                     description = null,
-                    documentType = documentType
+                    documentType = documentType,
+                    id = UUID.randomUUID().toString()
                 )
             }
         }
+    }
+
+    @Test
+    fun `test that getAluerajausLuontoselvitysParams returns correct parameters`() {
+        val createOrderResponse =
+            createOrderAndReport(controller = orderController, name = "Test report")
+        val reportResponse = reportController.getReportById(adminUser, createOrderResponse.reportId)
+
+        val expected =
+            mapOf(
+                "name" to reportResponse.name,
+                "year" to reportResponse.order?.returnDate?.year,
+                "contactPerson" to reportResponse.order?.assignee,
+                "unit" to reportResponse.order?.orderingUnit?.joinToString(","),
+                "additionalInformation" to null,
+                "reportLink" to "linkki",
+                "reportDocumentLink" to "raporttilinkki",
+                "surveyedData" to arrayOf("Tiikeri")
+            )
+        val params =
+            reportController.jdbi.inTransactionUnchecked { tx ->
+                tx.getAluerajausLuontoselvitysParams(
+                    adminUser,
+                    reportResponse.id,
+                    listOf("Tiikeri").toSet(),
+                    "linkki",
+                    "raporttilinkki"
+                )
+            }
+        assertEquals(expected["name"], params["name"])
+        assertEquals(expected["year"], params["year"])
+        assertEquals(expected["contactPerson"], params["contactPerson"])
+        assertEquals(expected["unit"], params["unit"])
+        assertEquals(expected["additionalInformation"], params["additionalInformation"])
+        assertEquals(expected["reportLink"], params["reportLink"])
+        assertEquals(expected["reportDocumentLink"], params["reportDocumentLink"])
+    }
+
+    @Test
+    fun `test that getAluerajausLuontoselvitysParams contact person overwriting works`() {
+        val createOrderResponse =
+            createOrderAndReport(
+                controller = orderController,
+                name = "Test report",
+                assigneeCompanyName = "Ylikirjoitus Oy"
+            )
+        val reportResponse = reportController.getReportById(adminUser, createOrderResponse.reportId)
+
+        val expected =
+            mapOf(
+                "name" to reportResponse.name,
+                "year" to reportResponse.order?.returnDate?.year,
+                "contactPerson" to "Ylikirjoitus Oy",
+                "unit" to reportResponse.order?.orderingUnit?.joinToString(","),
+                "additionalInformation" to null,
+                "reportLink" to "linkki",
+                "reportDocumentLink" to "raporttilinkki",
+                "surveyedData" to arrayOf("Tiikeri")
+            )
+        val params =
+            reportController.jdbi.inTransactionUnchecked { tx ->
+                tx.getAluerajausLuontoselvitysParams(
+                    adminUser,
+                    reportResponse.id,
+                    listOf("Tiikeri").toSet(),
+                    "linkki",
+                    "raporttilinkki"
+                )
+            }
+        assertEquals(expected["name"], params["name"])
+        assertEquals(expected["year"], params["year"])
+        assertEquals(expected["contactPerson"], params["contactPerson"])
+        assertEquals(expected["unit"], params["unit"])
+        assertEquals(expected["additionalInformation"], params["additionalInformation"])
+        assertEquals(expected["reportLink"], params["reportLink"])
+        assertEquals(expected["reportDocumentLink"], params["reportDocumentLink"])
     }
 }

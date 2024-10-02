@@ -18,9 +18,12 @@ import {
   ReportFormInput
 } from 'api/report-api'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { InfoBox } from 'shared/MessageBoxes'
 import { InlineButton } from 'shared/buttons/InlineButton'
+import { Checkbox } from 'shared/form/Checkbox'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
 import { FileInput, FileInputData } from 'shared/form/File/FileInput'
+import { colors } from 'shared/theme'
 import { useDebouncedState } from 'shared/useDebouncedState'
 import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
@@ -33,9 +36,6 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { A, H3, Label, P } from '../../shared/typography'
-import { Checkbox } from 'shared/form/Checkbox'
-import { InfoBox } from 'shared/MessageBoxes'
-import { colors } from 'shared/theme'
 
 const StyledInlineButton = styled(InlineButton)`
   font-size: 0.9rem;
@@ -61,6 +61,7 @@ interface ReportFileInputElementNew {
   file: File | null
   id: string
   noObservation: boolean
+  focus?: boolean
 }
 
 interface ReportFileInputElementExisting {
@@ -69,6 +70,7 @@ interface ReportFileInputElementExisting {
   documentType: ReportFileDocumentType
   details: ReportFileDetails
   noObservation: boolean
+  id: string
 }
 
 type ReportFileInputElement =
@@ -88,90 +90,111 @@ function getAcceptedFileTypes(
   }
 }
 
+function createFileInputElement(
+  documentType: ReportFileDocumentType,
+  reportFiles: ReportFileDetails[],
+  inMemoryFiles: ReportFileInputElement[]
+): ReportFileInputElement {
+  const existingFile = reportFiles.find(
+    (rf) => rf.documentType === documentType
+  )
+  if (existingFile) {
+    return {
+      type: 'EXISTING' as const,
+      userDescription: existingFile.description,
+      documentType: existingFile.documentType,
+      details: existingFile,
+      noObservation: false,
+      id: existingFile.id
+    } satisfies ReportFileInputElement
+  }
+  const inMemoryFile = inMemoryFiles.find(
+    (imf) => documentType === imf.documentType
+  )
+  if (inMemoryFile) {
+    return inMemoryFile satisfies ReportFileInputElement
+  }
+
+  return {
+    type: 'NEW' as const,
+    userDescription: '',
+    documentType: documentType,
+    file: null,
+    id: uuidv4(),
+    noObservation: false
+  } satisfies ReportFileInputElement
+}
+
 function createFileInputs(
   reportFiles: ReportFileDetails[],
   requiredFiles: OrderReportDocumentInput[],
-  noObservations: string[]
+  noObservations: string[],
+  inMemoryFiles: ReportFileInputElement[]
 ): ReportFileInputElement[] {
   const requiredFileInputs = requiredFiles.map((required) => {
-    const reportFile = reportFiles.find(
-      (reportFile) => reportFile.documentType === required.documentType
-    )
     const noObservation = noObservations.includes(required.documentType)
-    return reportFile
-      ? {
-          type: 'EXISTING' as const,
-          userDescription: reportFile.description,
-          documentType: required.documentType,
-          details: reportFile,
-          noObservation
-        }
-      : {
-          type: 'NEW' as const,
-          userDescription: '',
-          documentType: required.documentType,
-          file: null,
-          id: uuidv4(),
-          noObservation
-        }
+    return {
+      ...createFileInputElement(
+        required.documentType,
+        reportFiles,
+        inMemoryFiles
+      ),
+      noObservation
+    }
   })
-  const otherFiles = reportFiles
+
+  // This is the order we want to hold for the additional in memory files
+  const inMemoryOtherFileIds = inMemoryFiles
+    .filter((imf) => imf.documentType === ReportFileDocumentType.OTHER)
+    .map((imf) => imf.id)
+
+  const existingOtherFileIds = reportFiles
     .filter((rf) => rf.documentType === ReportFileDocumentType.OTHER)
-    .map((rf) => ({
-      type: 'EXISTING' as const,
-      userDescription: rf.description,
-      documentType: rf.documentType,
-      details: rf,
-      noObservation: false
-    }))
+    .map((rf) => rf.id)
 
-  const reportInfo = reportFiles.find(
-    (rf) => rf.documentType === ReportFileDocumentType.REPORT
+  const otherFileIds = [
+    ...new Set([...inMemoryOtherFileIds, ...existingOtherFileIds])
+  ]
+
+  const otherFiles: (ReportFileInputElement | null)[] = otherFileIds.map(
+    (fileId) => {
+      const existingFile = reportFiles.find((rf) => rf.id === fileId)
+      if (existingFile) {
+        return {
+          type: 'EXISTING' as const,
+          userDescription: existingFile.description,
+          documentType: existingFile.documentType,
+          details: existingFile,
+          noObservation: false,
+          id: existingFile.id
+        } satisfies ReportFileInputElement
+      }
+      const inMemoryFile = inMemoryFiles.find(
+        (imf) => imf.type === 'NEW' && imf.id === fileId
+      )
+      if (inMemoryFile && inMemoryFile.type === 'NEW') {
+        return inMemoryFile satisfies ReportFileInputElement
+      }
+      return null
+    }
   )
 
-  const mappedReportInfo = reportInfo
-    ? {
-        type: 'EXISTING' as const,
-        userDescription: reportInfo.description,
-        documentType: reportInfo.documentType,
-        details: reportInfo,
-        noObservation: false
-      }
-    : {
-        type: 'NEW' as const,
-        userDescription: '',
-        documentType: ReportFileDocumentType.REPORT,
-        file: null,
-        id: uuidv4(),
-        noObservation: false
-      }
-
-  const aluerajaus = reportFiles.find(
-    (rf) => rf.documentType === ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS
+  const mappedReportInfo = createFileInputElement(
+    ReportFileDocumentType.REPORT,
+    reportFiles,
+    inMemoryFiles
   )
-
-  const mappedAluerajaus = aluerajaus
-    ? {
-        type: 'EXISTING' as const,
-        userDescription: aluerajaus.description,
-        documentType: aluerajaus.documentType,
-        details: aluerajaus,
-        noObservation: false
-      }
-    : {
-        type: 'NEW' as const,
-        userDescription: '',
-        documentType: ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS,
-        file: null,
-        id: uuidv4(),
-        noObservation: false
-      }
+  const mappedAluerajaus = createFileInputElement(
+    ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS,
+    reportFiles,
+    inMemoryFiles
+  )
 
   return [
     ...requiredFileInputs,
-    ...otherFiles,
     mappedReportInfo,
-    mappedAluerajaus
+    mappedAluerajaus,
+    ...otherFiles.flatMap((of) => (of !== null ? [of] : []))
   ]
 }
 
@@ -232,9 +255,10 @@ export const ReportForm = React.memo(function ReportForm(
       createFileInputs(
         props.reportFiles ?? [],
         requiredFiles,
-        noObservations ?? []
+        noObservations ?? [],
+        []
       ),
-    [requiredFiles, props, noObservations]
+    [requiredFiles, props.reportFiles, noObservations]
   )
 
   const [name, _] = useDebouncedState(props.report.name)
@@ -294,7 +318,8 @@ export const ReportForm = React.memo(function ReportForm(
         userDescription: '',
         documentType: documentType,
         id: uuidv4(),
-        noObservation: false
+        noObservation: false,
+        focus: true
       }
     ])
   }
@@ -330,6 +355,7 @@ export const ReportForm = React.memo(function ReportForm(
         e.type === 'NEW' && e.file !== null
           ? [
               {
+                id: e.id,
                 description: e.userDescription,
                 documentType: e.documentType,
                 file: e.file
@@ -345,6 +371,17 @@ export const ReportForm = React.memo(function ReportForm(
     props.onChange(validInput)
   }, [validInput, props])
 
+  useEffect(() => {
+    setFileInputs(
+      createFileInputs(
+        props.reportFiles ?? [],
+        requiredFiles,
+        noObservations ?? [],
+        fileInputs
+      )
+    )
+  }, [originalFileInputs])
+
   return (
     <FlexCol>
       <H3>Selvityksen tiedot</H3>
@@ -352,6 +389,7 @@ export const ReportForm = React.memo(function ReportForm(
       <A
         href="https://www.espoo.fi/fi/espoon-luontotietoaineistot#paikkatietojen-toimittaminen-luontoselvitysten-yhteydess-61377"
         target="_blank"
+        aria-description="External link"
       >
         <InstructionsLink>
           Ohjeet paikkatietojen toimittamisesta luontoselvitysten yhteydessä
@@ -380,7 +418,8 @@ export const ReportForm = React.memo(function ReportForm(
                     data={{
                       description: fInput.userDescription,
                       file: fInput.file,
-                      id: fInput.id
+                      id: fInput.id,
+                      focus: fInput.focus
                     }}
                     noObservation={fInput.noObservation}
                     onChange={(data) => {
@@ -499,20 +538,20 @@ export const ReportFileIsPublic = React.memo(function ReportFileIsPublic({
         )}
         <FlexRow>
           <Checkbox
-            key={'yes'}
-            label={'Kyllä'}
+            key="yes"
+            label="Kyllä"
             checked={!!localPublic}
-            onChange={(checked) => {
+            onChange={(_checked) => {
               setLocalPublic(true)
               onChange(true)
             }}
             disabled={readOnly}
           />
           <StyledCheckBox
-            key={'no'}
-            label={'Ei'}
+            key="no"
+            label="Ei"
             checked={localPublic === false}
-            onChange={(checked) => {
+            onChange={(_checked) => {
               setLocalPublic(false)
               onChange(false)
             }}

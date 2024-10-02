@@ -34,7 +34,7 @@ export const Link = styled(StyledLink)`
 export const FileTitle = React.memo(function FileTitle(props: Props) {
   return (
     <Label>
-      {`${getDocumentTypeTitle(props.documentType)} ${props.required && '*'}`}
+      {`${getDocumentTypeTitle(props.documentType)} ${props.required ? '*' : ''}`}
       {isReportFileDocumentType(props.documentType) &&
         props.documentType !== ReportFileDocumentType.OTHER &&
         props.documentType !== ReportFileDocumentType.REPORT && (
@@ -46,12 +46,13 @@ export const FileTitle = React.memo(function FileTitle(props: Props) {
             }
             onKeyDown={(event: React.KeyboardEvent<HTMLAnchorElement>) => {
               if (event.code === 'Enter') {
-                apiGetReportDocumentTypeFileTemplate(
+                void apiGetReportDocumentTypeFileTemplate(
                   props.documentType as ReportFileDocumentType
                 )
               }
             }}
             tabIndex={0}
+            aria-label={`Lataa ${getDocumentTypeTitle(props.documentType)} tiedostopohja`}
           >
             <FontAwesomeIcon
               icon={faDownload}

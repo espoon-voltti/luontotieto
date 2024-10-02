@@ -19,6 +19,18 @@ export async function getAuthStatus(): Promise<AuthStatus> {
     .then((res) => res.data)
 }
 
+export type LoginErrorCode =
+  | 'account-is-locked'
+  | 'account-login-delay'
+  | 'wrong-credentials'
+
+export const LoginError: Record<LoginErrorCode, string> = {
+  'account-is-locked': 'Tili on lukittu. Yritä uudelleen myöhemmin.',
+  'account-login-delay':
+    'Liian monta virheellistä yritystä. Odota hetki ennen kuin yrität uudelleen.',
+  'wrong-credentials': 'Virheellinen sähköposti tai salasana'
+}
+
 export const apiPostLogin = async (emailAndPassword: {
   email: string
   password: string

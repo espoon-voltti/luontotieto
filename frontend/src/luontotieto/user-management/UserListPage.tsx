@@ -8,6 +8,7 @@ import { getUserRole, User } from 'api/users-api'
 import orderBy from 'lodash/orderBy'
 import React, { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 import { SortableTh, Th } from 'shared/Table'
 import { AddButton } from 'shared/buttons/AddButton'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
@@ -74,7 +75,7 @@ export const UserListPage = React.memo(function UserListPage() {
       <BackNavigation text="Käyttäjähallinta" navigationText="Etusivulle" />
 
       <SectionContainer>
-        <H2>Käyttäjähallinta</H2>
+        <H2>Käyttäjät</H2>
         <VerticalGap $size="m" />
         <FlexLeftRight>
           <FlexRowWithGaps $gapSize="s">
@@ -138,6 +139,7 @@ export const UserListPage = React.memo(function UserListPage() {
           </tbody>
         </Table>
       </SectionContainer>
+      <AccessibilityFooter />
     </PageContainer>
   )
 })
