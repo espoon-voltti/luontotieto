@@ -16,6 +16,8 @@ class EnvConfig {
 
     @Bean fun emailEnv(env: Environment): EmailEnv = EmailEnv.fromEnvironment(env)
 
+    @Bean fun geoClientEnv(env: Environment): GeoserverEnv = GeoserverEnv.fromEnvironment(env)
+
     @Bean
     fun luontotietoHost(env: Environment): LuontotietoHost = LuontotietoHost.fromEnvironment(env)
 }

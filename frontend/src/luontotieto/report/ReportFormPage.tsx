@@ -152,6 +152,10 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
         } else {
           setApproveError('Virhe selvityksen tiedostojen validoinnissa')
         }
+      } else if (error?.errorCode === 'access-denied') {
+        setApproveError(
+          'Hyväksyminen epäonnistui koska taustalla suoritettava tiedostojen virustarkistus on todennäköisesti vielä kesken. Yritä hetken kuluttua uudelleen.'
+        )
       } else {
         setApproveError('Virhe hyväksyttäessä selvitystä')
       }
@@ -187,7 +191,11 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
 
   const onApproveReport = async (reportInput: ReportFormInput) => {
     setApproveError(null)
-    await updateReportMutation({ ...reportInput, reportId: id })
+    await updateReportMutation({
+      ...reportInput,
+      reportId: id,
+      sendUpdatedEmail: false
+    })
 
     if (report && approve) {
       setShowModal({
@@ -209,7 +217,11 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
 
   const onReopenReport = async (reportInput: ReportFormInput) => {
     setApproveError(null)
-    await updateReportMutation({ ...reportInput, reportId: id })
+    await updateReportMutation({
+      ...reportInput,
+      reportId: id,
+      sendUpdatedEmail: false
+    })
     if (report && report.approved && reOpen) {
       setShowModal({
         title: 'Avaa selvitys uudelleen',

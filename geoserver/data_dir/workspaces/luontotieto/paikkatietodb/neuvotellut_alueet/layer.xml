@@ -1,0 +1,16 @@
+<layer>
+  <name>neuvotellut_alueet</name>
+  <id>LayerInfoImpl-30ac0bc:192415331d9:-7ffe</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--3bd8cec9:18ef552d955:-7ffe</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl-30ac0bc:192415331d9:-7fff</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-09-30 10:11:05.219 UTC</dateCreated>
+</layer>
