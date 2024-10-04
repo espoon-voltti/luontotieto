@@ -291,6 +291,12 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     setShowOrderAssigneeCompanyNameInfo
   ] = useState(false)
 
+  const [showPlanNumberSuggestionsInfo, setShowPlanNumberSuggestionsInfo] =
+    useState(false)
+
+  const [showCollectedDocumentsInfo, setShowCollectedDocumentsInfo] =
+    useState(false)
+
   const [orderFiles, setOrderFiles] = useState<OrderFileInputElement[]>(
     createFileInputs(props.mode === 'EDIT' ? props.orderFiles : [], [])
   )
@@ -300,11 +306,11 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   )
 
   const [planNumbers, setPlanNumbers] = useDebouncedState(
-    props.mode === 'CREATE' ? [] : (props.order.planNumber ?? [])
+    props.mode === 'CREATE' ? [] : props.order.planNumber ?? []
   )
 
   const [orderingUnit, setorderingUnit] = useDebouncedState(
-    props.mode === 'CREATE' ? [] : (props.order.orderingUnit ?? [])
+    props.mode === 'CREATE' ? [] : props.order.orderingUnit ?? []
   )
 
   const invalidContactEmailInfo = useMemo(
@@ -451,7 +457,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       assigneeCompanyName:
         orderInput.assigneeCompanyName?.trim() === ''
           ? null
-          : (orderInput.assigneeCompanyName?.trim() ?? null),
+          : orderInput.assigneeCompanyName?.trim() ?? null,
       planNumber: planNumbers,
       orderingUnit: orderingUnit,
       reportDocuments: reportDocuments
@@ -557,7 +563,37 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Tilaukseen liittyvät maankäytön suunnitelmat</Label>
+              <FlexRow>
+                <Label>Tilaukseen liittyvät maankäytön suunnitelmat</Label>
+                <StyledIconButton
+                  onClick={() =>
+                    setShowPlanNumberSuggestionsInfo(
+                      !showPlanNumberSuggestionsInfo
+                    )
+                  }
+                >
+                  <StyledIconContainer $color={colors.main.m1}>
+                    <FontAwesomeIcon
+                      icon={faInfo}
+                      size="1x"
+                      color={colors.main.m1}
+                      inverse
+                    />
+                  </StyledIconContainer>
+                </StyledIconButton>
+              </FlexRow>
+              {showPlanNumberSuggestionsInfo && (
+                <InfoBox
+                  message={
+                    <P>
+                      Jos luontoselvityksen tilaaminen liittyy kaavaan tai
+                      muuhun maankäytön hankkeeseen tai suunnitelmaan, ne
+                      kannattaa kirjoittaa tähän. Jos mitään maankäytön
+                      suunnitelmia ei ole, kentän voi jättää tyhjäksi.
+                    </P>
+                  }
+                />
+              )}
               <TagAutoComplete
                 suggestions={planNumberSuggestions}
                 data={
@@ -856,7 +892,33 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
         <GroupOfInputRows>
           <RowOfInputs>
             <LabeledInput $cols={8}>
-              <Label>Kerättävät dokumentit</Label>
+              <FlexRow>
+                <Label>Kerättävät dokumentit</Label>
+                <StyledIconButton
+                  onClick={() =>
+                    setShowCollectedDocumentsInfo(!showCollectedDocumentsInfo)
+                  }
+                >
+                  <StyledIconContainer $color={colors.main.m1}>
+                    <FontAwesomeIcon
+                      icon={faInfo}
+                      size="1x"
+                      color={colors.main.m1}
+                      inverse
+                    />
+                  </StyledIconContainer>
+                </StyledIconButton>
+              </FlexRow>
+              {showCollectedDocumentsInfo && (
+                <InfoBox
+                  message={
+                    <P>
+                      Tässä valitaan selvityksessä tuotettavat
+                      paikkatietoaineistot
+                    </P>
+                  }
+                />
+              )}
               <VerticalGap $size="s" />
 
               {reportDocuments.map((rd, index) => (
