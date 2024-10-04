@@ -611,7 +611,7 @@ private const val SQL_INSERT_LIITO_ORAVA_YHTEYSVIIVAT =
     VALUES (
         :pvm,
         :havaitsija,
-        :laatu,
+        :laatu::laatu,
         :lisatieto,
         :reportName,
         :kunta,
