@@ -2,17 +2,14 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { faInfo } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { apiGeoserverReloadConfiguration } from 'api/geoserver-api'
 import React from 'react'
 import AccessibilityFooter from 'shared/AccessibilityFooter'
 import { InfoBox } from 'shared/MessageBoxes'
 import { AsyncButton } from 'shared/buttons/AsyncButton'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
-import { colors } from 'shared/theme'
+import { InfoButton } from 'shared/buttons/InfoButton'
 import { H2, Label, P } from 'shared/typography'
-import styled from 'styled-components'
 
 import {
   FlexRow,
@@ -34,20 +31,11 @@ export const AdminSettingsPage = React.memo(function AdminSettingsPage() {
           <LabeledInput $cols={6}>
             <FlexRow>
               <Label>GeoServer-konfiguraation uudelleenlataus</Label>
-              <StyledIconButton
+              <InfoButton
                 onClick={() =>
                   setShowGeoserverReloadInfo(!showGeoserverReloadInfo)
                 }
-              >
-                <StyledIconContainer $color={colors.main.m1}>
-                  <FontAwesomeIcon
-                    icon={faInfo}
-                    size="1x"
-                    color={colors.main.m1}
-                    inverse
-                  />
-                </StyledIconContainer>
-              </StyledIconButton>
+              />
             </FlexRow>
             {showGeoserverReloadInfo && (
               <InfoBox
@@ -77,26 +65,3 @@ export const AdminSettingsPage = React.memo(function AdminSettingsPage() {
     </PageContainer>
   )
 })
-
-const StyledIconContainer = styled.div<{ $color: string }>`
-  margin-right: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  min-width: 24px;
-  height: 24px;
-  background: ${(props) => props.$color};
-  border-radius: 100%;
-`
-
-const StyledIconButton = styled.button`
-  margin-left: 16px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  padding: 0;
-  &:focus {
-    outline: 2px solid ${colors.main.m3};
-  }
-`
