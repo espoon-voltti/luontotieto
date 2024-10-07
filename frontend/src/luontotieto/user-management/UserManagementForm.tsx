@@ -117,16 +117,17 @@ export const UserManagementForm = React.memo(function UserManagementForm({
     onSuccess: onResetUserPasswordSuccess
   })
 
-  const invalidEmailInfo = useMemo(
-    () =>
-      enableEdit && userInput.email && !userInput.email.match(emailRegex)
-        ? {
-            text: 'Syötä oikeaa muotoa oleva sähköposti',
-            status: 'warning' as const
-          }
-        : undefined,
-    [userInput.email, enableEdit]
-  )
+  const invalidEmailInfo = useMemo(() => {
+    if (!enableEdit) return undefined
+    if (userInput.role === UserRole.CUSTOMER && !userInput.email)
+      return { text: 'Sähköposti vaaditaan', status: 'warning' as const }
+    if (userInput.email && !userInput.email.match(emailRegex))
+      return {
+        text: 'Syötä oikeaa muotoa oleva sähköposti',
+        status: 'warning' as const
+      }
+    return undefined
+  }, [userInput.email, userInput.role, enableEdit])
 
   const isValid = userInput.name && !invalidEmailInfo
 
@@ -134,7 +135,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
     <SectionContainer>
       <GroupOfInputRows>
         <H3>Käyttäjän tiedot</H3>
-        <LabeledInput $cols={3}>
+        <LabeledInput $cols={4}>
           <Label>Käyttäjä *</Label>
           <InputField
             value={userInput.name}
@@ -142,7 +143,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
             readonly={!enableEdit}
           />
         </LabeledInput>
-        <LabeledInput $cols={3}>
+        <LabeledInput $cols={4}>
           <Label>Yhteyssähköposti *</Label>
           <InputField
             value={userInput.email}
