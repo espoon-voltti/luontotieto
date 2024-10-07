@@ -64,11 +64,11 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
             </LabeledInput>
           )}
 
-          <LabeledInput $cols={3}>
+          <LabeledInput $cols={4}>
             <Label>Yritys *</Label>
             <InputField value={user.name} readonly={true} />
           </LabeledInput>
-          <LabeledInput $cols={3}>
+          <LabeledInput $cols={4}>
             <Label>Yhteyssähköposti *</Label>
             <InputField value={user.email ?? ''} readonly={true} />
           </LabeledInput>
@@ -89,7 +89,7 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
           )}
           {user.role !== UserRole.CUSTOMER && (
             <>
-              <LabeledInput $cols={3}>
+              <LabeledInput $cols={4}>
                 <Label>Käyttöoikeudet</Label>
                 <InputField value={getUserRole(user.role)} readonly={true} />
               </LabeledInput>
@@ -194,7 +194,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
       }}
     >
       <GroupOfInputRows>
-        <LabeledInput $cols={3}>
+        <LabeledInput $cols={4}>
           <Label>Nykyinen salasana</Label>
           <InputField
             onChange={setCurrentPassword}
@@ -202,7 +202,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
             type="password"
           />
         </LabeledInput>
-        <LabeledInput $cols={3}>
+        <LabeledInput $cols={4}>
           <Label>Uusi salasana</Label>
           <InputField
             onChange={setNewPassword}
@@ -211,7 +211,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
             info={passwordIsWeakInfo}
           />
         </LabeledInput>
-        <LabeledInput $cols={3}>
+        <LabeledInput $cols={4}>
           <Label>Vahvista uusi salasana</Label>
           <InputField
             onChange={setNewPassword2}
