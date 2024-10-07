@@ -190,7 +190,14 @@ export const UserManagementForm = React.memo(function UserManagementForm({
 
         {enableEdit ? (
           <FlexRowWithGaps>
-            <Button text="Peruuta" onClick={() => setEnableEdit(!enableEdit)} />
+            <Button
+              text="Peruuta"
+              onClick={() => {
+                setUserInput(user)
+                setErrorMessage(null)
+                setEnableEdit(!enableEdit)
+              }}
+            />
             <AsyncButton
               text="Tallenna"
               data-qa="save-button"
