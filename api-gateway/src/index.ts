@@ -34,9 +34,13 @@ app.set('etag', false)
 app.use(
   helmet({
     // Content-Security-Policy is set by the nginx proxy
-    contentSecurityPolicy: false
+    contentSecurityPolicy: false,
+    referrerPolicy: {
+      policy: 'no-referrer'
+    }
   })
 )
+
 app.get('/health', (_, res) => {
   assertRedisConnection(redisClient)
     .then(() => {
