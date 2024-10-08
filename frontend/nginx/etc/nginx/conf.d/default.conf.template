@@ -176,6 +176,7 @@ server {
   add_header X-Content-Type-Options nosniff;
   add_header X-XSS-Protection 0;
   add_header X-DNS-Prefetch-Control off;
+  add_header Referrer-Policy 'no-referrer';
   add_header Report-To '{"group","csp-endpoint","max_age":31536000,"endpoints":[{"url":"$httpScheme://$host/api/csp"}]}';
 
   <% if ENV.key?("HTTP_SCHEME") && ENV["HTTP_SCHEME"] == "http" %>

@@ -34,10 +34,7 @@ app.set('etag', false)
 app.use(
   helmet({
     // Content-Security-Policy is set by the nginx proxy
-    contentSecurityPolicy: false,
-    referrerPolicy: {
-      policy: 'no-referrer'
-    }
+    contentSecurityPolicy: false
   })
 )
 
