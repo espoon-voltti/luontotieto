@@ -92,6 +92,10 @@ limit_req_zone $binary_remote_addr zone=req_zone_wl:1m rate=100r/s;
 # Limits requests to 2 requests per second.
 limit_req_zone $binary_remote_addr zone=limit_zone:1m rate=2r/s;
 
+# Explicitly define limit request endpoint that makes
+# geoserver reload its configuration
+limit_req_zone $binary_remote_addr zone=geoserver_zone:1m rate=1r/m;
+
 
 # Logging
 
@@ -199,6 +203,7 @@ server {
 
   limit_req         zone=req_zone burst=20 nodelay;
   limit_req         zone=req_zone_wl burst=50 nodelay;
+  limit_req         zone=req_zone_wl burst=50 nodelay;
 
   limit_req_status  429;
 
@@ -232,6 +237,13 @@ server {
     include     proxy_params;
     proxy_pass  $apiGatewayURL;
     limit_req zone=limit_zone;
+  }
+
+  # Geoserver reload route
+  location /geoserver/reload-configuration {
+    include     proxy_params;
+    proxy_pass  $apiGatewayURL;
+    limit_req zone=geoserver_zone;
   }
 
   location / {
