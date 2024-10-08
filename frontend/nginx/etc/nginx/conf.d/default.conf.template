@@ -239,7 +239,7 @@ server {
   }
 
   # Geoserver reload route
-  location /geoserver/reload-configuration {
+  location /api/geoserver/reload-configuration {
     include     proxy_params;
     proxy_pass  $apiGatewayURL;
     limit_req zone=geoserver_zone;
