@@ -203,7 +203,6 @@ server {
 
   limit_req         zone=req_zone burst=20 nodelay;
   limit_req         zone=req_zone_wl burst=50 nodelay;
-  limit_req         zone=req_zone_wl burst=50 nodelay;
 
   limit_req_status  429;
 
