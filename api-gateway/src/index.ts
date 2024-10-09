@@ -37,6 +37,7 @@ app.use(
     contentSecurityPolicy: false
   })
 )
+
 app.get('/health', (_, res) => {
   assertRedisConnection(redisClient)
     .then(() => {
