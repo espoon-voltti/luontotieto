@@ -9,8 +9,8 @@ plugins {
     id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.4"
     kotlin("jvm") version "1.9.20"
-    kotlin("plugin.spring") version "1.9.20"
-    id("org.flywaydb.flyway") version "10.17.0"
+    kotlin("plugin.spring") version "2.0.20"
+    id("org.flywaydb.flyway") version "10.19.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
 
     idea
@@ -51,8 +51,8 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springframework.ws:spring-ws-security")
 
-    implementation("org.geotools:gt-geopkg:31.2")
-    implementation("org.geotools:gt-epsg-hsql:31.2")
+    implementation("org.geotools:gt-geopkg:32.0")
+    implementation("org.geotools:gt-epsg-hsql:32.0")
 
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.flywaydb:flyway-core:10.16.0")
@@ -67,7 +67,7 @@ dependencies {
     implementation("com.github.kittinunf.fuel:fuel:2.3.1")
     implementation("com.github.kittinunf.fuel:fuel-jackson:2.3.1")
 
-    api(platform("com.fasterxml.jackson:jackson-bom:2.17.0"))
+    api(platform("com.fasterxml.jackson:jackson-bom:2.18.0"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     implementation("software.amazon.awssdk:s3:2.27.22")
@@ -86,7 +86,7 @@ dependencies {
     api(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("com.microsoft.playwright:playwright:1.44.0")
+    testImplementation("com.microsoft.playwright:playwright:1.47.0")
 
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
 

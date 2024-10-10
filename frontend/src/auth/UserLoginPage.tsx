@@ -78,13 +78,13 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
           <VerticalGap $size="L" />
           <GroupOfInputRows>
             <RowOfInputs>
-              <LabeledInput $cols={3}>
+              <LabeledInput $cols={4}>
                 <Label>Sähköposti</Label>
                 <InputField onChange={setEmail} value={email} type="email" />
               </LabeledInput>
             </RowOfInputs>
             <RowOfInputs>
-              <LabeledInput $cols={3}>
+              <LabeledInput $cols={4}>
                 <Label>Salasana</Label>
                 <InputField
                   onChange={setPassword}

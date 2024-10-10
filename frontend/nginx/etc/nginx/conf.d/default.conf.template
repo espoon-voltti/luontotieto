@@ -92,6 +92,10 @@ limit_req_zone $binary_remote_addr zone=req_zone_wl:1m rate=100r/s;
 # Limits requests to 2 requests per second.
 limit_req_zone $binary_remote_addr zone=limit_zone:1m rate=2r/s;
 
+# Explicitly define limit request endpoint that makes
+# geoserver reload its configuration
+limit_req_zone $binary_remote_addr zone=geoserver_zone:1m rate=1r/m;
+
 
 # Logging
 
@@ -170,8 +174,9 @@ server {
   # a location bloc as it overrides the parent headers
   add_header Strict-Transport-Security 'max-age=31536000; includeSubdomains; preload';
   add_header X-Content-Type-Options nosniff;
-  add_header X-XSS-Protection '1; mode=block';
+  add_header X-XSS-Protection 0;
   add_header X-DNS-Prefetch-Control off;
+  add_header Referrer-Policy 'no-referrer';
   add_header Report-To '{"group","csp-endpoint","max_age":31536000,"endpoints":[{"url":"$httpScheme://$host/api/csp"}]}';
 
   <% if ENV.key?("HTTP_SCHEME") && ENV["HTTP_SCHEME"] == "http" %>
@@ -232,6 +237,13 @@ server {
     include     proxy_params;
     proxy_pass  $apiGatewayURL;
     limit_req zone=limit_zone;
+  }
+
+  # Geoserver reload route
+  location /api/geoserver/reload-configuration {
+    include     proxy_params;
+    proxy_pass  $apiGatewayURL;
+    limit_req zone=geoserver_zone;
   }
 
   location / {

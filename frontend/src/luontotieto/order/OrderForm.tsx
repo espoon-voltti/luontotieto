@@ -25,6 +25,7 @@ import React, {
 } from 'react'
 import { Tag } from 'react-tag-autocomplete'
 import { InfoBox } from 'shared/MessageBoxes'
+import { InfoButton } from 'shared/buttons/InfoButton'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { Checkbox } from 'shared/form/Checkbox'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
@@ -32,9 +33,7 @@ import { FileInput, FileInputData } from 'shared/form/File/FileInput'
 import { InputField } from 'shared/form/InputField'
 import { TagAutoComplete } from 'shared/form/TagAutoComplete/TagAutoComplete'
 import { TextArea } from 'shared/form/TextArea'
-import { colors } from 'shared/theme'
 import { useDebouncedState } from 'shared/useDebouncedState'
-import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 
 import { useGetAssigneeUsersQuery } from '../../api/hooks/users'
@@ -291,6 +290,12 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     setShowOrderAssigneeCompanyNameInfo
   ] = useState(false)
 
+  const [showPlanNumberSuggestionsInfo, setShowPlanNumberSuggestionsInfo] =
+    useState(false)
+
+  const [showCollectedDocumentsInfo, setShowCollectedDocumentsInfo] =
+    useState(false)
+
   const [orderFiles, setOrderFiles] = useState<OrderFileInputElement[]>(
     createFileInputs(props.mode === 'EDIT' ? props.orderFiles : [], [])
   )
@@ -300,11 +305,11 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   )
 
   const [planNumbers, setPlanNumbers] = useDebouncedState(
-    props.mode === 'CREATE' ? [] : (props.order.planNumber ?? [])
+    props.mode === 'CREATE' ? [] : props.order.planNumber ?? []
   )
 
   const [orderingUnit, setorderingUnit] = useDebouncedState(
-    props.mode === 'CREATE' ? [] : (props.order.orderingUnit ?? [])
+    props.mode === 'CREATE' ? [] : props.order.orderingUnit ?? []
   )
 
   const invalidContactEmailInfo = useMemo(
@@ -451,7 +456,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       assigneeCompanyName:
         orderInput.assigneeCompanyName?.trim() === ''
           ? null
-          : (orderInput.assigneeCompanyName?.trim() ?? null),
+          : orderInput.assigneeCompanyName?.trim() ?? null,
       planNumber: planNumbers,
       orderingUnit: orderingUnit,
       reportDocuments: reportDocuments
@@ -557,7 +562,28 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Tilaukseen liittyvät maankäytön suunnitelmat</Label>
+              <FlexRow>
+                <Label>Tilaukseen liittyvät maankäytön suunnitelmat</Label>
+                <InfoButton
+                  onClick={() =>
+                    setShowPlanNumberSuggestionsInfo(
+                      !showPlanNumberSuggestionsInfo
+                    )
+                  }
+                />
+              </FlexRow>
+              {showPlanNumberSuggestionsInfo && (
+                <InfoBox
+                  message={
+                    <P>
+                      Jos luontoselvityksen tilaaminen liittyy kaavaan tai
+                      muuhun maankäytön hankkeeseen tai suunnitelmaan, ne
+                      kannattaa kirjoittaa tähän. Jos mitään maankäytön
+                      suunnitelmia ei ole, kentän voi jättää tyhjäksi.
+                    </P>
+                  }
+                />
+              )}
               <TagAutoComplete
                 suggestions={planNumberSuggestions}
                 data={
@@ -674,22 +700,13 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               <LabeledInput $cols={4}>
                 <FlexRow>
                   <Label>Yhteysyritys </Label>
-                  <StyledIconButton
+                  <InfoButton
                     onClick={() =>
                       setShowOrderAssigneeCompanyNameInfo(
                         !showOrderAssigneeCompanyNameInfo
                       )
                     }
-                  >
-                    <StyledIconContainer $color={colors.main.m1}>
-                      <FontAwesomeIcon
-                        icon={faInfo}
-                        size="1x"
-                        color={colors.main.m1}
-                        inverse
-                      />
-                    </StyledIconContainer>
-                  </StyledIconButton>
+                  />
                 </FlexRow>
                 {showOrderAssigneeCompanyNameInfo && (
                   <InfoBox
@@ -856,7 +873,24 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
         <GroupOfInputRows>
           <RowOfInputs>
             <LabeledInput $cols={8}>
-              <Label>Kerättävät dokumentit</Label>
+              <FlexRow>
+                <Label>Kerättävät dokumentit</Label>
+                <InfoButton
+                  onClick={() =>
+                    setShowCollectedDocumentsInfo(!showCollectedDocumentsInfo)
+                  }
+                />
+              </FlexRow>
+              {showCollectedDocumentsInfo && (
+                <InfoBox
+                  message={
+                    <P>
+                      Tässä valitaan selvityksessä tuotettavat
+                      paikkatietoaineistot
+                    </P>
+                  }
+                />
+              )}
               <VerticalGap $size="s" />
 
               {reportDocuments.map((rd, index) => (
@@ -885,26 +919,3 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
 interface OrderCheckBoxComponentInput extends OrderReportDocumentInput {
   checked: boolean
 }
-
-const StyledIconContainer = styled.div<{ $color: string }>`
-  margin-right: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  min-width: 24px;
-  height: 24px;
-  background: ${(props) => props.$color};
-  border-radius: 100%;
-`
-
-const StyledIconButton = styled.button`
-  margin-left: 16px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  padding: 0;
-  &:focus {
-    outline: 2px solid ${colors.main.m3};
-  }
-`
