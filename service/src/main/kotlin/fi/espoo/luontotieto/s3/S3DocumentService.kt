@@ -29,7 +29,6 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import java.io.OutputStream
 import java.net.URL
 import java.time.Duration
 import javax.imageio.ImageIO
@@ -182,7 +181,6 @@ class S3DocumentService(
     }
 }
 
-
 fun removeExifDataIfImage(file: MultipartFile): Pair<InputStream, Long> {
     val contentType = file.contentType
     if (contentType == null || !contentType.startsWith("image/")) {
@@ -192,8 +190,9 @@ fun removeExifDataIfImage(file: MultipartFile): Pair<InputStream, Long> {
     val originalFormat = getImageFormat(file) ?: throw IllegalArgumentException("Unsupported image format")
 
     // Open the image and process it
-    val image: BufferedImage = ImageIO.read(file.inputStream)
-        ?: throw IllegalArgumentException("Invalid image file")
+    val image: BufferedImage =
+        ImageIO.read(file.inputStream)
+            ?: throw IllegalArgumentException("Invalid image file")
 
     // Create a new BufferedImage to effectively strip EXIF metadata
     val newImage = BufferedImage(image.width, image.height, image.type)
