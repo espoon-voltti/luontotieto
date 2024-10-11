@@ -58,16 +58,20 @@ const fileValidationErrorToMessage = (
 const isReportFileNatureDocument = (
   dt: ReportFileDocumentType | OrderFileDocumentType
 ) =>
-  dt === ReportFileDocumentType.LIITO_ORAVA_ALUEET ||
   dt === ReportFileDocumentType.LIITO_ORAVA_PISTEET ||
+  dt === ReportFileDocumentType.LIITO_ORAVA_ALUEET ||
   dt === ReportFileDocumentType.LIITO_ORAVA_VIIVAT ||
-  dt === ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET ||
   dt === ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET ||
   dt === ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT ||
+  dt === ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET ||
   dt === ReportFileDocumentType.LEPAKKO_ALUEET ||
   dt === ReportFileDocumentType.LEPAKKO_VIIVAT ||
+  dt === ReportFileDocumentType.LUMO_ALUEET ||
   dt === ReportFileDocumentType.NORO_VIIVAT ||
-  dt === ReportFileDocumentType.LUMO_ALUEET
+  dt === ReportFileDocumentType.LUONTOTYYPIT_ALUEET ||
+  dt === ReportFileDocumentType.EKOYHTEYDET_ALUEET ||
+  dt === ReportFileDocumentType.EKOYHTEYDET_VIIVAT ||
+  dt === ReportFileDocumentType.LAHTEET_PISTEET
 
 export const FileInput = <
   T extends ReportFileDocumentType | OrderFileDocumentType
@@ -183,7 +187,7 @@ export const FileInput = <
         )}
       </FlexRowWithGaps>
       {errorMessage && (
-        <FlexRowWithGaps>
+        <FlexRowWithGaps style={{ maxHeight: '300px', overflow: 'auto' }}>
           <InputFieldUnderRow className={classNames('warning')}>
             <span>
               {errorMessage.text.map((i) => (

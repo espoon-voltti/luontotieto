@@ -17,6 +17,10 @@ luontotieto:
     sender_address: "fake"
     sender_arn: "fake"
   host: "http://localhost:9000"
+  geoserver:
+    base_url: "fake"
+    username: "fake"
+    password: "fake"
 
 app:
   jwt:

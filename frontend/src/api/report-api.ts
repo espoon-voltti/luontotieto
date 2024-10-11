@@ -63,7 +63,6 @@ export enum ReportFileDocumentType {
   MUUT_HUOMIOITAVAT_LAJIT_PISTEET = 'MUUT_HUOMIOITAVAT_LAJIT_PISTEET',
   MUUT_HUOMIOITAVAT_LAJIT_VIIVAT = 'MUUT_HUOMIOITAVAT_LAJIT_VIIVAT',
   MUUT_HUOMIOITAVAT_LAJIT_ALUEET = 'MUUT_HUOMIOITAVAT_LAJIT_ALUEET',
-  ALUERAJAUS_LUONTOSELVITYS = 'ALUERAJAUS_LUONTOSELVITYS',
   LEPAKKO_VIIVAT = 'LEPAKKO_VIIVAT',
   LEPAKKO_ALUEET = 'LEPAKKO_ALUEET',
   LUMO_ALUEET = 'LUMO_ALUEET',
@@ -72,6 +71,7 @@ export enum ReportFileDocumentType {
   EKOYHTEYDET_ALUEET = 'EKOYHTEYDET_ALUEET',
   EKOYHTEYDET_VIIVAT = 'EKOYHTEYDET_VIIVAT',
   LAHTEET_PISTEET = 'LAHTEET_PISTEET',
+  ALUERAJAUS_LUONTOSELVITYS = 'ALUERAJAUS_LUONTOSELVITYS',
   OTHER = 'OTHER',
   REPORT = 'REPORT'
 }
@@ -117,7 +117,9 @@ export interface ReportFileDetails extends ReportFileInput {
 }
 
 export const apiPutReport = async (
-  reportInput: { reportId: string } & ReportFormInput
+  reportInput: { reportId: string } & ReportFormInput & {
+      sendUpdatedEmail?: false
+    }
 ): Promise<
   | ReportDetails
   | (ReportFileSuccessResponse | ReportFileValidationErrorResponse)[]
@@ -127,7 +129,12 @@ export const apiPutReport = async (
   }
 
   const report = await apiClient
-    .put<ReportDetails>(`/reports/${reportInput.reportId}`, body)
+    .put<ReportDetails>(`/reports/${reportInput.reportId}`, body, {
+      params:
+        reportInput.sendUpdatedEmail !== undefined
+          ? { sendUpdatedEmail: reportInput.sendUpdatedEmail }
+          : {}
+    })
     .then((r) => r.data)
 
   for (const id of reportInput.filesToRemove) {

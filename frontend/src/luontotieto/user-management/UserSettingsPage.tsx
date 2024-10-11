@@ -21,6 +21,7 @@ import React, {
 } from 'react'
 import AccessibilityFooter from 'shared/AccessibilityFooter'
 import { AlertBox, InfoBox } from 'shared/MessageBoxes'
+import { AsyncButton } from 'shared/buttons/AsyncButton'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
 import { InlineButton } from 'shared/buttons/InlineButton'
@@ -63,11 +64,11 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
             </LabeledInput>
           )}
 
-          <LabeledInput $cols={3}>
+          <LabeledInput $cols={4}>
             <Label>Yritys *</Label>
             <InputField value={user.name} readonly={true} />
           </LabeledInput>
-          <LabeledInput $cols={3}>
+          <LabeledInput $cols={4}>
             <Label>Yhteyssähköposti *</Label>
             <InputField value={user.email ?? ''} readonly={true} />
           </LabeledInput>
@@ -88,7 +89,7 @@ export const UserSettingsPage = React.memo(function UserSettingsPage() {
           )}
           {user.role !== UserRole.CUSTOMER && (
             <>
-              <LabeledInput $cols={3}>
+              <LabeledInput $cols={4}>
                 <Label>Käyttöoikeudet</Label>
                 <InputField value={getUserRole(user.role)} readonly={true} />
               </LabeledInput>
@@ -125,22 +126,24 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
+  const onChangePasswordSuccess = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ['auth-status'] })
+    void queryClient.invalidateQueries({ queryKey: ['users', userId] })
+    setShowModal({
+      title: 'Salasana muutettu',
+      resolve: {
+        action: () => {
+          setShowModal(null)
+          onClose()
+        },
+        label: 'Ok'
+      }
+    })
+  }, [userId])
+
   const { mutateAsync: changePassword, isPending } = useMutation({
     mutationFn: apiChangeUserPassword,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['auth-status'] })
-      void queryClient.invalidateQueries({ queryKey: ['users', userId] })
-      setShowModal({
-        title: 'Salasana muutettu',
-        resolve: {
-          action: () => {
-            setShowModal(null)
-            onClose()
-          },
-          label: 'Ok'
-        }
-      })
-    },
+    onSuccess: onChangePasswordSuccess,
     onError: (e: AxiosError<{ errorCode: ChangePasswordErrorCode }>) => {
       if (e instanceof AxiosError) {
         const errorCode = e.response?.data.errorCode
@@ -183,9 +186,15 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
   )
 
   return (
-    <form onSubmit={onSubmit}>
+    <form
+      onSubmit={async (e) => {
+        if (!isPending) {
+          await onSubmit(e)
+        }
+      }}
+    >
       <GroupOfInputRows>
-        <LabeledInput $cols={3}>
+        <LabeledInput $cols={4}>
           <Label>Nykyinen salasana</Label>
           <InputField
             onChange={setCurrentPassword}
@@ -193,7 +202,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
             type="password"
           />
         </LabeledInput>
-        <LabeledInput $cols={3}>
+        <LabeledInput $cols={4}>
           <Label>Uusi salasana</Label>
           <InputField
             onChange={setNewPassword}
@@ -202,7 +211,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
             info={passwordIsWeakInfo}
           />
         </LabeledInput>
-        <LabeledInput $cols={3}>
+        <LabeledInput $cols={4}>
           <Label>Vahvista uusi salasana</Label>
           <InputField
             onChange={setNewPassword2}
@@ -214,18 +223,21 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
         {!!errorMessage && <AlertBox title="Virhe" message={errorMessage} />}
         <FlexRowWithGaps>
           <Button text="Peruuta" onClick={onClose} />
-          <Button
+          <AsyncButton
+            text="Tallenna"
+            data-qa="save-button"
+            primary
             disabled={
-              isPending ||
               !currentPassword ||
               !newPassword ||
               !newPassword2 ||
               !!newPassWordDoesNotMatchInfo ||
               !!passwordIsWeakInfo
             }
-            primary
-            type="submit"
-            text="Tallenna"
+            onSuccess={onChangePasswordSuccess}
+            onClick={() =>
+              changePassword({ userId, currentPassword, newPassword })
+            }
           />
         </FlexRowWithGaps>
       </GroupOfInputRows>

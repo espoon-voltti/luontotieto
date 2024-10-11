@@ -70,6 +70,23 @@ class Emails {
 """
         )
 
+        fun getUserEmailUpdatedEmail(
+            link: String,
+            email: HtmlSafe<String>,
+            password: String
+        ) = EmailContent.fromHtml(
+            "Sähköposti liitetty käyttäjään Espoon Luontotietoportaalissa",
+            """
+<p>Tämä sähköposti on lisätty olemassa olevalle käyttäjälle Espoon Luontotietoportaalissa.</p>
+<p>Tämän muutoksen yhteydessä salasana on nollattu.</p>
+<p>Voitte kirjautua palveluun osoitteessa ${linkElement(link)}.</p>
+<p>Käyttäjätunnus: $email</p>
+<p>Salasana: $password</p>
+<p>Vaihtakaa salasana ensimmäisen kirjautumisen yhteydessä.</p>
+<p>$DO_NOT_REPLY_MESSAGE</p>
+"""
+        )
+
         fun getUserPasswordUpdatedEmail(link: String) =
             EmailContent.fromHtml(
                 "Salasana vaihdettu Espoon Luontotietoportaalissa",
