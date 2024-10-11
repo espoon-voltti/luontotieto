@@ -19,11 +19,11 @@ import {
 } from 'api/report-api'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { InfoBox } from 'shared/MessageBoxes'
+import { InfoButton } from 'shared/buttons/InfoButton'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { Checkbox } from 'shared/form/Checkbox'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
 import { FileInput, FileInputData } from 'shared/form/File/FileInput'
-import { colors } from 'shared/theme'
 import { useDebouncedState } from 'shared/useDebouncedState'
 import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
@@ -496,16 +496,7 @@ export const ReportFileIsPublic = React.memo(function ReportFileIsPublic({
       <LabeledInput $cols={8}>
         <FlexRow>
           <Label>Onko selvitysraportti julkinen? *</Label>
-          <StyledIconButton onClick={() => setShowInfoBox(!showInfoBox)}>
-            <StyledIconContainer $color={colors.main.m1}>
-              <FontAwesomeIcon
-                icon={faInfo}
-                size="1x"
-                color={colors.main.m1}
-                inverse
-              />
-            </StyledIconContainer>
-          </StyledIconButton>
+          <InfoButton onClick={() => setShowInfoBox(!showInfoBox)} />
         </FlexRow>
         <VerticalGap $size="s" />
         {showInfoBox && (
@@ -568,26 +559,4 @@ export const InnerContainer = styled.div`
 `
 export const StyledCheckBox = styled(Checkbox)`
   padding-left: 32px;
-`
-
-const StyledIconContainer = styled.div<{ $color: string }>`
-  margin-right: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  min-width: 24px;
-  height: 24px;
-  background: ${(props) => props.$color};
-  border-radius: 100%;
-`
-const StyledIconButton = styled.button`
-  margin-left: 16px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  padding: 0;
-  &:focus {
-    outline: 2px solid ${colors.main.m3};
-  }
 `
