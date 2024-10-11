@@ -6,6 +6,7 @@ package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.common.databaseValue
+import fi.espoo.luontotieto.common.sanitizeCsvCellData
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
@@ -23,11 +24,13 @@ data class Report(
     val updated: OffsetDateTime,
     val createdBy: String,
     val updatedBy: String,
+    val isPublic: Boolean?,
     val noObservations: List<DocumentType>?,
+    val observedSpecies: List<String>?,
     @Nested("o_") val order: Order?
 ) {
     companion object {
-        data class ReportInput(val name: String, val noObservations: List<DocumentType>?)
+        data class ReportInput(val name: String, val isPublic: Boolean?, val noObservations: List<DocumentType>?)
     }
 }
 
@@ -39,6 +42,8 @@ private const val SELECT_REPORT_SQL =
            r.updated                                  AS "updated",
            r.approved                                 AS "approved",
            r.no_observations                          AS "noObservations",
+           r.is_public                                AS "isPublic",
+           r.observed_species                         AS "observedSpecies",
            uc.name                                    AS "createdBy",
            uu.name                                    AS "updatedBy",
            r.order_id                                 AS "orderId",
@@ -55,11 +60,13 @@ private const val SELECT_REPORT_SQL =
            ouu.name                                   AS "o_updatedBy",
            o.assignee_contact_person                  AS "o_assigneeContactPerson",
            o.assignee_contact_email                   AS "o_assigneeContactEmail",
+           o.assignee_company_name                    AS "o_assigneeCompanyName",
            o.return_date                              AS "o_returnDate",
            o.contact_person                           AS "o_contactPerson",
            o.contact_phone                            AS "o_contactPhone",
            o.contact_email                            AS "o_contactEmail",
-           o.ordering_unit                            AS "o_orderingUnit"
+           o.ordering_unit                            AS "o_orderingUnit",
+           r.approved                                 AS "o_hasApprovedReport"
     FROM report r
              LEFT JOIN users uc ON r.created_by = uc.id
              LEFT JOIN users uu ON r.updated_by = uu.id
@@ -77,14 +84,15 @@ fun Handle.insertReport(
     return createQuery(
         """
             WITH report AS (
-                INSERT INTO report (name, created_by, updated_by, order_id) 
-                VALUES (:name, :createdBy, :updatedBy, :orderId)
+                INSERT INTO report (name, created_by, updated_by, order_id, is_public) 
+                VALUES (:name, :createdBy, :updatedBy, :orderId, :isPublic)
                 RETURNING *
             ) 
             $SELECT_REPORT_SQL
             """
     )
         .bind("name", data.name)
+        .bind("isPublic", data.isPublic)
         .bind("orderId", orderI)
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
@@ -95,6 +103,7 @@ fun Handle.insertReport(
 fun Handle.updateReportApproved(
     reportId: UUID,
     approve: Boolean,
+    observedSpecies: List<String>,
     user: AuthenticatedUser
 ): Report {
     return createUpdate(
@@ -102,12 +111,14 @@ fun Handle.updateReportApproved(
             UPDATE report 
               SET
                 approved = :approved,
+                observed_species = :observedSpecies,
                 updated_by = :updatedBy
             WHERE id = :reportId
             """
     )
         .bind("reportId", reportId)
         .bind("approved", approve)
+        .bind("observedSpecies", observedSpecies.toTypedArray())
         .bind("updatedBy", user.id)
         .executeAndReturnGeneratedKeys()
         .mapTo<Report>()
@@ -124,7 +135,7 @@ fun Handle.putReport(
         """
             WITH report AS (
                 UPDATE report r
-                 SET name = :name, updated_by = :updatedBy, no_observations = :noObservations
+                 SET name = :name, updated_by = :updatedBy, no_observations = :noObservations, is_public = :isPublic
                  FROM "order" o, users u
                 WHERE r.id = :id AND u.id = :updatedBy AND (o.assignee_id = u.id OR u.role != 'yrityskäyttäjä')
                 RETURNING r.*
@@ -133,6 +144,7 @@ fun Handle.putReport(
             """
     )
         .bind("name", report.name)
+        .bind("isPublic", report.isPublic)
         .bind("noObservations", noObservations)
         .bind("id", id)
         .bind("updatedBy", user.id)
@@ -205,7 +217,6 @@ fun Handle.getReports(
 }
 
 fun Handle.getAluerajausLuontoselvitysTilausParams(
-    user: AuthenticatedUser,
     report: Report,
     reportLink: String
 ): Map<String, Any?> {
@@ -218,7 +229,7 @@ fun Handle.getAluerajausLuontoselvitysTilausParams(
     )
 }
 
-fun Handle.getObservedSpecies(reportId: UUID): Set<String> {
+fun Handle.getObservedSpecies(reportId: UUID): List<String> {
     return createQuery(
         """
             SELECT suomenkielinen_nimi
@@ -236,7 +247,30 @@ fun Handle.getObservedSpecies(reportId: UUID): Set<String> {
     )
         .bind("reportId", reportId)
         .mapTo<String>()
-        .set()
+        .toList()
+}
+
+data class PaikkaTietoEnum(
+    val name: String,
+    val value: String
+)
+
+fun Handle.getPaikkaTietoEnums(): List<PaikkaTietoEnum> {
+    return createQuery(
+        """
+            SELECT
+                t.typname AS name,
+                e.enumlabel AS value
+            FROM
+                pg_type t
+            JOIN
+                pg_enum e ON t.oid = e.enumtypid
+            JOIN
+                pg_namespace n ON n.oid = t.typnamespace
+            """
+    )
+        .mapTo<PaikkaTietoEnum>()
+        .toList()
 }
 
 fun Handle.getAluerajausLuontoselvitysParams(
@@ -271,10 +305,12 @@ fun Handle.getAluerajausLuontoselvitysParams(
             .sorted()
             .toTypedArray()
 
+    val contactPerson = report.order?.assigneeCompanyName ?: report.order?.assignee
+
     return mapOf(
         "name" to report.name,
         "year" to report.order?.returnDate?.year,
-        "contactPerson" to report.order?.assigneeContactPerson,
+        "contactPerson" to contactPerson,
         "unit" to report.order?.orderingUnit?.joinToString(","),
         "additionalInformation" to reportAreaFile?.description,
         "reportLink" to reportLink,
@@ -282,6 +318,9 @@ fun Handle.getAluerajausLuontoselvitysParams(
         "surveyedData" to surveyedData
     )
 }
+
+const val CSV_FIELD_SEPARATOR = ";"
+const val CSV_RECORD_SEPARATOR = "\r\n"
 
 fun reportsToCsv(reports: List<Report>): String {
     val csvHeader =
@@ -296,29 +335,42 @@ fun reportsToCsv(reports: List<Report>): String {
             "viimeisin muokkaaja",
             "viimeisin muokkauspvm",
             "selvitetyt tiedot",
+            "muut huomioitavat lajit",
             "ei löydettyjä havaintoja"
-        ).joinToString(";") + "\n"
+        ).joinToString(CSV_FIELD_SEPARATOR, postfix = CSV_RECORD_SEPARATOR)
 
-    val delimiter = ";"
     val csvContent = StringBuilder()
     csvContent.append(csvHeader)
 
     for (report in reports) {
-        csvContent.append(report.id).append(delimiter)
-            .append(report.name).append(delimiter)
-            .append(report.approved).append(delimiter)
-            .append(report.order?.planNumber?.joinToString(",")).append(delimiter)
-            .append(report.order?.orderingUnit?.joinToString(",")).append(delimiter)
-            .append(report.createdBy).append(delimiter)
-            .append(report.created).append(delimiter)
-            .append(report.updatedBy).append(delimiter)
-            .append(report.updated).append(delimiter)
-            .append(
+        val planNumbers = sanitizeCsvCellData(report.order?.planNumber?.joinToString(",") ?: "")
+        val orderingUnits = sanitizeCsvCellData(report.order?.orderingUnit?.joinToString(",") ?: "")
+        val reportDocuments =
+
+            sanitizeCsvCellData(
                 report.order?.reportDocuments?.map { rd -> rd.documentType }
-                    ?.joinToString(",")
-            ).append(delimiter)
-            .append(report.noObservations?.map { rd -> rd }?.joinToString(","))
-            .append("\n")
+                    ?.joinToString(",") ?: ""
+            )
+
+        val observedSpecies = sanitizeCsvCellData(report.observedSpecies?.joinToString(",") ?: "")
+
+        val noObservations = sanitizeCsvCellData(report.noObservations?.joinToString(",") ?: "")
+
+        csvContent.append(report.id).append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.name)).append(CSV_FIELD_SEPARATOR)
+            .append(report.approved).append(CSV_FIELD_SEPARATOR)
+            .append(planNumbers).append(CSV_FIELD_SEPARATOR)
+            .append(orderingUnits).append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.createdBy)).append(CSV_FIELD_SEPARATOR)
+            .append(report.created).append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.updatedBy)).append(CSV_FIELD_SEPARATOR)
+            .append(report.updated).append(CSV_FIELD_SEPARATOR)
+            .append(
+                reportDocuments
+            ).append(CSV_FIELD_SEPARATOR)
+            .append(observedSpecies).append(CSV_FIELD_SEPARATOR)
+            .append(noObservations)
+            .append(CSV_RECORD_SEPARATOR)
     }
 
     return csvContent.toString()

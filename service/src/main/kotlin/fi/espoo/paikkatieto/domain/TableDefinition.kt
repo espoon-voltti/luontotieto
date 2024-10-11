@@ -4,6 +4,7 @@
 
 package fi.espoo.paikkatieto.domain
 
+import fi.espoo.luontotieto.domain.Order
 import fi.espoo.luontotieto.domain.Report
 import fi.espoo.paikkatieto.reader.GpkgFeature
 import fi.espoo.paikkatieto.reader.GpkgValidationError
@@ -28,7 +29,8 @@ data class Column(
 ) {
     fun validate(
         id: String,
-        value: Any?
+        value: Any?,
+        allowedValues: List<String> = emptyList()
     ): GpkgValidationError? =
         when {
             value == null && !isNullable ->
@@ -38,6 +40,7 @@ data class Column(
                     value = null,
                     reason = GpkgValidationErrorReason.IS_NULL
                 )
+
             value != null &&
                 (!value::class.isSubclassOf(kClass) && value::class != kClass::class) -> {
                 val errorValue =
@@ -54,6 +57,16 @@ data class Column(
                     reason = GpkgValidationErrorReason.WRONG_TYPE
                 )
             }
+
+            value != null && allowedValues.isNotEmpty() && !allowedValues.contains(value) -> {
+                GpkgValidationError(
+                    id = id,
+                    column = name,
+                    value = value,
+                    reason = GpkgValidationErrorReason.INVALID_VALUE
+                )
+            }
+
             else -> null
         }
 }
@@ -97,6 +110,11 @@ enum class TableDefinition(
                     name = "tarkkuus",
                     kClass = String::class,
                     sqlType = "luontotieto_mittaustyyppi"
+                ),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -120,6 +138,11 @@ enum class TableDefinition(
                     name = "tarkkuus",
                     kClass = String::class,
                     sqlType = "luontotieto_mittaustyyppi"
+                ),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -131,13 +154,18 @@ enum class TableDefinition(
                 Column(name = "geom", kClass = LineString::class),
                 Column(name = "pvm", kClass = Date::class),
                 Column(name = "havaitsija", kClass = String::class),
-                Column(name = "laatu", kClass = String::class, sqlType = "liito_orava_aluetyyppi"),
+                Column(name = "laatu", kClass = String::class, sqlType = "laatu"),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
                 Column(name = "kunta", kClass = Int::class, isNullable = true),
                 Column(
                     name = "tarkkuus",
                     kClass = String::class,
                     sqlType = "luontotieto_mittaustyyppi"
+                ),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
                 )
             )
     ),
@@ -155,7 +183,7 @@ enum class TableDefinition(
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
-                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka"),
+                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka_lajit"),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "paikan_nimi", kClass = String::class, isNullable = true),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
@@ -168,7 +196,12 @@ enum class TableDefinition(
                 Column(name = "yksilo_maara", kClass = Int::class),
                 Column(name = "yksikko", kClass = String::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(name = "havaitsija", kClass = String::class)
+                Column(name = "havaitsija", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
+                )
             )
     ),
     MUUT_HUOMIOITAVAT_LAJIT_VIIVAT(
@@ -185,14 +218,19 @@ enum class TableDefinition(
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
-                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka"),
+                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka_lajit"),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
                 Column(name = "laji_luokitus", kClass = String::class),
                 // Do not write pituus to DB. Keep it only in the template.
                 Column(name = "pituus", kClass = Double::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(name = "havaitsija", kClass = String::class)
+                Column(name = "havaitsija", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
+                )
             )
     ),
     MUUT_HUOMIOITAVAT_LAJIT_ALUEET(
@@ -209,7 +247,7 @@ enum class TableDefinition(
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
-                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka"),
+                Column(name = "IUCN_luokka", kClass = String::class, sqlType = "IUCN_luokka_lajit"),
                 Column(name = "direktiivi", kClass = String::class),
                 Column(name = "havaintopaikan_kuvaus", kClass = String::class, isNullable = true),
                 Column(name = "laji_luokitus", kClass = String::class),
@@ -218,7 +256,12 @@ enum class TableDefinition(
                 // Do not write pinta_ala to DB. Keep it only in the template.
                 Column(name = "pinta_ala", kClass = Double::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(name = "havaitsija", kClass = String::class)
+                Column(name = "havaitsija", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
+                )
             )
     ),
     LEPAKKO_VIIVAT(
@@ -230,7 +273,12 @@ enum class TableDefinition(
                 Column(name = "pvm", kClass = Date::class),
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "kuvaus", kClass = String::class),
-                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
+                )
             )
     ),
     LEPAKKO_ALUEET(
@@ -242,7 +290,12 @@ enum class TableDefinition(
                 Column(name = "pvm", kClass = Date::class),
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "luokka", kClass = String::class, sqlType = "lepakko_luokka"),
-                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
+                )
             )
     ),
     LUMO_ALUEET(
@@ -255,7 +308,12 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "nimi", kClass = String::class, isNullable = true),
                 Column(name = "lumo_luokka", kClass = String::class, sqlType = "lumo_luokka"),
-                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
+                )
             )
     ),
     NORO_VIIVAT(
@@ -266,7 +324,12 @@ enum class TableDefinition(
                 Column(name = "geom", kClass = LineString::class),
                 Column(name = "pvm", kClass = Date::class),
                 Column(name = "havaitsija", kClass = String::class),
-                Column(name = "lisatieto", kClass = String::class, isNullable = true)
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
+                )
             )
     ),
     LUONTOTYYPIT_ALUEET(
@@ -287,7 +350,7 @@ enum class TableDefinition(
                 Column(
                     name = "uhanalaisuusluokka",
                     kClass = String::class,
-                    sqlType = "IUCN_luokka"
+                    sqlType = "IUCN_luokka_luontotyypit"
                 ),
                 Column(name = "edustavuus", kClass = String::class, sqlType = "edustavuus_luokka"),
                 Column(name = "kuvaus", kClass = String::class),
@@ -300,6 +363,11 @@ enum class TableDefinition(
                     kClass = String::class,
                     sqlType = "luontotyyppi_lumo_luokka"
                 ),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
+                )
             )
     ),
     EKOYHTEYDET_ALUEET(
@@ -312,6 +380,11 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "laatu", kClass = String::class, sqlType = "yhteyden_laatu"),
                 Column(name = "lisatieto", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
+                )
             )
     ),
     EKOYHTEYDET_VIIVAT(
@@ -324,6 +397,11 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "laatu", kClass = String::class, sqlType = "yhteyden_laatu"),
                 Column(name = "lisatieto", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
+                )
             )
     ),
     LAHTEET_PISTEET(
@@ -336,6 +414,11 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "tyyppi", kClass = String::class),
                 Column(name = "lisatieto", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
+                )
             )
     )
 }
@@ -344,14 +427,16 @@ fun Handle.insertPaikkatieto(
     tableDefinition: TableDefinition,
     report: Report,
     data: Sequence<GpkgFeature>,
-    params: Map<String, Any?> = emptyMap()
+    params: Map<String, Any?> = emptyMap(),
+    overrideReportName: Boolean = false
 ): Array<Int> {
     val batchInsert = prepareBatch(tableDefinition.sqlInsertStatement)
     data.forEach {
+        val reportName = if (overrideReportName) it.columns["viite"] ?: report.name else report.name
         batchInsert.add(
             convertColumnsWithGeometry(it.columns)
                 .plus("reportId" to report.id)
-                .plus("reportName" to report.name)
+                .plus("reportName" to reportName)
                 .plus(params)
         )
     }
@@ -364,6 +449,30 @@ fun Handle.deletePaikkatieto(
 ): Int {
     val deleteQuery = "DELETE FROM ${tableDefinition.layerName} WHERE selvitys_id = :reportId"
     return createUpdate(deleteQuery).bind("reportId", reportId).execute()
+}
+
+fun Handle.updateAluerajausLuontoselvitystilaus(
+    reportId: UUID,
+    order: Order
+): Int {
+    return createQuery(
+        """
+        WITH updated AS (
+            UPDATE aluerajaus_luontoselvitystilaus
+                SET tilauksen_nimi = :name,
+                    tilauksen_tekija = :contactPerson,
+                    tilausyksikko = :unit
+            WHERE selvitys_id = :reportId
+            RETURNING *
+        )
+        SELECT COUNT(*) FROM updated;
+            """
+    ).bind("reportId", reportId)
+        .bind("name", order.name)
+        .bind("contactPerson", order.contactPerson)
+        .bind("unit", order.orderingUnit?.joinToString(","))
+        .mapTo<Int>()
+        .one()
 }
 
 fun Handle.deleteAluerajausLuontoselvitystilaus(reportId: UUID): Int {
@@ -502,7 +611,7 @@ private const val SQL_INSERT_LIITO_ORAVA_YHTEYSVIIVAT =
     VALUES (
         :pvm,
         :havaitsija,
-        :laatu,
+        :laatu::laatu,
         :lisatieto,
         :reportName,
         :kunta,
@@ -539,7 +648,7 @@ private const val SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_PISTEET =
         :elioryhma::muut_huomioitavat_lajit_elioryhma,
         :tieteellinen_nimi,
         :suomenkielinen_nimi,
-        :IUCN_luokka::"IUCN_luokka",
+        :IUCN_luokka::"IUCN_luokka_lajit",
         :direktiivi,
         :paikan_nimi,
         :havaintopaikan_kuvaus,
@@ -578,7 +687,7 @@ private const val SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_VIIVAT =
         :elioryhma::muut_huomioitavat_lajit_elioryhma,
         :tieteellinen_nimi,
         :suomenkielinen_nimi,
-        :IUCN_luokka::"IUCN_luokka",
+        :IUCN_luokka::"IUCN_luokka_lajit",
         :direktiivi,
         :havaintopaikan_kuvaus,
         :laji_luokitus,
@@ -615,7 +724,7 @@ private const val SQL_INSERT_MUUT_HUOMIOITAVAT_LAJIT_ALUEET =
         :elioryhma::muut_huomioitavat_lajit_elioryhma,
         :tieteellinen_nimi,
         :suomenkielinen_nimi,
-        :IUCN_luokka::"IUCN_luokka",
+        :IUCN_luokka::"IUCN_luokka_lajit",
         :direktiivi,
         :havaintopaikan_kuvaus,
         :laji_luokitus,
@@ -748,7 +857,7 @@ private const val SQL_INSERT_LUONTOTYYPIT_ALUEET =
         :nimi,
         :luontotyyppi_paaryhma::luontotyyppi_paaryhma,
         :luontotyyppi,
-        :uhanalaisuusluokka::"IUCN_luokka",
+        :uhanalaisuusluokka::"IUCN_luokka_luontotyypit",
         :edustavuus::edustavuus_luokka,
         :kuvaus,
         :lisatieto,

@@ -6,22 +6,18 @@ import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import express, { Router } from 'express'
 import { postPasswordLogin } from '../../clients/service-client.js'
-import { logError } from '../../logging/index.js'
 
 passport.use(
   'password',
   new LocalStrategy(
     { usernameField: 'email' },
     async (email, password, done) => {
-      const user = await postPasswordLogin(email, password).catch((reason) => {
-        logError('Login failed', undefined, undefined, reason)
-        return undefined
-      })
-
-      if (user) {
-        return done(undefined, user)
+      const response = await postPasswordLogin(email, password)
+      if ('errorCode' in response) {
+        return done(null, false, { message: response.errorCode })
+      } else {
+        return done(undefined, response)
       }
-      return done(undefined, false, { message: 'Invalid email or password.' })
     }
   )
 )
@@ -30,12 +26,31 @@ export function createPasswordAuthRouter(): Router {
   const router = Router()
   router.use(express.json())
 
-  router.post('/login', passport.authenticate('password'), (req, res) => {
-    if (req.user) {
-      res.sendStatus(200)
-    } else {
-      res.sendStatus(401)
-    }
+  router.post('/login', (req, res, next) => {
+    passport.authenticate(
+      'password',
+      (
+        err: Error | null,
+        user: Express.User | false,
+        info: { message: string } | undefined
+      ) => {
+        if (err) {
+          return next(err)
+        }
+        if (!user) {
+          // Authentication failed, send a custom error response
+          return res
+            .status(401)
+            .json({ errorCode: info ? info.message : 'Unauthorized' })
+        }
+        req.logIn(user, (err) => {
+          if (err) {
+            return next(err)
+          }
+          return res.sendStatus(200)
+        })
+      }
+    )(req, res, next)
   })
 
   router.post('/logout', (req, res, next) => {

@@ -1,0 +1,2 @@
+ALTER TABLE aluerajaus_luontoselvitystilaus
+ALTER COLUMN tilaus_vuosi SET DEFAULT EXTRACT(YEAR FROM CURRENT_DATE)::INTEGER;

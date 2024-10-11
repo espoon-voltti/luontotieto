@@ -9,12 +9,14 @@ import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.OrderController
+import fi.espoo.luontotieto.domain.OrderDocumentType
 import fi.espoo.luontotieto.domain.OrderInput
 import fi.espoo.luontotieto.domain.OrderReportDocument
 import fi.espoo.luontotieto.domain.ReportController
 import fi.espoo.luontotieto.domain.UserRole
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.mock.web.MockMultipartFile
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
@@ -22,9 +24,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class OrderTests : FullApplicationTest() {
-    @Autowired lateinit var controller: OrderController
+    @Autowired
+    lateinit var controller: OrderController
 
-    @Autowired lateinit var reportController: ReportController
+    @Autowired
+    lateinit var reportController: ReportController
 
     @Test
     fun `create order with all data and fetch`() {
@@ -104,6 +108,7 @@ class OrderTests : FullApplicationTest() {
                     reportDocuments = updatedReportDocuments,
                     assigneeContactEmail = "email@example.com",
                     assigneeContactPerson = "Person Name",
+                    assigneeCompanyName = "Ylikirjoitus Oy",
                     contactEmail = "contact@example.com",
                     contactPerson = "Contact Person",
                     contactPhone = "040123456789",
@@ -115,6 +120,7 @@ class OrderTests : FullApplicationTest() {
         assertEquals("New name", updatedReport.order?.name)
         assertEquals("New description", updatedReport.order?.description)
         assertEquals("Yritys Oy", updatedReport.order?.assignee)
+        assertEquals("Ylikirjoitus Oy", updatedReport.order?.assigneeCompanyName)
         assertEquals(customerUser.id, updatedReport.order?.assigneeId)
         assertEquals(updatedReportDocuments, updatedReport.order?.reportDocuments)
     }
@@ -143,5 +149,88 @@ class OrderTests : FullApplicationTest() {
         val report = reportController.getReportById(adminUser, createdOrder.reportId)
 
         assertNotNull(report)
+    }
+
+    @Test
+    fun `Can not update or delete order that has approved report`() {
+        val createdOrder = createOrderAndReport(controller = controller)
+
+        controller.uploadOrderFile(
+            user = adminUser,
+            orderId = createdOrder.orderId,
+            file =
+                MockMultipartFile(
+                    "tilaus_ohje.txt",
+                    "tilaus_ohje.txt",
+                    "text/plain",
+                    "ORDER INFO CONTENT".toByteArray()
+                ),
+            documentType = OrderDocumentType.ORDER_INFO,
+            description = "Test Description",
+            id = UUID.randomUUID().toString()
+        )
+
+        createLiitoOravaPisteetReportFile(reportController, createdOrder.reportId)
+
+        reportController.approveReport(adminUser, createdOrder.reportId)
+
+        assertThrows<BadRequest> {
+            controller.updateOrder(
+                adminUser,
+                createdOrder.orderId,
+                OrderInput(
+                    name = "New name",
+                    description = "New description",
+                    planNumber = listOf("12345"),
+                    assigneeId = customerUser.id,
+                    reportDocuments =
+                        listOf(
+                            OrderReportDocument(
+                                "Test description",
+                                DocumentType.LIITO_ORAVA_ALUEET
+                            )
+                        ),
+                    assigneeContactEmail = "email@example.com",
+                    assigneeContactPerson = "Person Name",
+                    assigneeCompanyName = "Ylikirjoitus Oy",
+                    contactEmail = "contact@example.com",
+                    contactPerson = "Contact Person",
+                    contactPhone = "040123456789",
+                    orderingUnit = listOf("Orava yksikkö"),
+                    returnDate = LocalDate.of(2026, 1, 1)
+                )
+            )
+        }
+        assertThrows<BadRequest> { controller.deleteOrder(adminUser, createdOrder.orderId) }
+
+        assertThrows<BadRequest> {
+            controller.uploadOrderFile(
+                user = adminUser,
+                orderId = createdOrder.orderId,
+                file =
+                    MockMultipartFile(
+                        "tilaus_ohje.txt",
+                        "tilaus_ohje.txt",
+                        "text/plain",
+                        "ORDER INFO CONTENT".toByteArray()
+                    ),
+                documentType = OrderDocumentType.ORDER_INFO,
+                description = "Test Description",
+                id = UUID.randomUUID().toString()
+            )
+        }
+        val orderFileResponse = controller.getOrderFiles(adminUser, createdOrder.orderId)
+
+        assertNotNull(orderFileResponse)
+        assertEquals(orderFileResponse.count(), 1)
+        val fileResponse = orderFileResponse.first()
+
+        assertThrows<BadRequest> {
+            controller.deleteOrderFile(
+                user = adminUser,
+                orderId = createdOrder.orderId,
+                fileId = fileResponse.id
+            )
+        }
     }
 }

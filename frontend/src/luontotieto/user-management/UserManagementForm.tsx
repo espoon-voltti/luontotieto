@@ -12,8 +12,9 @@ import {
   UserRole
 } from 'api/users-api'
 import { AxiosError } from 'axios'
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { AlertBox, InfoBox } from 'shared/MessageBoxes'
+import { AsyncButton } from 'shared/buttons/AsyncButton'
 import { Button } from 'shared/buttons/Button'
 import { InlineButton } from 'shared/buttons/InlineButton'
 import { InputField } from 'shared/form/InputField'
@@ -64,81 +65,86 @@ export const UserManagementForm = React.memo(function UserManagementForm({
   const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
 
   const userSelectedRoleInfo = roles.find((r) => r.role === userInput.role)
-  const { mutateAsync: updateUserMutation, isPending: updatingUser } =
-    useMutation({
-      mutationFn: apiPutUser,
-      onSuccess: (user) => {
-        void queryClient.invalidateQueries({ queryKey: ['users'] })
-        void queryClient.invalidateQueries({ queryKey: ['user', user.id] })
-        setShowModal({
-          title: 'Käyttäjän tiedot päivitetty',
-          resolve: {
-            action: () => {
-              setShowModal(null)
-              setEnableEdit(false)
-            },
-            label: 'Ok'
-          }
-        })
-      },
-      onError: (e: AxiosError<{ errorCode: string }>) => {
-        if (e instanceof AxiosError) {
-          const errorCode = e.response?.data.errorCode
-          const errorMessage =
-            errorCode === 'UniqueConstraintViolation'
-              ? 'Syötetty sähköposti on jo käytössä toisella käyttäjällä.'
-              : 'Tapahtui odottamaton virhe.'
-          setErrorMessage(errorMessage)
-        }
+
+  const onUpdateUserSuccess = useCallback((user: User) => {
+    void queryClient.invalidateQueries({ queryKey: ['users'] })
+    void queryClient.invalidateQueries({ queryKey: ['user', user.id] })
+    setShowModal({
+      title: 'Käyttäjän tiedot päivitetty',
+      resolve: {
+        action: () => {
+          setErrorMessage(null)
+          setShowModal(null)
+          setEnableEdit(false)
+        },
+        label: 'Ok'
       }
     })
+  }, [])
 
-  const {
-    mutateAsync: resetUserPasswordMutation,
-    isPending: resettingPassword
-  } = useMutation({
-    mutationFn: apiResetUserPassword,
-    onSuccess: (userId) => {
-      void queryClient.invalidateQueries({ queryKey: ['users'] })
-      void queryClient.invalidateQueries({ queryKey: ['user', userId] })
-      setShowModal({
-        title: 'Käyttäjän salasana resetoitu',
-        resolve: {
-          action: () => {
-            setShowModal(null)
-          },
-          label: 'Ok'
-        },
-        text: 'Uusi salasana on lähetetty käyttäjän sähköpostiin.'
-      })
+  const { mutateAsync: updateUserMutation } = useMutation({
+    mutationFn: apiPutUser,
+    onSuccess: onUpdateUserSuccess,
+    onError: (e: AxiosError<{ errorCode: string }>) => {
+      if (e instanceof AxiosError) {
+        const errorCode = e.response?.data.errorCode
+        const errorMessage =
+          errorCode === 'UniqueConstraintViolation'
+            ? 'Syötetty sähköposti on jo käytössä toisella käyttäjällä.'
+            : 'Tapahtui odottamaton virhe.'
+        setErrorMessage(errorMessage)
+      }
     }
   })
 
-  const invalidEmailInfo = useMemo(
-    () =>
-      enableEdit && userInput.email && !userInput.email.match(emailRegex)
-        ? {
-            text: 'Syötä oikeaa muotoa oleva sähköposti',
-            status: 'warning' as const
-          }
-        : undefined,
-    [userInput.email, enableEdit]
-  )
+  const onResetUserPasswordSuccess = useCallback((userId: string) => {
+    void queryClient.invalidateQueries({ queryKey: ['users'] })
+    void queryClient.invalidateQueries({ queryKey: ['user', userId] })
+    setShowModal({
+      title: 'Käyttäjän salasana resetoitu',
+      resolve: {
+        action: () => {
+          setShowModal(null)
+        },
+        label: 'Ok'
+      },
+      text: 'Uusi salasana on lähetetty käyttäjän sähköpostiin.'
+    })
+  }, [])
+
+  const { mutateAsync: resetUserPasswordMutation } = useMutation({
+    mutationFn: apiResetUserPassword,
+    onSuccess: onResetUserPasswordSuccess
+  })
+
+  const invalidEmailInfo = useMemo(() => {
+    if (!enableEdit) return undefined
+    if (userInput.role === UserRole.CUSTOMER && !userInput.email)
+      return { text: 'Sähköposti vaaditaan', status: 'warning' as const }
+    if (userInput.email && !userInput.email.match(emailRegex))
+      return {
+        text: 'Syötä oikeaa muotoa oleva sähköposti',
+        status: 'warning' as const
+      }
+    return undefined
+  }, [userInput.email, userInput.role, enableEdit])
+
+  const isValid = userInput.name && !invalidEmailInfo
 
   return (
     <SectionContainer>
       <GroupOfInputRows>
         <H3>Käyttäjän tiedot</H3>
-        <LabeledInput $cols={3}>
-          <Label>Käyttäjä</Label>
+        <LabeledInput $cols={4}>
+          <Label>Käyttäjä *</Label>
           <InputField
             value={userInput.name}
             onChange={(value) => setUserInput({ ...userInput, name: value })}
             readonly={!enableEdit}
           />
         </LabeledInput>
-        <LabeledInput $cols={3}>
-          <Label>Yhteyssähköposti</Label>
+        <LabeledInput $cols={4}>
+          <Label>Yhteyssähköposti *</Label>
           <InputField
             value={userInput.email}
             onChange={(value) => setUserInput({ ...userInput, email: value })}
@@ -149,7 +155,7 @@ export const UserManagementForm = React.memo(function UserManagementForm({
 
         {userInput.role !== UserRole.CUSTOMER && (
           <LabeledInput $cols={5}>
-            <Label>Käyttöoikeudet</Label>
+            <Label>Käyttöoikeudet *</Label>
             <FlexRowWithGaps style={{ paddingTop: '4px' }}>
               {roles.map((r) => (
                 <Radio
@@ -186,16 +192,21 @@ export const UserManagementForm = React.memo(function UserManagementForm({
         {enableEdit ? (
           <FlexRowWithGaps>
             <Button
-              disabled={updatingUser}
               text="Peruuta"
-              onClick={() => setEnableEdit(!enableEdit)}
+              onClick={() => {
+                setUserInput(user)
+                setErrorMessage(null)
+                setEnableEdit(!enableEdit)
+              }}
             />
-            <Button
-              disabled={updatingUser || !!invalidEmailInfo}
-              primary
+            <AsyncButton
               text="Tallenna"
-              onClick={async () =>
-                await updateUserMutation({
+              data-qa="save-button"
+              primary
+              disabled={!isValid}
+              onSuccess={onUpdateUserSuccess}
+              onClick={() =>
+                updateUserMutation({
                   ...userInput,
                   userId: user.id
                 })
@@ -212,7 +223,6 @@ export const UserManagementForm = React.memo(function UserManagementForm({
         )}
         {userInput.role === UserRole.CUSTOMER && (
           <InlineButton
-            disabled={resettingPassword}
             text="Resetoi salasana"
             onClick={() =>
               setShowModal({

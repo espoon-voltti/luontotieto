@@ -9,3 +9,8 @@
 !*.lock
 !config
 !entrypoint.sh
+!yarn.lock
+!yarnrc.yml
+!.yarn/releases
+!.yarn/plugins
+!.yarnrc.yml

@@ -3,19 +3,21 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import React from 'react'
+import { AsyncButton } from 'shared/buttons/AsyncButton'
 import { Button } from 'shared/buttons/Button'
 import { VerticalGap } from 'shared/layout'
 
 import BaseModal, { ModalBaseProps, ModalButtons } from './BaseModal'
 
-export interface InfoModalStateProps extends InfoModalActions {
+export interface InfoModalStateProps extends InfoModalActions<unknown> {
   title: string
   text?: string
 }
 
-export interface InfoModalActions {
+export interface InfoModalActions<T> {
   resolve?: {
-    action: () => void
+    action: () => Promise<T> | void
+    onSuccess?: (value: T) => void
     label: string
     disabled?: boolean
   }
@@ -24,10 +26,17 @@ export interface InfoModalActions {
     label: string
   }
 }
-type Props = Omit<ModalBaseProps, 'mobileFullScreen'> &
-  (InfoModalActions & { close: () => void; closeLabel: string })
+type Props<T> = Omit<ModalBaseProps, 'mobileFullScreen'> &
+  (InfoModalActions<T> & {
+    close: () => void
+    closeLabel: string
+    disabled?: boolean
+  })
 
-export default React.memo(function InfoModal({ children, ...props }: Props) {
+export default React.memo(function InfoModal({
+  children,
+  ...props
+}: Props<unknown>) {
   return (
     <BaseModal
       {...props}
@@ -41,10 +50,16 @@ export default React.memo(function InfoModal({ children, ...props }: Props) {
           $justifyContent={!props.reject ? 'center' : 'space-between'}
         >
           {props.resolve && (
-            <Button
+            <AsyncButton
               data-qa="modal-okBtn"
               onClick={props.resolve.action}
-              disabled={props.resolve.disabled}
+              onSuccess={
+                props.resolve.onSuccess ||
+                (() => {
+                  /* intentionally empty */
+                })
+              }
+              disabled={props.disabled || props.resolve.disabled}
               text={props.resolve.label}
               primary
             />

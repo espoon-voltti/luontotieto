@@ -8,12 +8,17 @@ luontotieto:
   bucket:
     data: ${DATA_BUCKET}
     proxy_through_nginx: true
+    verify_file_av_tagged: true
   email:
     enabled: ${EMAIL_ENABLED}
     region: ${EMAIL_AWS_REGION}
     sender_address: ${EMAIL_SENDER_ADDRESS}
     sender_arn: ${EMAIL_SENDER_ARN}
   host: ${BASE_URL}
+  geoserver:
+    base_url: ${GEOSERVER_URL}
+    username: ${GEOSERVER_USERNAME}
+    password: ${GEOSERVER_PASSWORD}
 
 spring:
   main:

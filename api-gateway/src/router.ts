@@ -34,7 +34,9 @@ export function createRouter(config: Config, redisClient: RedisClient): Router {
 
   router.use(cacheControl(() => 'forbid-cache'))
 
-  router.all('/system/*', (_, res) => res.sendStatus(404))
+  router.all('/system/*', (_, res) => {
+    res.sendStatus(404)
+  })
 
   if (config.ad.type === 'mock') {
     router.use('/auth/saml', createDevAdRouter(sessions))

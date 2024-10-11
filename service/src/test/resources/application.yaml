@@ -10,12 +10,17 @@ luontotieto:
   bucket:
     data: "data"
     proxy_through_nginx: false
+    verify_file_av_tagged: false
   email:
     enabled: "false"
     region: "fake"
     sender_address: "fake"
     sender_arn: "fake"
   host: "http://localhost:9000"
+  geoserver:
+    base_url: "fake"
+    username: "fake"
+    password: "fake"
 
 app:
   jwt:

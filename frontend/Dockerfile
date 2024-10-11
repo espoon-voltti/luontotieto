@@ -5,11 +5,13 @@
 
 ARG NGINX_VERSION=1.25.1
 
-FROM node:22.2-bookworm-slim AS builder
+FROM node:22.9-bookworm-slim AS builder
 
 WORKDIR /project
 
-COPY ./package.json ./yarn.lock ./
+COPY ./.yarn ./.yarn
+COPY ./package.json ./yarn.lock ./.yarnrc.yml ./
+
 RUN yarn install --immutable
 
 COPY . .
@@ -26,13 +28,13 @@ ENV NGINX_ENV=local \
     TZ=UTC
 
 RUN apt-get update \
- && apt-get -y dist-upgrade \
- && apt-get -y --no-install-recommends install ruby \
- && curl -sSfL https://github.com/espoon-voltti/s3-downloader/releases/download/v1.4.1/s3downloader-linux-amd64 \
-       -o /bin/s3download \
- && chmod +x /bin/s3download \
- && echo "520ea232e83a7cefe2a87d4f2af8433e383a4351464e213b7dd3b78ca0dc200f  /bin/s3download" | sha256sum -c - \
- && rm -rf /var/lib/apt/lists/*
+    && apt-get -y dist-upgrade \
+    && apt-get -y --no-install-recommends install ruby \
+    && curl -sSfL https://github.com/espoon-voltti/s3-downloader/releases/download/v1.4.1/s3downloader-linux-amd64 \
+    -o /bin/s3download \
+    && chmod +x /bin/s3download \
+    && echo "520ea232e83a7cefe2a87d4f2af8433e383a4351464e213b7dd3b78ca0dc200f  /bin/s3download" | sha256sum -c - \
+    && rm -rf /var/lib/apt/lists/*
 
 
 COPY ./nginx/bin/ /bin/
@@ -49,4 +51,4 @@ ARG commit=none
 ENV APP_BUILD="$build" \
     APP_COMMIT="$commit"
 LABEL fi.espoo.build="$build" \
-      fi.espoo.commit="$commit"
+    fi.espoo.commit="$commit"

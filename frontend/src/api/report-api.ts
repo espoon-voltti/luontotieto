@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { apiClient } from 'api-client'
-import { AxiosHeaders, AxiosResponse } from 'axios'
+import { AxiosError, AxiosHeaders, AxiosResponse } from 'axios'
 import FileSaver from 'file-saver'
 import { JsonOf } from 'shared/api-utils'
 
@@ -63,7 +63,6 @@ export enum ReportFileDocumentType {
   MUUT_HUOMIOITAVAT_LAJIT_PISTEET = 'MUUT_HUOMIOITAVAT_LAJIT_PISTEET',
   MUUT_HUOMIOITAVAT_LAJIT_VIIVAT = 'MUUT_HUOMIOITAVAT_LAJIT_VIIVAT',
   MUUT_HUOMIOITAVAT_LAJIT_ALUEET = 'MUUT_HUOMIOITAVAT_LAJIT_ALUEET',
-  ALUERAJAUS_LUONTOSELVITYS = 'ALUERAJAUS_LUONTOSELVITYS',
   LEPAKKO_VIIVAT = 'LEPAKKO_VIIVAT',
   LEPAKKO_ALUEET = 'LEPAKKO_ALUEET',
   LUMO_ALUEET = 'LUMO_ALUEET',
@@ -72,6 +71,7 @@ export enum ReportFileDocumentType {
   EKOYHTEYDET_ALUEET = 'EKOYHTEYDET_ALUEET',
   EKOYHTEYDET_VIIVAT = 'EKOYHTEYDET_VIIVAT',
   LAHTEET_PISTEET = 'LAHTEET_PISTEET',
+  ALUERAJAUS_LUONTOSELVITYS = 'ALUERAJAUS_LUONTOSELVITYS',
   OTHER = 'OTHER',
   REPORT = 'REPORT'
 }
@@ -81,6 +81,7 @@ export interface ReportFormInput {
   noObservations: string[] | null
   filesToAdd: ReportFileInput[]
   filesToRemove: string[]
+  isPublic?: boolean
 }
 
 export interface ReportDetails {
@@ -92,11 +93,13 @@ export interface ReportDetails {
   updatedBy: string
   approved: boolean
   noObservations: ReportFileDocumentType[] | null
+  isPublic: boolean | null
   order: Order
   reportDocumentsString?: string
 }
 
 export interface ReportFileInput {
+  id: string
   description: string
   documentType: ReportFileDocumentType
   file: File
@@ -104,7 +107,6 @@ export interface ReportFileInput {
 }
 
 export interface ReportFileDetails extends ReportFileInput {
-  id: string
   mediaType: string
   fileName: string
   created: Date
@@ -115,29 +117,74 @@ export interface ReportFileDetails extends ReportFileInput {
 }
 
 export const apiPutReport = async (
-  reportInput: { reportId: string } & ReportFormInput
-): Promise<ReportDetails> => {
+  reportInput: { reportId: string } & ReportFormInput & {
+      sendUpdatedEmail?: false
+    }
+): Promise<
+  | ReportDetails
+  | (ReportFileSuccessResponse | ReportFileValidationErrorResponse)[]
+> => {
   const body: JsonOf<ReportFormInput> = {
     ...reportInput
   }
 
   const report = await apiClient
-    .put<ReportDetails>(`/reports/${reportInput.reportId}`, body)
+    .put<ReportDetails>(`/reports/${reportInput.reportId}`, body, {
+      params:
+        reportInput.sendUpdatedEmail !== undefined
+          ? { sendUpdatedEmail: reportInput.sendUpdatedEmail }
+          : {}
+    })
     .then((r) => r.data)
 
   for (const id of reportInput.filesToRemove) {
     await apiClient.delete(`/reports/${report.id}/files/${id}`)
   }
 
-  for (const file of reportInput.filesToAdd) {
-    await apiPostReportFile(report.id, file)
+  /** Make sure we try to save all files so the saving does not stop with the first file with error */
+  const postPromises = reportInput.filesToAdd.map((f) =>
+    apiPostReportFile(report.id, f)
+  )
+  const responses = await Promise.all(postPromises)
+
+  if (responses.find((r) => 'errors' in r)) {
+    /** Return all file responses to make sure we have a list of the saved files also */
+    return Promise.reject(responses)
   }
+  // for (const file of reportInput.filesToAdd) {
+  //   await apiPostReportFile(report.id, file)
+  // }
 
   return report
 }
 
-export const apiApproveReport = async (reportId: string): Promise<void> => {
-  await apiClient.post(`/reports/${reportId}/approve`, {})
+export interface ApproveReportError {
+  errorCode:
+    | 'error-saving-paikkatieto-data'
+    | 'error-validating-paikkatieto-data'
+    | 'access-denied'
+  errorMessages?: string[]
+}
+
+export const apiApproveReport = async (input: {
+  reportId: string
+  overrideReportName: boolean
+}): Promise<void> => {
+  const { reportId, overrideReportName } = input
+  await apiClient
+    .post(
+      `/reports/${reportId}/approve`,
+      {},
+      { params: { overrideReportName } }
+    )
+    .catch((error: { response: { data: ApproveReportError } }) => {
+      const errorResponse = {
+        errorCode: error.response.data.errorCode,
+        errorMessages: error.response.data.errorMessages
+      }
+      return Promise.reject(errorResponse)
+    })
+  return Promise.resolve()
 }
 
 export const apiReOpenReport = async (reportId: string): Promise<void> => {
@@ -151,30 +198,73 @@ export interface ReportFileValidationError {
   reason: string
 }
 
-export interface ReportFileValidationErrorResponse {
+export type ReportFileSuccessResponse = {
+  type: 'success'
+}
+
+export type ReportFileValidationErrorResponse = {
+  type: 'error'
   documentType: ReportFileDocumentType
-  errors: ReportFileValidationError[]
+  errors: ReportFileValidationError[] | string
+  name: string
+  id: string
 }
 
 const apiPostReportFile = async (
   id: string,
   file: ReportFileInput
-): Promise<void> => {
+): Promise<ReportFileSuccessResponse | ReportFileValidationErrorResponse> => {
   const formData = new FormData()
   formData.append('file', file.file)
+  formData.append('id', file.id)
   formData.append('description', file.description)
   formData.append('documentType', ReportFileDocumentType[file.documentType])
 
-  await apiClient
+  return await apiClient
     .postForm(`/reports/${id}/files`, formData)
-    .catch((error: { response: { data: ReportFileValidationError } }) => {
-      const errorResponse = {
-        documentType: file.documentType,
-        errors: error.response.data
+    .then(
+      (_resp) =>
+        ({
+          type: 'success'
+        }) satisfies ReportFileSuccessResponse
+    )
+    .catch((error: AxiosError) => {
+      if (error.response?.status === 400) {
+        const errorResponse = {
+          type: 'error',
+          documentType: file.documentType,
+          id: file.id,
+          name: file.file.name,
+          errors: error?.response?.data
+        } as ReportFileValidationErrorResponse
+        return errorResponse
+      } else if (error.response?.status === 409) {
+        const errorResponse = {
+          type: 'error',
+          documentType: file.documentType,
+          id: file.id,
+          name: file.file.name,
+          errors: 'Tiedostonimi on jo olemassa'
+        } as ReportFileValidationErrorResponse
+        return errorResponse
+      } else if (error.response?.status === 413) {
+        const errorResponse = {
+          type: 'error',
+          documentType: file.documentType,
+          id: file.id,
+          name: file.file.name,
+          errors: 'Tiedosto on liian suuri. Sallittu maksimikoko on 100 Mt.'
+        } as ReportFileValidationErrorResponse
+        return errorResponse
       }
-      return Promise.reject(errorResponse)
+      return {
+        type: 'error',
+        documentType: file.documentType,
+        id: file.id,
+        name: file.file.name,
+        errors: 'Tuntematon virhe'
+      } as ReportFileValidationErrorResponse
     })
-  return Promise.resolve()
 }
 
 export const apiGetReport = (id: string): Promise<ReportDetails> =>
