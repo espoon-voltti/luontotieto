@@ -8,12 +8,14 @@ import fi.espoo.luontotieto.domain.OrderController
 import fi.espoo.luontotieto.domain.OrderDocumentType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mock.web.MockMultipartFile
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class OrderFileTests : FullApplicationTest() {
-    @Autowired lateinit var controller: OrderController
+    @Autowired
+    lateinit var controller: OrderController
 
     @Test
     fun `create order files and fetch and delete`() {
@@ -27,10 +29,11 @@ class OrderFileTests : FullApplicationTest() {
                     "tilaus_ohje.txt",
                     "tilaus_ohje.txt",
                     "text/plain",
-                    "ORDER INFO CONTENT".toByteArray()
+                    "ORDER INFO CONTENT".toByteArray(),
                 ),
             documentType = OrderDocumentType.ORDER_INFO,
-            description = "Test Description"
+            description = "Test Description",
+            id = UUID.randomUUID().toString()
         )
 
         val orderFileResponse = controller.getOrderFiles(adminUser, createdOrder.orderId)

@@ -38,6 +38,7 @@ data class OrderFile(
 )
 
 data class OrderFileInput(
+    val fileId: UUID,
     val orderId: UUID,
     val description: String?,
     val mediaType: String,
@@ -51,11 +52,12 @@ fun Handle.insertOrderFile(
 ): UUID {
     return createUpdate(
         """
-            INSERT INTO order_file (order_id, description, media_type, file_name, document_type, created_by, updated_by) 
-            VALUES (:orderId, :description, :mediaType, :fileName, :documentType, :createdBy, :updatedBy)
+            INSERT INTO order_file (id,order_id, description, media_type, file_name, document_type, created_by, updated_by) 
+            VALUES (:id, :orderId, :description, :mediaType, :fileName, :documentType, :createdBy, :updatedBy)
             RETURNING id
             """
     )
+        .bind("id", data.fileId)
         .bind("orderId", data.orderId)
         .bind("description", data.description)
         .bind("mediaType", data.mediaType)

@@ -19,10 +19,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class UserControllerTests : FullApplicationTest() {
-    @Autowired lateinit var controller: UserController
+    @Autowired
+    lateinit var controller: UserController
 
     @Test
     fun createUserOk() {
@@ -36,6 +38,7 @@ class UserControllerTests : FullApplicationTest() {
         assertEquals("new-user@example.com", createdUser.email)
         assertEquals("Company Oy", createdUser.name)
         assertTrue(createdUser.active)
+        createdUser.passwordUpdated?.let { assertFalse(it) }
     }
 
     @Test
@@ -77,6 +80,7 @@ class UserControllerTests : FullApplicationTest() {
 
     @Test
     fun updateUserOk() {
+        val oldPasswordHash = jdbi.inTransactionUnchecked { it.getUserPasswordHash(customerUser.id) }
         val email = "${UUID.randomUUID()}@example.com"
         val name = "${UUID.randomUUID()}"
         val updatedUser =
@@ -90,7 +94,9 @@ class UserControllerTests : FullApplicationTest() {
                     active = false
                 )
             )
+        val updatedPasswordHash = jdbi.inTransactionUnchecked { it.getUserPasswordHash(customerUser.id) }
 
+        assertNotEquals(updatedPasswordHash, oldPasswordHash)
         assertFalse(updatedUser.active)
         assertEquals(email, updatedUser.email)
         assertEquals(name, updatedUser.name)
@@ -128,7 +134,7 @@ class UserControllerTests : FullApplicationTest() {
                 .execute()
         }
 
-        val newPassword = "password.2A"
+        val newPassword = "passwordlong.2A"
 
         controller.updateUserPassword(
             customerUser,
@@ -138,6 +144,32 @@ class UserControllerTests : FullApplicationTest() {
         val updatedHash = jdbi.inTransactionUnchecked { it.getUserPasswordHash(customerUser.id) }
         val matches = encoder.matches(newPassword, updatedHash)
         assertTrue(matches)
+
+        val user = controller.getUser(systemUser, customerUser.id)
+        assertTrue(user.passwordUpdated!!)
+    }
+
+    @Test
+    fun updatePasswordTooWeak() {
+        val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
+        val jdbi = controller.jdbi
+        val currentPassword = "password.1A"
+        val currentHash = encoder.encode(currentPassword)
+        jdbi.inTransactionUnchecked {
+            it.createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
+                .bind("password", currentHash)
+                .bind("id", customerUser.id)
+                .execute()
+        }
+
+        val newPassword = "password.2A"
+
+        assertFailsWith(BadRequest::class) {
+            controller.updateUserPassword(
+                customerUser,
+                User.Companion.UpdatePasswordPayload(currentPassword, newPassword)
+            )
+        }
     }
 
     @Test
@@ -153,7 +185,7 @@ class UserControllerTests : FullApplicationTest() {
                 .execute()
         }
 
-        val newPassword = "password.2A"
+        val newPassword = "passwordlong.2A"
 
         assertFailsWith(BadRequest::class) {
             controller.updateUserPassword(

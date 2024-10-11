@@ -24,13 +24,21 @@ export enum UserRole {
   CUSTOMER = 'CUSTOMER'
 }
 
-export interface UserFormInput {
+export interface CreateUserInput {
   name: string
   email: string
 }
+export interface UpdateUserInput {
+  name: string
+  email: string
+  role: UserRole
+  active: boolean
+}
 
-export const apiPostUser = async (userInput: UserFormInput): Promise<User> => {
-  const body: JsonOf<UserFormInput> = {
+export const apiPostUser = async (
+  userInput: CreateUserInput
+): Promise<User> => {
+  const body: JsonOf<CreateUserInput> = {
     ...userInput
   }
 
@@ -38,9 +46,9 @@ export const apiPostUser = async (userInput: UserFormInput): Promise<User> => {
 }
 
 export const apiPutUser = async (
-  userInput: { userId: string } & UserFormInput
+  userInput: { userId: string } & UpdateUserInput
 ): Promise<User> => {
-  const body: JsonOf<UserFormInput> = {
+  const body: JsonOf<UpdateUserInput> = {
     ...userInput
   }
 
@@ -59,12 +67,12 @@ export type ChangePasswordErrorCode =
   | 'new-password-already-in-use'
   | 'weak-password'
 
-export const ChangePasswordError = {
+export const ChangePasswordError: Record<ChangePasswordErrorCode, string> = {
   'wrong-current-password': 'Väärä nykyinen salasana',
   'new-password-already-in-use':
     'Uusi salasana ei saa olla sama kuin nykyinen salana',
   'weak-password':
-    'Syötä vahva salasana jossa on: vähintään 10 merkkiä, yksi iso kirjain, yksi pieni kirjain ja yksi numero.'
+    'Syötä vahva salasana jossa on: vähintään 12 merkkiä, yksi iso kirjain, yksi pieni kirjain ja yksi numero.'
 }
 
 export const apiChangeUserPassword = async (

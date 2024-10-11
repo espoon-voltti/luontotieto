@@ -6,6 +6,7 @@ package fi.espoo.luontotieto.domain
 
 import fi.espoo.luontotieto.common.BadRequest
 import fi.espoo.luontotieto.common.Emails
+import fi.espoo.luontotieto.common.HtmlSafe
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
@@ -39,11 +40,9 @@ class UserController {
     @Autowired
     lateinit var jdbi: Jdbi
 
-    @Autowired
-    lateinit var sesEmailClient: SESEmailClient
+    @Autowired lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired
-    lateinit var luontotietoHost: LuontotietoHost
+    @Autowired lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -54,19 +53,17 @@ class UserController {
         @RequestBody body: User.Companion.CreateCustomerUser
     ): User {
         user.checkRoles(UserRole.ADMIN)
-        val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
-        val generatedString = generatePassword()
-        val passwordHash = encoder.encode(generatedString)
+        val passwordAndHash = generatePasswordAndHash()
         return jdbi
             .inTransactionUnchecked { tx ->
-                val createdUser = tx.insertUser(data = body, user = user, passwordHash)
+                val createdUser = tx.insertUser(data = body, user = user, passwordAndHash.hash)
                 sesEmailClient.send(
                     Email(
                         body.email,
                         Emails.getUserCreatedEmail(
                             luontotietoHost.getCustomerUserLoginUrl(),
-                            createdUser.email ?: "",
-                            generatedString
+                            HtmlSafe(createdUser.email ?: ""),
+                            passwordAndHash.password
                         )
                     )
                 )
@@ -82,7 +79,9 @@ class UserController {
         @PathVariable id: UUID
     ): User {
         if (user.isSystemUser() || user.role == UserRole.ADMIN) {
-            return jdbi.inTransactionUnchecked { tx -> tx.getUser(id) }
+            return jdbi.inTransactionUnchecked { tx -> tx.getUser(id) }.also {
+                logger.audit(user, AuditEvent.GET_USER, mapOf("id" to "$id"))
+            }
         } else {
             throw NotFound()
         }
@@ -94,15 +93,18 @@ class UserController {
         @RequestParam includeInactive: Boolean = true
     ): List<User> {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
-        return jdbi.inTransactionUnchecked { tx ->
-            tx.getUsers().filter { u ->
-                if (user.role === UserRole.ADMIN) {
-                    includeInactive || u.active
-                } else {
-                    (u.role === UserRole.CUSTOMER || u.id == user.id) && includeInactive || u.active
+        return jdbi
+            .inTransactionUnchecked { tx ->
+                tx.getUsers().filter { u ->
+                    if (user.role === UserRole.ADMIN) {
+                        includeInactive || u.active
+                    } else {
+                        (u.role === UserRole.CUSTOMER || u.id == user.id) && includeInactive ||
+                            u.active
+                    }
                 }
             }
-        }
+            .also { logger.audit(user, AuditEvent.GET_USERS) }
     }
 
     @PutMapping("/{id}")
@@ -112,7 +114,29 @@ class UserController {
         @RequestBody data: User.Companion.UserInput
     ): User {
         user.checkRoles(UserRole.ADMIN)
-        return jdbi.inTransactionUnchecked { tx -> tx.putUser(id, data, user) }.also {
+        return jdbi.inTransactionUnchecked { tx ->
+            val currentUserData = tx.getUser(id)
+            val updatedEmailForCustomer = data.role == UserRole.CUSTOMER && currentUserData.email != data.email && data.email.isNotEmpty()
+            val updatedUser = tx.putUser(id, data, user)
+
+            if (updatedEmailForCustomer) {
+                // If email was updated for a customer user, reset password and send an email with the new password
+                val passwordAndHash = generatePasswordAndHash()
+                tx.putPassword(updatedUser.id, passwordAndHash.hash, user, false)
+                sesEmailClient.send(
+                    Email(
+                        data.email,
+                        Emails.getUserEmailUpdatedEmail(
+                            luontotietoHost.getCustomerUserLoginUrl(),
+                            HtmlSafe(data.email),
+                            passwordAndHash.password
+                        )
+                    )
+                )
+            }
+
+            updatedUser
+        }.also {
             logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id"))
         }
     }
@@ -123,7 +147,8 @@ class UserController {
         @RequestBody data: User.Companion.UpdatePasswordPayload
     ): UUID {
         user.checkRoles(UserRole.CUSTOMER)
-        if (!data.newPassword.matches("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{10,}\$".toRegex())) {
+
+        if (!data.newPassword.matches("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{12,}\$".toRegex())) {
             throw BadRequest("User entered a weak new password.", "weak-password")
         }
         return jdbi
@@ -148,7 +173,16 @@ class UserController {
                 }
 
                 val passwordHash = encoder.encode(data.newPassword)
-                tx.putPassword(user.id, passwordHash, user).id
+                val result = tx.putPassword(user.id, passwordHash, user, true)
+                sesEmailClient.send(
+                    Email(
+                        result.email,
+                        Emails.getUserPasswordUpdatedEmail(
+                            luontotietoHost.getCustomerUserLoginUrl(),
+                        )
+                    )
+                )
+                result.id
             }
             .also {
                 logger.audit(user, AuditEvent.UPDATE_USER_PASSWORD, mapOf("id" to "${user.id}"))
@@ -166,17 +200,20 @@ class UserController {
         val passwordHash = encoder.encode(generatedString)
         return jdbi
             .inTransactionUnchecked { tx ->
-                val result = tx.putPassword(id, passwordHash, user)
+                val result = tx.putPassword(id, passwordHash, user, false)
                 sesEmailClient.send(
                     Email(
                         result.email,
-                        Emails.getPasswordResetedEmail(luontotietoHost.getCustomerUserLoginUrl(), generatedString)
+                        Emails.getPasswordResetedEmail(
+                            luontotietoHost.getCustomerUserLoginUrl(),
+                            generatedString
+                        )
                     )
                 )
                 result.id
             }
             .also {
-                logger.audit(user, AuditEvent.UPDATE_USER_PASSWORD, mapOf("id" to "${user.id}"))
+                logger.audit(user, AuditEvent.RESET_USER_PASSWORD, mapOf("id" to "${user.id}"))
             }
     }
 }
@@ -189,4 +226,13 @@ private fun generatePassword(): String {
         append("-")
         append(RandomStringUtils.randomAlphanumeric(6))
     }
+}
+
+data class PasswordAndHash(val password: String, val hash: String)
+
+private fun generatePasswordAndHash(): PasswordAndHash {
+    val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
+    val generatedString = generatePassword()
+    val passwordHash = encoder.encode(generatedString)
+    return PasswordAndHash(generatedString, passwordHash)
 }

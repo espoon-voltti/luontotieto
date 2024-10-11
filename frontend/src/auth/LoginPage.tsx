@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import React from 'react'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
 import styled from 'styled-components'
 
 import { LinkStyledAsButton } from '../shared/buttons/LinkStyledAsButton'
@@ -63,6 +64,7 @@ export const LoginPage = React.memo(function LoginPage() {
           </FlexColWithGaps>
         </Wrapper>
       </SectionContainer>
+      <AccessibilityFooter />
     </PageContainer>
   )
 })

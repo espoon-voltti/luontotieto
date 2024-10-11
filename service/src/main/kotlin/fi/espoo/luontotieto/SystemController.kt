@@ -9,7 +9,10 @@ import fi.espoo.luontotieto.common.AppUser
 import fi.espoo.luontotieto.common.Unauthorized
 import fi.espoo.luontotieto.common.getAppUser
 import fi.espoo.luontotieto.common.getAppUserWithPassword
+import fi.espoo.luontotieto.common.loginFailed
+import fi.espoo.luontotieto.common.loginSuccess
 import fi.espoo.luontotieto.common.upsertAppUserFromAd
+import fi.espoo.luontotieto.common.userIsLockedOrInDelayPeriod
 import fi.espoo.luontotieto.config.AuditEvent
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.config.audit
@@ -66,6 +69,14 @@ class SystemController {
     ): AppUser {
         return jdbi
             .inTransactionUnchecked {
+                // First, check if the user is locked out
+                val userIsLockedOut = it.userIsLockedOrInDelayPeriod(email = passwordUser.email)
+                if (userIsLockedOut != null) {
+                    logger.info("Login attempt failed. $userIsLockedOut")
+                    throw Unauthorized("Unauthorized", userIsLockedOut)
+                }
+
+                // Second check that the user exists, is active and the password is correct
                 val user = it.getAppUserWithPassword(passwordUser.email)
                 if (user == null) {
                     logger.info("Login attempt failed. Invalid email.")
@@ -79,9 +90,13 @@ class SystemController {
                 val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
 
                 if (!encoder.matches(passwordUser.password, user.password)) {
+                    it.loginFailed(passwordUser.email)
+                    // Make sure the login failed properties are updated even though we return error
+                    it.commit()
                     logger.info("Login attempt failed. Invalid password.")
                     throw Unauthorized()
                 }
+                it.loginSuccess(passwordUser.email)
                 user.toAppUser()
             }
             .also {

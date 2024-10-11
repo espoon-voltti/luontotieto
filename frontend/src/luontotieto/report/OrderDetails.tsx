@@ -9,8 +9,11 @@ import { getDocumentTypeTitle } from 'api/report-api'
 import { hasOrdererRole, UserContext } from 'auth/UserContext'
 import React, { useContext, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { IconButton } from 'shared/buttons/IconButton'
 import { LinkFileDownload } from 'shared/buttons/LinkFileDownload'
 import { formatDate, parseDate } from 'shared/dates'
+import useDownloadFile from 'shared/form/File/useDownloadFile'
+import InfoModal from 'shared/modals/InfoModal'
 import styled from 'styled-components'
 
 import {
@@ -20,7 +23,6 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H3, Label, P } from '../../shared/typography'
-import { IconButton } from 'shared/buttons/IconButton'
 
 type Props = { order: Order; reportId: string }
 
@@ -54,13 +56,8 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
 
   const { data: orderFiles } = useGetOrderFilesQuery(order.id)
 
-  const handleOrderFileClick = async (fileId: string) => {
-    let url = ''
-    url = await apiGetOrderFileUrl(order.id, fileId)
-    if (url) {
-      window.open(url)
-    }
-  }
+  const { downloadFile, acknowledgeError, errorMessage } =
+    useDownloadFile(apiGetOrderFileUrl)
 
   const showEditBtn = useMemo(() => hasOrdererRole(user), [user])
 
@@ -114,19 +111,25 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
             <Label>Tilaajan yhteyshenkilö</Label>
             <P>
               {order.contactPerson}
-              <br />
+              <br aria-hidden />
               {order.contactEmail}
-              <br />
+              <br aria-hidden />
               {order.contactPhone}
-              <br />
+              <br aria-hidden />
               {order.orderingUnit?.join(', ')}
             </P>
           </GridItem>
           <GridItem $col={3} $row={2}>
             <Label>Selvityksen tekijän yhteyshenkilö</Label>
             <P>
+              {!!order.assigneeCompanyName && (
+                <>
+                  {order.assigneeCompanyName} <br aria-hidden />
+                </>
+              )}
+
               {order.assigneeContactPerson}
-              <br />
+              <br aria-hidden />
               {order.assigneeContactEmail}
             </P>
           </GridItem>
@@ -138,7 +141,7 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
                   <LinkFileDownload
                     fileName={rf.fileName}
                     fileId={rf.id}
-                    onClick={(fileId) => handleOrderFileClick(fileId)}
+                    onClick={(fileId) => downloadFile(order.id, fileId)}
                   />
                   {` ${getDocumentTypeTitle(rf.documentType)}`}
                 </StyledLi>
@@ -146,6 +149,21 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
           </GridItem>
         </GridLayout>
       </FlexCol>
+      {!!errorMessage && (
+        <InfoModal
+          close={() => acknowledgeError()}
+          closeLabel="Sulje"
+          title="Virhe ladattaessa tiedostoa"
+          resolve={{
+            action: () => {
+              acknowledgeError()
+            },
+            label: 'Ok'
+          }}
+        >
+          {errorMessage}
+        </InfoModal>
+      )}
     </SectionContainer>
   )
 })

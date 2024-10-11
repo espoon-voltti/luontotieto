@@ -56,7 +56,7 @@ class Emails {
     companion object {
         fun getUserCreatedEmail(
             link: String,
-            email: String,
+            email: HtmlSafe<String>,
             password: String
         ) = EmailContent.fromHtml(
             "Käyttäjätunnukset luotu Espoon Luontotietoportaaliin",
@@ -70,11 +70,39 @@ class Emails {
 """
         )
 
+        fun getUserEmailUpdatedEmail(
+            link: String,
+            email: HtmlSafe<String>,
+            password: String
+        ) = EmailContent.fromHtml(
+            "Sähköposti liitetty käyttäjään Espoon Luontotietoportaalissa",
+            """
+<p>Tämä sähköposti on lisätty olemassa olevalle käyttäjälle Espoon Luontotietoportaalissa.</p>
+<p>Tämän muutoksen yhteydessä salasana on nollattu.</p>
+<p>Voitte kirjautua palveluun osoitteessa ${linkElement(link)}.</p>
+<p>Käyttäjätunnus: $email</p>
+<p>Salasana: $password</p>
+<p>Vaihtakaa salasana ensimmäisen kirjautumisen yhteydessä.</p>
+<p>$DO_NOT_REPLY_MESSAGE</p>
+"""
+        )
+
+        fun getUserPasswordUpdatedEmail(link: String) =
+            EmailContent.fromHtml(
+                "Salasana vaihdettu Espoon Luontotietoportaalissa",
+                """
+<p>Teidän salasananne on vaihdettu Espoon Luontotietoportaalissa.</p>
+<p>Voitte kirjautua palveluun osoitteessa ${linkElement(link)}.</p>
+<p>Jos et ole itse vaihtanut salasanaasi, pyydämme sinua ottamaan yhteyttä ymparisto@espoo.fi.</p>
+<p>$DO_NOT_REPLY_MESSAGE</p>
+"""
+            )
+
         fun getPasswordResetedEmail(
             link: String,
             password: String
         ) = EmailContent.fromHtml(
-            "Salasana resetoitu Espoon Luontotietoportaaliissa",
+            "Salasana resetoitu Espoon Luontotietoportaalissa",
             """
 <p>Teidän salasananne Espoon Luontotietoportaaliin on resetoitu.</p>
 <p>Voitte kirjautua palveluun osoitteessa ${linkElement(link)}.</p>
@@ -85,8 +113,8 @@ class Emails {
         )
 
         fun getReportApprovedEmail(
-            reportName: String,
-            approverName: String,
+            reportName: HtmlSafe<String>,
+            approverName: HtmlSafe<String>,
             link: String
         ) = EmailContent.fromHtml(
             "Hyväksytty selvitys: $reportName",
@@ -100,8 +128,8 @@ class Emails {
         )
 
         fun getReportCreatedEmail(
-            reportName: String,
-            reportDescription: String,
+            reportName: HtmlSafe<String>,
+            reportDescription: HtmlSafe<String>,
             link: String
         ) = EmailContent.fromHtml(
             "Uusi luontoselvitys",
@@ -116,8 +144,8 @@ class Emails {
         )
 
         fun getReportUpdatedEmail(
-            reportName: String,
-            reportAssignee: String,
+            reportName: HtmlSafe<String>,
+            reportAssignee: HtmlSafe<String>,
             link: String
         ) = EmailContent.fromHtml(
             "Päivitys selvitykseen $reportName",

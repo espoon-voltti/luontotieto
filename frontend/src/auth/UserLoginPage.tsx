@@ -3,15 +3,17 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import React, { FormEvent, useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from 'shared/buttons/Button'
+import AccessibilityFooter from 'shared/AccessibilityFooter'
+import { AsyncButton } from 'shared/buttons/AsyncButton'
 import { InputField } from 'shared/form/InputField'
 import { PageContainer } from 'shared/layout'
 import { useDebouncedState } from 'shared/useDebouncedState'
 import styled from 'styled-components'
 
-import { apiPostLogin } from '../api/auth-api'
+import { LoginError, LoginErrorCode, apiPostLogin } from '../api/auth-api'
 import {
   GroupOfInputRows,
   LabeledInput,
@@ -35,17 +37,23 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
+  const onLoginSuccess = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['auth-status'] })
+    navigate('/luontotieto')
+  }, [])
+
   const { mutateAsync: loginMutation, isPending } = useMutation({
     mutationFn: apiPostLogin,
-    onSuccess: async (success: boolean) => {
-      if (success) {
-        await queryClient.invalidateQueries({ queryKey: ['auth-status'] })
-        navigate('/luontotieto')
-      } else {
-        setErrorMsg('Virheellinen sähköposti tai salasana!')
+    onSuccess: onLoginSuccess,
+    onError: (e: AxiosError<{ errorCode: LoginErrorCode }>) => {
+      if (e instanceof AxiosError) {
+        const errorCode = e.response?.data.errorCode
+        const errorMessage = errorCode
+          ? LoginError[errorCode]
+          : 'Virheellinen sähköposti tai salasana!'
+        setErrorMsg(errorMessage)
       }
-    },
-    onError: () => setErrorMsg('Virheellinen sähköposti tai salasana!')
+    }
   })
 
   const onSubmit = useCallback(
@@ -58,19 +66,25 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
 
   return (
     <PageContainer>
-      <form onSubmit={onSubmit}>
+      <form
+        onSubmit={async (e) => {
+          if (!isPending) {
+            await onSubmit(e)
+          }
+        }}
+      >
         <SectionContainer>
           <H2>Kirjaudu sisään</H2>
           <VerticalGap $size="L" />
           <GroupOfInputRows>
             <RowOfInputs>
-              <LabeledInput $cols={3}>
+              <LabeledInput $cols={4}>
                 <Label>Sähköposti</Label>
                 <InputField onChange={setEmail} value={email} type="email" />
               </LabeledInput>
             </RowOfInputs>
             <RowOfInputs>
-              <LabeledInput $cols={3}>
+              <LabeledInput $cols={4}>
                 <Label>Salasana</Label>
                 <InputField
                   onChange={setPassword}
@@ -80,15 +94,18 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
               </LabeledInput>
             </RowOfInputs>
             {!!errorMsg && <LoginMessage>{errorMsg}</LoginMessage>}
-            <Button
+            <AsyncButton
               text="Kirjaudu sisään"
+              data-qa="save-button"
               primary
-              disabled={!email || !password || isPending}
-              type="submit"
+              disabled={!email || !password}
+              onSuccess={onLoginSuccess}
+              onClick={() => loginMutation({ email, password })}
             />
           </GroupOfInputRows>
         </SectionContainer>
       </form>
+      <AccessibilityFooter />
     </PageContainer>
   )
 })

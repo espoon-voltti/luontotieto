@@ -101,7 +101,14 @@ export const UserMenu = React.memo(function LanguageMenu({
   })
 
   return (
-    <DropDownContainer ref={dropDownContainerRef}>
+    <DropDownContainer
+      ref={dropDownContainerRef}
+      onKeyUp={(ev) => {
+        if (ev.key === 'Escape') {
+          setOpen(false)
+        }
+      }}
+    >
       <DropDownButton
         onClick={toggleOpen}
         data-qa="button-select-language"
@@ -126,6 +133,21 @@ export const UserMenu = React.memo(function LanguageMenu({
               aria-checked={true}
             >
               Käyttäjänhallinta
+            </DropDownItemButton>
+          )}
+          {user.role === UserRole.ADMIN && (
+            <DropDownItemButton
+              ref={firstButtonRef}
+              key="admin-settings"
+              className={classNames({ active: true })}
+              onClick={() => {
+                navigate(`/luontotieto/pääkäyttäjän-asetukset`)
+                setOpen(false)
+              }}
+              role="menuitemradio"
+              aria-checked={true}
+            >
+              Pääkäyttäjän asetukset
             </DropDownItemButton>
           )}
           <DropDownItemButton

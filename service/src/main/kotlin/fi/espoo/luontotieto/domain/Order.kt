@@ -32,11 +32,13 @@ data class Order(
     val assigneeId: UUID,
     val assigneeContactPerson: String,
     val assigneeContactEmail: String,
+    val assigneeCompanyName: String?,
     val returnDate: LocalDate,
     val contactPerson: String,
     val contactPhone: String,
     val contactEmail: String,
-    @Json val reportDocuments: List<OrderReportDocument>
+    @Json val reportDocuments: List<OrderReportDocument>,
+    val hasApprovedReport: Boolean
 )
 
 data class OrderInput(
@@ -47,11 +49,12 @@ data class OrderInput(
     val assigneeId: UUID,
     val assigneeContactPerson: String,
     val assigneeContactEmail: String,
+    val assigneeCompanyName: String?,
     @Json val reportDocuments: List<OrderReportDocument>,
     val returnDate: LocalDate,
     val contactPerson: String,
     val contactPhone: String,
-    val contactEmail: String
+    val contactEmail: String,
 )
 
 private const val SELECT_ORDER_SQL =
@@ -65,6 +68,7 @@ private const val SELECT_ORDER_SQL =
            o.updated,
            o.assignee_contact_person AS "assigneeContactPerson",
            o.assignee_contact_email AS "assigneeContactEmail",
+           o.assignee_company_name AS "assigneeCompanyName",
            o.return_date AS "returnDate",
            o.contact_person AS "contactPerson",
            o.contact_phone AS "contactPhone",
@@ -73,11 +77,16 @@ private const val SELECT_ORDER_SQL =
            uc.name AS "createdBy",
            uu.name AS "updatedBy",
            ua.name AS "assignee",
-           o.assignee_id AS "assigneeId"
+           o.assignee_id AS "assigneeId",
+           CASE
+                WHEN r.approved IS TRUE THEN TRUE
+                ELSE FALSE
+              END AS "hasApprovedReport"
     FROM "order" o
         LEFT JOIN users uc ON o.created_by = uc.id
         LEFT JOIN users uu ON o.updated_by = uu.id
         LEFT JOIN users ua ON o.assignee_id = ua.id
+        LEFT JOIN report r ON o.id = r.order_id
 """
 
 fun Handle.insertOrder(
@@ -86,8 +95,8 @@ fun Handle.insertOrder(
 ): UUID {
     return createUpdate(
         """
-            INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents, assignee_id, assignee_contact_person, assignee_contact_email, return_date, contact_person, contact_phone, contact_email, ordering_unit) 
-            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments, :assigneeId, :assigneeContactPerson, :assigneeContactEmail, :returnDate, :contactPerson, :contactPhone, :contactEmail, :orderingUnit)
+            INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents, assignee_id, assignee_contact_person, assignee_contact_email, assignee_company_name, return_date, contact_person, contact_phone, contact_email, ordering_unit) 
+            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments, :assigneeId, :assigneeContactPerson, :assigneeContactEmail, :assigneeCompanyName, :returnDate, :contactPerson, :contactPhone, :contactEmail, :orderingUnit)
             RETURNING id
             """
     )
@@ -99,6 +108,9 @@ fun Handle.insertOrder(
         .one()
 }
 
+/**
+ * Update order and reflect the updated name field to report data
+ */
 fun Handle.putOrder(
     id: UUID,
     order: OrderInput,
@@ -111,11 +123,18 @@ fun Handle.putOrder(
                  SET name = :name, description = :description, updated_by = :updatedBy,
                   plan_number = :planNumber, report_documents = :reportDocuments, assignee_id = :assigneeId,
                   assignee_contact_person = :assigneeContactPerson, assignee_contact_email = :assigneeContactEmail,
-                  return_date = :returnDate, contact_person = :contactPerson, contact_phone = :contactPhone,
+                  assignee_company_name = :assigneeCompanyName, return_date = :returnDate,
+                  contact_person = :contactPerson, contact_phone = :contactPhone,
                   contact_email = :contactEmail, ordering_unit = :orderingUnit
                  WHERE id = :id
                 RETURNING *
-            ) 
+            ),
+            updated_report AS (
+                UPDATE report r
+                   SET name = :name
+                WHERE r.order_id = :id
+                RETURNING *
+            )
             $SELECT_ORDER_SQL
             """
     )

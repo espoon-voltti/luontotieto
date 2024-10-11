@@ -77,8 +77,25 @@ map $limit $limit_key {
 # limit_req_zone with a higher limit, as $binary_remote_addr is always defined.
 # The more restrictive limit is applied, so even though all clients will match
 # the second limit_req_zone, the first will be applied to non-whitelisted clients.
+
+# Normal configuration allows up to:
+# - 10 requests per second (rate=10r/s)
+# - Burst of 20 additional requests (burst=20) without delay
 limit_req_zone $limit_key zone=req_zone:10m rate=10r/s;
+
+# Whitelisted configuration allows up to:
+# - 100 requests per second (rate=100r/s)
+# - Burst of 50 additional requests (burst=50) without delay
 limit_req_zone $binary_remote_addr zone=req_zone_wl:1m rate=100r/s;
+
+# Explicitly define limit request for specific endpoints
+# Limits requests to 2 requests per second.
+limit_req_zone $binary_remote_addr zone=limit_zone:1m rate=2r/s;
+
+# Explicitly define limit request endpoint that makes
+# geoserver reload its configuration
+limit_req_zone $binary_remote_addr zone=geoserver_zone:1m rate=1r/m;
+
 
 # Logging
 
@@ -157,8 +174,9 @@ server {
   # a location bloc as it overrides the parent headers
   add_header Strict-Transport-Security 'max-age=31536000; includeSubdomains; preload';
   add_header X-Content-Type-Options nosniff;
-  add_header X-XSS-Protection '1; mode=block';
+  add_header X-XSS-Protection 0;
   add_header X-DNS-Prefetch-Control off;
+  add_header Referrer-Policy 'no-referrer';
   add_header Report-To '{"group","csp-endpoint","max_age":31536000,"endpoints":[{"url":"$httpScheme://$host/api/csp"}]}';
 
   <% if ENV.key?("HTTP_SCHEME") && ENV["HTTP_SCHEME"] == "http" %>
@@ -186,6 +204,7 @@ server {
 
   limit_req         zone=req_zone burst=20 nodelay;
   limit_req         zone=req_zone_wl burst=50 nodelay;
+
   limit_req_status  429;
 
   location /health {
@@ -197,6 +216,34 @@ server {
   location /api {
     include     proxy_params;
     proxy_pass  $apiGatewayURL;
+  }
+
+  # Post orders route
+  location = /api/orders {
+    include     proxy_params;
+    proxy_pass  $apiGatewayURL;
+    limit_req zone=limit_zone;
+  }
+
+  # Update report route
+  location ~ ^/api/reports/[0-9a-zA-Z-]+$ {
+    include     proxy_params;
+    proxy_pass  $apiGatewayURL;
+    limit_req zone=limit_zone;
+  }
+
+  # Approve report route
+  location ~ ^/api/reports/[0-9a-zA-Z-]+/approve$ {
+    include     proxy_params;
+    proxy_pass  $apiGatewayURL;
+    limit_req zone=limit_zone;
+  }
+
+  # Geoserver reload route
+  location /api/geoserver/reload-configuration {
+    include     proxy_params;
+    proxy_pass  $apiGatewayURL;
+    limit_req zone=geoserver_zone;
   }
 
   location / {

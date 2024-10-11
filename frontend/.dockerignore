@@ -4,6 +4,9 @@
 
 *
 
+!.yarn/releases
+!.yarnrc.yml
+
 !src
 !nginx
 !*.js

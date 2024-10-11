@@ -13,15 +13,18 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.io.FileInputStream
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ReportFileTests : FullApplicationTest() {
-    @Autowired lateinit var controller: ReportController
+    @Autowired
+    lateinit var controller: ReportController
 
-    @Autowired lateinit var orderController: OrderController
+    @Autowired
+    lateinit var orderController: OrderController
 
     @Test
     fun `create report files and fetch and delete`() {
@@ -71,7 +74,8 @@ class ReportFileTests : FullApplicationTest() {
                 reportId = createOrderResponse.reportId,
                 file = multipartFile,
                 documentType = DocumentType.LIITO_ORAVA_PISTEET,
-                description = "Test Description"
+                description = "Test Description",
+                id = UUID.randomUUID().toString()
             )
 
         val errors = response.body
@@ -100,7 +104,8 @@ class ReportFileTests : FullApplicationTest() {
                         "TEST FILE CONTENT".toByteArray()
                     ),
                 documentType = DocumentType.REPORT,
-                description = "Test Description"
+                description = "Test Description",
+                id = UUID.randomUUID().toString()
             )
 
         val errors = response.body
@@ -118,7 +123,8 @@ class ReportFileTests : FullApplicationTest() {
                     "MORE INFORMATION".toByteArray()
                 ),
             documentType = DocumentType.OTHER,
-            description = "Test Description"
+            description = "Test Description",
+            id = UUID.randomUUID().toString()
         )
 
         val reportFileResponse = controller.getReportFiles(adminUser, createOrderResponse.reportId)

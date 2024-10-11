@@ -1,0 +1,16 @@
+<layer>
+  <name>arvokkaat_vesikohteet_alueet</name>
+  <id>LayerInfoImpl--18927b2a:1916956e7a9:-7ffc</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--3bd8cec9:18ef552d955:-7ffe</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--18927b2a:1916956e7a9:-7ffd</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-08-19 06:36:12.393 UTC</dateCreated>
+</layer>
