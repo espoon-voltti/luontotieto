@@ -2178,37 +2178,37 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fortawesome/fontawesome-common-types@npm:6.5.0":
-  version: 6.5.0
-  resolution: "@fortawesome/fontawesome-common-types@npm:6.5.0"
-  checksum: 10/e4da679d4116ff7e3ddf197e7764a8f472e812504438e0245a22f88f4433135afb78b1d89300e5b3f38a3d89d80ad55c93d5a7925dd37f977a5c014d88e74545
+"@fortawesome/fontawesome-common-types@npm:6.6.0":
+  version: 6.6.0
+  resolution: "@fortawesome/fontawesome-common-types@npm:6.6.0"
+  checksum: 10/2c730897466fa3b9ae01a4d0943e24fffbc5cbeb4fdae3df044e49619e52763a431d5d5324e9c607995ab36f3dcc90a45958b44020b23b5e148fb66e3b668875
   languageName: node
   linkType: hard
 
-"@fortawesome/fontawesome-svg-core@npm:6.5.0":
-  version: 6.5.0
-  resolution: "@fortawesome/fontawesome-svg-core@npm:6.5.0"
+"@fortawesome/fontawesome-svg-core@npm:6.6.0":
+  version: 6.6.0
+  resolution: "@fortawesome/fontawesome-svg-core@npm:6.6.0"
   dependencies:
-    "@fortawesome/fontawesome-common-types": "npm:6.5.0"
-  checksum: 10/ac420cd1b19140ffeb7482c9b24d2565a557ca731758e3291f951c28f5fde8bb827cab44b451a0208d9f1889dce3912f3ff958ec665c020f2e81acbadc13275f
+    "@fortawesome/fontawesome-common-types": "npm:6.6.0"
+  checksum: 10/b13afc5aed1598bcba86ad93fc413ecbcfdb4310015c72cfe205b18d7a1c0534e3ebacd6db49fae2e0240af15593b2281ad3dbeb9e85fc41d6de281142f030f1
   languageName: node
   linkType: hard
 
-"@fortawesome/free-regular-svg-icons@npm:6.5.0":
-  version: 6.5.0
-  resolution: "@fortawesome/free-regular-svg-icons@npm:6.5.0"
+"@fortawesome/free-regular-svg-icons@npm:6.6.0":
+  version: 6.6.0
+  resolution: "@fortawesome/free-regular-svg-icons@npm:6.6.0"
   dependencies:
-    "@fortawesome/fontawesome-common-types": "npm:6.5.0"
-  checksum: 10/d8084f1356e82205b39ec0f4ec50d554a4f879bd5959ec7bbacc285d8b823aa6b801ec579e58f144985aa98efc58613efef236a1b5dc1b0a7c69d11af26a6e24
+    "@fortawesome/fontawesome-common-types": "npm:6.6.0"
+  checksum: 10/a5b9d42a4eb0ea9ef55a44ee2bdfd7d4bf54aac0a6af623eb194bf53603f996450182c49363a423ecd8b880d342b12d6444ffeb4067d823974237de1c692b8d4
   languageName: node
   linkType: hard
 
-"@fortawesome/free-solid-svg-icons@npm:6.5.0":
-  version: 6.5.0
-  resolution: "@fortawesome/free-solid-svg-icons@npm:6.5.0"
+"@fortawesome/free-solid-svg-icons@npm:6.6.0":
+  version: 6.6.0
+  resolution: "@fortawesome/free-solid-svg-icons@npm:6.6.0"
   dependencies:
-    "@fortawesome/fontawesome-common-types": "npm:6.5.0"
-  checksum: 10/d951752b7752b1365e8d09633f6642ff815ff9ab3e4df71ea206771f7d7b49f16493ab3a8273d73b814fca3b12cfc3b9452072c02f256f90ee836a5de5e648d0
+    "@fortawesome/fontawesome-common-types": "npm:6.6.0"
+  checksum: 10/cd46d6cb4e334a5b92d15b68b417dc0940f5133af2489f2714018068cad7fe2df849dd02d8fae2c7376d1cf9ca12e7ff65da8620b6612efd0f32b38e93ec4b0a
   languageName: node
   linkType: hard
 
@@ -5537,9 +5537,9 @@ __metadata:
   dependencies:
     "@babel/core": "npm:^7.25.7"
     "@babel/preset-env": "npm:^7.25.0"
-    "@fortawesome/fontawesome-svg-core": "npm:6.5.0"
-    "@fortawesome/free-regular-svg-icons": "npm:6.5.0"
-    "@fortawesome/free-solid-svg-icons": "npm:6.5.0"
+    "@fortawesome/fontawesome-svg-core": "npm:6.6.0"
+    "@fortawesome/free-regular-svg-icons": "npm:6.6.0"
+    "@fortawesome/free-solid-svg-icons": "npm:6.6.0"
     "@fortawesome/react-fontawesome": "npm:0.2.0"
     "@react-spring/web": "npm:^9.7.4"
     "@tanstack/react-query": "npm:^5.51.11"
