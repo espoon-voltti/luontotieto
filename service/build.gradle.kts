@@ -71,7 +71,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     implementation("software.amazon.awssdk:s3:2.27.22")
-    implementation("software.amazon.awssdk:ses:2.25.23")
+    implementation("software.amazon.awssdk:ses:2.29.16")
 
     implementation("org.apache.tika:tika-core:2.9.2")
 
