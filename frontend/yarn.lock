@@ -3636,10 +3636,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:^3.6.0":
-  version: 3.6.0
-  resolution: "date-fns@npm:3.6.0"
-  checksum: 10/cac35c58926a3b5d577082ff2b253612ec1c79eb6754fddef46b6a8e826501ea2cb346ecbd211205f1ba382ddd1f9d8c3f00bf433ad63cc3063454d294e3a6b8
+"date-fns@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "date-fns@npm:4.1.0"
+  checksum: 10/d5f6e9de5bbc52310f786099e18609289ed5e30af60a71e0646784c8185ddd1d0eebcf7c96b7faaaefc4a8366f3a3a4244d099b6d0866ee2bec80d1361e64342
   languageName: node
   linkType: hard
 
@@ -5561,7 +5561,7 @@ __metadata:
     concurrently: "npm:^8.2.2"
     core-js: "npm:^3.38.1"
     css-loader: "npm:^7.1.0"
-    date-fns: "npm:^3.6.0"
+    date-fns: "npm:^4.1.0"
     esbuild: "npm:^0.21.2"
     eslint: "npm:^8.57.0"
     eslint-config-prettier: "npm:^9.1.0"
@@ -5584,7 +5584,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-csv: "npm:^2.2.2"
     react-dom: "npm:^18.3.1"
-    react-focus-lock: "npm:^2.12.1"
+    react-focus-lock: "npm:^2.13.2"
     react-router-dom: "npm:^6.25.1"
     react-tag-autocomplete: "npm:7.3.0"
     react-textarea-autosize: "npm:^8.5.3"
@@ -6683,9 +6683,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-focus-lock@npm:^2.12.1":
-  version: 2.12.1
-  resolution: "react-focus-lock@npm:2.12.1"
+"react-focus-lock@npm:^2.13.2":
+  version: 2.13.2
+  resolution: "react-focus-lock@npm:2.13.2"
   dependencies:
     "@babel/runtime": "npm:^7.0.0"
     focus-lock: "npm:^1.3.5"
@@ -6699,7 +6699,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10/4183e713668e49b5954ab4124307fee220826fa5ca26c400646132fbad02a8d9047fc688cf94b20f7afbd29c84857a5bd7e8341f3674f464a0d4ad6776735f7a
+  checksum: 10/a169e060e2a2457062489fb5e48811f334823b3878a4599162878c93c683f47807407044009c3886da07f2adaa9d7325cbb4fafc104a7f8cd4d1dad7325304f8
   languageName: node
   linkType: hard
 
