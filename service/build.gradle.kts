@@ -94,7 +94,7 @@ dependencies {
 
     implementation("org.unbescape:unbescape:1.1.6.RELEASE")
 
-    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
 
 tasks.withType<KotlinCompile> {
