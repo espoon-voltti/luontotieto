@@ -12,3 +12,4 @@
 !*.js
 !*.json
 !*.lock
+!*.mjs
