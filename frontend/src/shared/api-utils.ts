@@ -12,6 +12,6 @@ export type JsonOf<T> = T extends string | number | boolean | null | undefined
         ? JsonOf<U>[]
         : T extends (infer U)[]
           ? JsonOf<U>[]
-          : T extends object // eslint-disable-line @typescript-eslint/ban-types
+          : T extends object
             ? { [P in keyof T]: JsonOf<T[P]> }
             : never

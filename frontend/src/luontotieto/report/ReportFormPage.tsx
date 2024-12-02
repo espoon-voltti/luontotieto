@@ -109,7 +109,8 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
         }
         return []
       })
-      errors && setReportFileErrors(errors)
+
+      if (errors) setReportFileErrors(errors)
 
       setShowModal({
         title: 'Tietojen tallennus epäonnistui',
