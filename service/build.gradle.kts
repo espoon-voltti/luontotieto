@@ -54,7 +54,7 @@ dependencies {
     implementation("org.geotools:gt-geopkg:32.0")
     implementation("org.geotools:gt-epsg-hsql:32.0")
 
-    implementation("com.zaxxer:HikariCP:5.1.0")
+    implementation("com.zaxxer:HikariCP:6.2.1")
     implementation("org.flywaydb:flyway-core:10.16.0")
     implementation("org.flywaydb:flyway-database-postgresql:10.17.0")
     implementation("org.postgresql:postgresql:42.7.3")
@@ -70,7 +70,7 @@ dependencies {
     api(platform("com.fasterxml.jackson:jackson-bom:2.18.0"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    implementation("software.amazon.awssdk:s3:2.27.22")
+    implementation("software.amazon.awssdk:s3:2.29.20")
     implementation("software.amazon.awssdk:ses:2.25.23")
 
     implementation("org.apache.tika:tika-core:2.9.2")
