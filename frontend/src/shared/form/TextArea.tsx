@@ -96,7 +96,7 @@ export const TextArea = React.memo(function TextArea({
         onFocus={onFocus}
         onBlur={(e) => {
           setTouched(true)
-          onBlur && onBlur(e)
+          if (onBlur) onBlur(e)
         }}
         placeholder={placeholder}
         readOnly={readonly}

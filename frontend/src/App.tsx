@@ -25,6 +25,7 @@ import { UserHeader } from './auth/UserHeader'
 import { FlexRowWithGaps } from './shared/layout'
 import { H1 } from './shared/typography'
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
 const Header = styled.nav`

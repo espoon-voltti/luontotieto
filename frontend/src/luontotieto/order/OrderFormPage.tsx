@@ -147,7 +147,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
         return []
       })
 
-      errors && setOrderFileErrors(errors)
+      if (errors) setOrderFileErrors(errors)
 
       const firstOrderId = errors[0].orderId ?? undefined
 
@@ -199,7 +199,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
         return []
       })
 
-      errors && setOrderFileErrors(errors)
+      if (errors) setOrderFileErrors(errors)
 
       setShowModal({
         title: 'Tilauksen päivitys epäonnistui',
