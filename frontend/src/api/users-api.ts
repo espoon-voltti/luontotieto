@@ -24,13 +24,21 @@ export enum UserRole {
   CUSTOMER = 'CUSTOMER'
 }
 
-export interface UserFormInput {
+export interface CreateUserInput {
   name: string
   email: string
 }
+export interface UpdateUserInput {
+  name: string
+  email: string
+  role: UserRole
+  active: boolean
+}
 
-export const apiPostUser = async (userInput: UserFormInput): Promise<User> => {
-  const body: JsonOf<UserFormInput> = {
+export const apiPostUser = async (
+  userInput: CreateUserInput
+): Promise<User> => {
+  const body: JsonOf<CreateUserInput> = {
     ...userInput
   }
 
@@ -38,9 +46,9 @@ export const apiPostUser = async (userInput: UserFormInput): Promise<User> => {
 }
 
 export const apiPutUser = async (
-  userInput: { userId: string } & UserFormInput
+  userInput: { userId: string } & UpdateUserInput
 ): Promise<User> => {
-  const body: JsonOf<UserFormInput> = {
+  const body: JsonOf<UpdateUserInput> = {
     ...userInput
   }
 

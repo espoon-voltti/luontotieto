@@ -5,8 +5,10 @@
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ReportDetails } from 'api/report-api'
+import { UserRole } from 'api/users-api'
 import { UserContext, hasOrdererRole } from 'auth/UserContext'
 import React, { useContext, useMemo, useState } from 'react'
+import { InfoBox } from 'shared/MessageBoxes'
 import { formatDateTime } from 'shared/dates'
 import { Checkbox } from 'shared/form/Checkbox'
 import { colors } from 'shared/theme'
@@ -18,8 +20,6 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { B, H3, P } from '../../shared/typography'
-import { UserRole } from 'api/users-api'
-import { InfoBox } from 'shared/MessageBoxes'
 
 type Props = {
   report: ReportDetails

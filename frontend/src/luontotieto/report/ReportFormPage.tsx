@@ -9,14 +9,18 @@ import {
   apiPutReport,
   apiReOpenReport,
   ApproveReportError,
+  ReportFileSuccessResponse,
   ReportFileValidationErrorResponse,
-  ReportFormInput
+  ReportFormInput,
+  getDocumentTypeTitle
 } from 'api/report-api'
 import { UserRole } from 'api/users-api'
 import { hasViewerRole, UserContext } from 'auth/UserContext'
 import React, { useContext, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Footer } from 'shared/Footer'
+import { AlertBox } from 'shared/MessageBoxes'
+import { AsyncButton } from 'shared/buttons/AsyncButton'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 import { Button } from 'shared/buttons/Button'
 import InfoModal, { InfoModalStateProps } from 'shared/modals/InfoModal'
@@ -34,7 +38,6 @@ import { OrderDetails } from './OrderDetails'
 import { ReportApproval } from './ReportApproval'
 import { ReportForm } from './ReportForm'
 import { ReportReOpen } from './ReportReOpen'
-import { AlertBox } from 'shared/MessageBoxes'
 
 const StyledButton = styled(Button)`
   margin-right: 20px;
@@ -71,87 +74,164 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
     setOverrideReportName(false)
   }
 
-  const { mutateAsync: updateReportMutation, isPending: updatingReport } =
-    useMutation({
-      mutationFn: apiPutReport,
-      onSuccess: (_report) => {
-        void queryClient.invalidateQueries({ queryKey: ['report', id] })
-        void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-        setReportFileErrors([])
-        setShowModal({
-          title: 'Tiedot tallennettu',
-          resolve: {
-            action: () => {
-              closeModal()
-              navigate(`/luontotieto`)
-            },
-            label: 'Ok'
-          }
-        })
-      },
-      onError: (error: ReportFileValidationErrorResponse) => {
-        setReportFileErrors([error])
-        setShowModal({
-          title: 'Tietojen tallennus epäonnistui',
-          resolve: {
-            action: () => closeModal(),
-            label: 'Sulje'
-          }
-        })
+  const onUpdateReportSuccess = () => {
+    setReportFileErrors([])
+    setShowModal({
+      title: 'Tiedot tallennettu',
+      resolve: {
+        action: async () => {
+          await queryClient.invalidateQueries({ queryKey: ['report', id] })
+          await queryClient.invalidateQueries({
+            queryKey: ['reportFiles', id]
+          })
+          closeModal()
+          navigate(`/luontotieto`)
+        },
+        label: 'Ok'
       }
     })
+  }
+
+  const { mutateAsync: updateReportMutation } = useMutation({
+    mutationFn: apiPutReport,
+    onSuccess: onUpdateReportSuccess,
+    onError: (
+      responses: (
+        | ReportFileSuccessResponse
+        | ReportFileValidationErrorResponse
+      )[]
+    ) => {
+      // void queryClient.invalidateQueries({ queryKey: ['report', id] })
+      void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+      const errors = responses.flatMap((r) => {
+        if (r.type === 'error') {
+          return [r satisfies ReportFileValidationErrorResponse]
+        }
+        return []
+      })
+
+      if (errors) setReportFileErrors(errors)
+
+      setShowModal({
+        title: 'Tietojen tallennus epäonnistui',
+        text: `Seuravien tiedostojen tallennus epäonnistui: ${errors
+          .map((e) => `${getDocumentTypeTitle(e.documentType)}:${e.name} \r\n`)
+          .join(',')}`,
+        resolve: {
+          action: () => closeModal(),
+          label: 'Sulje'
+        }
+      })
+    }
+  })
+
+  const onApproveSuccess = () => {
+    setApprove(false)
+    void queryClient.invalidateQueries({ queryKey: ['report', id] })
+    void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+    setShowModal({
+      title: 'Selvitys hyväksytty',
+      resolve: {
+        action: () => closeModal(),
+        label: 'Ok'
+      }
+    })
+  }
 
   const { mutateAsync: approveReport, isPending: approving } = useMutation({
     mutationFn: apiApproveReport,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['report', id] })
-      void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-      setShowModal({
-        title: 'Selvitys hyväksytty',
-        resolve: {
-          action: () => closeModal(),
-          label: 'Ok'
-        }
-      })
-    },
+    onSuccess: () => onApproveSuccess,
     onError: (error: ApproveReportError) => {
       if (error?.errorCode === 'error-saving-paikkatieto-data') {
         setApproveError('Virhe tallentaessa paikkatietoja paikkatietokantaan.')
+      } else if (error?.errorCode === 'error-validating-paikkatieto-data') {
+        if (error.errorMessages && error.errorMessages.length > 0) {
+          setApproveError(
+            'Tiedostoista löytyi seuraavat virheet: \r\n' +
+              error?.errorMessages.join('\r\n')
+          )
+        } else {
+          setApproveError('Virhe selvityksen tiedostojen validoinnissa')
+        }
+      } else if (error?.errorCode === 'access-denied') {
+        setApproveError(
+          'Hyväksyminen epäonnistui koska taustalla suoritettava tiedostojen virustarkistus on todennäköisesti vielä kesken. Yritä hetken kuluttua uudelleen.'
+        )
       } else {
         setApproveError('Virhe hyväksyttäessä selvitystä')
       }
     }
   })
 
-  const { mutateAsync: reOpenReport, isPending: reOpening } = useMutation({
-    mutationFn: apiReOpenReport,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['report', id] })
-      void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
-      setShowModal({
-        title: 'Selvitys avattu uudelleen',
-        resolve: {
-          action: () => {
-            closeModal()
+  const onReopenSuccess = () => {
+    setReOpen(false)
+    void queryClient.invalidateQueries({ queryKey: ['report', id] })
+    void queryClient.invalidateQueries({ queryKey: ['reportFiles', id] })
+    setShowModal({
+      title: 'Selvitys avattu uudelleen',
+      resolve: {
+        action: () => {
+          closeModal()
 
-            navigate(0)
+          navigate(0)
+        },
+        label: 'Ok'
+      }
+    })
+  }
+
+  const { mutateAsync: reOpenReport } = useMutation({
+    mutationFn: apiReOpenReport,
+    onSuccess: () => onReopenSuccess
+  })
+
+  const onSaveReport = (reportInput: ReportFormInput) => {
+    setApproveError(null)
+    return updateReportMutation({ ...reportInput, reportId: id })
+  }
+
+  const onApproveReport = async (reportInput: ReportFormInput) => {
+    setApproveError(null)
+    await updateReportMutation({
+      ...reportInput,
+      reportId: id,
+      sendUpdatedEmail: false
+    })
+
+    if (report && approve) {
+      setShowModal({
+        title: 'Hyväksy selvitys',
+        text: 'Selvityksen hyväksyminen lukitsee selvityksen ja tallentaa paikkatiedot paikkatietokantaan',
+        resolve: {
+          action: async () => {
+            setApproveError(null)
+            await approveReport({ reportId: report.id, overrideReportName })
           },
-          label: 'Ok'
+          onSuccess: onApproveSuccess,
+          label: 'Hyväksy'
+        },
+        reject: {
+          action: () => closeModal(),
+          label: 'Peruuta'
         }
       })
     }
-  })
-  console.log()
+  }
 
-  const onSubmit = async (reportInput: ReportFormInput) => {
-    console.log('ON SUBMIT RENDER???')
-    console.log(overrideReportName)
+  const onReopenReport = async (reportInput: ReportFormInput) => {
+    setApproveError(null)
+    await updateReportMutation({
+      ...reportInput,
+      reportId: id,
+      sendUpdatedEmail: false
+    })
     if (report && report.approved && reOpen) {
       setShowModal({
         title: 'Avaa selvitys uudelleen',
         text: 'Selvityksen avaaminen poistaa kaikki tallennetut tiedot paikkatietokannasta, oletko varma?',
         resolve: {
           action: () => reOpenReport(report.id),
+          onSuccess: onReopenSuccess,
           label: 'Hyväksy'
         },
         reject: {
@@ -160,24 +240,6 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
         }
       })
       return
-    }
-
-    await updateReportMutation({ ...reportInput, reportId: id })
-
-    if (report && approve) {
-      setShowModal({
-        title: 'Hyväksy selvitys',
-        text: 'Selvityksen hyväksyminen lukitsee selvityksen ja tallentaa paikkatiedot paikkatietokantaan',
-        resolve: {
-          action: () =>
-            approveReport({ reportId: report.id, overrideReportName }),
-          label: 'Hyväksy'
-        },
-        reject: {
-          action: () => closeModal(),
-          label: 'Peruuta'
-        }
-      })
     }
   }
 
@@ -243,23 +305,40 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
                 text="Peruuta"
                 onClick={() => navigate(`/luontotieto`)}
               />
-              <StyledButton
-                text="Tallenna muutokset"
-                data-qa="save-button"
-                primary
-                disabled={
-                  !reOpen &&
-                  (!reportInput ||
-                    updatingReport ||
-                    report?.approved ||
-                    approving ||
-                    reOpening)
-                }
-                onClick={() => {
-                  if (!reportInput) return
-                  void onSubmit(reportInput)
-                }}
-              />
+              {!reOpen && !approve && (
+                <AsyncButton
+                  text="Tallenna muutokset"
+                  data-qa="save-button"
+                  primary
+                  disabled={!reportInput || report?.approved}
+                  onSuccess={onUpdateReportSuccess}
+                  onClick={() => onSaveReport(reportInput!)}
+                />
+              )}
+              {reOpen && (
+                <AsyncButton
+                  text="Tallenna muutokset"
+                  data-qa="save-button"
+                  primary
+                  disabled={!reportInput || !report?.approved}
+                  onSuccess={() => {
+                    /* intentionally empty */
+                  }}
+                  onClick={() => onReopenReport(reportInput!)}
+                />
+              )}
+              {approve && (
+                <AsyncButton
+                  text="Tallenna muutokset"
+                  data-qa="save-button"
+                  primary
+                  disabled={!reportInput || report?.approved}
+                  onSuccess={() => {
+                    /* intentionally empty */
+                  }}
+                  onClick={() => onApproveReport(reportInput!)}
+                />
+              )}
             </>
           )}
         </FlexRight>
@@ -274,7 +353,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
           disabled={approving}
         >
           {showModal.text}
-          {approveError && (
+          {!!approveError && (
             <>
               <VerticalGap $size="L" />
               <AlertBox title="Virhe" message={approveError} />

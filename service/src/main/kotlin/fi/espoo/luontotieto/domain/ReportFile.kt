@@ -133,6 +133,7 @@ data class ReportFile(
 )
 
 data class ReportFileInput(
+    val fileId: UUID,
     val reportId: UUID,
     val description: String?,
     val mediaType: String,
@@ -146,11 +147,12 @@ fun Handle.insertReportFile(
 ): UUID {
     return createUpdate(
         """
-            INSERT INTO report_file (report_id, description, media_type, file_name, document_type, created_by, updated_by) 
-            VALUES (:reportId, :description, :mediaType, :fileName, :documentType, :createdBy, :updatedBy)
+            INSERT INTO report_file (id, report_id, description, media_type, file_name, document_type, created_by, updated_by) 
+            VALUES (:id, :reportId, :description, :mediaType, :fileName, :documentType, :createdBy, :updatedBy)
             RETURNING id
             """
     )
+        .bind("id", data.fileId)
         .bind("reportId", data.reportId)
         .bind("description", data.description)
         .bind("mediaType", data.mediaType)

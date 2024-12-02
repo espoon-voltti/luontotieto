@@ -4,8 +4,12 @@
 
 *
 
+!.yarn/releases
+!.yarnrc.yml
+
 !src
 !nginx
 !*.js
 !*.json
 !*.lock
+!*.mjs

@@ -37,8 +37,12 @@ export interface AdUser {
   email?: string | null
 }
 
+export interface PasswordUser {
+  passwordUpdated: boolean
+}
+
 // currently same
-export interface AppUser extends AdUser {
+export interface AppUser extends AdUser, PasswordUser {
   id: string
 }
 

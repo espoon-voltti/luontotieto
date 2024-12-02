@@ -8,7 +8,7 @@ import {
   ReportFileValidationError
 } from 'api/report-api'
 import classNames from 'classnames'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { InputField, InputFieldUnderRow } from 'shared/form/InputField'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
@@ -29,6 +29,7 @@ export interface FileInputData {
   description: string
   file: File | null
   id: string
+  focus?: boolean
 }
 
 interface FileInputProps<T> {
@@ -57,16 +58,20 @@ const fileValidationErrorToMessage = (
 const isReportFileNatureDocument = (
   dt: ReportFileDocumentType | OrderFileDocumentType
 ) =>
-  dt === ReportFileDocumentType.LIITO_ORAVA_ALUEET ||
   dt === ReportFileDocumentType.LIITO_ORAVA_PISTEET ||
+  dt === ReportFileDocumentType.LIITO_ORAVA_ALUEET ||
   dt === ReportFileDocumentType.LIITO_ORAVA_VIIVAT ||
-  dt === ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET ||
   dt === ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET ||
   dt === ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT ||
+  dt === ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET ||
   dt === ReportFileDocumentType.LEPAKKO_ALUEET ||
   dt === ReportFileDocumentType.LEPAKKO_VIIVAT ||
+  dt === ReportFileDocumentType.LUMO_ALUEET ||
   dt === ReportFileDocumentType.NORO_VIIVAT ||
-  dt === ReportFileDocumentType.LUMO_ALUEET
+  dt === ReportFileDocumentType.LUONTOTYYPIT_ALUEET ||
+  dt === ReportFileDocumentType.EKOYHTEYDET_ALUEET ||
+  dt === ReportFileDocumentType.EKOYHTEYDET_VIIVAT ||
+  dt === ReportFileDocumentType.LAHTEET_PISTEET
 
 export const FileInput = <
   T extends ReportFileDocumentType | OrderFileDocumentType
@@ -81,6 +86,8 @@ export const FileInput = <
   accept,
   required
 }: FileInputProps<T>) => {
+  const inputRef = useRef<HTMLInputElement | null>(null)
+
   const [file, setFile] = useState(data.file ?? null)
   const [description, setDescription] = useDebouncedState(data.description)
   const [noObs, setNoObs] = useState(noObservation)
@@ -94,6 +101,12 @@ export const FileInput = <
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file, description, noObs])
+
+  useEffect(() => {
+    if (!!data.focus && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [])
 
   const errorMessage = errors
     ? typeof errors === 'string'
@@ -148,12 +161,14 @@ export const FileInput = <
             />
           )}
           <FileInputField
+            id={data.id}
             readonly={noObservation}
             onChange={(fileList) => {
               const file = fileList?.[0]
               setFile(file ?? null)
             }}
             accept={accept}
+            inputRef={inputRef}
           />
         </LabeledInput>
 
@@ -172,7 +187,7 @@ export const FileInput = <
         )}
       </FlexRowWithGaps>
       {errorMessage && (
-        <FlexRowWithGaps>
+        <FlexRowWithGaps style={{ maxHeight: '300px', overflow: 'auto' }}>
           <InputFieldUnderRow className={classNames('warning')}>
             <span>
               {errorMessage.text.map((i) => (

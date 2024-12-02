@@ -40,11 +40,9 @@ class UserController {
     @Autowired
     lateinit var jdbi: Jdbi
 
-    @Autowired
-    lateinit var sesEmailClient: SESEmailClient
+    @Autowired lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired
-    lateinit var luontotietoHost: LuontotietoHost
+    @Autowired lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -55,19 +53,17 @@ class UserController {
         @RequestBody body: User.Companion.CreateCustomerUser
     ): User {
         user.checkRoles(UserRole.ADMIN)
-        val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
-        val generatedString = generatePassword()
-        val passwordHash = encoder.encode(generatedString)
+        val passwordAndHash = generatePasswordAndHash()
         return jdbi
             .inTransactionUnchecked { tx ->
-                val createdUser = tx.insertUser(data = body, user = user, passwordHash)
+                val createdUser = tx.insertUser(data = body, user = user, passwordAndHash.hash)
                 sesEmailClient.send(
                     Email(
                         body.email,
                         Emails.getUserCreatedEmail(
                             luontotietoHost.getCustomerUserLoginUrl(),
                             HtmlSafe(createdUser.email ?: ""),
-                            generatedString
+                            passwordAndHash.password
                         )
                     )
                 )
@@ -118,7 +114,29 @@ class UserController {
         @RequestBody data: User.Companion.UserInput
     ): User {
         user.checkRoles(UserRole.ADMIN)
-        return jdbi.inTransactionUnchecked { tx -> tx.putUser(id, data, user) }.also {
+        return jdbi.inTransactionUnchecked { tx ->
+            val currentUserData = tx.getUser(id)
+            val updatedEmailForCustomer = data.role == UserRole.CUSTOMER && currentUserData.email != data.email && data.email.isNotEmpty()
+            val updatedUser = tx.putUser(id, data, user)
+
+            if (updatedEmailForCustomer) {
+                // If email was updated for a customer user, reset password and send an email with the new password
+                val passwordAndHash = generatePasswordAndHash()
+                tx.putPassword(updatedUser.id, passwordAndHash.hash, user, false)
+                sesEmailClient.send(
+                    Email(
+                        data.email,
+                        Emails.getUserEmailUpdatedEmail(
+                            luontotietoHost.getCustomerUserLoginUrl(),
+                            HtmlSafe(data.email),
+                            passwordAndHash.password
+                        )
+                    )
+                )
+            }
+
+            updatedUser
+        }.also {
             logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id"))
         }
     }
@@ -155,7 +173,7 @@ class UserController {
                 }
 
                 val passwordHash = encoder.encode(data.newPassword)
-                val result = tx.putPassword(user.id, passwordHash, user)
+                val result = tx.putPassword(user.id, passwordHash, user, true)
                 sesEmailClient.send(
                     Email(
                         result.email,
@@ -182,7 +200,7 @@ class UserController {
         val passwordHash = encoder.encode(generatedString)
         return jdbi
             .inTransactionUnchecked { tx ->
-                val result = tx.putPassword(id, passwordHash, user)
+                val result = tx.putPassword(id, passwordHash, user, false)
                 sesEmailClient.send(
                     Email(
                         result.email,
@@ -208,4 +226,13 @@ private fun generatePassword(): String {
         append("-")
         append(RandomStringUtils.randomAlphanumeric(6))
     }
+}
+
+data class PasswordAndHash(val password: String, val hash: String)
+
+private fun generatePasswordAndHash(): PasswordAndHash {
+    val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
+    val generatedString = generatePassword()
+    val passwordHash = encoder.encode(generatedString)
+    return PasswordAndHash(generatedString, passwordHash)
 }

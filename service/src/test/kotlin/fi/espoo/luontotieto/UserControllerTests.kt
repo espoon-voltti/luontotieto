@@ -19,6 +19,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class UserControllerTests : FullApplicationTest() {
@@ -37,6 +38,7 @@ class UserControllerTests : FullApplicationTest() {
         assertEquals("new-user@example.com", createdUser.email)
         assertEquals("Company Oy", createdUser.name)
         assertTrue(createdUser.active)
+        createdUser.passwordUpdated?.let { assertFalse(it) }
     }
 
     @Test
@@ -78,6 +80,7 @@ class UserControllerTests : FullApplicationTest() {
 
     @Test
     fun updateUserOk() {
+        val oldPasswordHash = jdbi.inTransactionUnchecked { it.getUserPasswordHash(customerUser.id) }
         val email = "${UUID.randomUUID()}@example.com"
         val name = "${UUID.randomUUID()}"
         val updatedUser =
@@ -91,7 +94,9 @@ class UserControllerTests : FullApplicationTest() {
                     active = false
                 )
             )
+        val updatedPasswordHash = jdbi.inTransactionUnchecked { it.getUserPasswordHash(customerUser.id) }
 
+        assertNotEquals(updatedPasswordHash, oldPasswordHash)
         assertFalse(updatedUser.active)
         assertEquals(email, updatedUser.email)
         assertEquals(name, updatedUser.name)
@@ -139,6 +144,9 @@ class UserControllerTests : FullApplicationTest() {
         val updatedHash = jdbi.inTransactionUnchecked { it.getUserPasswordHash(customerUser.id) }
         val matches = encoder.matches(newPassword, updatedHash)
         assertTrue(matches)
+
+        val user = controller.getUser(systemUser, customerUser.id)
+        assertTrue(user.passwordUpdated!!)
     }
 
     @Test

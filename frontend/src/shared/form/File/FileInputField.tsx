@@ -92,7 +92,7 @@ export const FileInputField = React.memo(function FileInputField({
         onFocus={onFocus}
         onBlur={(e) => {
           setTouched(true)
-          onBlur && onBlur(e)
+          if (onBlur) onBlur(e)
         }}
         placeholder={placeholder}
         readOnly={readonly}

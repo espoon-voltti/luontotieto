@@ -60,11 +60,13 @@ private const val SELECT_REPORT_SQL =
            ouu.name                                   AS "o_updatedBy",
            o.assignee_contact_person                  AS "o_assigneeContactPerson",
            o.assignee_contact_email                   AS "o_assigneeContactEmail",
+           o.assignee_company_name                    AS "o_assigneeCompanyName",
            o.return_date                              AS "o_returnDate",
            o.contact_person                           AS "o_contactPerson",
            o.contact_phone                            AS "o_contactPhone",
            o.contact_email                            AS "o_contactEmail",
-           o.ordering_unit                            AS "o_orderingUnit"
+           o.ordering_unit                            AS "o_orderingUnit",
+           r.approved                                 AS "o_hasApprovedReport"
     FROM report r
              LEFT JOIN users uc ON r.created_by = uc.id
              LEFT JOIN users uu ON r.updated_by = uu.id
@@ -248,6 +250,29 @@ fun Handle.getObservedSpecies(reportId: UUID): List<String> {
         .toList()
 }
 
+data class PaikkaTietoEnum(
+    val name: String,
+    val value: String
+)
+
+fun Handle.getPaikkaTietoEnums(): List<PaikkaTietoEnum> {
+    return createQuery(
+        """
+            SELECT
+                t.typname AS name,
+                e.enumlabel AS value
+            FROM
+                pg_type t
+            JOIN
+                pg_enum e ON t.oid = e.enumtypid
+            JOIN
+                pg_namespace n ON n.oid = t.typnamespace
+            """
+    )
+        .mapTo<PaikkaTietoEnum>()
+        .toList()
+}
+
 fun Handle.getAluerajausLuontoselvitysParams(
     user: AuthenticatedUser,
     id: UUID,
@@ -280,10 +305,12 @@ fun Handle.getAluerajausLuontoselvitysParams(
             .sorted()
             .toTypedArray()
 
+    val contactPerson = report.order?.assigneeCompanyName ?: report.order?.assignee
+
     return mapOf(
         "name" to report.name,
         "year" to report.order?.returnDate?.year,
-        "contactPerson" to report.order?.assigneeContactPerson,
+        "contactPerson" to contactPerson,
         "unit" to report.order?.orderingUnit?.joinToString(","),
         "additionalInformation" to reportAreaFile?.description,
         "reportLink" to reportLink,

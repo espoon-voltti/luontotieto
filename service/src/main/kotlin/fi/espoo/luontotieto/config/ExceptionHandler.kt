@@ -35,7 +35,7 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
     ): ResponseEntity<ErrorResponse> {
         logger.warn("Bad request (${ex.message})", ex)
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(ErrorResponse(errorCode = ex.errorCode))
+            .body(ErrorResponse(errorCode = ex.errorCode, errorMessages = ex.errorMessages))
     }
 
     @ExceptionHandler(value = [NotFound::class])
@@ -129,5 +129,6 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
 
 data class ErrorResponse(
     val errorCode: String? = null,
+    val errorMessages: List<String>? = null,
     val timestamp: Long = Instant.now().toEpochMilli()
 )
