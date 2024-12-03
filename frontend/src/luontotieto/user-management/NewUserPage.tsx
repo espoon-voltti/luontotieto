@@ -37,7 +37,7 @@ export const NewUserPage = React.memo(function NewUserPage() {
 
   const onCreateUserSuccess = useCallback((user: User) => {
     setShowModal({
-      title: 'Käyttäjän luotu',
+      title: 'Käyttäjä luotu',
       resolve: {
         action: () => {
           setShowModal(null)

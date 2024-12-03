@@ -98,7 +98,7 @@ export const ReportApproval = React.memo(function ReportApproval({
                 message={
                   <P>
                     {`Jos ylikirjoita viitesarake valintaruutu on valittuna, 
-                  kirjoitetaan paikkatietokantaan selvityksen nimen sijasta tiedostota löytyvä viite.`}
+                  kirjoitetaan paikkatietokantaan selvityksen nimen sijasta tiedostosta löytyvä viite.`}
                   </P>
                 }
               />

@@ -40,7 +40,7 @@ export function getDocumentTypeTitle<
     case ReportFileDocumentType.EKOYHTEYDET_VIIVAT:
       return 'Ekoyhteydet viivat'
     case ReportFileDocumentType.LAHTEET_PISTEET:
-      return 'Lähteet pisteet'
+      return 'Lähde pisteet'
     case ReportFileDocumentType.OTHER:
       return 'Muu liite'
     case ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS:
