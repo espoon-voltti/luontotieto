@@ -10,7 +10,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.5"
     kotlin("jvm") version "2.0.0"
     kotlin("plugin.spring") version "2.0.20"
-    id("org.flywaydb.flyway") version "10.19.0"
+    id("org.flywaydb.flyway") version "11.0.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
 
     idea
@@ -42,7 +42,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     // cve fixes
-    api("org.yaml:snakeyaml:2.2")
+    api("org.yaml:snakeyaml:2.3")
 
     api("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
@@ -55,7 +55,7 @@ dependencies {
     implementation("org.geotools:gt-epsg-hsql:32.0")
 
     implementation("com.zaxxer:HikariCP:6.2.1")
-    implementation("org.flywaydb:flyway-core:10.16.0")
+    implementation("org.flywaydb:flyway-core:11.0.0")
     implementation("org.flywaydb:flyway-database-postgresql:10.17.0")
     implementation("org.postgresql:postgresql:42.7.3")
     api(platform("org.jdbi:jdbi3-bom:3.45.0"))
