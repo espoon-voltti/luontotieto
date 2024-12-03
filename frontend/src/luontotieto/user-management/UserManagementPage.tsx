@@ -4,7 +4,7 @@
 
 import { useGetUserQuery } from 'api/hooks/users'
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 import { BackNavigation } from 'shared/buttons/BackNavigation'
 
 import { NotFound } from '../../shared/404'

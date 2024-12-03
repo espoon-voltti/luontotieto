@@ -5,7 +5,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import React, { FormEvent, useCallback, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import AccessibilityFooter from 'shared/AccessibilityFooter'
 import { AsyncButton } from 'shared/buttons/AsyncButton'
 import { InputField } from 'shared/form/InputField'

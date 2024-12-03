@@ -4,7 +4,7 @@
 
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { FlexColWithGaps, SectionContainer, VerticalGap } from 'shared/layout'
 import { BaseProps } from 'shared/theme'
 import { H2 } from 'shared/typography'
