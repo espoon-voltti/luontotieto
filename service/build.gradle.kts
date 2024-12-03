@@ -51,7 +51,7 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springframework.ws:spring-ws-security")
 
-    implementation("org.geotools:gt-geopkg:32.0")
+    implementation("org.geotools:gt-geopkg:32.1")
     implementation("org.geotools:gt-epsg-hsql:32.0")
 
     implementation("com.zaxxer:HikariCP:6.2.1")
