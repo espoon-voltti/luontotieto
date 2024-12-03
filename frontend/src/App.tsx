@@ -13,7 +13,7 @@ import { UserListPage } from 'luontotieto/user-management/UserListPage'
 import { UserManagementPage } from 'luontotieto/user-management/UserManagementPage'
 import { UserSettingsPage } from 'luontotieto/user-management/UserSettingsPage'
 import React, { Fragment } from 'react'
-import { createBrowserRouter, Link, Navigate, Outlet } from 'react-router-dom'
+import { createBrowserRouter, Link, Navigate, Outlet } from 'react-router'
 import { theme } from 'shared/theme'
 import styled, { ThemeProvider } from 'styled-components'
 

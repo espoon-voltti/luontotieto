@@ -17,7 +17,7 @@ import {
 import { UserRole } from 'api/users-api'
 import { hasViewerRole, UserContext } from 'auth/UserContext'
 import React, { useContext, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import { Footer } from 'shared/Footer'
 import { AlertBox } from 'shared/MessageBoxes'
 import { AsyncButton } from 'shared/buttons/AsyncButton'

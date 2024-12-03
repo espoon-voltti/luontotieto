@@ -11,7 +11,7 @@ import {
 } from 'api/report-api'
 import orderBy from 'lodash/orderBy'
 import React, { useCallback, useContext, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import AccessibilityFooter from 'shared/AccessibilityFooter'
 import { SortableTh, Th } from 'shared/Table'
 import { AddButton } from 'shared/buttons/AddButton'
