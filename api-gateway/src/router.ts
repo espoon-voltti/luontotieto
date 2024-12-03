@@ -34,7 +34,7 @@ export function createRouter(config: Config, redisClient: RedisClient): Router {
 
   router.use(cacheControl(() => 'forbid-cache'))
 
-  router.all('/system/*', (_, res) => {
+  router.all('/system/*splat', (_, res) => {
     res.sendStatus(404)
   })
 
