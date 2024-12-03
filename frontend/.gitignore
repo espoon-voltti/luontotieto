@@ -13,3 +13,5 @@ dist
 !.yarn/plugins
 !.yarn/sdks
 !.yarn/versions
+
+tsconfig.tsbuildinfo
