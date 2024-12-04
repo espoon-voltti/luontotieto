@@ -12,7 +12,7 @@ import {
   OrderReportDocumentInput
 } from 'api/order-api'
 import { getDocumentTypeTitle, ReportFileDocumentType } from 'api/report-api'
-import { UserRole } from 'api/users-api'
+import { getUserRole, User, UserRole } from 'api/users-api'
 import { UserContext } from 'auth/UserContext'
 import { emailRegex } from 'luontotieto/user-management/common'
 import React, {
@@ -37,7 +37,6 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { useGetAssigneeUsersQuery } from '../../api/hooks/users'
 import { DATE_PATTERN } from '../../shared/dates'
-import { Select } from '../../shared/form/Select'
 import {
   FlexCol,
   FlexRow,
@@ -48,6 +47,7 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H3, Label, P } from '../../shared/typography'
+import { SelectOptionsGroup } from 'shared/form/SelectOptionsGroup'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -432,6 +432,48 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     [orderInput, assigneeUsers]
   )
 
+  const groupedAssigneeUsers = useMemo(() => {
+    if (!assigneeUsers) return []
+
+    // Group users by their role
+    const grouped = assigneeUsers.reduce<Record<UserRole, User[]>>(
+      (acc, user) => {
+        const { role } = user
+        if (!acc[role]) {
+          acc[role] = []
+        }
+        acc[role].push(user)
+        return acc
+      },
+      {} as Record<UserRole, User[]>
+    )
+
+    // Convert the grouped object into an array of Group<User>
+    const groups = (Object.entries(grouped) as [UserRole, User[]][]).map(
+      ([role, users]) => ({
+        role: role,
+        items: users
+      })
+    )
+
+    // Sort groups so that CUSTOMER and ORDERER are first
+    return groups
+      .sort((a, b) => {
+        const order: UserRole[] = [UserRole.CUSTOMER, UserRole.ORDERER]
+        const indexA = order.indexOf(a.role)
+        const indexB = order.indexOf(b.role)
+
+        if (indexA === -1 && indexB === -1) return 0
+        if (indexA === -1) return 1
+        if (indexB === -1) return -1
+        return indexA - indexB
+      })
+      .map((group) => ({
+        label: getUserRole(group.role), // Use getUserRole for human-readable names
+        items: group.items
+      }))
+  }, [assigneeUsers])
+
   const validInput: OrderFormInput | null = useMemo(() => {
     if (orderInput.name.trim() === '') return null
     if (orderInput.description.trim() === '') return null
@@ -679,9 +721,9 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           <RowOfInputs>
             <LabeledInput $cols={4}>
               <Label>Selvityksen tekijä *</Label>
-              <Select
+              <SelectOptionsGroup
                 selectedItem={assignee}
-                items={assigneeUsers ?? []}
+                items={groupedAssigneeUsers}
                 onChange={(assignee) =>
                   setOrderInput({
                     ...orderInput,
@@ -691,6 +733,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 getItemLabel={(u) => u?.name ?? '-'}
                 getItemValue={(u) => u?.id ?? '-'}
                 disabled={props.disabled}
+                placeholder="Valitse selvittäjä"
               />
             </LabeledInput>
           </RowOfInputs>

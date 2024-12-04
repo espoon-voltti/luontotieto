@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { useQuery } from '@tanstack/react-query'
-import { apiGetUser, apiGetUsers } from 'api/users-api'
+import { apiGetUser, apiGetUsers, UserRole } from 'api/users-api'
 
 export function useGetUsersQuery() {
   return useQuery({
@@ -18,7 +18,7 @@ export function useGetAssigneeUsersQuery() {
     queryFn: () =>
       apiGetUsers({
         includeInactive: false
-      }).then((users) => [undefined, ...users])
+      }).then((users) => users.filter((user) => user.role !== UserRole.VIEWER))
   })
 }
 
