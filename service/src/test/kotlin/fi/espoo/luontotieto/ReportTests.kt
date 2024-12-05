@@ -316,7 +316,6 @@ class ReportTests : FullApplicationTest() {
 
             assertEquals(viitteet, listOf("over-written", "Test report"))
 
-
             val selvitysTilat =
                 ptx.createQuery(
                     """
@@ -328,8 +327,6 @@ class ReportTests : FullApplicationTest() {
                     .toList()
 
             assertEquals(selvitysTilat, listOf("Hyväksytty"))
-
-
         }
 
         reportController.reopenReport(adminUser, createOrderResponse.reportId)

@@ -226,7 +226,7 @@ fun Handle.getAluerajausLuontoselvitysTilausParams(
         "unit" to report.order?.orderingUnit?.joinToString(","),
         "reportId" to report.id,
         "reportLink" to reportLink,
-        "reportStatus" to if(report.approved) "Hyväksytty" else "Lähetetty"
+        "reportStatus" to if (report.approved) "Hyväksytty" else "Lähetetty"
     )
 }
 
