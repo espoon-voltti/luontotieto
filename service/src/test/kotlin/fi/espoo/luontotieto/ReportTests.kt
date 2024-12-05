@@ -315,6 +315,21 @@ class ReportTests : FullApplicationTest() {
                     .toList()
 
             assertEquals(viitteet, listOf("over-written", "Test report"))
+
+
+            val selvitysTilat =
+                ptx.createQuery(
+                    """
+                    SELECT selvitys_tila AS "selvitysTila" FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId
+                    """.trimIndent()
+                )
+                    .bind("reportId", createOrderResponse.reportId)
+                    .mapTo<String>()
+                    .toList()
+
+            assertEquals(selvitysTilat, listOf("Hyväksytty"))
+
+
         }
 
         reportController.reopenReport(adminUser, createOrderResponse.reportId)
@@ -344,6 +359,18 @@ class ReportTests : FullApplicationTest() {
                     .mapTo<String>()
 
             assertEquals(muutHuomioitavatLajitPisteet.count(), 0)
+
+            val selvitysTilat =
+                ptx.createQuery(
+                    """
+                    SELECT selvitys_tila AS "selvitysTila" FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId
+                    """.trimIndent()
+                )
+                    .bind("reportId", createOrderResponse.reportId)
+                    .mapTo<String>()
+                    .toList()
+
+            assertEquals(selvitysTilat, listOf("Lähetetty"))
         }
     }
 

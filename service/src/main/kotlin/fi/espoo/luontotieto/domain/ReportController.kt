@@ -22,10 +22,7 @@ import fi.espoo.luontotieto.s3.checkFileExtension
 import fi.espoo.luontotieto.s3.getAndCheckFileName
 import fi.espoo.luontotieto.ses.Email
 import fi.espoo.luontotieto.ses.SESEmailClient
-import fi.espoo.paikkatieto.domain.TableDefinition
-import fi.espoo.paikkatieto.domain.deletePaikkatieto
-import fi.espoo.paikkatieto.domain.getEnumRange
-import fi.espoo.paikkatieto.domain.insertPaikkatieto
+import fi.espoo.paikkatieto.domain.*
 import fi.espoo.paikkatieto.reader.GpkgReader
 import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.writer.GpkgWriter
@@ -328,6 +325,11 @@ class ReportController {
             }
             .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
 
+        paikkatietoJdbi
+            .inTransactionUnchecked { tx ->
+                tx.updateAluerajausLuontoselvitystilausSelvitysTila(reportId, true)
+            }
+
         if (emailEnv.enabled) {
             val userResponse = jdbi.inTransactionUnchecked { tx -> tx.getUser(user.id) }
             val reportApprovedEmail =
@@ -369,6 +371,11 @@ class ReportController {
                 tx.updateReportApproved(reportId, false, listOf(), user)
             }
             .also { logger.audit(user, AuditEvent.REOPEN_REPORT, mapOf("id" to "$reportId")) }
+
+        paikkatietoJdbi
+            .inTransactionUnchecked { tx ->
+                tx.updateAluerajausLuontoselvitystilausSelvitysTila(reportId, false)
+            }
     }
 
     @GetMapping("/{reportId}/files")
