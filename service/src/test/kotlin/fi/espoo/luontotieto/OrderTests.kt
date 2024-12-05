@@ -17,6 +17,7 @@ import fi.espoo.luontotieto.domain.UserRole
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mock.web.MockMultipartFile
+import java.io.File
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
@@ -169,6 +170,30 @@ class OrderTests : FullApplicationTest() {
             description = "Test Description",
             id = UUID.randomUUID().toString()
         )
+        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use {
+                inStream ->
+            assertEquals(
+                controller
+                    .uploadOrderFile(
+                        user = adminUser,
+                        orderId = createdOrder.orderId,
+                        file =
+                            MockMultipartFile(
+                                "aluerajaus_luontoselvitys_tilaus.gpkg",
+                                "aluerajaus_luontoselvitys_tilaus.gpkg",
+                                "application/geopackage+sqlite3",
+                                inStream
+                            ),
+                        description =
+                            "Alustava aluerajaus tilaukselle.",
+                        documentType = OrderDocumentType.ORDER_AREA,
+                        id = UUID.randomUUID().toString()
+                    )
+                    .statusCode
+                    .value(),
+                201
+            )
+        }
 
         createLiitoOravaPisteetReportFile(reportController, createdOrder.reportId)
 
@@ -222,7 +247,7 @@ class OrderTests : FullApplicationTest() {
         val orderFileResponse = controller.getOrderFiles(adminUser, createdOrder.orderId)
 
         assertNotNull(orderFileResponse)
-        assertEquals(orderFileResponse.count(), 1)
+        assertEquals(orderFileResponse.count(), 2)
         val fileResponse = orderFileResponse.first()
 
         assertThrows<BadRequest> {
