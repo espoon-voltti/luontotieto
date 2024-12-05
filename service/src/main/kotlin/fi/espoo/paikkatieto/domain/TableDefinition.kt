@@ -453,7 +453,7 @@ fun Handle.deletePaikkatieto(
 
 fun Handle.updateAluerajausLuontoselvitystilaus(
     reportId: UUID,
-    order: Order
+    order: Order,
 ): Int {
     return createQuery(
         """
@@ -475,6 +475,23 @@ fun Handle.updateAluerajausLuontoselvitystilaus(
         .one()
 }
 
+fun Handle.updateAluerajausLuontoselvitystilausSelvitysTila(
+    reportId: UUID,
+    reportApproved: Boolean
+): Int {
+    return createQuery(
+        """
+            UPDATE aluerajaus_luontoselvitystilaus
+                SET selvitys_tila = :selvitys_tila
+            WHERE selvitys_id = :reportId
+            RETURNING *
+            """
+    ).bind("reportId", reportId)
+        .bind("selvitys_tila", if (reportApproved) "Hyväksytty" else "Lähetetty")
+        .mapTo<Int>()
+        .one()
+}
+
 fun Handle.deleteAluerajausLuontoselvitystilaus(reportId: UUID): Int {
     return createUpdate("DELETE FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId")
         .bind("reportId", reportId)
@@ -489,6 +506,7 @@ private const val SQL_INSERT_ALUERAJAUS_LUONTOSELVITYSTILAUS =
             tilausyksikko,
             selvitys_id,
             selvitys_linkki,
+            selvitys_tila,
             geom
         ) VALUES (
             :name,
@@ -496,6 +514,7 @@ private const val SQL_INSERT_ALUERAJAUS_LUONTOSELVITYSTILAUS =
             :unit,
             :reportId,
             :reportLink,
+            :reportStatus,
             ST_GeomFromWKB(:geom, 3879)
         )
         RETURNING id

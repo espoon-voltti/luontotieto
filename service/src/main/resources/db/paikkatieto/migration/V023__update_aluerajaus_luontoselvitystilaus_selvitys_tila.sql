@@ -1,0 +1,2 @@
+ALTER TABLE aluerajaus_luontoselvitystilaus
+ADD COLUMN selvitys_tila TEXT;

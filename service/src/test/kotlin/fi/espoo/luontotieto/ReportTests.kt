@@ -9,6 +9,7 @@ import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.FileExtension
 import fi.espoo.luontotieto.domain.OrderController
+import fi.espoo.luontotieto.domain.OrderDocumentType
 import fi.espoo.luontotieto.domain.OrderReportDocument
 import fi.espoo.luontotieto.domain.Report
 import fi.espoo.luontotieto.domain.ReportController
@@ -244,6 +245,31 @@ class ReportTests : FullApplicationTest() {
             )
         }
 
+        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use {
+                inStream ->
+            assertEquals(
+                orderController
+                    .uploadOrderFile(
+                        user = adminUser,
+                        orderId = createOrderResponse.orderId,
+                        file =
+                            MockMultipartFile(
+                                "aluerajaus_luontoselvitys_tilaus.gpkg",
+                                "aluerajaus_luontoselvitys_tilaus.gpkg",
+                                "application/geopackage+sqlite3",
+                                inStream
+                            ),
+                        description =
+                            "Alustava aluerajaus tilaukselle.",
+                        documentType = OrderDocumentType.ORDER_AREA,
+                        id = UUID.randomUUID().toString()
+                    )
+                    .statusCode
+                    .value(),
+                201
+            )
+        }
+
         assertEquals(
             reportController
                 .uploadReportFile(
@@ -315,6 +341,18 @@ class ReportTests : FullApplicationTest() {
                     .toList()
 
             assertEquals(viitteet, listOf("over-written", "Test report"))
+
+            val selvitysTilat =
+                ptx.createQuery(
+                    """
+                    SELECT selvitys_tila AS "selvitysTila" FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId
+                    """.trimIndent()
+                )
+                    .bind("reportId", createOrderResponse.reportId)
+                    .mapTo<String>()
+                    .toList()
+
+            assertEquals(selvitysTilat, listOf("Hyväksytty"))
         }
 
         reportController.reopenReport(adminUser, createOrderResponse.reportId)
@@ -344,6 +382,18 @@ class ReportTests : FullApplicationTest() {
                     .mapTo<String>()
 
             assertEquals(muutHuomioitavatLajitPisteet.count(), 0)
+
+            val selvitysTilat =
+                ptx.createQuery(
+                    """
+                    SELECT selvitys_tila AS "selvitysTila" FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId
+                    """.trimIndent()
+                )
+                    .bind("reportId", createOrderResponse.reportId)
+                    .mapTo<String>()
+                    .toList()
+
+            assertEquals(selvitysTilat, listOf("Lähetetty"))
         }
     }
 
