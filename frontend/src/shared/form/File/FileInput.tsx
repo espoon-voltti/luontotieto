@@ -24,6 +24,7 @@ import { UnderRowStatusIcon } from '../StatusIcon'
 
 import { FileInputField } from './FileInputField'
 import { FileTitle } from './FileTitle'
+import { TextArea } from '../TextArea'
 
 export interface FileInputData {
   description: string
@@ -176,7 +177,7 @@ export const FileInput = <
           <LabeledInput $cols={5}>
             {showTitle && <VerticalGap $size="L" />}
             <Label>Lisätiedot tarvittaessa</Label>
-            <InputField
+            <TextArea
               readonly={readOnly || noObservation}
               onChange={(value) => {
                 setDescription(value)
