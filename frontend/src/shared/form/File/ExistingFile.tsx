@@ -23,11 +23,10 @@ import {
 import InfoModal from 'shared/modals/InfoModal'
 import { I, Label } from 'shared/typography'
 
-import { InputField } from '../InputField'
-
 import FileDownloadButton from './FileDownloadButton'
 import { FileTitle } from './FileTitle'
 import useDownloadFile from './useDownloadFile'
+import { TextArea } from '../TextArea'
 
 interface Props {
   data:
@@ -88,7 +87,7 @@ export const ExistingFile = React.memo(function ExistingFile({
         <LabeledInput $cols={5}>
           {showTitle && <VerticalGap $size="L" />}
           <Label>Lisätiedot tarvittaessa</Label>
-          <InputField
+          <TextArea
             value={props.data.file.description}
             readonly={props.data.readonly}
           />

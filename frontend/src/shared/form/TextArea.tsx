@@ -175,6 +175,12 @@ const StyledTextArea = styled(TextareaAutosize)<{
     }
   }
 
+   &:read-only {
+    border-bottom-style: dashed;
+    color: ${colors.grayscale.g70};
+    background: none;
+  }
+
   &.warning {
     border-bottom-color: ${colors.status.warning};
 
