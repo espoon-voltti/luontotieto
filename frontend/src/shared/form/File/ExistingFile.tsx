@@ -95,10 +95,7 @@ export const ExistingFile = React.memo(function ExistingFile({
           <LabeledInput $cols={5}>
             {showTitle && <VerticalGap $size="L" />}
             <Label>Lisätiedot tarvittaessa</Label>
-            <TextArea
-              value={props.data.file.description}
-              readonly={props.data.readonly}
-            />
+            <TextArea value={props.data.file.description} readonly={true} />
           </LabeledInput>
         )}
       </FlexRowWithGaps>
