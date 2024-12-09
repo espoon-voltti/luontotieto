@@ -68,6 +68,12 @@ export const ExistingFile = React.memo(function ExistingFile({
     }
   }
 
+  const showDescription =
+    props.data.documentType ===
+      ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS ||
+    props.data.documentType === ReportFileDocumentType.OTHER ||
+    props.data.documentType === OrderFileDocumentType.ORDER_INFO
+
   return (
     <FlexColWithGaps>
       <FlexRowWithGaps>
@@ -84,14 +90,16 @@ export const ExistingFile = React.memo(function ExistingFile({
             readonly={props.data.readonly}
           />
         </LabeledInput>
-        <LabeledInput $cols={5}>
-          {showTitle && <VerticalGap $size="L" />}
-          <Label>Lisätiedot tarvittaessa</Label>
-          <TextArea
-            value={props.data.file.description}
-            readonly={props.data.readonly}
-          />
-        </LabeledInput>
+        {showDescription && (
+          <LabeledInput $cols={5}>
+            {showTitle && <VerticalGap $size="L" />}
+            <Label>Lisätiedot tarvittaessa</Label>
+            <TextArea
+              value={props.data.file.description}
+              readonly={props.data.readonly}
+            />
+          </LabeledInput>
+        )}
       </FlexRowWithGaps>
       <FlexRowWithGaps>
         <I>{`Lisätty ${updatedStr}`}</I>
