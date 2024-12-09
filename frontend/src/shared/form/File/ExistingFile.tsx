@@ -23,10 +23,11 @@ import {
 import InfoModal from 'shared/modals/InfoModal'
 import { I, Label } from 'shared/typography'
 
+import { TextArea } from '../TextArea'
+
 import FileDownloadButton from './FileDownloadButton'
 import { FileTitle } from './FileTitle'
 import useDownloadFile from './useDownloadFile'
-import { TextArea } from '../TextArea'
 
 interface Props {
   data:
