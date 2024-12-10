@@ -20,6 +20,7 @@ import org.jdbi.v3.core.kotlin.mapTo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mock.web.MockMultipartFile
 import java.io.File
+import java.math.BigDecimal
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -291,7 +292,9 @@ class ReportTests : FullApplicationTest() {
             201
         )
 
-        reportController.approveReport(adminUser, createOrderResponse.reportId, true)
+        val reportCost = BigDecimal("1337.37")
+
+        reportController.approveReport(adminUser, createOrderResponse.reportId, true, reportCost)
 
         val approvedReport = reportController.getReportById(adminUser, createOrderResponse.reportId)
         assertTrue(approvedReport.approved)
@@ -299,6 +302,7 @@ class ReportTests : FullApplicationTest() {
             approvedReport.observedSpecies,
             listOf("Ilves", "Torakka", "Jänis", "Perhonen")
         )
+        assertEquals(approvedReport.cost, reportCost)
 
         val reportFiles = reportController.getReportFiles(adminUser, createOrderResponse.reportId)
         assertEquals(5, reportFiles.size)
