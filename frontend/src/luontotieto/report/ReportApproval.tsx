@@ -9,6 +9,7 @@ import { UserRole } from 'api/users-api'
 import { UserContext, hasOrdererRole } from 'auth/UserContext'
 import React, { useContext, useMemo, useState } from 'react'
 import { InfoBox } from 'shared/MessageBoxes'
+import { InfoButton } from 'shared/buttons/InfoButton'
 import { formatDateTime } from 'shared/dates'
 import { Checkbox } from 'shared/form/Checkbox'
 import { InputField } from 'shared/form/InputField'
@@ -16,6 +17,7 @@ import { colors } from 'shared/theme'
 
 import {
   FlexCol,
+  FlexRow,
   FlexRowWithGaps,
   LabeledInput,
   SectionContainer,
@@ -48,6 +50,7 @@ export const ReportApproval = React.memo(function ReportApproval({
 
   const [approved, setApproved] = useState(report.approved)
   const [overrideReportName, setOverrideReportName] = useState(false)
+  const [showReportCostInfo, setShowReportCostInfo] = useState(false)
 
   const handleCostChange = (value: string) => {
     // Ensure valid monetary format
@@ -134,7 +137,21 @@ export const ReportApproval = React.memo(function ReportApproval({
             )}
           {showApproveButton && (
             <LabeledInput $cols={4}>
-              <Label>Selvityksen hinta </Label>
+              <FlexRow>
+                <Label>Selvityksen hinta </Label>
+                <InfoButton
+                  onClick={() => setShowReportCostInfo(!showReportCostInfo)}
+                />
+              </FlexRow>
+              {showReportCostInfo && (
+                <InfoBox
+                  message={
+                    <P>
+                      Selvityksen toteutunut kokonaishinta euroissa ilman alvia.
+                    </P>
+                  }
+                />
+              )}
               <InputField
                 readonly={report.approved}
                 type="text"
