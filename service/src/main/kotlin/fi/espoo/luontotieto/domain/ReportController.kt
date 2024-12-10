@@ -57,6 +57,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.io.IOException
+import java.math.BigDecimal
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -235,6 +236,7 @@ class ReportController {
     fun approveReport(
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
+        @RequestParam("reportCost") reportCost: BigDecimal? = null,
         @RequestParam("overrideReportName") overrideReportName: Boolean? = false
     ) {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
@@ -325,7 +327,7 @@ class ReportController {
 
         jdbi
             .inTransactionUnchecked { tx ->
-                tx.updateReportApproved(reportId, true, observed.distinct(), user)
+                tx.updateReportApproved(reportId, true, observed.distinct(), user, reportCost)
             }
             .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
 
@@ -372,7 +374,7 @@ class ReportController {
 
         jdbi
             .inTransactionUnchecked { tx ->
-                tx.updateReportApproved(reportId, false, listOf(), user)
+                tx.updateReportApproved(reportId, false, listOf(), user, report.cost)
             }
             .also { logger.audit(user, AuditEvent.REOPEN_REPORT, mapOf("id" to "$reportId")) }
 

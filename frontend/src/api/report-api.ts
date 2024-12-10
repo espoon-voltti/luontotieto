@@ -96,6 +96,7 @@ export interface ReportDetails {
   isPublic: boolean | null
   order: Order
   reportDocumentsString?: string
+  cost?: string | null
 }
 
 export interface ReportFileInput {
@@ -169,13 +170,14 @@ export interface ApproveReportError {
 export const apiApproveReport = async (input: {
   reportId: string
   overrideReportName: boolean
+  reportCost?: string
 }): Promise<void> => {
-  const { reportId, overrideReportName } = input
+  const { reportId, overrideReportName, reportCost } = input
   await apiClient
     .post(
       `/reports/${reportId}/approve`,
       {},
-      { params: { overrideReportName } }
+      { params: { overrideReportName, reportCost } }
     )
     .catch((error: { response: { data: ApproveReportError } }) => {
       const errorResponse = {

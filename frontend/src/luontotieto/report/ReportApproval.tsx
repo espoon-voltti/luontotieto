@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { faCheckCircle } from '@fortawesome/free-solid-svg-icons'
+import { faCheckCircle, faEuroSign } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ReportDetails } from 'api/report-api'
 import { UserRole } from 'api/users-api'
@@ -11,28 +11,32 @@ import React, { useContext, useMemo, useState } from 'react'
 import { InfoBox } from 'shared/MessageBoxes'
 import { formatDateTime } from 'shared/dates'
 import { Checkbox } from 'shared/form/Checkbox'
+import { InputField } from 'shared/form/InputField'
 import { colors } from 'shared/theme'
 
 import {
   FlexCol,
   FlexRowWithGaps,
+  LabeledInput,
   SectionContainer,
   VerticalGap
 } from '../../shared/layout'
-import { B, H3, P } from '../../shared/typography'
+import { B, H3, Label, P } from '../../shared/typography'
 
 type Props = {
   report: ReportDetails
   isValid: boolean
   onApprove: (approved: boolean) => void
   onOverrideReportName: (approved: boolean) => void
+  onCostChange: (cost: string) => void
 }
 
 export const ReportApproval = React.memo(function ReportApproval({
   report,
   isValid,
   onApprove,
-  onOverrideReportName
+  onOverrideReportName,
+  onCostChange
 }: Props) {
   const { user } = useContext(UserContext)
   const showApproveButton = useMemo(
@@ -40,9 +44,18 @@ export const ReportApproval = React.memo(function ReportApproval({
     [user, report.approved, isValid]
   )
 
+  const [reportCost, setReportCost] = useState(report.cost ?? '')
+
   const [approved, setApproved] = useState(report.approved)
   const [overrideReportName, setOverrideReportName] = useState(false)
 
+  const handleCostChange = (value: string) => {
+    // Ensure valid monetary format
+    if (/^\d{0,18}(\.\d{0,2})?$/.test(value)) {
+      setReportCost(value)
+      onCostChange(value)
+    }
+  }
   return (
     <SectionContainer>
       <FlexCol>
@@ -53,14 +66,29 @@ export const ReportApproval = React.memo(function ReportApproval({
         </B>
         <VerticalGap $size="m" />
         {report.approved && (
-          <B>
-            <FontAwesomeIcon
-              icon={faCheckCircle}
-              color={colors.status.success}
-              style={{ marginRight: '6px' }}
-            />
-            {`Selvitys hyväksytty ${formatDateTime(report.updated)}, ${report.updatedBy}`}
-          </B>
+          <>
+            <B>
+              <FontAwesomeIcon
+                icon={faCheckCircle}
+                color={colors.status.success}
+                style={{ marginRight: '6px' }}
+              />
+              {`Selvitys hyväksytty ${formatDateTime(report.updated)}, ${report.updatedBy}`}
+            </B>
+            {!!report.cost && (
+              <>
+                <VerticalGap $size="m" />
+                <B>
+                  <FontAwesomeIcon
+                    icon={faEuroSign}
+                    color={colors.status.success}
+                    style={{ marginRight: '12px' }}
+                  />
+                  {`Selvityksen toteutunut hinta ${report.cost} €`}
+                </B>
+              </>
+            )}
+          </>
         )}
         <VerticalGap $size="m" />
         <FlexRowWithGaps $gapSize="L">
@@ -88,22 +116,34 @@ export const ReportApproval = React.memo(function ReportApproval({
               }}
             />
           )}
-        </FlexRowWithGaps>
-        {showApproveButton &&
-          user?.role === UserRole.ADMIN &&
-          overrideReportName && (
-            <>
-              <VerticalGap $size="m" />
-              <InfoBox
-                message={
-                  <P>
-                    {`Jos ylikirjoita viitesarake valintaruutu on valittuna, 
+
+          {showApproveButton &&
+            user?.role === UserRole.ADMIN &&
+            overrideReportName && (
+              <>
+                <VerticalGap $size="m" />{' '}
+                <InfoBox
+                  message={
+                    <P>
+                      {`Jos ylikirjoita viitesarake valintaruutu on valittuna, 
                   kirjoitetaan paikkatietokantaan selvityksen nimen sijasta tiedostosta löytyvä viite.`}
-                  </P>
-                }
+                    </P>
+                  }
+                />
+              </>
+            )}
+          {showApproveButton && (
+            <LabeledInput $cols={4}>
+              <Label>Selvityksen hinta </Label>
+              <InputField
+                readonly={report.approved}
+                type="text"
+                onChange={(value) => handleCostChange(value)}
+                value={reportCost}
               />
-            </>
+            </LabeledInput>
           )}
+        </FlexRowWithGaps>
       </FlexCol>
     </SectionContainer>
   )
