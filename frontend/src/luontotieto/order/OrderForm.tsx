@@ -11,7 +11,11 @@ import {
   OrderFormInput,
   OrderReportDocumentInput
 } from 'api/order-api'
-import { getDocumentTypeTitle, ReportFileDocumentType } from 'api/report-api'
+import {
+  getDocumentTypeTitle,
+  getReportDocumentTypeInfo,
+  ReportFileDocumentType
+} from 'api/report-api'
 import { getUserRole, User, UserRole } from 'api/users-api'
 import { UserContext } from 'auth/UserContext'
 import { emailRegex } from 'luontotieto/user-management/common'
@@ -30,9 +34,11 @@ import { Checkbox } from 'shared/form/Checkbox'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
 import { FileInput, FileInputData } from 'shared/form/File/FileInput'
 import { InputField } from 'shared/form/InputField'
+import { SelectOptionsGroup } from 'shared/form/SelectOptionsGroup'
 import { TagAutoComplete } from 'shared/form/TagAutoComplete/TagAutoComplete'
 import { TextArea } from 'shared/form/TextArea'
 import { useDebouncedState } from 'shared/useDebouncedState'
+import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 
 import { useGetAssigneeUsersQuery } from '../../api/hooks/users'
@@ -40,6 +46,7 @@ import { DATE_PATTERN } from '../../shared/dates'
 import {
   FlexCol,
   FlexRow,
+  FlexRowWithGaps,
   GroupOfInputRows,
   LabeledInput,
   RowOfInputs,
@@ -47,7 +54,6 @@ import {
   VerticalGap
 } from '../../shared/layout'
 import { H3, Label, P } from '../../shared/typography'
-import { SelectOptionsGroup } from 'shared/form/SelectOptionsGroup'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -914,7 +920,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       <SectionContainer>
         <GroupOfInputRows>
           <RowOfInputs>
-            <LabeledInput $cols={8}>
+            <LabeledInput $cols={12}>
               <FlexRow>
                 <Label>Kerättävät dokumentit</Label>
                 <InfoButton
@@ -936,17 +942,18 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               <VerticalGap $size="s" />
 
               {reportDocuments.map((rd, index) => (
-                <Checkbox
+                <ReportDocumentRow
                   key={index}
-                  label={getDocumentTypeTitle(rd.documentType)}
-                  checked={rd.checked}
-                  onChange={(checked) =>
+                  index={index}
+                  onCheck={(checked) =>
                     updateReportDocuments({
                       checked,
                       documentType: rd.documentType
                     })
                   }
-                  disabled={props.disabled}
+                  checked={rd.checked}
+                  documentType={rd.documentType}
+                  disabled={props.disabled ?? false}
                 />
               ))}
             </LabeledInput>
@@ -957,6 +964,43 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     </FlexCol>
   )
 })
+
+type ReportDocumentProps = {
+  checked: boolean
+  documentType: ReportFileDocumentType
+  index: number
+  disabled: boolean
+  onCheck: (checked: boolean) => void
+}
+
+const ReportDocumentRow = React.memo(function ReportDocumentRow({
+  checked,
+  documentType,
+  index,
+  disabled,
+  onCheck
+}: ReportDocumentProps) {
+  const [showInfo, setShowInfo] = useState(false)
+  return (
+    <FlexRowWithGaps $gapSize="m">
+      <StyledCheckBox
+        key={index}
+        label={getDocumentTypeTitle(documentType)}
+        checked={checked}
+        onChange={onCheck}
+        disabled={disabled}
+      />
+      <InfoButton onClick={() => setShowInfo(!showInfo)} />
+      {showInfo && (
+        <InfoBox message={<P>{getReportDocumentTypeInfo(documentType)}</P>} />
+      )}
+    </FlexRowWithGaps>
+  )
+})
+
+const StyledCheckBox = styled(Checkbox)`
+  min-width: 300px;
+`
 
 interface OrderCheckBoxComponentInput extends OrderReportDocumentInput {
   checked: boolean
