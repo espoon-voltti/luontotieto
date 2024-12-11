@@ -259,10 +259,12 @@ class ReportController {
          * during the time that approval takes place.
          * (Note: The old document type files are still stored in the s3)
          */
+        val uploadReportDocumentTypes = arrayOf(DocumentType.ALUERAJAUS_LUONTOSELVITYS).toMutableList()
         val orderDefinedReportDocumentTypes = report.order?.reportDocuments?.map { it.documentType }
+        uploadReportDocumentTypes.addAll(orderDefinedReportDocumentTypes ?: emptyList())
 
         val readers =
-            reportFiles.filter { rf -> orderDefinedReportDocumentTypes?.contains(rf.documentType) == true }
+            reportFiles.filter { rf -> uploadReportDocumentTypes.contains(rf.documentType) }
                 .mapNotNull { rf ->
                     getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf, paikkatietoEnums)
                 }
