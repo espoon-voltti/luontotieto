@@ -292,7 +292,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
           <ReportApproval
             report={report}
             onApprove={setApprove}
-            isValid={!!reportInput}
+            isValid={!!reportInput && reportInput.valid}
             onOverrideReportName={setOverrideReportName}
             onCostChange={setReportCost}
           />
