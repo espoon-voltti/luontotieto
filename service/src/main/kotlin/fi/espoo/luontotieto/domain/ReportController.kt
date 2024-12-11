@@ -252,10 +252,20 @@ class ReportController {
             }
 
         val report = jdbi.inTransactionUnchecked { tx -> tx.getReport(reportId, user) }
+
+        /**
+         * Document types required in order can be changed even after a report document has been added.
+         * We make sure to only upload the data for document types that are defined in the order
+         * during the time that approval takes place.
+         * (Note: The old document type files are still stored in the s3)
+         */
+        val orderDefinedReportDocumentTypes = report.order?.reportDocuments?.map { it.documentType }
+
         val readers =
-            reportFiles.mapNotNull { rf ->
-                getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf, paikkatietoEnums)
-            }
+            reportFiles.filter { rf -> orderDefinedReportDocumentTypes?.contains(rf.documentType) == true }
+                .mapNotNull { rf ->
+                    getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf, paikkatietoEnums)
+                }
 
         val observed = mutableListOf<String>()
 
