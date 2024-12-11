@@ -82,6 +82,7 @@ export interface ReportFormInput {
   filesToAdd: ReportFileInput[]
   filesToRemove: string[]
   isPublic?: boolean
+  valid: boolean
 }
 
 export interface ReportDetails {
