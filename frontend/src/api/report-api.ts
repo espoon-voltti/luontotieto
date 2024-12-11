@@ -56,6 +56,49 @@ export function getDocumentTypeTitle<
   }
 }
 
+export function getReportDocumentTypeInfo<T extends ReportFileDocumentType>(
+  dt: T
+) {
+  switch (dt) {
+    case ReportFileDocumentType.LIITO_ORAVA_ALUEET:
+      return 'Liito-orava alueet'
+    case ReportFileDocumentType.LIITO_ORAVA_PISTEET:
+      return 'Liito-orava pisteet'
+    case ReportFileDocumentType.LIITO_ORAVA_VIIVAT:
+      return 'Liito-orava viivat'
+    case ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET:
+      return 'Muut huomioitavat lajit pisteet'
+    case ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT:
+      return 'Muut huomioitavat lajit viivat'
+    case ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET:
+      return 'Muut huomioitavat lajit alueet'
+    case ReportFileDocumentType.LEPAKKO_ALUEET:
+      return 'Lepakko alueet'
+    case ReportFileDocumentType.LEPAKKO_VIIVAT:
+      return 'Lepakko viivat'
+    case ReportFileDocumentType.LUMO_ALUEET:
+      return 'Lumo alueet'
+    case ReportFileDocumentType.NORO_VIIVAT:
+      return 'Noro viivat'
+    case ReportFileDocumentType.LUONTOTYYPIT_ALUEET:
+      return 'Luontotyypit alueet'
+    case ReportFileDocumentType.EKOYHTEYDET_ALUEET:
+      return 'Ekoyhteydet alueet'
+    case ReportFileDocumentType.EKOYHTEYDET_VIIVAT:
+      return 'Ekoyhteydet viivat'
+    case ReportFileDocumentType.LAHTEET_PISTEET:
+      return 'Lähde pisteet'
+    case ReportFileDocumentType.OTHER:
+      return 'Muu liite'
+    case ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS:
+      return 'Lopullinen aluerajaus'
+    case ReportFileDocumentType.REPORT:
+      return 'Selvitysraportti'
+    default:
+      return 'Puuttuu'
+  }
+}
+
 export enum ReportFileDocumentType {
   LIITO_ORAVA_PISTEET = 'LIITO_ORAVA_PISTEET',
   LIITO_ORAVA_ALUEET = 'LIITO_ORAVA_ALUEET',
