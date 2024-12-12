@@ -2,7 +2,8 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faExternalLink, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Order,
   OrderFile,
@@ -53,7 +54,7 @@ import {
   SectionContainer,
   VerticalGap
 } from '../../shared/layout'
-import { H3, Label, P } from '../../shared/typography'
+import { A, H3, Label, P } from '../../shared/typography'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -934,7 +935,25 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                   message={
                     <P>
                       Tässä valitaan selvityksessä tuotettavat
-                      paikkatietoaineistot
+                      paikkatietoaineistot, joille on vakiintunut tietomalli
+                      Espoon kaupungilla. Valitse kaikki tarvittavat. Jos
+                      selvitykseen ei tilata tietomallien mukaisia
+                      paikkatietoja, niin tässä ei valita mitään kerättäviä
+                      dokumentteja. Lisätietoa paikkatietomalleista: Ohjeet
+                      paikkatietojen toimittamisesta luontoselvitysten
+                      yhteydessä.
+                      <A
+                        href="https://www.espoo.fi/fi/espoon-luontotietoaineistot#paikkatietojen-toimittaminen-luontoselvitysten-yhteydess-61377"
+                        target="_blank"
+                        aria-description="External link"
+                      >
+                        Ohjeet paikkatietojen toimittamisesta luontoselvitysten
+                        yhteydessä.
+                        <FontAwesomeIcon
+                          icon={faExternalLink}
+                          style={{ marginLeft: '6px' }}
+                        />
+                      </A>
                     </P>
                   }
                 />

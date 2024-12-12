@@ -61,33 +61,33 @@ export function getReportDocumentTypeInfo<T extends ReportFileDocumentType>(
 ) {
   switch (dt) {
     case ReportFileDocumentType.LIITO_ORAVA_ALUEET:
-      return 'Liito-orava alueet'
+      return 'Liito-oravien aluemaiset havainnot (elinalueet, ydinalueet, soveltuvat alueet).'
     case ReportFileDocumentType.LIITO_ORAVA_PISTEET:
-      return 'Liito-orava pisteet'
+      return 'Liito-oravien pistemäiset havainnot (papanapuut, pesäpuut jne.).'
     case ReportFileDocumentType.LIITO_ORAVA_VIIVAT:
-      return 'Liito-orava viivat'
+      return 'Liito-oravien kulkuyhteydet viivakohteina.'
     case ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET:
-      return 'Muut huomioitavat lajit pisteet'
+      return 'Pistemäiset lajihavainnot (kaikki lajihavainnot, paitsi liito-orava).'
     case ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT:
-      return 'Muut huomioitavat lajit viivat'
+      return 'Lajeille olennaiset viivakohteet (esim. kulkureitit; kaikki lajit, paitsi liito-orava ja lepakot).'
     case ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET:
-      return 'Muut huomioitavat lajit alueet'
+      return 'Lajeille olennaiset aluerajaukset (esim. elinalueet; kaikki lajit, paitsi liito-orava ja lepakot).'
     case ReportFileDocumentType.LEPAKKO_ALUEET:
-      return 'Lepakko alueet'
+      return 'Lepakoiden aluemaiset havainnot (lepakkoalueet: Luokka I, Luokka II, Luokka III).'
     case ReportFileDocumentType.LEPAKKO_VIIVAT:
-      return 'Lepakko viivat'
+      return 'Lepakoiden viivamaiset havainnot (esim. siirtymäreitit).'
     case ReportFileDocumentType.LUMO_ALUEET:
-      return 'Lumo alueet'
+      return 'Aluemuotoiset rajaukset kohteista, jotka voidaan luokitella Espoon Lumo-kriteeristön mukaisesti.'
     case ReportFileDocumentType.NORO_VIIVAT:
-      return 'Noro viivat'
+      return 'Havumetsävyöhykkeen norot viivamaisina kohteina.'
     case ReportFileDocumentType.LUONTOTYYPIT_ALUEET:
-      return 'Luontotyypit alueet'
+      return 'Luontotyyppikuvioiden aluerajaukset.'
     case ReportFileDocumentType.EKOYHTEYDET_ALUEET:
-      return 'Ekoyhteydet alueet'
+      return 'Ekologiset yhteydet aluemuotoisina kohteina.'
     case ReportFileDocumentType.EKOYHTEYDET_VIIVAT:
-      return 'Ekoyhteydet viivat'
+      return 'Ekologiset yhteydet viivamaisina kohteina.'
     case ReportFileDocumentType.LAHTEET_PISTEET:
-      return 'Lähde pisteet'
+      return 'Lähteet pistemäisinä kohteina.'
     case ReportFileDocumentType.OTHER:
       return 'Muu liite'
     case ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS:
