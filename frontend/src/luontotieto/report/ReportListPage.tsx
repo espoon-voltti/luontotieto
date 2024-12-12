@@ -204,7 +204,9 @@ export const ReportListPage = React.memo(function ReportList() {
                     ))}
                   </ul>
                 </td>
-                <td>{report.order?.assignee}</td>
+                <td>
+                  {report.order?.assigneeCompanyName ?? report.order?.assignee}
+                </td>
               </tr>
             ))}
             {reports.length == 0 && (
