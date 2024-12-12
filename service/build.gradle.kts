@@ -78,19 +78,19 @@ dependencies {
     implementation("com.auth0:java-jwt:4.4.0")
 
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
-    implementation("ch.qos.logback:logback-access:1.4.14")
+    implementation("ch.qos.logback:logback-access:1.5.12")
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit5"))
-    api(platform("org.junit:junit-bom:5.10.0"))
+    api(platform("org.junit:junit-bom:5.11.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.microsoft.playwright:playwright:1.47.0")
 
-    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.79")
 
-    api("org.jsoup:jsoup:1.17.1")
+    api("org.jsoup:jsoup:1.18.3")
 
     implementation("org.unbescape:unbescape:1.1.6.RELEASE")
 
