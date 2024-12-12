@@ -31,7 +31,6 @@ export const InfoButton = React.memo(function InfoButton({
 })
 
 const StyledIconContainer = styled.div<{ $color: string }>`
-  margin-right: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
