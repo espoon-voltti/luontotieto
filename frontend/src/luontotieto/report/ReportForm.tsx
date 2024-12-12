@@ -323,7 +323,8 @@ export const ReportForm = React.memo(function ReportForm(
     ])
   }
 
-  const validInput: ReportFormInput | null = useMemo(() => {
+  const reportInput: ReportFormInput | null = useMemo(() => {
+    let valid = true
     const filesToRemove = originalFileInputs.flatMap((e) =>
       e.type === 'EXISTING' &&
       !fileInputs.find(
@@ -333,14 +334,14 @@ export const ReportForm = React.memo(function ReportForm(
         : []
     )
 
-    if (name.trim() === '') return null
-    if (isPublic === null) return null
+    if (name.trim() === '') valid = false
+    if (isPublic === null) valid = false
 
     // With this we make it possible for the user to delete files he has previously saved to the system
     if (filesToRemove.length === 0) {
-      if (!filesAreValid(requiredFiles, fileInputs)) return null
-      if (!hasReportDocument(fileInputs)) return null
-      if (!hasAluerajausDocument(fileInputs)) return null
+      if (!filesAreValid(requiredFiles, fileInputs)) valid = false
+      if (!hasReportDocument(fileInputs)) valid = false
+      if (!hasAluerajausDocument(fileInputs)) valid = false
     }
 
     const noObs = fileInputs.flatMap((input) =>
@@ -348,7 +349,7 @@ export const ReportForm = React.memo(function ReportForm(
     )
     return {
       name: name.trim(),
-      isPublic,
+      isPublic: isPublic !== null ? isPublic : undefined,
       noObservations: noObs,
       filesToAdd: fileInputs.flatMap((e) =>
         e.type === 'NEW' && e.file !== null
@@ -362,13 +363,14 @@ export const ReportForm = React.memo(function ReportForm(
             ]
           : []
       ),
-      filesToRemove
+      filesToRemove,
+      valid
     }
   }, [name, fileInputs, requiredFiles, originalFileInputs, isPublic])
 
   useEffect(() => {
-    props.onChange(validInput)
-  }, [validInput, props])
+    props.onChange(reportInput)
+  }, [reportInput, props])
 
   useEffect(() => {
     setFileInputs(
