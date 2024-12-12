@@ -68,7 +68,11 @@ export const ReportListPage = React.memo(function ReportList() {
   const reportAssignees = useMemo(() => {
     const assignees = (reports ?? [])
       .flatMap((r) =>
-        r.order?.assignee !== undefined ? r.order?.assignee : []
+        r.order?.assigneeCompanyName
+          ? r.order.assigneeCompanyName
+          : r.order?.assignee !== undefined
+            ? r.order?.assignee
+            : []
       )
       .sort()
 
@@ -268,6 +272,9 @@ const filterReports = (
       return (
         (report.name.toLowerCase().includes(searchQueryToLower) ||
           report.order.assignee.toLowerCase().includes(searchQueryToLower) ||
+          report.order.assigneeCompanyName
+            ?.toLowerCase()
+            .includes(searchQueryToLower) ||
           report.order.planNumber
             ?.toString()
             .toLowerCase()
@@ -281,9 +288,10 @@ const filterReports = (
       )
     } else if (assigneeLower) {
       return (
-        report.order &&
-        assigneeLower &&
-        report.order.assignee.toLowerCase().includes(assigneeLower)
+        (report.order &&
+          assigneeLower &&
+          report.order.assignee.toLowerCase().includes(assigneeLower)) ||
+        report.order.assigneeCompanyName?.toLowerCase().includes(assigneeLower)
       )
     }
     return true
