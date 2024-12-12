@@ -2,7 +2,8 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faExternalLink, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Order,
   OrderFile,
@@ -11,7 +12,11 @@ import {
   OrderFormInput,
   OrderReportDocumentInput
 } from 'api/order-api'
-import { getDocumentTypeTitle, ReportFileDocumentType } from 'api/report-api'
+import {
+  getDocumentTypeTitle,
+  getReportDocumentTypeInfo,
+  ReportFileDocumentType
+} from 'api/report-api'
 import { getUserRole, User, UserRole } from 'api/users-api'
 import { UserContext } from 'auth/UserContext'
 import { emailRegex } from 'luontotieto/user-management/common'
@@ -30,9 +35,11 @@ import { Checkbox } from 'shared/form/Checkbox'
 import { ExistingFile } from 'shared/form/File/ExistingFile'
 import { FileInput, FileInputData } from 'shared/form/File/FileInput'
 import { InputField } from 'shared/form/InputField'
+import { SelectOptionsGroup } from 'shared/form/SelectOptionsGroup'
 import { TagAutoComplete } from 'shared/form/TagAutoComplete/TagAutoComplete'
 import { TextArea } from 'shared/form/TextArea'
 import { useDebouncedState } from 'shared/useDebouncedState'
+import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 
 import { useGetAssigneeUsersQuery } from '../../api/hooks/users'
@@ -40,14 +47,14 @@ import { DATE_PATTERN } from '../../shared/dates'
 import {
   FlexCol,
   FlexRow,
+  FlexRowWithGaps,
   GroupOfInputRows,
   LabeledInput,
   RowOfInputs,
   SectionContainer,
   VerticalGap
 } from '../../shared/layout'
-import { H3, Label, P } from '../../shared/typography'
-import { SelectOptionsGroup } from 'shared/form/SelectOptionsGroup'
+import { A, H3, Label, P } from '../../shared/typography'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -914,7 +921,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       <SectionContainer>
         <GroupOfInputRows>
           <RowOfInputs>
-            <LabeledInput $cols={8}>
+            <LabeledInput $cols={12}>
               <FlexRow>
                 <Label>Kerättävät dokumentit</Label>
                 <InfoButton
@@ -928,7 +935,25 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                   message={
                     <P>
                       Tässä valitaan selvityksessä tuotettavat
-                      paikkatietoaineistot
+                      paikkatietoaineistot, joille on vakiintunut tietomalli
+                      Espoon kaupungilla. Valitse kaikki tarvittavat. Jos
+                      selvitykseen ei tilata tietomallien mukaisia
+                      paikkatietoja, niin tässä ei valita mitään kerättäviä
+                      dokumentteja. Lisätietoa paikkatietomalleista: Ohjeet
+                      paikkatietojen toimittamisesta luontoselvitysten
+                      yhteydessä.
+                      <A
+                        href="https://www.espoo.fi/fi/espoon-luontotietoaineistot#paikkatietojen-toimittaminen-luontoselvitysten-yhteydess-61377"
+                        target="_blank"
+                        aria-description="External link"
+                      >
+                        Ohjeet paikkatietojen toimittamisesta luontoselvitysten
+                        yhteydessä.
+                        <FontAwesomeIcon
+                          icon={faExternalLink}
+                          style={{ marginLeft: '6px' }}
+                        />
+                      </A>
                     </P>
                   }
                 />
@@ -936,17 +961,18 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               <VerticalGap $size="s" />
 
               {reportDocuments.map((rd, index) => (
-                <Checkbox
+                <ReportDocumentRow
                   key={index}
-                  label={getDocumentTypeTitle(rd.documentType)}
-                  checked={rd.checked}
-                  onChange={(checked) =>
+                  index={index}
+                  onCheck={(checked) =>
                     updateReportDocuments({
                       checked,
                       documentType: rd.documentType
                     })
                   }
-                  disabled={props.disabled}
+                  checked={rd.checked}
+                  documentType={rd.documentType}
+                  disabled={props.disabled ?? false}
                 />
               ))}
             </LabeledInput>
@@ -957,6 +983,43 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     </FlexCol>
   )
 })
+
+type ReportDocumentProps = {
+  checked: boolean
+  documentType: ReportFileDocumentType
+  index: number
+  disabled: boolean
+  onCheck: (checked: boolean) => void
+}
+
+const ReportDocumentRow = React.memo(function ReportDocumentRow({
+  checked,
+  documentType,
+  index,
+  disabled,
+  onCheck
+}: ReportDocumentProps) {
+  const [showInfo, setShowInfo] = useState(false)
+  return (
+    <FlexRowWithGaps $gapSize="m">
+      <StyledCheckBox
+        key={index}
+        label={getDocumentTypeTitle(documentType)}
+        checked={checked}
+        onChange={onCheck}
+        disabled={disabled}
+      />
+      <InfoButton onClick={() => setShowInfo(!showInfo)} />
+      {showInfo && (
+        <InfoBox message={<P>{getReportDocumentTypeInfo(documentType)}</P>} />
+      )}
+    </FlexRowWithGaps>
+  )
+})
+
+const StyledCheckBox = styled(Checkbox)`
+  min-width: 300px;
+`
 
 interface OrderCheckBoxComponentInput extends OrderReportDocumentInput {
   checked: boolean

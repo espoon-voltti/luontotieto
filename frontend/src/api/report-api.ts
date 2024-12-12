@@ -56,6 +56,49 @@ export function getDocumentTypeTitle<
   }
 }
 
+export function getReportDocumentTypeInfo<T extends ReportFileDocumentType>(
+  dt: T
+) {
+  switch (dt) {
+    case ReportFileDocumentType.LIITO_ORAVA_ALUEET:
+      return 'Liito-oravien aluemaiset havainnot (elinalueet, ydinalueet, soveltuvat alueet).'
+    case ReportFileDocumentType.LIITO_ORAVA_PISTEET:
+      return 'Liito-oravien pistemäiset havainnot (papanapuut, pesäpuut jne.).'
+    case ReportFileDocumentType.LIITO_ORAVA_VIIVAT:
+      return 'Liito-oravien kulkuyhteydet viivakohteina.'
+    case ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET:
+      return 'Pistemäiset lajihavainnot (kaikki lajihavainnot, paitsi liito-orava).'
+    case ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT:
+      return 'Lajeille olennaiset viivakohteet (esim. kulkureitit; kaikki lajit, paitsi liito-orava ja lepakot).'
+    case ReportFileDocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET:
+      return 'Lajeille olennaiset aluerajaukset (esim. elinalueet; kaikki lajit, paitsi liito-orava ja lepakot).'
+    case ReportFileDocumentType.LEPAKKO_ALUEET:
+      return 'Lepakoiden aluemaiset havainnot (lepakkoalueet: Luokka I, Luokka II, Luokka III).'
+    case ReportFileDocumentType.LEPAKKO_VIIVAT:
+      return 'Lepakoiden viivamaiset havainnot (esim. siirtymäreitit).'
+    case ReportFileDocumentType.LUMO_ALUEET:
+      return 'Aluemuotoiset rajaukset kohteista, jotka voidaan luokitella Espoon Lumo-kriteeristön mukaisesti.'
+    case ReportFileDocumentType.NORO_VIIVAT:
+      return 'Havumetsävyöhykkeen norot viivamaisina kohteina.'
+    case ReportFileDocumentType.LUONTOTYYPIT_ALUEET:
+      return 'Luontotyyppikuvioiden aluerajaukset.'
+    case ReportFileDocumentType.EKOYHTEYDET_ALUEET:
+      return 'Ekologiset yhteydet aluemuotoisina kohteina.'
+    case ReportFileDocumentType.EKOYHTEYDET_VIIVAT:
+      return 'Ekologiset yhteydet viivamaisina kohteina.'
+    case ReportFileDocumentType.LAHTEET_PISTEET:
+      return 'Lähteet pistemäisinä kohteina.'
+    case ReportFileDocumentType.OTHER:
+      return 'Muu liite'
+    case ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS:
+      return 'Lopullinen aluerajaus'
+    case ReportFileDocumentType.REPORT:
+      return 'Selvitysraportti'
+    default:
+      return 'Puuttuu'
+  }
+}
+
 export enum ReportFileDocumentType {
   LIITO_ORAVA_PISTEET = 'LIITO_ORAVA_PISTEET',
   LIITO_ORAVA_ALUEET = 'LIITO_ORAVA_ALUEET',
@@ -82,6 +125,7 @@ export interface ReportFormInput {
   filesToAdd: ReportFileInput[]
   filesToRemove: string[]
   isPublic?: boolean
+  valid: boolean
 }
 
 export interface ReportDetails {
@@ -96,6 +140,7 @@ export interface ReportDetails {
   isPublic: boolean | null
   order: Order
   reportDocumentsString?: string
+  cost?: string | null
 }
 
 export interface ReportFileInput {
@@ -169,13 +214,14 @@ export interface ApproveReportError {
 export const apiApproveReport = async (input: {
   reportId: string
   overrideReportName: boolean
+  reportCost?: string
 }): Promise<void> => {
-  const { reportId, overrideReportName } = input
+  const { reportId, overrideReportName, reportCost } = input
   await apiClient
     .post(
       `/reports/${reportId}/approve`,
       {},
-      { params: { overrideReportName } }
+      { params: { overrideReportName, reportCost } }
     )
     .catch((error: { response: { data: ApproveReportError } }) => {
       const errorResponse = {

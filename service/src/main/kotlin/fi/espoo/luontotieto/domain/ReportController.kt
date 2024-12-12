@@ -57,6 +57,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.io.IOException
+import java.math.BigDecimal
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -235,7 +236,8 @@ class ReportController {
     fun approveReport(
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
-        @RequestParam("overrideReportName") overrideReportName: Boolean? = false
+        @RequestParam("overrideReportName") overrideReportName: Boolean? = false,
+        @RequestParam("reportCost") reportCost: BigDecimal? = null
     ) {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         val dataBucket = bucketEnv.data
@@ -250,10 +252,22 @@ class ReportController {
             }
 
         val report = jdbi.inTransactionUnchecked { tx -> tx.getReport(reportId, user) }
+
+        /**
+         * Document types required in order can be changed even after a report document has been added.
+         * We make sure to only upload the data for document types that are defined in the order
+         * during the time that approval takes place.
+         * (Note: The old document type files are still stored in the s3)
+         */
+        val uploadReportDocumentTypes = arrayOf(DocumentType.ALUERAJAUS_LUONTOSELVITYS).toMutableList()
+        val orderDefinedReportDocumentTypes = report.order?.reportDocuments?.map { it.documentType }
+        uploadReportDocumentTypes.addAll(orderDefinedReportDocumentTypes ?: emptyList())
+
         val readers =
-            reportFiles.mapNotNull { rf ->
-                getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf, paikkatietoEnums)
-            }
+            reportFiles.filter { rf -> uploadReportDocumentTypes.contains(rf.documentType) }
+                .mapNotNull { rf ->
+                    getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf, paikkatietoEnums)
+                }
 
         val observed = mutableListOf<String>()
 
@@ -325,7 +339,7 @@ class ReportController {
 
         jdbi
             .inTransactionUnchecked { tx ->
-                tx.updateReportApproved(reportId, true, observed.distinct(), user)
+                tx.updateReportApproved(reportId, true, observed.distinct(), user, reportCost)
             }
             .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
 
@@ -372,7 +386,7 @@ class ReportController {
 
         jdbi
             .inTransactionUnchecked { tx ->
-                tx.updateReportApproved(reportId, false, listOf(), user)
+                tx.updateReportApproved(reportId, false, listOf(), user, report.cost)
             }
             .also { logger.audit(user, AuditEvent.REOPEN_REPORT, mapOf("id" to "$reportId")) }
 

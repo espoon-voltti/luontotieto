@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import RedisStore from 'connect-redis'
+import { RedisStore } from 'connect-redis'
 import {
   addMinutes,
   differenceInMinutes,
