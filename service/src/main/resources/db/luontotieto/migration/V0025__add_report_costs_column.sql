@@ -1,0 +1,2 @@
+ALTER TABLE report
+    ADD COLUMN cost NUMERIC(20, 2);
