@@ -16,7 +16,7 @@ import {
 } from 'api/report-api'
 import { UserRole } from 'api/users-api'
 import { hasViewerRole, UserContext } from 'auth/UserContext'
-import React, { useContext, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { Footer } from 'shared/Footer'
 import { AlertBox } from 'shared/MessageBoxes'
@@ -53,6 +53,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
   const [approve, setApprove] = useState(false)
   const [reOpen, setReOpen] = useState(false)
   const [overrideReportName, setOverrideReportName] = useState(false)
+  const [reportCost, setReportCost] = useState('')
 
   if (!id) throw Error('Id not found in path')
 
@@ -67,6 +68,12 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
 
   const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
   const [approveError, setApproveError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (report) {
+      setReportCost(report.cost ?? '')
+    }
+  }, [report])
 
   const closeModal = () => {
     setShowModal(null)
@@ -205,7 +212,11 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
         resolve: {
           action: async () => {
             setApproveError(null)
-            await approveReport({ reportId: report.id, overrideReportName })
+            await approveReport({
+              reportId: report.id,
+              overrideReportName,
+              reportCost
+            })
           },
           onSuccess: onApproveSuccess,
           label: 'Hyväksy'
@@ -281,8 +292,9 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
           <ReportApproval
             report={report}
             onApprove={setApprove}
-            isValid={!!reportInput}
+            isValid={!!reportInput && reportInput.valid}
             onOverrideReportName={setOverrideReportName}
+            onCostChange={setReportCost}
           />
         )}
         <VerticalGap $size="m" />

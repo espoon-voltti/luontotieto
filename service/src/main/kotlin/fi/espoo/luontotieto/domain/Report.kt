@@ -11,6 +11,7 @@ import fi.espoo.luontotieto.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -27,6 +28,7 @@ data class Report(
     val isPublic: Boolean?,
     val noObservations: List<DocumentType>?,
     val observedSpecies: List<String>?,
+    val cost: BigDecimal?,
     @Nested("o_") val order: Order?
 ) {
     companion object {
@@ -66,7 +68,8 @@ private const val SELECT_REPORT_SQL =
            o.contact_phone                            AS "o_contactPhone",
            o.contact_email                            AS "o_contactEmail",
            o.ordering_unit                            AS "o_orderingUnit",
-           r.approved                                 AS "o_hasApprovedReport"
+           r.approved                                 AS "o_hasApprovedReport",
+           r.cost                                     AS "cost"
     FROM report r
              LEFT JOIN users uc ON r.created_by = uc.id
              LEFT JOIN users uu ON r.updated_by = uu.id
@@ -104,7 +107,8 @@ fun Handle.updateReportApproved(
     reportId: UUID,
     approve: Boolean,
     observedSpecies: List<String>,
-    user: AuthenticatedUser
+    user: AuthenticatedUser,
+    reportCost: BigDecimal? = null
 ): Report {
     return createUpdate(
         """
@@ -112,7 +116,8 @@ fun Handle.updateReportApproved(
               SET
                 approved = :approved,
                 observed_species = :observedSpecies,
-                updated_by = :updatedBy
+                updated_by = :updatedBy,
+                cost = :cost
             WHERE id = :reportId
             """
     )
@@ -120,6 +125,7 @@ fun Handle.updateReportApproved(
         .bind("approved", approve)
         .bind("observedSpecies", observedSpecies.toTypedArray())
         .bind("updatedBy", user.id)
+        .bind("cost", reportCost)
         .executeAndReturnGeneratedKeys()
         .mapTo<Report>()
         .one()
@@ -337,7 +343,8 @@ fun reportsToCsv(reports: List<Report>): String {
             "viimeisin muokkauspvm",
             "selvitetyt tiedot",
             "muut huomioitavat lajit",
-            "ei löydettyjä havaintoja"
+            "ei löydettyjä havaintoja",
+            "selvityksen toteutunut hinta"
         ).joinToString(CSV_FIELD_SEPARATOR, postfix = CSV_RECORD_SEPARATOR)
 
     val csvContent = StringBuilder()
@@ -370,8 +377,8 @@ fun reportsToCsv(reports: List<Report>): String {
                 reportDocuments
             ).append(CSV_FIELD_SEPARATOR)
             .append(observedSpecies).append(CSV_FIELD_SEPARATOR)
-            .append(noObservations)
-            .append(CSV_RECORD_SEPARATOR)
+            .append(noObservations).append(CSV_RECORD_SEPARATOR)
+            .append(report.cost).append(CSV_FIELD_SEPARATOR)
     }
 
     return csvContent.toString()
