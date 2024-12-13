@@ -354,6 +354,8 @@ fun reportsToCsv(reports: List<Report>): String {
 
         val noObservations = sanitizeCsvCellData(report.noObservations?.joinToString(",") ?: "")
 
+        val assigneeOrCompany = sanitizeCsvCellData(report.order?.assigneeCompanyName ?: report.order?.assignee ?: "")
+
         csvContent
             .append(report.id)
             .append(CSV_FIELD_SEPARATOR)
@@ -369,7 +371,7 @@ fun reportsToCsv(reports: List<Report>): String {
             .append(CSV_FIELD_SEPARATOR)
             .append(report.created)
             .append(CSV_FIELD_SEPARATOR)
-            .append((report.order?.assigneeCompanyName ?: report.order?.assignee))
+            .append(assigneeOrCompany)
             .append(CSV_FIELD_SEPARATOR)
             .append(sanitizeCsvCellData(report.updatedBy))
             .append(CSV_FIELD_SEPARATOR)
@@ -381,9 +383,9 @@ fun reportsToCsv(reports: List<Report>): String {
             .append(observedSpecies)
             .append(CSV_FIELD_SEPARATOR)
             .append(noObservations)
-            .append(CSV_RECORD_SEPARATOR)
-            .append(report.cost)
             .append(CSV_FIELD_SEPARATOR)
+            .append(report.cost ?: "")
+            .append(CSV_RECORD_SEPARATOR)
     }
 
     return csvContent.toString()
