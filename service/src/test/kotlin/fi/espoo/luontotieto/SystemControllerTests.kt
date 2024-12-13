@@ -24,7 +24,8 @@ class SystemControllerTests : FullApplicationTest() {
         val jdbi = controller.jdbi
         val password = "password.1A"
         jdbi.inTransactionUnchecked {
-            it.createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
+            it
+                .createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
                 .bind("password", encoder.encode(password))
                 .bind("id", customerUser.id)
                 .execute()
@@ -41,10 +42,10 @@ class SystemControllerTests : FullApplicationTest() {
         val password = "password.1A"
         val email = "yritys@example.com"
         jdbi.inTransactionUnchecked {
-            it.createUpdate(
-                "UPDATE users SET active = false, password_hash = :password WHERE id = :id"
-            )
-                .bind("password", encoder.encode(password))
+            it
+                .createUpdate(
+                    "UPDATE users SET active = false, password_hash = :password WHERE id = :id"
+                ).bind("password", encoder.encode(password))
                 .bind("id", customerUser.id)
                 .execute()
         }
@@ -62,7 +63,8 @@ class SystemControllerTests : FullApplicationTest() {
         val wrongPassword = "wrong password"
         val email = "yritys@example.com"
         jdbi.inTransactionUnchecked {
-            it.createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
+            it
+                .createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
                 .bind("password", encoder.encode(password))
                 .bind("id", customerUser.id)
                 .execute()
@@ -91,7 +93,8 @@ class SystemControllerTests : FullApplicationTest() {
     @Test
     fun adLoginInactive() {
         jdbi.inTransactionUnchecked {
-            it.createUpdate("UPDATE users SET active = false WHERE id = :id")
+            it
+                .createUpdate("UPDATE users SET active = false WHERE id = :id")
                 .bind("id", adminUser.id)
                 .execute()
         }

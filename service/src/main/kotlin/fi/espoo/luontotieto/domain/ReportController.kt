@@ -200,7 +200,8 @@ class ReportController {
 
         val res = reportsToCsv(reports).byteInputStream()
         val inputStreamResource = InputStreamResource(res)
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
             .body(inputStreamResource)
@@ -328,8 +329,7 @@ class ReportController {
         jdbi
             .inTransactionUnchecked { tx ->
                 tx.updateReportApproved(reportId, true, observed.distinct(), user, reportCost)
-            }
-            .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
+            }.also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
 
         paikkatietoJdbi
             .inTransactionUnchecked { tx ->
@@ -375,8 +375,7 @@ class ReportController {
         jdbi
             .inTransactionUnchecked { tx ->
                 tx.updateReportApproved(reportId, false, listOf(), user, report.cost)
-            }
-            .also { logger.audit(user, AuditEvent.REOPEN_REPORT, mapOf("id" to "$reportId")) }
+            }.also { logger.audit(user, AuditEvent.REOPEN_REPORT, mapOf("id" to "$reportId")) }
 
         paikkatietoJdbi
             .inTransactionUnchecked { tx ->
@@ -388,17 +387,15 @@ class ReportController {
     fun getReportFiles(
         user: AuthenticatedUser,
         @PathVariable reportId: UUID
-    ): List<ReportFile> {
-        return jdbi
+    ): List<ReportFile> =
+        jdbi
             .inTransactionUnchecked { tx ->
                 // This is done to check that user has access to the report
                 val report = tx.getReport(reportId, user)
                 tx.getReportFiles(reportId)
-            }
-            .also {
+            }.also {
                 logger.audit(user, AuditEvent.GET_REPORT_FILES, mapOf("id" to "$reportId"))
             }
-    }
 
     @GetMapping("/{reportId}/files/{fileId}")
     fun getReportFileById(
@@ -417,7 +414,8 @@ class ReportController {
                 )
             }
         val contentDisposition =
-            ContentDisposition.attachment()
+            ContentDisposition
+                .attachment()
                 .filename(reportFile.fileName, StandardCharsets.UTF_8)
                 .build()
         val fileUrl =
@@ -435,13 +433,15 @@ class ReportController {
             jdbi.inTransactionUnchecked { tx -> tx.getReportDocumentForReport(reportId) }
 
         val contentDisposition =
-            ContentDisposition.attachment()
+            ContentDisposition
+                .attachment()
                 .filename(reportFile.fileName, StandardCharsets.UTF_8)
                 .build()
 
         val res = documentClient.download(dataBucket, "$reportId/${reportFile.id}")
         val inputStreamResource = InputStreamResource(res)
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
             .contentType(MediaType.parseMediaType(res.response().contentType()))
             .contentLength(res.response().contentLength())
@@ -473,20 +473,20 @@ class ReportController {
     ): ResponseEntity<Resource> {
         val tableDefinition = documentType.tableDefinition ?: throw NotFound()
         val file =
-            GpkgWriter.write(tableDefinition) { column ->
-                paikkatietoJdbi.inTransactionUnchecked { tx -> tx.getEnumRange(column) }
-            }
-                ?.takeIf { Files.size(it) > 0 }
+            GpkgWriter
+                .write(tableDefinition) { column ->
+                    paikkatietoJdbi.inTransactionUnchecked { tx -> tx.getEnumRange(column) }
+                }?.takeIf { Files.size(it) > 0 }
                 ?: throw NotFound()
 
         val resource = UrlResource(file.toUri())
 
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .header(
                 HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"${tableDefinition.layerName}.gpkg\""
-            )
-            .header(HttpHeaders.CONTENT_TYPE, "application/geopackage+sqlite3")
+            ).header(HttpHeaders.CONTENT_TYPE, "application/geopackage+sqlite3")
             .body(resource)
     }
 

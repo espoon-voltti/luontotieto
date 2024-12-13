@@ -8,7 +8,9 @@ import org.apache.http.client.utils.URIBuilder
 import org.springframework.core.env.Environment
 import java.util.UUID
 
-data class LuontotietoHost(val host: String) {
+data class LuontotietoHost(
+    val host: String
+) {
     fun getReportUrl(id: UUID): String {
         val builder = URIBuilder(host)
         builder.path = "/luontotieto/selvitys/$id"
@@ -28,8 +30,6 @@ data class LuontotietoHost(val host: String) {
     }
 
     companion object {
-        fun fromEnvironment(env: Environment): LuontotietoHost {
-            return LuontotietoHost(env.lookup("luontotieto.host"))
-        }
+        fun fromEnvironment(env: Environment): LuontotietoHost = LuontotietoHost(env.lookup("luontotieto.host"))
     }
 }

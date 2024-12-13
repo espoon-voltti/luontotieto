@@ -59,8 +59,7 @@ fun <T> Environment.lookup(
             } catch (e: Exception) {
                 throw EnvLookupException(legacyKey, e)
             }
-        }
-        .firstOrNull()
+        }.firstOrNull()
         ?: try {
             getProperty(key, clazz)
         } catch (e: Exception) {
@@ -69,8 +68,10 @@ fun <T> Environment.lookup(
 
 private val logger = KotlinLogging.logger {}
 
-class EnvLookupException(key: String, cause: Throwable) :
-    RuntimeException(
+class EnvLookupException(
+    key: String,
+    cause: Throwable
+) : RuntimeException(
         "Failed to lookup configuration key $key (environment variable ${key.toSystemEnvKey()})",
         cause
     )

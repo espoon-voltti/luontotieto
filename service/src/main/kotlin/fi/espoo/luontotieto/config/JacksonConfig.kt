@@ -17,16 +17,17 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 fun defaultJsonMapperBuilder(): JsonMapper.Builder =
-    JsonMapper.builder()
+    JsonMapper
+        .builder()
         .addModules(
-            KotlinModule.Builder()
+            KotlinModule
+                .Builder()
                 .enable(KotlinFeature.SingletonSupport)
                 .build(),
             JavaTimeModule(),
             Jdk8Module(),
             ParameterNamesModule()
-        )
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        ).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 @Configuration
 class JacksonConfig {

@@ -16,7 +16,10 @@ import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
-data class OrderReportDocument(val description: String, val documentType: DocumentType)
+data class OrderReportDocument(
+    val description: String,
+    val documentType: DocumentType
+)
 
 data class Order(
     @PropagateNull val id: UUID,
@@ -92,21 +95,19 @@ private const val SELECT_ORDER_SQL =
 fun Handle.insertOrder(
     data: OrderInput,
     user: AuthenticatedUser
-): UUID {
-    return createUpdate(
+): UUID =
+    createUpdate(
         """
             INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents, assignee_id, assignee_contact_person, assignee_contact_email, assignee_company_name, return_date, contact_person, contact_phone, contact_email, ordering_unit) 
             VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments, :assigneeId, :assigneeContactPerson, :assigneeContactEmail, :assigneeCompanyName, :returnDate, :contactPerson, :contactPhone, :contactEmail, :orderingUnit)
             RETURNING id
             """
-    )
-        .bindKotlin(data)
+    ).bindKotlin(data)
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
         .executeAndReturnGeneratedKeys()
         .mapTo<UUID>()
         .one()
-}
 
 /**
  * Update order and reflect the updated name field to report data
@@ -115,8 +116,8 @@ fun Handle.putOrder(
     id: UUID,
     order: OrderInput,
     user: AuthenticatedUser
-): Order {
-    return createQuery(
+): Order =
+    createQuery(
         """
             WITH "order" AS (
                 UPDATE "order" 
@@ -137,15 +138,13 @@ fun Handle.putOrder(
             )
             $SELECT_ORDER_SQL
             """
-    )
-        .bindKotlin(order)
+    ).bindKotlin(order)
         .bind("id", id)
         .bind("updatedBy", user.id)
         .mapTo<Order>()
         .findOne()
         .getOrNull()
         ?: throw NotFound()
-}
 
 fun Handle.getOrder(id: UUID): Order =
     createQuery(
@@ -153,8 +152,7 @@ fun Handle.getOrder(id: UUID): Order =
             $SELECT_ORDER_SQL
             WHERE o.id = :id
             """
-    )
-        .bind("id", id)
+    ).bind("id", id)
         .mapTo<Order>()
         .findOne()
         .getOrNull()
@@ -165,8 +163,7 @@ fun Handle.getPlanNumbers(): List<String> =
         """
             SELECT DISTINCT (unnest(plan_number)) FROM "order"
             """
-    )
-        .mapTo<String>()
+    ).mapTo<String>()
         .sorted()
 
 fun Handle.getorderingUnits(): List<String> =
@@ -174,8 +171,7 @@ fun Handle.getorderingUnits(): List<String> =
         """
             SELECT DISTINCT (unnest(ordering_unit)) FROM "order"
             """
-    )
-        .mapTo<String>()
+    ).mapTo<String>()
         .sorted()
 
 fun Handle.deleteOrderAndReportData(
@@ -189,7 +185,6 @@ fun Handle.deleteOrderAndReportData(
             DELETE FROM report r WHERE r.order_id = :orderId AND r.id = :reportId;
             DELETE FROM "order" o WHERE o.id = :orderId;
             """
-    )
-        .bind("orderId", orderId)
+    ).bind("orderId", orderId)
         .bind("reportId", reportId)
         .execute()

@@ -32,7 +32,11 @@ data class Report(
     @Nested("o_") val order: Order?
 ) {
     companion object {
-        data class ReportInput(val name: String, val isPublic: Boolean?, val noObservations: List<DocumentType>?)
+        data class ReportInput(
+            val name: String,
+            val isPublic: Boolean?,
+            val noObservations: List<DocumentType>?
+        )
     }
 }
 
@@ -83,8 +87,8 @@ fun Handle.insertReport(
     data: Report.Companion.ReportInput,
     user: AuthenticatedUser,
     orderI: UUID? = null
-): Report {
-    return createQuery(
+): Report =
+    createQuery(
         """
             WITH report AS (
                 INSERT INTO report (name, created_by, updated_by, order_id, is_public) 
@@ -93,15 +97,13 @@ fun Handle.insertReport(
             ) 
             $SELECT_REPORT_SQL
             """
-    )
-        .bind("name", data.name)
+    ).bind("name", data.name)
         .bind("isPublic", data.isPublic)
         .bind("orderId", orderI)
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
         .mapTo<Report>()
         .one()
-}
 
 fun Handle.updateReportApproved(
     reportId: UUID,
@@ -109,8 +111,8 @@ fun Handle.updateReportApproved(
     observedSpecies: List<String>,
     user: AuthenticatedUser,
     reportCost: BigDecimal? = null
-): Report {
-    return createUpdate(
+): Report =
+    createUpdate(
         """
             UPDATE report 
               SET
@@ -120,8 +122,7 @@ fun Handle.updateReportApproved(
                 cost = :cost
             WHERE id = :reportId
             """
-    )
-        .bind("reportId", reportId)
+    ).bind("reportId", reportId)
         .bind("approved", approve)
         .bind("observedSpecies", observedSpecies.toTypedArray())
         .bind("updatedBy", user.id)
@@ -129,7 +130,6 @@ fun Handle.updateReportApproved(
         .executeAndReturnGeneratedKeys()
         .mapTo<Report>()
         .one()
-}
 
 fun Handle.putReport(
     id: UUID,
@@ -148,8 +148,7 @@ fun Handle.putReport(
             ) 
             $SELECT_REPORT_SQL
             """
-    )
-        .bind("name", report.name)
+    ).bind("name", report.name)
         .bind("isPublic", report.isPublic)
         .bind("noObservations", noObservations)
         .bind("id", id)
@@ -162,38 +161,34 @@ fun Handle.putReport(
 fun Handle.getReport(
     id: UUID,
     user: AuthenticatedUser
-): Report {
-    return createQuery(
+): Report =
+    createQuery(
         """ 
                 $SELECT_REPORT_SQL
                 JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
                 WHERE r.id = :id
             """
-    )
-        .bind("id", id)
+    ).bind("id", id)
         .bind("userId", user.id)
         .mapTo<Report>()
         .findOne()
         .getOrNull() ?: throw NotFound()
-}
 
 fun Handle.getReportByOrderId(
     orderId: UUID,
     user: AuthenticatedUser
-): Report {
-    return createQuery(
+): Report =
+    createQuery(
         """ 
                 $SELECT_REPORT_SQL
                 JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
                 WHERE o.id = :id
             """
-    )
-        .bind("id", orderId)
+    ).bind("id", orderId)
         .bind("userId", user.id)
         .mapTo<Report>()
         .findOne()
         .getOrNull() ?: throw NotFound()
-}
 
 fun Handle.getReports(
     user: AuthenticatedUser,
@@ -208,8 +203,7 @@ fun Handle.getReports(
                 $whereClause
                 ORDER BY r.created DESC
             """
-    )
-        .bind("userId", user.id)
+    ).bind("userId", user.id)
         .apply {
             if (startDate !== null) {
                 bind("startDate", startDate)
@@ -217,16 +211,15 @@ fun Handle.getReports(
             if (endDate !== null) {
                 bind("endDate", endDate)
             }
-        }
-        .mapTo<Report>()
+        }.mapTo<Report>()
         .list() ?: emptyList()
 }
 
 fun Handle.getAluerajausLuontoselvitysTilausParams(
     report: Report,
     reportLink: String
-): Map<String, Any?> {
-    return mapOf(
+): Map<String, Any?> =
+    mapOf(
         "name" to report.order?.name,
         "contactPerson" to report.order?.contactPerson,
         "unit" to report.order?.orderingUnit?.joinToString(","),
@@ -234,10 +227,9 @@ fun Handle.getAluerajausLuontoselvitysTilausParams(
         "reportLink" to reportLink,
         "reportStatus" to if (report.approved) "Hyväksytty" else "Lähetetty"
     )
-}
 
-fun Handle.getObservedSpecies(reportId: UUID): List<String> {
-    return createQuery(
+fun Handle.getObservedSpecies(reportId: UUID): List<String> =
+    createQuery(
         """
             SELECT suomenkielinen_nimi
             FROM muut_huomioitavat_lajit_alueet
@@ -251,19 +243,17 @@ fun Handle.getObservedSpecies(reportId: UUID): List<String> {
             FROM muut_huomioitavat_lajit_pisteet
             WHERE selvitys_id = :reportId
             """
-    )
-        .bind("reportId", reportId)
+    ).bind("reportId", reportId)
         .mapTo<String>()
         .toList()
-}
 
 data class PaikkaTietoEnum(
     val name: String,
     val value: String
 )
 
-fun Handle.getPaikkaTietoEnums(): List<PaikkaTietoEnum> {
-    return createQuery(
+fun Handle.getPaikkaTietoEnums(): List<PaikkaTietoEnum> =
+    createQuery(
         """
             SELECT
                 t.typname AS name,
@@ -275,10 +265,8 @@ fun Handle.getPaikkaTietoEnums(): List<PaikkaTietoEnum> {
             JOIN
                 pg_namespace n ON n.oid = t.typnamespace
             """
-    )
-        .mapTo<PaikkaTietoEnum>()
+    ).mapTo<PaikkaTietoEnum>()
         .toList()
-}
 
 fun Handle.getAluerajausLuontoselvitysParams(
     user: AuthenticatedUser,
@@ -307,8 +295,7 @@ fun Handle.getAluerajausLuontoselvitysParams(
                 } else {
                     "$it (havaittu)"
                 }
-            }
-            .plus(noObservations.map { "$it (ei havaittu)" })
+            }.plus(noObservations.map { "$it (ei havaittu)" })
             .sorted()
             .toTypedArray()
 
@@ -356,7 +343,9 @@ fun reportsToCsv(reports: List<Report>): String {
         val reportDocuments =
 
             sanitizeCsvCellData(
-                report.order?.reportDocuments?.map { rd -> rd.documentType }
+                report.order
+                    ?.reportDocuments
+                    ?.map { rd -> rd.documentType }
                     ?.joinToString(",") ?: ""
             )
 
@@ -364,21 +353,34 @@ fun reportsToCsv(reports: List<Report>): String {
 
         val noObservations = sanitizeCsvCellData(report.noObservations?.joinToString(",") ?: "")
 
-        csvContent.append(report.id).append(CSV_FIELD_SEPARATOR)
-            .append(sanitizeCsvCellData(report.name)).append(CSV_FIELD_SEPARATOR)
-            .append(report.approved).append(CSV_FIELD_SEPARATOR)
-            .append(planNumbers).append(CSV_FIELD_SEPARATOR)
-            .append(orderingUnits).append(CSV_FIELD_SEPARATOR)
-            .append(sanitizeCsvCellData(report.createdBy)).append(CSV_FIELD_SEPARATOR)
-            .append(report.created).append(CSV_FIELD_SEPARATOR)
-            .append(sanitizeCsvCellData(report.updatedBy)).append(CSV_FIELD_SEPARATOR)
-            .append(report.updated).append(CSV_FIELD_SEPARATOR)
+        csvContent
+            .append(report.id)
+            .append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.name))
+            .append(CSV_FIELD_SEPARATOR)
+            .append(report.approved)
+            .append(CSV_FIELD_SEPARATOR)
+            .append(planNumbers)
+            .append(CSV_FIELD_SEPARATOR)
+            .append(orderingUnits)
+            .append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.createdBy))
+            .append(CSV_FIELD_SEPARATOR)
+            .append(report.created)
+            .append(CSV_FIELD_SEPARATOR)
+            .append(sanitizeCsvCellData(report.updatedBy))
+            .append(CSV_FIELD_SEPARATOR)
+            .append(report.updated)
+            .append(CSV_FIELD_SEPARATOR)
             .append(
                 reportDocuments
             ).append(CSV_FIELD_SEPARATOR)
-            .append(observedSpecies).append(CSV_FIELD_SEPARATOR)
-            .append(noObservations).append(CSV_RECORD_SEPARATOR)
-            .append(report.cost).append(CSV_FIELD_SEPARATOR)
+            .append(observedSpecies)
+            .append(CSV_FIELD_SEPARATOR)
+            .append(noObservations)
+            .append(CSV_RECORD_SEPARATOR)
+            .append(report.cost)
+            .append(CSV_FIELD_SEPARATOR)
     }
 
     return csvContent.toString()

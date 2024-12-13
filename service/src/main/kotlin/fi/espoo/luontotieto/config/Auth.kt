@@ -19,7 +19,10 @@ import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import java.util.UUID
 
-data class AuthenticatedUser(val id: UUID, val role: UserRole) {
+data class AuthenticatedUser(
+    val id: UUID,
+    val role: UserRole
+) {
     fun isSystemUser() = id == UUID.fromString("00000000-0000-0000-0000-000000000000")
 
     fun isAdmin() = role == UserRole.ADMIN
@@ -31,7 +34,9 @@ data class AuthenticatedUser(val id: UUID, val role: UserRole) {
     }
 }
 
-class JwtToAuthenticatedUser(val jdbi: Jdbi) : HttpFilter() {
+class JwtToAuthenticatedUser(
+    val jdbi: Jdbi
+) : HttpFilter() {
     override fun doFilter(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -98,7 +103,9 @@ class HttpAccessControl : HttpFilter() {
         }
 }
 
-class JwtTokenDecoder(private val jwtVerifier: JWTVerifier) : HttpFilter() {
+class JwtTokenDecoder(
+    private val jwtVerifier: JWTVerifier
+) : HttpFilter() {
     private val logger = KotlinLogging.logger {}
 
     override fun doFilter(

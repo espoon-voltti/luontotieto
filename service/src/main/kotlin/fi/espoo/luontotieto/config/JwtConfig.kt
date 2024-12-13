@@ -26,7 +26,11 @@ import java.security.spec.RSAPublicKeySpec
 class JwtConfig {
     @Bean
     fun rsaJwtAlgorithm(env: AppEnv): Algorithm {
-        val publicKeys = env.jwt.publicKeysUrl.toURL().openStream().use { loadPublicKeys(it) }
+        val publicKeys =
+            env.jwt.publicKeysUrl
+                .toURL()
+                .openStream()
+                .use { loadPublicKeys(it) }
         return Algorithm.RSA256(JwtKeys(publicKeys))
     }
 
@@ -34,7 +38,9 @@ class JwtConfig {
     fun jwtVerifier(algorithm: Algorithm): JWTVerifier = JWT.require(algorithm).acceptLeeway(1).build()
 }
 
-class JwtKeys(private val publicKeys: Map<String, RSAPublicKey>) : RSAKeyProvider {
+class JwtKeys(
+    private val publicKeys: Map<String, RSAPublicKey>
+) : RSAKeyProvider {
     override fun getPrivateKeyId(): String? = null
 
     override fun getPrivateKey(): RSAPrivateKey? = null
@@ -44,15 +50,23 @@ class JwtKeys(private val publicKeys: Map<String, RSAPublicKey>) : RSAKeyProvide
 
 fun loadPublicKeys(inputStream: InputStream): Map<String, RSAPublicKey> {
     @JsonIgnoreProperties(ignoreUnknown = true)
-    class Jwk(val kid: String, val n: ByteArray, val e: ByteArray)
+    class Jwk(
+        val kid: String,
+        val n: ByteArray,
+        val e: ByteArray
+    )
 
-    class JwkSet(val keys: List<Jwk>)
+    class JwkSet(
+        val keys: List<Jwk>
+    )
 
     val kf = KeyFactory.getInstance("RSA")
     return jacksonMapperBuilder()
         .defaultBase64Variant(Base64Variants.MODIFIED_FOR_URL)
         .build()
-        .readValue<JwkSet>(inputStream).keys.associate {
+        .readValue<JwkSet>(inputStream)
+        .keys
+        .associate {
             it.kid to
                 kf.generatePublic(
                     RSAPublicKeySpec(

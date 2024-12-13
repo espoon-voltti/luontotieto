@@ -69,8 +69,7 @@ class UserController {
                 )
 
                 createdUser
-            }
-            .also { logger.audit(user, AuditEvent.CREATE_USER, mapOf("id" to "$it")) }
+            }.also { logger.audit(user, AuditEvent.CREATE_USER, mapOf("id" to "$it")) }
     }
 
     @GetMapping("/{id}")
@@ -99,12 +98,12 @@ class UserController {
                     if (user.role === UserRole.ADMIN) {
                         includeInactive || u.active
                     } else {
-                        (u.role === UserRole.CUSTOMER || u.id == user.id) && includeInactive ||
+                        (u.role === UserRole.CUSTOMER || u.id == user.id) &&
+                            includeInactive ||
                             u.active
                     }
                 }
-            }
-            .also { logger.audit(user, AuditEvent.GET_USERS) }
+            }.also { logger.audit(user, AuditEvent.GET_USERS) }
     }
 
     @PutMapping("/{id}")
@@ -114,31 +113,33 @@ class UserController {
         @RequestBody data: User.Companion.UserInput
     ): User {
         user.checkRoles(UserRole.ADMIN)
-        return jdbi.inTransactionUnchecked { tx ->
-            val currentUserData = tx.getUser(id)
-            val updatedEmailForCustomer = data.role == UserRole.CUSTOMER && currentUserData.email != data.email && data.email.isNotEmpty()
-            val updatedUser = tx.putUser(id, data, user)
+        return jdbi
+            .inTransactionUnchecked { tx ->
+                val currentUserData = tx.getUser(id)
+                val updatedEmailForCustomer =
+                    data.role == UserRole.CUSTOMER && currentUserData.email != data.email && data.email.isNotEmpty()
+                val updatedUser = tx.putUser(id, data, user)
 
-            if (updatedEmailForCustomer) {
-                // If email was updated for a customer user, reset password and send an email with the new password
-                val passwordAndHash = generatePasswordAndHash()
-                tx.putPassword(updatedUser.id, passwordAndHash.hash, user, false)
-                sesEmailClient.send(
-                    Email(
-                        data.email,
-                        Emails.getUserEmailUpdatedEmail(
-                            luontotietoHost.getCustomerUserLoginUrl(),
-                            HtmlSafe(data.email),
-                            passwordAndHash.password
+                if (updatedEmailForCustomer) {
+                    // If email was updated for a customer user, reset password and send an email with the new password
+                    val passwordAndHash = generatePasswordAndHash()
+                    tx.putPassword(updatedUser.id, passwordAndHash.hash, user, false)
+                    sesEmailClient.send(
+                        Email(
+                            data.email,
+                            Emails.getUserEmailUpdatedEmail(
+                                luontotietoHost.getCustomerUserLoginUrl(),
+                                HtmlSafe(data.email),
+                                passwordAndHash.password
+                            )
                         )
                     )
-                )
-            }
+                }
 
-            updatedUser
-        }.also {
-            logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id"))
-        }
+                updatedUser
+            }.also {
+                logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id"))
+            }
     }
 
     @PutMapping("/password")
@@ -183,8 +184,7 @@ class UserController {
                     )
                 )
                 result.id
-            }
-            .also {
+            }.also {
                 logger.audit(user, AuditEvent.UPDATE_USER_PASSWORD, mapOf("id" to "${user.id}"))
             }
     }
@@ -211,24 +211,25 @@ class UserController {
                     )
                 )
                 result.id
-            }
-            .also {
+            }.also {
                 logger.audit(user, AuditEvent.RESET_USER_PASSWORD, mapOf("id" to "${user.id}"))
             }
     }
 }
 
-private fun generatePassword(): String {
-    return buildString {
+private fun generatePassword(): String =
+    buildString {
         append(RandomStringUtils.randomAlphanumeric(6))
         append("-")
         append(RandomStringUtils.randomAlphanumeric(6))
         append("-")
         append(RandomStringUtils.randomAlphanumeric(6))
     }
-}
 
-data class PasswordAndHash(val password: String, val hash: String)
+data class PasswordAndHash(
+    val password: String,
+    val hash: String
+)
 
 private fun generatePasswordAndHash(): PasswordAndHash {
     val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()

@@ -454,8 +454,8 @@ fun Handle.deletePaikkatieto(
 fun Handle.updateAluerajausLuontoselvitystilaus(
     reportId: UUID,
     order: Order,
-): Int {
-    return createQuery(
+): Int =
+    createQuery(
         """
         WITH updated AS (
             UPDATE aluerajaus_luontoselvitystilaus
@@ -473,13 +473,12 @@ fun Handle.updateAluerajausLuontoselvitystilaus(
         .bind("unit", order.orderingUnit?.joinToString(","))
         .mapTo<Int>()
         .one()
-}
 
 fun Handle.updateAluerajausLuontoselvitystilausSelvitysTila(
     reportId: UUID,
     reportApproved: Boolean
-): Int {
-    return createQuery(
+): Int =
+    createQuery(
         """
             UPDATE aluerajaus_luontoselvitystilaus
                 SET selvitys_tila = :selvitys_tila
@@ -490,13 +489,11 @@ fun Handle.updateAluerajausLuontoselvitystilausSelvitysTila(
         .bind("selvitys_tila", if (reportApproved) "Hyväksytty" else "Lähetetty")
         .mapTo<Int>()
         .one()
-}
 
-fun Handle.deleteAluerajausLuontoselvitystilaus(reportId: UUID): Int {
-    return createUpdate("DELETE FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId")
+fun Handle.deleteAluerajausLuontoselvitystilaus(reportId: UUID): Int =
+    createUpdate("DELETE FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId")
         .bind("reportId", reportId)
         .execute()
-}
 
 private const val SQL_INSERT_ALUERAJAUS_LUONTOSELVITYSTILAUS =
     """
@@ -960,19 +957,17 @@ private const val SQL_INSERT_LAHTEET_PISTEET =
     RETURNING id
     """
 
-fun Handle.getEnumRange(column: Column): List<String>? {
-    return column.sqlType?.let { sqlType ->
+fun Handle.getEnumRange(column: Column): List<String>? =
+    column.sqlType?.let { sqlType ->
         createQuery("""SELECT unnest(enum_range(NULL::"$sqlType"))::text""")
             .mapTo(String::class)
             .list()
     }
-}
 
-private fun convertColumnsWithGeometry(map: Map<String, Any?>): Map<String, Any?> {
-    return map.mapValues { (_, value) ->
+private fun convertColumnsWithGeometry(map: Map<String, Any?>): Map<String, Any?> =
+    map.mapValues { (_, value) ->
         when (value) {
             is Geometry -> WKBWriter().write(value)
             else -> value
         }
     }
-}

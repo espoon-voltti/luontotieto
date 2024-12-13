@@ -40,7 +40,8 @@ data class EmailContent(
             EmailContent(
                 subject,
                 text =
-                    doc.body()
+                    doc
+                        .body()
                         .wholeText()
                         .lineSequence()
                         .joinToString(separator = "\n") { it.trim() }

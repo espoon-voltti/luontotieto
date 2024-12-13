@@ -170,8 +170,7 @@ class OrderTests : FullApplicationTest() {
             description = "Test Description",
             id = UUID.randomUUID().toString()
         )
-        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use {
-                inStream ->
+        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use { inStream ->
             assertEquals(
                 controller
                     .uploadOrderFile(
@@ -188,8 +187,7 @@ class OrderTests : FullApplicationTest() {
                             "Alustava aluerajaus tilaukselle.",
                         documentType = OrderDocumentType.ORDER_AREA,
                         id = UUID.randomUUID().toString()
-                    )
-                    .statusCode
+                    ).statusCode
                     .value(),
                 201
             )

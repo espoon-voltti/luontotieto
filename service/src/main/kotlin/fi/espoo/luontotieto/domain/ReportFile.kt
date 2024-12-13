@@ -26,7 +26,9 @@ object DocumentName {
     const val LAHTEET = "Lähteet"
 }
 
-enum class FileExtension(val extension: String) {
+enum class FileExtension(
+    val extension: String
+) {
     PDF("pdf"),
     GPKG("gpkg");
 
@@ -144,15 +146,14 @@ data class ReportFileInput(
 fun Handle.insertReportFile(
     data: ReportFileInput,
     user: AuthenticatedUser
-): UUID {
-    return createUpdate(
+): UUID =
+    createUpdate(
         """
             INSERT INTO report_file (id, report_id, description, media_type, file_name, document_type, created_by, updated_by) 
             VALUES (:id, :reportId, :description, :mediaType, :fileName, :documentType, :createdBy, :updatedBy)
             RETURNING id
             """
-    )
-        .bind("id", data.fileId)
+    ).bind("id", data.fileId)
         .bind("reportId", data.reportId)
         .bind("description", data.description)
         .bind("mediaType", data.mediaType)
@@ -163,7 +164,6 @@ fun Handle.insertReportFile(
         .executeAndReturnGeneratedKeys()
         .mapTo<UUID>()
         .one()
-}
 
 fun Handle.getReportFileById(
     reportId: UUID,
@@ -178,8 +178,7 @@ fun Handle.getReportFileById(
                 WHERE report_id = :reportId
                 AND id = :fileId
             """
-    )
-        .bind("reportId", reportId)
+    ).bind("reportId", reportId)
         .bind("fileId", fileId)
         .mapTo<ReportFile>()
         .findOne()
@@ -199,8 +198,7 @@ fun Handle.getReportDocumentForReport(reportId: UUID): ReportFile =
                 AND report_file.report_id = :reportId
                 AND report_file.document_type = 'luontotieto:report'
             """
-    )
-        .bind("reportId", reportId)
+    ).bind("reportId", reportId)
         .mapTo<ReportFile>()
         .findOne()
         .getOrNull() ?: throw NotFound()
@@ -214,8 +212,7 @@ fun Handle.getReportFiles(reportId: UUID): List<ReportFile> =
                 FROM report_file
                 WHERE report_id = :reportId
             """
-    )
-        .bind("reportId", reportId)
+    ).bind("reportId", reportId)
         .mapTo<ReportFile>()
         .list()
 
@@ -229,8 +226,7 @@ fun Handle.getPaikkaTietoReportFiles(reportId: UUID): List<ReportFile> =
                 WHERE report_id = :reportId
                 AND document_type::text ILIKE 'paikkatieto:%'
             """
-    )
-        .bind("reportId", reportId)
+    ).bind("reportId", reportId)
         .mapTo<ReportFile>()
         .list()
 

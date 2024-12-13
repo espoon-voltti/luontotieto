@@ -87,8 +87,8 @@ fun Handle.insertUser(
     data: User.Companion.CreateCustomerUser,
     user: AuthenticatedUser,
     passwordHash: String
-): User {
-    return createQuery(
+): User =
+    createQuery(
         """
             WITH users AS (
                 INSERT INTO users (email, name, role, password_hash, created_by, updated_by, password_updated) 
@@ -97,22 +97,20 @@ fun Handle.insertUser(
                 ) 
             $SELECT_USER_SQL
             """
-    )
-        .bindKotlin(data)
+    ).bindKotlin(data)
         .bind("role", UserRole.CUSTOMER)
         .bind("passwordHash", passwordHash)
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
         .mapTo<User>()
         .one()
-}
 
 fun Handle.putUser(
     id: UUID,
     data: User.Companion.UserInput,
     user: AuthenticatedUser
-): User {
-    return createQuery(
+): User =
+    createQuery(
         """
              WITH users AS (
                 UPDATE users 
@@ -123,14 +121,12 @@ fun Handle.putUser(
                ) 
              $SELECT_USER_SQL
             """
-    )
-        .bindKotlin(data)
+    ).bindKotlin(data)
         .bind("id", id)
         .bind("updatedBy", user.id)
         .mapTo<User>()
         .findOne()
         .getOrNull() ?: throw NotFound()
-}
 
 fun Handle.getUserPasswordHash(id: UUID) =
     createQuery(
@@ -139,38 +135,37 @@ fun Handle.getUserPasswordHash(id: UUID) =
         SELECT password_hash AS password
         FROM users 
         WHERE id = :id AND NOT system_user AND password_hash IS NOT NULL
-        """
-            .trimIndent()
-    )
-        .bind("id", id)
+        """.trimIndent()
+    ).bind("id", id)
         .mapTo<String>()
         .findOne()
         .getOrNull()
 
-data class UpdatePasswordResult(val id: UUID, val email: String)
+data class UpdatePasswordResult(
+    val id: UUID,
+    val email: String
+)
 
 fun Handle.putPassword(
     id: UUID,
     password: String,
     user: AuthenticatedUser,
     passwordUpdated: Boolean
-): UpdatePasswordResult {
-    return createQuery(
+): UpdatePasswordResult =
+    createQuery(
         """
                 UPDATE users 
                  SET password_hash = :password, updated_by = :updatedBy, password_updated = :passwordUpdated
                  WHERE id = :id
                  RETURNING id, email
             """
-    )
-        .bind("id", id)
+    ).bind("id", id)
         .bind("updatedBy", user.id)
         .bind("password", password)
         .bind("passwordUpdated", passwordUpdated)
         .mapTo<UpdatePasswordResult>()
         .findOne()
         .getOrNull() ?: throw NotFound()
-}
 
 fun Handle.getUser(id: UUID) =
     createQuery(
@@ -178,8 +173,7 @@ fun Handle.getUser(id: UUID) =
                 $SELECT_USER_SQL
                 WHERE u.id = :id AND NOT u.system_user
             """
-    )
-        .bind("id", id)
+    ).bind("id", id)
         .mapTo<User>()
         .findOne()
         .getOrNull() ?: throw NotFound()
@@ -190,8 +184,7 @@ fun Handle.getAuthUser(id: UUID) =
                 $SELECT_USER_SQL
                 WHERE u.id = :id
             """
-    )
-        .bind("id", id)
+    ).bind("id", id)
         .mapTo<User>()
         .findOne()
         .getOrNull() ?: throw NotFound()
@@ -203,6 +196,5 @@ fun Handle.getUsers() =
                 WHERE NOT u.system_user
                 ORDER BY u.name
             """
-    )
-        .mapTo<User>()
+    ).mapTo<User>()
         .list() ?: emptyList()

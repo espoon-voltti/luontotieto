@@ -62,31 +62,37 @@ ${Jsoup.clean(content.html, Safelist.basic())}
         logger.info { "Sending email" }
         try {
             val request =
-                SendEmailRequest.builder()
+                SendEmailRequest
+                    .builder()
                     .destination(Destination.builder().toAddresses(toAddress).build())
                     .sourceArn(arn)
                     .message(
-                        Message.builder()
+                        Message
+                            .builder()
                             .body(
-                                Body.builder()
-                                    .html(Content.builder().charset(charset).data(html).build())
-                                    .text(
-                                        Content.builder()
+                                Body
+                                    .builder()
+                                    .html(
+                                        Content
+                                            .builder()
+                                            .charset(charset)
+                                            .data(html)
+                                            .build()
+                                    ).text(
+                                        Content
+                                            .builder()
                                             .charset(charset)
                                             .data(content.text)
                                             .build()
-                                    )
-                                    .build()
-                            )
-                            .subject(
-                                Content.builder()
+                                    ).build()
+                            ).subject(
+                                Content
+                                    .builder()
                                     .charset(charset)
                                     .data(title)
                                     .build()
-                            )
-                            .build()
-                    )
-                    .source(fromAddress)
+                            ).build()
+                    ).source(fromAddress)
                     .build()
 
             client.sendEmail(request)
