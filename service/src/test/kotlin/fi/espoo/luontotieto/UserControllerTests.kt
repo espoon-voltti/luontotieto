@@ -128,7 +128,8 @@ class UserControllerTests : FullApplicationTest() {
         val currentPassword = "password.1A"
         val currentHash = encoder.encode(currentPassword)
         jdbi.inTransactionUnchecked {
-            it.createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
+            it
+                .createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
                 .bind("password", currentHash)
                 .bind("id", customerUser.id)
                 .execute()
@@ -156,7 +157,8 @@ class UserControllerTests : FullApplicationTest() {
         val currentPassword = "password.1A"
         val currentHash = encoder.encode(currentPassword)
         jdbi.inTransactionUnchecked {
-            it.createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
+            it
+                .createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
                 .bind("password", currentHash)
                 .bind("id", customerUser.id)
                 .execute()
@@ -179,7 +181,8 @@ class UserControllerTests : FullApplicationTest() {
         val currentPassword = "password.1A"
         val currentHash = encoder.encode(currentPassword)
         jdbi.inTransactionUnchecked {
-            it.createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
+            it
+                .createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
                 .bind("password", currentHash)
                 .bind("id", customerUser.id)
                 .execute()

@@ -25,9 +25,8 @@ class SpringMvcConfig : WebMvcConfigurer {
 }
 
 object AuthenticatedUserResolver : HandlerMethodArgumentResolver {
-    override fun supportsParameter(parameter: MethodParameter): Boolean {
-        return AuthenticatedUser::class.java.isAssignableFrom(parameter.parameterType)
-    }
+    override fun supportsParameter(parameter: MethodParameter): Boolean =
+        AuthenticatedUser::class.java.isAssignableFrom(parameter.parameterType)
 
     override fun resolveArgument(
         parameter: MethodParameter,

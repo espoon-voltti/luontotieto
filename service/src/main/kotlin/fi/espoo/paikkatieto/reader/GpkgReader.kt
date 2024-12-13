@@ -19,7 +19,9 @@ import kotlin.reflect.full.isSubclassOf
 
 private val logger = KotlinLogging.logger {}
 
-class GpkgReaderException(msg: String) : IOException(msg)
+class GpkgReaderException(
+    msg: String
+) : IOException(msg)
 
 enum class GpkgValidationErrorReason {
     IS_NULL,
@@ -34,7 +36,10 @@ data class GpkgValidationError(
     val reason: GpkgValidationErrorReason
 )
 
-data class GpkgFeature(val columns: Map<String, Any?>, val errors: List<GpkgValidationError>) {
+data class GpkgFeature(
+    val columns: Map<String, Any?>,
+    val errors: List<GpkgValidationError>
+) {
     fun isValid() = errors.isEmpty()
 }
 
@@ -42,8 +47,8 @@ class GpkgReader(
     private val file: File,
     val tableDefinition: TableDefinition,
     private val validEnums: List<PaikkaTietoEnum>
-) :
-    Iterator<GpkgFeature>, Closeable {
+) : Iterator<GpkgFeature>,
+    Closeable {
     private lateinit var gpkg: GeoPackage
     private var reader: SimpleFeatureReader
 
@@ -65,13 +70,9 @@ class GpkgReader(
         }
     }
 
-    fun isValid(): Boolean {
-        return this.asSequence().all { it.isValid() }
-    }
+    fun isValid(): Boolean = this.asSequence().all { it.isValid() }
 
-    override fun hasNext(): Boolean {
-        return reader.hasNext()
-    }
+    override fun hasNext(): Boolean = reader.hasNext()
 
     override fun next(): GpkgFeature {
         val gpkgFeature = reader.next()
@@ -110,15 +111,14 @@ class GpkgReader(
     private fun getAttribute(
         column: String,
         gpkgFeature: SimpleFeature
-    ): Any? {
-        return gpkgFeature.getAttribute(column)
+    ): Any? =
+        gpkgFeature.getAttribute(column)
             ?: gpkgFeature.getAttribute(column.uppercase())
             ?: gpkgFeature.getAttribute(
                 column.lowercase().replaceFirstChar {
                     if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
                 }
             )
-    }
 
     override fun close() {
         try {

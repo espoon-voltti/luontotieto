@@ -49,15 +49,14 @@ data class OrderFileInput(
 fun Handle.insertOrderFile(
     data: OrderFileInput,
     user: AuthenticatedUser
-): UUID {
-    return createUpdate(
+): UUID =
+    createUpdate(
         """
             INSERT INTO order_file (id,order_id, description, media_type, file_name, document_type, created_by, updated_by) 
             VALUES (:id, :orderId, :description, :mediaType, :fileName, :documentType, :createdBy, :updatedBy)
             RETURNING id
             """
-    )
-        .bind("id", data.fileId)
+    ).bind("id", data.fileId)
         .bind("orderId", data.orderId)
         .bind("description", data.description)
         .bind("mediaType", data.mediaType)
@@ -68,13 +67,12 @@ fun Handle.insertOrderFile(
         .executeAndReturnGeneratedKeys()
         .mapTo<UUID>()
         .one()
-}
 
 fun Handle.getOrderFiles(
     orderId: UUID,
     user: AuthenticatedUser
-): List<OrderFile> {
-    return createQuery(
+): List<OrderFile> =
+    createQuery(
         """
                 SELECT of.id, of.description, of.order_id AS "orderId", of.media_type AS "mediaType", 
                 of.file_name AS "fileName", of.document_type AS "documentType",
@@ -84,19 +82,17 @@ fun Handle.getOrderFiles(
                 JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
                 WHERE of.order_id = :orderId
             """
-    )
-        .bind("orderId", orderId)
+    ).bind("orderId", orderId)
         .bind("userId", user.id)
         .mapTo<OrderFile>()
         .list()
-}
 
 fun Handle.getOrderFileById(
     orderId: UUID,
     fileId: UUID,
     user: AuthenticatedUser
-): OrderFile {
-    return createQuery(
+): OrderFile =
+    createQuery(
         """
                 SELECT of.id, of.description, of.order_id AS "orderId", of.media_type AS "mediaType", 
                 of.file_name AS "fileName", of.document_type AS "documentType",
@@ -106,14 +102,12 @@ fun Handle.getOrderFileById(
                 JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
                 WHERE of.order_id = :orderId AND of.id = :fileId  
             """
-    )
-        .bind("orderId", orderId)
+    ).bind("orderId", orderId)
         .bind("fileId", fileId)
         .bind("userId", user.id)
         .mapTo<OrderFile>()
         .findOne()
         .getOrNull() ?: throw NotFound()
-}
 
 fun Handle.deleteOrderFile(
     orderId: UUID,

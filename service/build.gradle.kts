@@ -8,10 +8,10 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 plugins {
     id("org.springframework.boot") version "3.4.0"
     id("io.spring.dependency-management") version "1.1.5"
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.1.0"
     kotlin("plugin.spring") version "2.0.20"
     id("org.flywaydb.flyway") version "11.0.0"
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
 
     idea
 }
@@ -36,6 +36,10 @@ val e2eTestImplementation: Configuration by
 configurations["e2eTestRuntimeOnly"].extendsFrom(configurations.testRuntimeOnly.get())
 
 idea { module { testSources = testSources + sourceSets["e2eTest"].kotlin.sourceDirectories } }
+
+ktlint {
+    version.set("1.4.1")
+}
 
 dependencies {
     api(kotlin("stdlib"))
@@ -123,8 +127,7 @@ tasks.register("resolveDependencies") {
             .map {
                 val files = it.resolve()
                 it.name to files.size
-            }
-            .groupBy({ (_, count) -> count }) { (name, _) -> name }
+            }.groupBy({ (_, count) -> count }) { (name, _) -> name }
             .forEach { (count, names) ->
                 println(
                     "Resolved $count dependency files for configurations: ${names.joinToString(", ")}"

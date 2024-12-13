@@ -87,7 +87,9 @@ private fun configureJdbi(
     return jdbi
 }
 
-private class CustomObjectArgument(private val value: Any) : Argument {
+private class CustomObjectArgument(
+    private val value: Any
+) : Argument {
     override fun apply(
         position: Int,
         statement: PreparedStatement,

@@ -34,17 +34,18 @@ class AwsConfig {
         credentialsProvider: AwsCredentialsProvider
     ): S3Client {
         val attrs =
-            AttributeMap.builder()
+            AttributeMap
+                .builder()
                 .put(SdkHttpConfigurationOption.TRUST_ALL_CERTIFICATES, true)
                 .build()
         val client =
-            S3Client.builder()
+            S3Client
+                .builder()
                 .httpClient(DefaultSdkHttpClientBuilder().buildWithDefaults(attrs))
                 .region(Region.US_EAST_1)
                 .serviceConfiguration(
                     S3Configuration.builder().pathStyleAccessEnabled(true).build()
-                )
-                .endpointOverride(env.s3MockUrl)
+                ).endpointOverride(env.s3MockUrl)
                 .credentialsProvider(credentialsProvider)
                 .build()
 
@@ -62,12 +63,12 @@ class AwsConfig {
         env: BucketEnv,
         credentialsProvider: AwsCredentialsProvider
     ): S3Presigner =
-        S3Presigner.builder()
+        S3Presigner
+            .builder()
             .region(env.region)
             .serviceConfiguration(
                 S3Configuration.builder().pathStyleAccessEnabled(true).build()
-            )
-            .endpointOverride(env.s3MockUrl)
+            ).endpointOverride(env.s3MockUrl)
             .credentialsProvider(credentialsProvider)
             .build()
 
@@ -80,31 +81,32 @@ class AwsConfig {
     fun amazonS3Prod(
         env: BucketEnv,
         credentialsProvider: AwsCredentialsProvider
-    ): S3Client {
-        return S3Client.builder()
+    ): S3Client =
+        S3Client
+            .builder()
             .region(env.region)
             .credentialsProvider(credentialsProvider)
             .build()
-    }
 
     @Bean
     @Profile("production")
     fun amazonS3PresignerProd(
         env: BucketEnv,
         credentialsProvider: AwsCredentialsProvider
-    ): S3Presigner {
-        return S3Presigner.builder()
+    ): S3Presigner =
+        S3Presigner
+            .builder()
             .region(env.region)
             .credentialsProvider(credentialsProvider)
             .build()
-    }
 
     @Bean
     fun amazonSES(
         env: EmailEnv,
         awsCredentialsProvider: AwsCredentialsProvider?
     ): SesClient =
-        SesClient.builder()
+        SesClient
+            .builder()
             .credentialsProvider(awsCredentialsProvider)
             .region(env.region)
             .build()

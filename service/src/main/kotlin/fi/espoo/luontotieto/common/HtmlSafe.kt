@@ -13,6 +13,8 @@ import org.unbescape.html.HtmlEscape
  * `.toString()`, which returns an escaped HTML-safe string representation.
  */
 @JvmInline
-value class HtmlSafe<T>(private val data: T) {
+value class HtmlSafe<T>(
+    private val data: T
+) {
     override fun toString(): String = HtmlEscape.escapeHtml5(data.toString())
 }

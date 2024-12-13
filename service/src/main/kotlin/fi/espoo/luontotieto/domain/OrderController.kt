@@ -129,8 +129,7 @@ class OrderController {
                             orderId
                         )
                     OrderIdAndReport(orderId, report)
-                }
-                .also {
+                }.also {
                     logger.audit(user, AuditEvent.CREATE_ORDER, mapOf("id" to "${it.orderId}"))
                 }
 
@@ -160,8 +159,7 @@ class OrderController {
                     ptx.updateAluerajausLuontoselvitystilaus(updatedReport.id, createdOrder)
                 }
                 updatedReport
-            }
-            .also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
+            }.also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
     }
 
     @DeleteMapping("/{orderId}")
@@ -190,8 +188,7 @@ class OrderController {
                 paikkatietoJdbi.inTransactionUnchecked { ptx ->
                     ptx.deleteAluerajausLuontoselvitystilaus(report.id)
                 }
-            }
-            .also { logger.audit(user, AuditEvent.DELETE_ORDER, mapOf("id" to "$orderId")) }
+            }.also { logger.audit(user, AuditEvent.DELETE_ORDER, mapOf("id" to "$orderId")) }
     }
 
     @PostMapping("/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -236,7 +233,8 @@ class OrderController {
                     val data = reader.asSequence().toList()
                     if (data.isEmpty()) {
                         logger.error("No data in file: $fileName")
-                        return ResponseEntity.badRequest()
+                        return ResponseEntity
+                            .badRequest()
                             .body(
                                 listOf(
                                     GpkgValidationError(
@@ -306,7 +304,8 @@ class OrderController {
     fun getOrderFiles(
         user: AuthenticatedUser,
         @PathVariable orderId: UUID
-    ) = jdbi.inTransactionUnchecked { tx -> tx.getOrderFiles(orderId, user) }
+    ) = jdbi
+        .inTransactionUnchecked { tx -> tx.getOrderFiles(orderId, user) }
         .also { logger.audit(user, AuditEvent.GET_ORDER_FILES, mapOf("id" to "$orderId")) }
 
     @DeleteMapping("/{orderId}/files/{fileId}")
@@ -325,8 +324,7 @@ class OrderController {
                 paikkatietoJdbi.inTransactionUnchecked { ptx ->
                     ptx.deleteAluerajausLuontoselvitystilaus(report.id)
                 }
-            }
-            .also {
+            }.also {
                 logger.audit(
                     user,
                     AuditEvent.DELETE_ORDER_FILE,
@@ -344,7 +342,8 @@ class OrderController {
         val dataBucket = bucketEnv.data
 
         val orderFile =
-            jdbi.inTransactionUnchecked { tx -> tx.getOrderFileById(orderId, fileId, user) }
+            jdbi
+                .inTransactionUnchecked { tx -> tx.getOrderFileById(orderId, fileId, user) }
                 .also {
                     logger.audit(
                         user,
@@ -367,8 +366,8 @@ class OrderController {
     private fun canUpdateOrder(
         orderId: UUID,
         user: AuthenticatedUser
-    ): Report {
-        return jdbi.inTransactionUnchecked { tx ->
+    ): Report =
+        jdbi.inTransactionUnchecked { tx ->
             val report = tx.getReportByOrderId(orderId, user)
             if (report.approved) {
                 throw BadRequest(
@@ -378,7 +377,6 @@ class OrderController {
             }
             report
         }
-    }
 
     private fun sendReportCreatedEmail(
         report: Report,

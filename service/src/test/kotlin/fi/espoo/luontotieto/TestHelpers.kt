@@ -35,8 +35,8 @@ fun createOrderAndReport(
     contactPhone: String = "04012345678",
     orderingUnit: List<String> = listOf("Orava yksikkö", "Karhuryhmä"),
     assigneeCompanyName: String? = null
-): OrderController.CreateOrderResponse {
-    return controller.createOrderFromScratch(
+): OrderController.CreateOrderResponse =
+    controller.createOrderFromScratch(
         user = adminUser,
         body =
             OrderInput(
@@ -55,7 +55,6 @@ fun createOrderAndReport(
                 orderingUnit = orderingUnit
             )
     )
-}
 
 fun createLiitoOravaPisteetReportFile(
     controller: ReportController,

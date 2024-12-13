@@ -14,7 +14,11 @@ import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.pow
 
-data class AdUser(val externalId: String, val name: String, val email: String?)
+data class AdUser(
+    val externalId: String,
+    val name: String,
+    val email: String?
+)
 
 data class UserStatus(
     val delayUntil: LocalDateTime?,
@@ -46,8 +50,8 @@ data class AppUserWithPassword(
     val active: Boolean,
     val passwordUpdated: Boolean?
 ) {
-    fun toAppUser(): AppUser {
-        return AppUser(
+    fun toAppUser(): AppUser =
+        AppUser(
             id = this.id,
             externalId = this.externalId,
             name = this.name,
@@ -56,7 +60,6 @@ data class AppUserWithPassword(
             active = this.active,
             passwordUpdated = this.passwordUpdated
         )
-    }
 }
 
 fun Handle.upsertAppUserFromAd(
@@ -71,10 +74,8 @@ fun Handle.upsertAppUserFromAd(
         ON CONFLICT (external_id) DO UPDATE
         SET updated = now(), name = :name, updated_by = :updatedBy
         RETURNING id, external_id, name, email, role, active
-        """
-            .trimIndent()
-    )
-        .bindKotlin(adUser)
+        """.trimIndent()
+    ).bindKotlin(adUser)
         .bind("createdBy", user.id)
         .bind("updatedBy", user.id)
         .mapTo<AppUser>()
@@ -87,10 +88,8 @@ fun Handle.getAppUser(id: UUID) =
         SELECT id, external_id, name, email, role, active, password_updated as "passwordUpdated"
         FROM users 
         WHERE id = :id AND NOT system_user
-        """
-            .trimIndent()
-    )
-        .bind("id", id)
+        """.trimIndent()
+    ).bind("id", id)
         .mapTo<AppUser>()
         .findOne()
         .getOrNull()
@@ -103,10 +102,8 @@ fun Handle.getAppUserWithPassword(email: String) =
         active, password_updated as "passwordUpdated"
         FROM users 
         WHERE email = :email AND NOT system_user AND password_hash IS NOT NULL
-        """
-            .trimIndent()
-    )
-        .bind("email", email)
+        """.trimIndent()
+    ).bind("email", email)
         .mapTo<AppUserWithPassword>()
         .findOne()
         .getOrNull()
@@ -119,8 +116,7 @@ fun Handle.userIsLockedOrInDelayPeriod(email: String): String? {
                 FROM users 
                 WHERE email = :email
                 """
-        )
-            .bind("email", email)
+        ).bind("email", email)
             .mapTo<UserStatus>()
             .findOne()
             .getOrNull()
@@ -153,8 +149,7 @@ fun Handle.loginFailed(email: String) {
                 FROM users 
                 WHERE email = :email
                 """
-        )
-            .bind("email", email)
+        ).bind("email", email)
             .mapTo<UserFailedAttempts>()
             .one()
 
@@ -185,8 +180,7 @@ fun Handle.loginFailed(email: String) {
             END
         WHERE email = :email
     """
-    )
-        .bind("email", email)
+    ).bind("email", email)
         .bind("delayTime", delayTime)
         .execute()
 }
@@ -201,6 +195,5 @@ fun Handle.loginSuccess(email: String) =
             lockout_expiration = NULL
             WHERE email = :email
             """
-    )
-        .bind("email", email)
+    ).bind("email", email)
         .execute()

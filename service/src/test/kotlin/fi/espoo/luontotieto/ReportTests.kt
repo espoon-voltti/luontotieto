@@ -162,8 +162,7 @@ class ReportTests : FullApplicationTest() {
                             documentType =
                                 DocumentType.MUUT_HUOMIOITAVAT_LAJIT_ALUEET,
                             id = UUID.randomUUID().toString()
-                        )
-                        .statusCode
+                        ).statusCode
                         .value(),
                     201
                 )
@@ -188,8 +187,7 @@ class ReportTests : FullApplicationTest() {
                             documentType =
                                 DocumentType.MUUT_HUOMIOITAVAT_LAJIT_VIIVAT,
                             id = UUID.randomUUID().toString()
-                        )
-                        .statusCode
+                        ).statusCode
                         .value(),
                     201
                 )
@@ -214,15 +212,13 @@ class ReportTests : FullApplicationTest() {
                             documentType =
                                 DocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET,
                             id = UUID.randomUUID().toString()
-                        )
-                        .statusCode
+                        ).statusCode
                         .value(),
                     201
                 )
             }
 
-        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use {
-                inStream ->
+        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use { inStream ->
             assertEquals(
                 reportController
                     .uploadReportFile(
@@ -239,15 +235,13 @@ class ReportTests : FullApplicationTest() {
                             "Alueelta löytyi ilves, torakka, jänis ja perhonen.",
                         documentType = DocumentType.ALUERAJAUS_LUONTOSELVITYS,
                         id = UUID.randomUUID().toString()
-                    )
-                    .statusCode
+                    ).statusCode
                     .value(),
                 201
             )
         }
 
-        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use {
-                inStream ->
+        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use { inStream ->
             assertEquals(
                 orderController
                     .uploadOrderFile(
@@ -264,8 +258,7 @@ class ReportTests : FullApplicationTest() {
                             "Alustava aluerajaus tilaukselle.",
                         documentType = OrderDocumentType.ORDER_AREA,
                         id = UUID.randomUUID().toString()
-                    )
-                    .statusCode
+                    ).statusCode
                     .value(),
                 201
             )
@@ -286,8 +279,7 @@ class ReportTests : FullApplicationTest() {
                     description = null,
                     documentType = DocumentType.REPORT,
                     id = UUID.randomUUID().toString()
-                )
-                .statusCode
+                ).statusCode
                 .value(),
             201
         )
@@ -315,12 +307,12 @@ class ReportTests : FullApplicationTest() {
             )
 
             val data =
-                ptx.createQuery(
-                    """
-                    SELECT lisatieto, selvitetyt_tiedot AS "selvitetytTiedot", selvitys_raportti_linkki AS "selvitysRaporttiLinkki" FROM aluerajaus_luontoselvitys WHERE selvitys_id = :reportId
-                    """.trimIndent()
-                )
-                    .bind("reportId", createOrderResponse.reportId)
+                ptx
+                    .createQuery(
+                        """
+                        SELECT lisatieto, selvitetyt_tiedot AS "selvitetytTiedot", selvitys_raportti_linkki AS "selvitysRaporttiLinkki" FROM aluerajaus_luontoselvitys WHERE selvitys_id = :reportId
+                        """.trimIndent()
+                    ).bind("reportId", createOrderResponse.reportId)
                     .mapTo<AluerajausResult>()
                     .one()
 
@@ -335,24 +327,24 @@ class ReportTests : FullApplicationTest() {
             assertEquals("Ei julkinen", data.selvitysRaporttiLinkki)
 
             val viitteet =
-                ptx.createQuery(
-                    """
-                    SELECT viite FROM muut_huomioitavat_lajit_pisteet WHERE selvitys_id = :reportId
-                    """.trimIndent()
-                )
-                    .bind("reportId", createOrderResponse.reportId)
+                ptx
+                    .createQuery(
+                        """
+                        SELECT viite FROM muut_huomioitavat_lajit_pisteet WHERE selvitys_id = :reportId
+                        """.trimIndent()
+                    ).bind("reportId", createOrderResponse.reportId)
                     .mapTo<String>()
                     .toList()
 
             assertEquals(viitteet, listOf("over-written", "Test report"))
 
             val selvitysTilat =
-                ptx.createQuery(
-                    """
-                    SELECT selvitys_tila AS "selvitysTila" FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId
-                    """.trimIndent()
-                )
-                    .bind("reportId", createOrderResponse.reportId)
+                ptx
+                    .createQuery(
+                        """
+                        SELECT selvitys_tila AS "selvitysTila" FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId
+                        """.trimIndent()
+                    ).bind("reportId", createOrderResponse.reportId)
                     .mapTo<String>()
                     .toList()
 
@@ -366,34 +358,34 @@ class ReportTests : FullApplicationTest() {
 
         reportController.paikkatietoJdbi.inTransactionUnchecked { ptx ->
             val aluerajausRows =
-                ptx.createQuery(
-                    """
-                    SELECT selvitys_id FROM aluerajaus_luontoselvitys WHERE selvitys_id = :reportId
-                    """.trimIndent()
-                )
-                    .bind("reportId", createOrderResponse.reportId)
+                ptx
+                    .createQuery(
+                        """
+                        SELECT selvitys_id FROM aluerajaus_luontoselvitys WHERE selvitys_id = :reportId
+                        """.trimIndent()
+                    ).bind("reportId", createOrderResponse.reportId)
                     .mapTo<String>()
 
             assertEquals(aluerajausRows.count(), 0)
 
             val muutHuomioitavatLajitPisteet =
-                ptx.createQuery(
-                    """
-                    SELECT selvitys_id FROM muut_huomioitavat_lajit_pisteet WHERE selvitys_id = :reportId
-                    """.trimIndent()
-                )
-                    .bind("reportId", createOrderResponse.reportId)
+                ptx
+                    .createQuery(
+                        """
+                        SELECT selvitys_id FROM muut_huomioitavat_lajit_pisteet WHERE selvitys_id = :reportId
+                        """.trimIndent()
+                    ).bind("reportId", createOrderResponse.reportId)
                     .mapTo<String>()
 
             assertEquals(muutHuomioitavatLajitPisteet.count(), 0)
 
             val selvitysTilat =
-                ptx.createQuery(
-                    """
-                    SELECT selvitys_tila AS "selvitysTila" FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId
-                    """.trimIndent()
-                )
-                    .bind("reportId", createOrderResponse.reportId)
+                ptx
+                    .createQuery(
+                        """
+                        SELECT selvitys_tila AS "selvitysTila" FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId
+                        """.trimIndent()
+                    ).bind("reportId", createOrderResponse.reportId)
                     .mapTo<String>()
                     .toList()
 

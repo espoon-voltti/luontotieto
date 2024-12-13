@@ -31,7 +31,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-data class PasswordUser(val email: String, val password: String)
+data class PasswordUser(
+    val email: String,
+    val password: String
+)
 
 /**
  * Controller for "system" endpoints intended to be only called from api-gateway as the system
@@ -50,8 +53,8 @@ class SystemController {
     fun adLogin(
         user: AuthenticatedUser,
         @RequestBody adUser: AdUser
-    ): AppUser {
-        return jdbi
+    ): AppUser =
+        jdbi
             .inTransactionUnchecked {
                 val appUser = it.upsertAppUserFromAd(adUser, user)
                 if (!appUser.active) {
@@ -59,15 +62,13 @@ class SystemController {
                     throw Unauthorized()
                 }
                 appUser
-            }
-            .also { logger.audit(user, AuditEvent.USER_LOGIN) }
-    }
+            }.also { logger.audit(user, AuditEvent.USER_LOGIN) }
 
     @PostMapping("/password-login")
     fun passwordLogin(
         @RequestBody passwordUser: PasswordUser
-    ): AppUser {
-        return jdbi
+    ): AppUser =
+        jdbi
             .inTransactionUnchecked {
                 // First, check if the user is locked out
                 val userIsLockedOut = it.userIsLockedOrInDelayPeriod(email = passwordUser.email)
@@ -98,16 +99,12 @@ class SystemController {
                 }
                 it.loginSuccess(passwordUser.email)
                 user.toAppUser()
-            }
-            .also {
+            }.also {
                 logger.audit(AuthenticatedUser(it.id, UserRole.CUSTOMER), AuditEvent.PASSWORD_LOGIN)
             }
-    }
 
     @GetMapping("/users/{id}")
     fun getUser(
         @PathVariable id: UUID
-    ): AppUser? {
-        return jdbi.inTransactionUnchecked { it.getAppUser(id) }
-    }
+    ): AppUser? = jdbi.inTransactionUnchecked { it.getAppUser(id) }
 }

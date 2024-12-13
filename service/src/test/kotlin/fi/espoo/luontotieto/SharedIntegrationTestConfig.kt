@@ -23,21 +23,21 @@ class SharedIntegrationTestConfig {
     @Bean
     fun s3Client(env: BucketEnv): S3Client {
         val attrs =
-            AttributeMap.builder()
+            AttributeMap
+                .builder()
                 .put(SdkHttpConfigurationOption.TRUST_ALL_CERTIFICATES, true)
                 .build()
         val client =
-            S3Client.builder()
+            S3Client
+                .builder()
                 .httpClient(DefaultSdkHttpClientBuilder().buildWithDefaults(attrs))
                 .region(Region.US_EAST_1)
                 .serviceConfiguration(
                     S3Configuration.builder().pathStyleAccessEnabled(true).build()
-                )
-                .endpointOverride(env.s3MockUrl)
+                ).endpointOverride(env.s3MockUrl)
                 .credentialsProvider(
                     StaticCredentialsProvider.create(AwsBasicCredentials.create("foo", "bar"))
-                )
-                .build()
+                ).build()
 
         val existingBuckets = client.listBuckets().buckets().map { it.name()!! }
         for (bucket in env.allBuckets().filterNot { existingBuckets.contains(it) }) {
@@ -49,12 +49,12 @@ class SharedIntegrationTestConfig {
 
     @Bean
     fun s3Presigner(env: BucketEnv): S3Presigner =
-        S3Presigner.builder()
+        S3Presigner
+            .builder()
             .region(Region.US_EAST_1)
             .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
             .endpointOverride(env.s3MockUrl)
             .credentialsProvider(
                 StaticCredentialsProvider.create(AwsBasicCredentials.create("foo", "bar"))
-            )
-            .build()
+            ).build()
 }

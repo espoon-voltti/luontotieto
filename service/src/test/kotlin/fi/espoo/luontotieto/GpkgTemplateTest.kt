@@ -31,7 +31,10 @@ class GpkgTemplateTest : FullApplicationTest() {
                 response.headers.contentType
             )
             assertTrue(response.headers.contentDisposition.isAttachment)
-            assertTrue(response.headers.contentDisposition.filename?.endsWith(".gpkg") == true)
+            assertTrue(
+                response.headers.contentDisposition.filename
+                    ?.endsWith(".gpkg") == true
+            )
         }
     }
 }
