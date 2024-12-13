@@ -265,7 +265,8 @@ class ReportController {
         uploadReportDocumentTypes.addAll(orderDefinedReportDocumentTypes ?: emptyList())
 
         val readers =
-            reportFiles.filter { rf -> uploadReportDocumentTypes.contains(rf.documentType) }
+            reportFiles
+                .filter { rf -> uploadReportDocumentTypes.contains(rf.documentType) }
                 .mapNotNull { rf ->
                     getPaikkatietoReader(dataBucket, "$reportId/${rf.id}", rf, paikkatietoEnums)
                 }
