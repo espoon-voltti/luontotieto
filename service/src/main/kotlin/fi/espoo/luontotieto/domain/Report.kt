@@ -326,6 +326,7 @@ fun reportsToCsv(reports: List<Report>): String {
             "tilaajayksikkö",
             "tilaaja",
             "tilauksen luontipvm",
+            "selvittäjä",
             "viimeisin muokkaaja",
             "viimeisin muokkauspvm",
             "selvitetyt tiedot",
@@ -367,6 +368,8 @@ fun reportsToCsv(reports: List<Report>): String {
             .append(sanitizeCsvCellData(report.createdBy))
             .append(CSV_FIELD_SEPARATOR)
             .append(report.created)
+            .append(CSV_FIELD_SEPARATOR)
+            .append((report.order?.assigneeCompanyName ?: report.order?.assignee))
             .append(CSV_FIELD_SEPARATOR)
             .append(sanitizeCsvCellData(report.updatedBy))
             .append(CSV_FIELD_SEPARATOR)
