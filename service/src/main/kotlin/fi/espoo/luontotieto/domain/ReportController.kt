@@ -277,6 +277,7 @@ class ReportController {
          * because the observed species value is deferred from the muut_huomioitavat_lajit tables
          * that need to be inserted first.
          */
+
         val sortedReaders = readers.sortedBy { it.tableDefinition.layerName.contains("aluerajaus") }
 
         paikkatietoJdbi.inTransactionUnchecked { ptx ->
