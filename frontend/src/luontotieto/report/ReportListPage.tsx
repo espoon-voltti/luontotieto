@@ -268,13 +268,13 @@ const filterReports = (
   const searchQueryToLower = searchQuery ? searchQuery.toLowerCase() : null
   const assigneeLower = assignee ? assignee.toLowerCase() : null
   return reports.filter((report) => {
+    const reportMainAssignee =
+      report.order.assigneeCompanyName?.toLowerCase() ??
+      report.order.assignee.toLowerCase()
     if (searchQueryToLower) {
       return (
         (report.name.toLowerCase().includes(searchQueryToLower) ||
-          report.order.assignee.toLowerCase().includes(searchQueryToLower) ||
-          report.order.assigneeCompanyName
-            ?.toLowerCase()
-            .includes(searchQueryToLower) ||
+          reportMainAssignee.includes(searchQueryToLower) ||
           report.order.planNumber
             ?.toString()
             .toLowerCase()
@@ -282,16 +282,13 @@ const filterReports = (
           report.reportDocumentsString
             ?.toLowerCase()
             .includes(searchQueryToLower)) &&
-        (assigneeLower
-          ? report.order.assignee.toLowerCase().includes(assigneeLower)
-          : true)
+        (assigneeLower ? reportMainAssignee.includes(assigneeLower) : true)
       )
     } else if (assigneeLower) {
       return (
-        (report.order &&
-          assigneeLower &&
-          report.order.assignee.toLowerCase().includes(assigneeLower)) ||
-        report.order.assigneeCompanyName?.toLowerCase().includes(assigneeLower)
+        report.order &&
+        assigneeLower &&
+        reportMainAssignee.includes(assigneeLower)
       )
     }
     return true
