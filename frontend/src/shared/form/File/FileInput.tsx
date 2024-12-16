@@ -9,7 +9,7 @@ import {
 } from 'api/report-api'
 import classNames from 'classnames'
 import React, { useEffect, useRef, useState } from 'react'
-import { InputField, InputFieldUnderRow } from 'shared/form/InputField'
+import { InputFieldUnderRow } from 'shared/form/InputField'
 import { useDebouncedState } from 'shared/useDebouncedState'
 
 import {
@@ -21,10 +21,10 @@ import {
 import { Label } from '../../typography'
 import { Checkbox } from '../Checkbox'
 import { UnderRowStatusIcon } from '../StatusIcon'
+import { TextArea } from '../TextArea'
 
 import { FileInputField } from './FileInputField'
 import { FileTitle } from './FileTitle'
-import { TextArea } from '../TextArea'
 
 export interface FileInputData {
   description: string
