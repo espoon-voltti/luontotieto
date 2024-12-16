@@ -8,6 +8,7 @@ import fi.espoo.luontotieto.common.EmailContent
 import fi.espoo.luontotieto.config.EmailEnv
 import mu.KotlinLogging
 import org.jsoup.Jsoup
+import org.jsoup.parser.Parser
 import org.jsoup.safety.Safelist
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.services.ses.SesClient
@@ -42,7 +43,7 @@ class SESEmailClient(
         }
         val fromAddress = env.senderAddress
         val arn = env.senderArn
-        val title = email.content.title
+        val sanitezTitle = Jsoup.clean(email.content.title, Safelist.basic())
         val content = email.content
         val toAddress = email.toAddress
 
@@ -51,7 +52,7 @@ class SESEmailClient(
 <!DOCTYPE html>
 <html>
 <head>
-<title>${Jsoup.clean(title, Safelist.basic())}</title>
+<title>$sanitezTitle</title>
 </head>
 <body>
 ${Jsoup.clean(content.html, Safelist.basic())}
@@ -89,7 +90,7 @@ ${Jsoup.clean(content.html, Safelist.basic())}
                                 Content
                                     .builder()
                                     .charset(charset)
-                                    .data(title)
+                                    .data(Parser.unescapeEntities(sanitezTitle, false))
                                     .build()
                             ).build()
                     ).source(fromAddress)
