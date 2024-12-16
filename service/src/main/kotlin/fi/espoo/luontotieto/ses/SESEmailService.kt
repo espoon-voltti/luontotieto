@@ -43,7 +43,7 @@ class SESEmailClient(
         }
         val fromAddress = env.senderAddress
         val arn = env.senderArn
-        val sanitezTitle = Jsoup.clean(email.content.title, Safelist.basic())
+        val sanitizedTitle = Jsoup.clean(email.content.title, Safelist.basic())
         val content = email.content
         val toAddress = email.toAddress
 
@@ -52,7 +52,7 @@ class SESEmailClient(
 <!DOCTYPE html>
 <html>
 <head>
-<title>$sanitezTitle</title>
+<title>$sanitizedTitle</title>
 </head>
 <body>
 ${Jsoup.clean(content.html, Safelist.basic())}
@@ -90,7 +90,7 @@ ${Jsoup.clean(content.html, Safelist.basic())}
                                 Content
                                     .builder()
                                     .charset(charset)
-                                    .data(Parser.unescapeEntities(sanitezTitle, false))
+                                    .data(Parser.unescapeEntities(sanitizedTitle, false))
                                     .build()
                             ).build()
                     ).source(fromAddress)
