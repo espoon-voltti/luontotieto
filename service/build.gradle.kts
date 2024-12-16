@@ -77,7 +77,7 @@ dependencies {
     implementation("software.amazon.awssdk:s3:2.29.20")
     implementation("software.amazon.awssdk:ses:2.29.24")
 
-    implementation("org.apache.tika:tika-core:2.9.2")
+    implementation("org.apache.tika:tika-core:3.0.0")
 
     implementation("com.auth0:java-jwt:4.4.0")
 
