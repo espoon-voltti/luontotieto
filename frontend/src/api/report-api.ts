@@ -163,7 +163,7 @@ export interface ReportFileDetails extends ReportFileInput {
 
 export const apiPutReport = async (
   reportInput: { reportId: string } & ReportFormInput & {
-      sendUpdatedEmail?: false
+      sendUpdatedEmail: boolean
     }
 ): Promise<
   | ReportDetails
@@ -175,10 +175,7 @@ export const apiPutReport = async (
 
   const report = await apiClient
     .put<ReportDetails>(`/reports/${reportInput.reportId}`, body, {
-      params:
-        reportInput.sendUpdatedEmail !== undefined
-          ? { sendUpdatedEmail: reportInput.sendUpdatedEmail }
-          : {}
+      params: { sendUpdatedEmail: reportInput.sendUpdatedEmail }
     })
     .then((r) => r.data)
 

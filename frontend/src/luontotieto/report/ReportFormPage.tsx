@@ -92,7 +92,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
             queryKey: ['reportFiles', id]
           })
           closeModal()
-          navigate(`/luontotieto`)
+          void navigate(`/luontotieto`)
         },
         label: 'Ok'
       }
@@ -179,8 +179,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
       resolve: {
         action: () => {
           closeModal()
-
-          navigate(0)
+          void navigate(0)
         },
         label: 'Ok'
       }
@@ -194,7 +193,11 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
 
   const onSaveReport = (reportInput: ReportFormInput) => {
     setApproveError(null)
-    return updateReportMutation({ ...reportInput, reportId: id })
+    return updateReportMutation({
+      ...reportInput,
+      reportId: id,
+      sendUpdatedEmail: reportInput.valid
+    })
   }
 
   const onApproveReport = async (reportInput: ReportFormInput) => {
