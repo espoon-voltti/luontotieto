@@ -59,7 +59,7 @@ dependencies {
     implementation("org.geotools:gt-epsg-hsql:32.1")
 
     implementation("com.zaxxer:HikariCP:6.2.1")
-    implementation("org.flywaydb:flyway-core:11.0.0")
+    implementation("org.flywaydb:flyway-core:11.1.0")
     implementation("org.flywaydb:flyway-database-postgresql:10.17.0")
     implementation("org.postgresql:postgresql:42.7.3")
     api(platform("org.jdbi:jdbi3-bom:3.45.0"))
