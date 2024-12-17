@@ -30,7 +30,6 @@ ENV NGINX_ENV=local \
 RUN apt-get update \
     && apt-get -y dist-upgrade \
     && apt-get -y --no-install-recommends install ruby \
-    && apt-get remove --auto-remove -y nginx-module-image-filter \
     && curl -sSfL https://github.com/espoon-voltti/s3-downloader/releases/download/v1.4.1/s3downloader-linux-amd64 \
     -o /bin/s3download \
     && chmod +x /bin/s3download \
