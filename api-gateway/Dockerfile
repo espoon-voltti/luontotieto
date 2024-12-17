@@ -31,7 +31,8 @@ RUN apt-get update \
       && apt-get -y install curl \
       && curl -sSfL https://github.com/espoon-voltti/s3-downloader/releases/download/v1.4.1/s3downloader-linux-amd64 \
       -o /bin/s3download \
-      && chmod +x /bin/s3download
+      && chmod +x /bin/s3download \
+      && apt-get remove --auto-remove -y curl 
 
 ARG build=none
 ARG commit=none
