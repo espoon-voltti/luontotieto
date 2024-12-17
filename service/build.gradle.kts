@@ -56,7 +56,7 @@ dependencies {
     implementation("org.springframework.ws:spring-ws-security")
 
     implementation("org.geotools:gt-geopkg:32.1")
-    implementation("org.geotools:gt-epsg-hsql:32.0")
+    implementation("org.geotools:gt-epsg-hsql:32.1")
 
     implementation("com.zaxxer:HikariCP:6.2.1")
     implementation("org.flywaydb:flyway-core:11.0.0")
