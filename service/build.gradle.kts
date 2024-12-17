@@ -10,7 +10,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.5"
     kotlin("jvm") version "2.1.0"
     kotlin("plugin.spring") version "2.0.20"
-    id("org.flywaydb.flyway") version "11.0.0"
+    id("org.flywaydb.flyway") version "11.1.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
 
     idea
@@ -56,7 +56,7 @@ dependencies {
     implementation("org.springframework.ws:spring-ws-security")
 
     implementation("org.geotools:gt-geopkg:32.1")
-    implementation("org.geotools:gt-epsg-hsql:32.0")
+    implementation("org.geotools:gt-epsg-hsql:32.1")
 
     implementation("com.zaxxer:HikariCP:6.2.1")
     implementation("org.flywaydb:flyway-core:11.0.0")
