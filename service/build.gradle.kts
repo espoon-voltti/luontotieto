@@ -53,7 +53,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    implementation("org.springframework.ws:spring-ws-security")
+    implementation("org.springframework.ws:spring-ws-security") {
+        exclude("org.opensaml")
+    }
 
     implementation("org.geotools:gt-geopkg:32.1")
     implementation("org.geotools:gt-epsg-hsql:32.1")
