@@ -66,7 +66,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core:11.1.0")
     implementation("org.flywaydb:flyway-database-postgresql:10.17.0")
     implementation("org.postgresql:postgresql:42.7.3")
-    api(platform("org.jdbi:jdbi3-bom:3.45.0"))
+    api(platform("org.jdbi:jdbi3-bom:3.47.0"))
     implementation("org.jdbi:jdbi3-core")
     implementation("org.jdbi:jdbi3-jackson2")
     implementation("org.jdbi:jdbi3-kotlin")
