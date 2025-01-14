@@ -90,7 +90,7 @@ limit_req_zone $binary_remote_addr zone=req_zone_wl:1m rate=100r/s;
 
 # Explicitly define limit request for specific endpoints
 # Limits requests to 2 requests per second.
-limit_req_zone $binary_remote_addr zone=limit_zone:1m rate=2r/s;
+limit_req_zone $binary_remote_addr zone=limit_zone:1m rate=4r/s;
 
 # Explicitly define limit request endpoint that makes
 # geoserver reload its configuration

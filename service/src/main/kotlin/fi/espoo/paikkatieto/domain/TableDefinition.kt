@@ -480,10 +480,13 @@ fun Handle.updateAluerajausLuontoselvitystilausSelvitysTila(
 ): Int =
     createQuery(
         """
+        WITH updated AS (
             UPDATE aluerajaus_luontoselvitystilaus
                 SET selvitys_tila = :selvitys_tila
             WHERE selvitys_id = :reportId
             RETURNING *
+        )
+        SELECT COUNT(*) FROM updated;
             """
     ).bind("reportId", reportId)
         .bind("selvitys_tila", if (reportApproved) "Hyväksytty" else "Lähetetty")

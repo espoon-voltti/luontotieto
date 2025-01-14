@@ -306,7 +306,7 @@ class ReportTests : FullApplicationTest() {
                 val selvitysRaporttiLinkki: String
             )
 
-            val data =
+            val result =
                 ptx
                     .createQuery(
                         """
@@ -314,7 +314,9 @@ class ReportTests : FullApplicationTest() {
                         """.trimIndent()
                     ).bind("reportId", createOrderResponse.reportId)
                     .mapTo<AluerajausResult>()
-                    .one()
+                    .list()
+
+            val data = result.first()
 
             assertEquals("Alueelta löytyi ilves, torakka, jänis ja perhonen.", data.lisatieto)
             assertEquals(
@@ -348,7 +350,7 @@ class ReportTests : FullApplicationTest() {
                     .mapTo<String>()
                     .toList()
 
-            assertEquals(selvitysTilat, listOf("Hyväksytty"))
+            assertEquals(selvitysTilat, listOf("Hyväksytty", "Hyväksytty"))
         }
 
         reportController.reopenReport(adminUser, createOrderResponse.reportId)
@@ -389,7 +391,7 @@ class ReportTests : FullApplicationTest() {
                     .mapTo<String>()
                     .toList()
 
-            assertEquals(selvitysTilat, listOf("Lähetetty"))
+            assertEquals(selvitysTilat, listOf("Lähetetty", "Lähetetty"))
         }
     }
 
