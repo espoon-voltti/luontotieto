@@ -46,6 +46,8 @@ export const ReportListPage = React.memo(function ReportList() {
 
   const { data: reports, isLoading } = useGetReportsQuery()
 
+  const [isLoadingReportCsv, setIsLoadingReportCsv] = useState(false)
+
   const [sortBy, setSortBy] = useState<ReportSortColumn | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>('ASC')
   const [filterByReportAssignee, setFilterByReportAssignee] = useState<
@@ -251,7 +253,13 @@ export const ReportListPage = React.memo(function ReportList() {
             <InlineButton
               icon={faDownload}
               text="Lataa raportti"
-              onClick={async () => await apiGetReportsAsCsv(dateRange)}
+              disabled={isLoadingReportCsv}
+              onClick={async () => {
+                setIsLoadingReportCsv(true)
+                await apiGetReportsAsCsv(dateRange).finally(() =>
+                  setIsLoadingReportCsv(false)
+                )
+              }}
             />
           </>
         </InfoModal>
