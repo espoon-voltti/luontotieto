@@ -12,6 +12,7 @@ plugins {
     kotlin("plugin.spring") version "2.0.20"
     id("org.flywaydb.flyway") version "11.1.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
+    id("org.owasp.dependencycheck") version "12.0.1"
 
     idea
 }
@@ -150,5 +151,17 @@ tasks {
         classpath = sourceSets["e2eTest"].runtimeClasspath
         shouldRunAfter("test")
         outputs.upToDateWhen { false }
+    }
+
+    dependencyCheck {
+        failBuildOnCVSS = 0.0f
+        analyzers.apply {
+            assemblyEnabled = false
+            nodeAuditEnabled = false
+            nodeEnabled = false
+            nuspecEnabled = false
+        }
+        nvd.apply { apiKey = System.getenv("NVD_API_KEY") }
+        suppressionFile = "$projectDir/owasp-suppressions.xml"
     }
 }
