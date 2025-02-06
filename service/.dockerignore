@@ -9,3 +9,4 @@
 !gradle*
 !src
 !.editorconfig
+!owasp-suppressions.xml
