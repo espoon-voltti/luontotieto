@@ -4,11 +4,14 @@
 
 name: Build
 on:
-  - push
+  push:
+  schedule:
+    - cron: "30 1 * * 1" # At 01:30 on Monday
 
 env:
   AWS_REGION: eu-north-1
   ECR_REGISTRY: 767398123997.dkr.ecr.eu-north-1.amazonaws.com
+  DOCKER_PULL: "${{ github.ref == 'refs/heads/master' && 'true' || 'false' }}"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -32,8 +35,19 @@ jobs:
       - name: Reuse Compliance Check
         uses: fsfe/reuse-action@v5
 
+  cache-bust:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Cache bust"
+        id: cache-bust
+        run: echo "cache-bust=$(date '+%Y-W%V')" >> "$GITHUB_OUTPUT"
+    outputs:
+      cache-bust: ${{ steps.cache-bust.outputs.cache-bust }}
+
   dockerize:
     runs-on: ubuntu-latest
+    needs:
+      - cache-bust
     strategy:
       fail-fast: false
       matrix:
@@ -55,6 +69,7 @@ jobs:
         id: build
         with:
           path: ${{ matrix.path }}
+          pull: ${{ env.DOCKER_PULL }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE }}
@@ -62,11 +77,14 @@ jobs:
           registry: ${{ env.ECR_REGISTRY }}
           name: ${{ matrix.name }}
           build-args: |
+            CACHE_BUST=${{ needs.cache-bust.outputs.cache-bust }}
             build=${{ github.run_number }}
             commit=${{ github.sha }}
 
   service-builder:
     runs-on: ubuntu-latest
+    needs:
+      - cache-bust
     env:
       name: luontotieto/service
       path: service
@@ -80,6 +98,7 @@ jobs:
         id: builder
         with:
           path: ${{ env.path }}
+          pull: ${{ env.DOCKER_PULL }}
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE }}
@@ -87,6 +106,7 @@ jobs:
           registry: ${{ env.ECR_REGISTRY }}
           name: ${{ env.name }}-${{ env.builder }}
           build-args: |
+            CACHE_BUST=${{ needs.cache-bust.outputs.cache-bust }}
             build=${{ github.run_number }}
             commit=${{ github.sha }}
           target: ${{ env.builder }}

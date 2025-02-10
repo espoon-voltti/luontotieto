@@ -5,6 +5,8 @@
 
 FROM docker.osgeo.org/geoserver:2.25.x
 
+ARG CACHE_BUST=none
+
 COPY ./data_dir /opt/geoserver_data/
 
 EXPOSE 8080
