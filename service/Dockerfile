@@ -4,6 +4,8 @@
 
 FROM eclipse-temurin:21-jammy AS base
 
+ARG CACHE_BUST=none
+
 LABEL maintainer="https://github.com/espoon-voltti/luontotieto"
 
 ENV LC_ALL C.UTF-8
