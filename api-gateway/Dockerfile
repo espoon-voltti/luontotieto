@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-FROM node:22.9-bookworm-slim AS base
+FROM node:23.9-bookworm-slim AS base
 
 ARG CACHE_BUST=none
 
