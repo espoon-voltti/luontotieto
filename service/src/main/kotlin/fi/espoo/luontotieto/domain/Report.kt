@@ -73,7 +73,8 @@ private const val SELECT_REPORT_SQL =
            o.contact_email                            AS "o_contactEmail",
            o.ordering_unit                            AS "o_orderingUnit",
            r.approved                                 AS "o_hasApprovedReport",
-           r.cost                                     AS "cost"
+           r.cost                                     AS "cost",
+           o.year                                     AS "o_year"
     FROM report r
              LEFT JOIN users uc ON r.created_by = uc.id
              LEFT JOIN users uu ON r.updated_by = uu.id
@@ -225,7 +226,8 @@ fun Handle.getAluerajausLuontoselvitysTilausParams(
         "unit" to report.order?.orderingUnit?.joinToString(","),
         "reportId" to report.id,
         "reportLink" to reportLink,
-        "reportStatus" to if (report.approved) "Hyväksytty" else "Lähetetty"
+        "reportStatus" to if (report.approved) "Hyväksytty" else "Lähetetty",
+        "year" to report.order?.year
     )
 
 fun Handle.getObservedSpecies(reportId: UUID): List<String> =
@@ -326,6 +328,7 @@ fun reportsToCsv(reports: List<Report>): String {
             "tilaajayksikkö",
             "tilaaja",
             "tilauksen luontipvm",
+            "tilausvuosi",
             "selvittäjä",
             "viimeisin muokkaaja",
             "viimeisin muokkauspvm",
@@ -370,6 +373,8 @@ fun reportsToCsv(reports: List<Report>): String {
             .append(sanitizeCsvCellData(report.createdBy))
             .append(CSV_FIELD_SEPARATOR)
             .append(report.created)
+            .append(CSV_FIELD_SEPARATOR)
+            .append(report.order?.year)
             .append(CSV_FIELD_SEPARATOR)
             .append(assigneeOrCompany)
             .append(CSV_FIELD_SEPARATOR)

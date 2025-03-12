@@ -45,6 +45,7 @@ class ReportTests : FullApplicationTest() {
         assertEquals("Test report", reportResponse.name)
         assertEquals("Teija Testaaja", reportResponse.createdBy)
         assertEquals("Teija Testaaja", reportResponse.updatedBy)
+        assertEquals(2030, reportResponse.order?.year)
     }
 
     @Test
@@ -108,6 +109,7 @@ class ReportTests : FullApplicationTest() {
 
     @Test
     fun `create, approve and reopen report`() {
+        val expectedOrderYear = 2029
         val createOrderResponse =
             createOrderAndReport(
                 controller = orderController,
@@ -131,7 +133,8 @@ class ReportTests : FullApplicationTest() {
                             description = "Muut huomioitavat lajit pisteet",
                             DocumentType.MUUT_HUOMIOITAVAT_LAJIT_PISTEET
                         )
-                    )
+                    ),
+                orderYear = expectedOrderYear
             )
 
         val reportInput =
@@ -295,6 +298,7 @@ class ReportTests : FullApplicationTest() {
             listOf("Ilves", "Torakka", "Jänis", "Perhonen")
         )
         assertEquals(approvedReport.cost, reportCost)
+        assertEquals(expectedOrderYear, approvedReport.order?.year)
 
         val reportFiles = reportController.getReportFiles(adminUser, createOrderResponse.reportId)
         assertEquals(5, reportFiles.size)
@@ -381,17 +385,22 @@ class ReportTests : FullApplicationTest() {
 
             assertEquals(muutHuomioitavatLajitPisteet.count(), 0)
 
+            data class AluerajausLuontoselvitystilausRow(
+                val selvitysTila: String,
+                val tilausvuosi: Int
+            )
             val selvitysTilat =
                 ptx
                     .createQuery(
                         """
-                        SELECT selvitys_tila AS "selvitysTila" FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId
+                        SELECT selvitys_tila AS "selvitysTila", tilaus_vuosi AS "tilausvuosi" FROM aluerajaus_luontoselvitystilaus WHERE selvitys_id = :reportId
                         """.trimIndent()
                     ).bind("reportId", createOrderResponse.reportId)
-                    .mapTo<String>()
+                    .mapTo<AluerajausLuontoselvitystilausRow>()
                     .toList()
 
-            assertEquals(selvitysTilat, listOf("Lähetetty", "Lähetetty"))
+            assertEquals(selvitysTilat.map { it.selvitysTila }, listOf("Lähetetty", "Lähetetty"))
+            assertEquals(selvitysTilat.map { it.tilausvuosi }, listOf(expectedOrderYear, expectedOrderYear))
         }
     }
 

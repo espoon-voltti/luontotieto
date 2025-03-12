@@ -41,7 +41,8 @@ data class Order(
     val contactPhone: String,
     val contactEmail: String,
     @Json val reportDocuments: List<OrderReportDocument>,
-    val hasApprovedReport: Boolean
+    val hasApprovedReport: Boolean,
+    val year: Int
 )
 
 data class OrderInput(
@@ -55,6 +56,7 @@ data class OrderInput(
     val assigneeCompanyName: String?,
     @Json val reportDocuments: List<OrderReportDocument>,
     val returnDate: LocalDate,
+    val year: Int?,
     val contactPerson: String,
     val contactPhone: String,
     val contactEmail: String,
@@ -84,7 +86,8 @@ private const val SELECT_ORDER_SQL =
            CASE
                 WHEN r.approved IS TRUE THEN TRUE
                 ELSE FALSE
-              END AS "hasApprovedReport"
+              END AS "hasApprovedReport",
+           o.year
     FROM "order" o
         LEFT JOIN users uc ON o.created_by = uc.id
         LEFT JOIN users uu ON o.updated_by = uu.id
@@ -98,8 +101,8 @@ fun Handle.insertOrder(
 ): UUID =
     createUpdate(
         """
-            INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents, assignee_id, assignee_contact_person, assignee_contact_email, assignee_company_name, return_date, contact_person, contact_phone, contact_email, ordering_unit) 
-            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments, :assigneeId, :assigneeContactPerson, :assigneeContactEmail, :assigneeCompanyName, :returnDate, :contactPerson, :contactPhone, :contactEmail, :orderingUnit)
+            INSERT INTO "order" (name, description, plan_number, created_by, updated_by, report_documents, assignee_id, assignee_contact_person, assignee_contact_email, assignee_company_name, return_date, contact_person, contact_phone, contact_email, ordering_unit, year) 
+            VALUES (:name, :description, :planNumber, :createdBy, :updatedBy, :reportDocuments, :assigneeId, :assigneeContactPerson, :assigneeContactEmail, :assigneeCompanyName, :returnDate, :contactPerson, :contactPhone, :contactEmail, :orderingUnit, COALESCE(:year, EXTRACT(YEAR FROM CURRENT_DATE)::integer))
             RETURNING id
             """
     ).bindKotlin(data)
@@ -126,7 +129,8 @@ fun Handle.putOrder(
                   assignee_contact_person = :assigneeContactPerson, assignee_contact_email = :assigneeContactEmail,
                   assignee_company_name = :assigneeCompanyName, return_date = :returnDate,
                   contact_person = :contactPerson, contact_phone = :contactPhone,
-                  contact_email = :contactEmail, ordering_unit = :orderingUnit
+                  contact_email = :contactEmail, ordering_unit = :orderingUnit,
+                  year = COALESCE(:year, EXTRACT(YEAR FROM CURRENT_DATE)::integer)
                  WHERE id = :id
                 RETURNING *
             ),

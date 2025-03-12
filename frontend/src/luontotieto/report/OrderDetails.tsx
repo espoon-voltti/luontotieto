@@ -100,14 +100,18 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
             <P>{returnDateStr}</P>
           </GridItem>
           <GridItem $col={4} $row={1}>
+            <Label>Tilausvuosi</Label>
+            <P>{order.year}</P>
+          </GridItem>
+          <GridItem $col={1} $row={2}>
             <Label>Selvityksen kuvaus</Label>
             <P>{order.description}</P>
           </GridItem>
-          <GridItem $col={1} $row={2}>
+          <GridItem $col={2} $row={2}>
             <Label>Selvityksen tekijä</Label>
             <P>{order.assignee}</P>
           </GridItem>
-          <GridItem $col={2} $row={2}>
+          <GridItem $col={3} $row={2}>
             <Label>Tilaajan yhteyshenkilö</Label>
             <P>
               {order.contactPerson}
@@ -119,7 +123,7 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
               {order.orderingUnit?.join(', ')}
             </P>
           </GridItem>
-          <GridItem $col={3} $row={2}>
+          <GridItem $col={4} $row={2}>
             <Label>Selvityksen tekijän yhteyshenkilö</Label>
             <P>
               {!!order.assigneeCompanyName && (
@@ -133,7 +137,7 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
               {order.assigneeContactEmail}
             </P>
           </GridItem>
-          <GridItem $col={4} $row={2}>
+          <GridItem $col={1} $row={3}>
             <Label>Tilauksen liitteet</Label>
             {!!orderFiles &&
               orderFiles.map((rf) => (

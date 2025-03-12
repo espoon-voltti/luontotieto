@@ -65,6 +65,7 @@ class OrderTests : FullApplicationTest() {
         assertEquals(listOf("Plan 1", "Plan 2"), orderResponse.planNumber)
         assertEquals(listOf("Orava yksikkö", "Karhuryhmä"), orderResponse.orderingUnit)
         assertEquals(customerUser.id, orderResponse.assigneeId)
+        assertEquals(2030, orderResponse.year)
     }
 
     @Test
@@ -81,6 +82,7 @@ class OrderTests : FullApplicationTest() {
         assertEquals("Test description", orderReportResponse.order?.description)
         assertEquals("Yritys Oy", orderReportResponse.order?.assignee)
         assertEquals(customerUser.id, orderReportResponse.order?.assigneeId)
+        assertEquals(2030, orderReportResponse.order?.year)
     }
 
     @Test
@@ -114,7 +116,8 @@ class OrderTests : FullApplicationTest() {
                     contactPerson = "Contact Person",
                     contactPhone = "040123456789",
                     orderingUnit = listOf("Orava yksikkö"),
-                    returnDate = LocalDate.of(2026, 1, 1)
+                    returnDate = LocalDate.of(2026, 1, 1),
+                    year = 2026
                 )
             )
 
@@ -124,6 +127,8 @@ class OrderTests : FullApplicationTest() {
         assertEquals("Ylikirjoitus Oy", updatedReport.order?.assigneeCompanyName)
         assertEquals(customerUser.id, updatedReport.order?.assigneeId)
         assertEquals(updatedReportDocuments, updatedReport.order?.reportDocuments)
+        assertEquals(LocalDate.of(2026, 1, 1), updatedReport.order?.returnDate)
+        assertEquals(2026, updatedReport.order?.year)
     }
 
     @Test
@@ -220,7 +225,8 @@ class OrderTests : FullApplicationTest() {
                     contactPerson = "Contact Person",
                     contactPhone = "040123456789",
                     orderingUnit = listOf("Orava yksikkö"),
-                    returnDate = LocalDate.of(2026, 1, 1)
+                    returnDate = LocalDate.of(2026, 1, 1),
+                    year = 2026
                 )
             )
         }

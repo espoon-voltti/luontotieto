@@ -461,7 +461,8 @@ fun Handle.updateAluerajausLuontoselvitystilaus(
             UPDATE aluerajaus_luontoselvitystilaus
                 SET tilauksen_nimi = :name,
                     tilauksen_tekija = :contactPerson,
-                    tilausyksikko = :unit
+                    tilausyksikko = :unit,
+                    tilaus_vuosi = :year
             WHERE selvitys_id = :reportId
             RETURNING *
         )
@@ -471,6 +472,7 @@ fun Handle.updateAluerajausLuontoselvitystilaus(
         .bind("name", order.name)
         .bind("contactPerson", order.contactPerson)
         .bind("unit", order.orderingUnit?.joinToString(","))
+        .bind("year", order.year)
         .mapTo<Int>()
         .one()
 
@@ -507,7 +509,8 @@ private const val SQL_INSERT_ALUERAJAUS_LUONTOSELVITYSTILAUS =
             selvitys_id,
             selvitys_linkki,
             selvitys_tila,
-            geom
+            geom,
+            tilaus_vuosi
         ) VALUES (
             :name,
             :contactPerson,
@@ -515,7 +518,8 @@ private const val SQL_INSERT_ALUERAJAUS_LUONTOSELVITYSTILAUS =
             :reportId,
             :reportLink,
             :reportStatus,
-            ST_GeomFromWKB(:geom, 3879)
+            ST_GeomFromWKB(:geom, 3879),
+            :year
         )
         RETURNING id
     """
