@@ -241,7 +241,7 @@ export const ReportListPage = React.memo(function ReportList() {
             <VerticalGap $size="m" />
             <LabeledInput>
               <Label>
-                Lataa raportti selvityksistä, jotka on tilattu aikavälillä
+                Lataa raportti selvityksistä, joiden tilaus on luotu aikavälillä
               </Label>
               <DateRange
                 start={dateRange.startDate}

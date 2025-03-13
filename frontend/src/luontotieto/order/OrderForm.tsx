@@ -269,6 +269,7 @@ function createOrderFormInput(order: Order | undefined): OrderFormInput {
     name: order?.name ?? '',
     description: order?.description ?? '',
     returnDate: order?.returnDate ?? '',
+    year: order?.year ?? undefined,
     assigneeId: order?.assigneeId ?? '',
     assigneeContactEmail: order?.assigneeContactEmail ?? '',
     assigneeContactPerson: order?.assigneeContactPerson ?? '',
@@ -298,6 +299,8 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
 
   const [showPlanNumberSuggestionsInfo, setShowPlanNumberSuggestionsInfo] =
     useState(false)
+
+  const [showOrderYearInfo, setShowOrderYearInfo] = useState(false)
 
   const [showCollectedDocumentsInfo, setShowCollectedDocumentsInfo] =
     useState(false)
@@ -496,6 +499,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       name: orderInput.name.trim(),
       description: orderInput.description.trim(),
       returnDate: orderInput.returnDate,
+      year: orderInput.year,
       contactEmail: orderInput.contactEmail.trim(),
       contactPhone: orderInput.contactPhone.trim(),
       contactPerson: orderInput.contactPerson.trim(),
@@ -658,6 +662,41 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
                 type="date"
                 readonly={props.disabled}
                 aria-describedby="date-picker-input"
+              />
+            </LabeledInput>
+          </RowOfInputs>
+          <RowOfInputs>
+            <LabeledInput $cols={4}>
+              <FlexRow>
+                <Label>Tilausvuosi</Label>
+                <InfoButton
+                  onClick={() => setShowOrderYearInfo(!showOrderYearInfo)}
+                />
+              </FlexRow>
+
+              {showOrderYearInfo && (
+                <InfoBox
+                  message={
+                    <P>
+                      Jos tilausvuosi-kenttä jätetään täyttämättä,
+                      tilausvuodeksi asetetaan kuluva vuosi.
+                    </P>
+                  }
+                />
+              )}
+              <InputField
+                width="m"
+                onChange={(reportYear) =>
+                  setOrderInput({
+                    ...orderInput,
+                    year: parseInt(reportYear)
+                  })
+                }
+                value={orderInput.year?.toString() ?? ''}
+                type="number"
+                min={1900}
+                max={2100}
+                readonly={props.disabled}
               />
             </LabeledInput>
           </RowOfInputs>

@@ -33,6 +33,7 @@ export interface OrderFormInput {
   assigneeContactEmail: string
   assigneeCompanyName: string | null
   returnDate: string
+  year?: number
   orderingUnit?: string[]
 }
 
