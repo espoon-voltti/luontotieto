@@ -300,6 +300,8 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
   const [showPlanNumberSuggestionsInfo, setShowPlanNumberSuggestionsInfo] =
     useState(false)
 
+  const [showOrderYearInfo, setShowOrderYearInfo] = useState(false)
+
   const [showCollectedDocumentsInfo, setShowCollectedDocumentsInfo] =
     useState(false)
 
@@ -665,7 +667,23 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Tilausvuosi</Label>
+              <FlexRow>
+                <Label>Tilausvuosi</Label>
+                <InfoButton
+                  onClick={() => setShowOrderYearInfo(!showOrderYearInfo)}
+                />
+              </FlexRow>
+
+              {showOrderYearInfo && (
+                <InfoBox
+                  message={
+                    <P>
+                      Jos tilausvuosi-kenttä jätetään täyttämättä,
+                      tilausvuodeksi asetetaan kuluva vuosi.
+                    </P>
+                  }
+                />
+              )}
               <InputField
                 width="m"
                 onChange={(reportYear) =>
