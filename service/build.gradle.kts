@@ -79,7 +79,7 @@ dependencies {
     api(platform("com.fasterxml.jackson:jackson-bom:2.18.0"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    implementation("software.amazon.awssdk:s3:2.29.20")
+    implementation("software.amazon.awssdk:s3:2.31.7")
     implementation("software.amazon.awssdk:ses:2.29.24")
 
     implementation("org.apache.tika:tika-core:2.9.2")
