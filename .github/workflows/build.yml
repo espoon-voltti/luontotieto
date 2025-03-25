@@ -65,7 +65,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build image
-        uses: espoon-voltti/voltti-actions/docker-build-push@master
+        uses: espoon-voltti/voltti-actions/docker-build-push@chore/cleanup-docker-build
         id: build
         with:
           path: ${{ matrix.path }}
