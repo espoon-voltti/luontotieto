@@ -76,7 +76,7 @@ dependencies {
     implementation("com.github.kittinunf.fuel:fuel:2.3.1")
     implementation("com.github.kittinunf.fuel:fuel-jackson:2.3.1")
 
-    api(platform("com.fasterxml.jackson:jackson-bom:2.18.0"))
+    api(platform("com.fasterxml.jackson:jackson-bom:2.19.0"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     implementation("software.amazon.awssdk:s3:2.29.20")
