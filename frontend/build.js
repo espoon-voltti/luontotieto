@@ -114,7 +114,7 @@ function serve() {
   const middleware = express.static(outdir)
 
   app.use('/', middleware)
-  app.get(`/*`, (req, _res, next) => {
+  app.get(`/{*rest}`, (req, _res, next) => {
     req.url = `index.html`
     next()
   })
