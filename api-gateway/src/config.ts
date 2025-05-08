@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { RedisClientOptions } from 'redis'
+import { RedisClientOptions } from '@redis/client'
 import { ValidateInResponseTo } from '@node-saml/node-saml'
 
 export interface Config {

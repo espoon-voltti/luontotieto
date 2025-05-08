@@ -5,7 +5,7 @@
 import sourceMapSupport from 'source-map-support'
 import express from 'express'
 import helmet from 'helmet'
-import * as redis from 'redis'
+import * as redis from '@redis/client'
 import { configFromEnv, httpPort, toRedisClientOpts } from './config.js'
 import { fallbackErrorHandler } from './middleware/errors.js'
 import { createRouter } from './router.js'
