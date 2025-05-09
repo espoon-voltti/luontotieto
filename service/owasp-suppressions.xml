@@ -11,7 +11,13 @@ SPDX-License-Identifier: LGPL-2.1-or-later
         <notes><![CDATA[
         Misidentification. The checkstyle reporter for Ktlint version x.y is not the same as the actual checkstyle library version x.y.
        ]]></notes>
-       <packageUrl regex="true">^pkg:maven/com\.pinterest\.ktlint/ktlint\-cli\-reporter\-checkstyle@.*$</packageUrl>
-       <cpe>cpe:/a:checkstyle:checkstyle</cpe>
+        <packageUrl regex="true">^pkg:maven/com\.pinterest\.ktlint/ktlint\-cli\-reporter\-checkstyle@.*$</packageUrl>
+        <cpe>cpe:/a:checkstyle:checkstyle</cpe>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+        CVE-2022-41852 is rejected by the NVD.
+        ]]></notes>
+        <cve>CVE-2022-41852</cve>
     </suppress>
 </suppressions>
