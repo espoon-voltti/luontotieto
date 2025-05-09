@@ -41,7 +41,7 @@ class ReportFileTests : FullApplicationTest() {
         assertEquals("Test Description", fileResponse.description)
         assertEquals("liito_orava_pisteet.gpkg", fileResponse.fileName)
         assertEquals(DocumentType.LIITO_ORAVA_PISTEET, fileResponse.documentType)
-        assertEquals("application/x-sqlite3", fileResponse.mediaType)
+        assertEquals("application/x-geopackage", fileResponse.mediaType)
         assertEquals(adminUser.id, fileResponse.createdBy)
         assertEquals(adminUser.id, fileResponse.updatedBy)
 
