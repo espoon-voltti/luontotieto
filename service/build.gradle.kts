@@ -32,8 +32,7 @@ sourceSets {
     }
 }
 
-val e2eTestImplementation: Configuration by
-    configurations.getting { extendsFrom(configurations.testImplementation.get()) }
+val e2eTestImplementation: Configuration by configurations.getting { extendsFrom(configurations.testImplementation.get()) }
 
 configurations["e2eTestRuntimeOnly"].extendsFrom(configurations.testRuntimeOnly.get())
 
