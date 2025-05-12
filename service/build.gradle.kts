@@ -83,7 +83,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     implementation("software.amazon.awssdk:s3:2.31.36")
-    implementation("software.amazon.awssdk:ses:2.29.24")
+    implementation("software.amazon.awssdk:ses:2.31.40")
 
     implementation("org.apache.tika:tika-core:3.1.0")
 
