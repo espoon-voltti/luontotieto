@@ -100,7 +100,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.microsoft.playwright:playwright:1.49.0")
 
-    implementation("org.bouncycastle:bcprov-jdk18on:1.79")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.80")
 
     api("org.jsoup:jsoup:1.18.3")
 
