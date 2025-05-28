@@ -64,7 +64,7 @@ dependencies {
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
 
     implementation("org.geotools:gt-geopkg:33.1")
-    implementation("org.geotools:gt-epsg-hsql:33.0")
+    implementation("org.geotools:gt-epsg-hsql:33.1")
 
     implementation("com.zaxxer:HikariCP:6.3.0")
     implementation("org.flywaydb:flyway-core:11.8.1")
