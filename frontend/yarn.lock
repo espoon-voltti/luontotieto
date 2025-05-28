@@ -5339,7 +5339,7 @@ __metadata:
     react-dom: "npm:^18.3.1"
     react-focus-lock: "npm:^2.13.2"
     react-router-dom: "npm:^7.6.0"
-    react-tag-autocomplete: "npm:7.4.0"
+    react-tag-autocomplete: "npm:7.5.0"
     react-textarea-autosize: "npm:^8.5.3"
     style-loader: "npm:^4.0.0"
     styled-components: "npm:6.1.0"
@@ -6402,12 +6402,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-tag-autocomplete@npm:7.4.0":
-  version: 7.4.0
-  resolution: "react-tag-autocomplete@npm:7.4.0"
+"react-tag-autocomplete@npm:7.5.0":
+  version: 7.5.0
+  resolution: "react-tag-autocomplete@npm:7.5.0"
   peerDependencies:
-    react: ^18.0.0
-  checksum: 10/b5eb4c3e41d0555f447fb6ffac7ef665d33800d3c4df128ebb74bc390a5da745b62134af4dad6b259b7654277a8a2098ae4f3670860a7ab57b19fc0cf0795004
+    react: ^18.0.0 || ^19.0.0
+  checksum: 10/acc17f9088c97153f69465d1d89bddb3c34e78b08982befef1e08837b7bc5fa56799e508879212d6cdec7145e2ea75452d42ebae60196c1c3d6dd2041a4062c7
   languageName: node
   linkType: hard
 
