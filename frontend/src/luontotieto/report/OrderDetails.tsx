@@ -108,30 +108,31 @@ export const OrderDetails = React.memo(function OrderDetails(props: Props) {
             <P>{order.description}</P>
           </GridItem>
           <GridItem $col={2} $row={2}>
-            <Label>Selvityksen tekijä</Label>
-            <P>{order.assignee}</P>
-          </GridItem>
-          <GridItem $col={3} $row={2}>
-            <Label>Tilaajan yhteyshenkilö</Label>
+            <Label>Tilaaja ja yhteyshenkilö</Label>
             <P>
+              {order.orderingUnit && order.orderingUnit.length > 0
+                ? order.orderingUnit.join(', ')
+                : '-'}
+              <br aria-hidden />
+              <br aria-hidden />
               {order.contactPerson}
               <br aria-hidden />
               {order.contactEmail}
               <br aria-hidden />
               {order.contactPhone}
-              <br aria-hidden />
-              {order.orderingUnit?.join(', ')}
             </P>
           </GridItem>
-          <GridItem $col={4} $row={2}>
-            <Label>Selvityksen tekijän yhteyshenkilö</Label>
+          <GridItem $col={3} $row={2}>
+            <Label>Selvityksen tekijä ja yhteyshenkilö</Label>
             <P>
+              {order.assignee}
+              <br aria-hidden />
+              <br aria-hidden />
               {!!order.assigneeCompanyName && (
                 <>
                   {order.assigneeCompanyName} <br aria-hidden />
                 </>
               )}
-
               {order.assigneeContactPerson}
               <br aria-hidden />
               {order.assigneeContactEmail}
