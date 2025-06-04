@@ -54,12 +54,16 @@ jobs:
         include:
           - name: luontotieto/service
             path: service
+            test: "false"
           - name: luontotieto/frontend
             path: frontend
+            test: "true"
           - name: luontotieto/api-gateway
             path: api-gateway
+            test: "true"
           - name: luontotieto/geoserver
             path: geoserver
+            test: "false"
 
     steps:
       - uses: actions/checkout@v4
@@ -76,6 +80,25 @@ jobs:
           AWS_REGION: ${{ env.AWS_REGION }}
           registry: ${{ env.ECR_REGISTRY }}
           name: ${{ matrix.name }}
+          build-args: |
+            CACHE_BUST=${{ needs.cache-bust.outputs.cache-bust }}
+            build=${{ github.run_number }}
+            commit=${{ github.sha }}
+
+      - name: Run tests
+        if: ${{ matrix.test == 'true' }}
+        uses: espoon-voltti/voltti-actions/docker-build-push@master
+        id: test
+        with:
+          path: ${{ matrix.path }}
+          push: false
+          target: "test"
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          registry: ${{ env.ECR_REGISTRY }}
+          name: ${{ matrix.name }}-tests
           build-args: |
             CACHE_BUST=${{ needs.cache-bust.outputs.cache-bust }}
             build=${{ github.run_number }}
