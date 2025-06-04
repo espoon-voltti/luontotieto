@@ -16,7 +16,13 @@ import {
   ReportFileValidationErrorResponse,
   ReportFormInput
 } from 'api/report-api'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from 'react'
 import { InfoBox } from 'shared/MessageBoxes'
 import { InfoButton } from 'shared/buttons/InfoButton'
 import { InlineButton } from 'shared/buttons/InlineButton'
@@ -370,12 +376,12 @@ export const ReportForm = React.memo(function ReportForm(
   }, [reportInput, props])
 
   useEffect(() => {
-    setFileInputs(
+    setFileInputs((prev) =>
       createFileInputs(
         props.reportFiles ?? [],
         requiredFiles,
         noObservations ?? [],
-        fileInputs
+        prev
       )
     )
   }, [originalFileInputs])
@@ -408,7 +414,7 @@ export const ReportForm = React.memo(function ReportForm(
           switch (fInput.type) {
             case 'NEW':
               return (
-                <>
+                <Fragment key={fInput.id}>
                   <FileInput
                     readOnly={readOnly}
                     documentType={fInput.documentType}
@@ -436,11 +442,11 @@ export const ReportForm = React.memo(function ReportForm(
                       onChange={(value) => setIsPublic(value)}
                     />
                   )}
-                </>
+                </Fragment>
               )
             case 'EXISTING':
               return (
-                <>
+                <Fragment key={fInput.id}>
                   <ExistingFile
                     key={fInput.details.id}
                     data={{
@@ -461,7 +467,7 @@ export const ReportForm = React.memo(function ReportForm(
                       onChange={(value) => setIsPublic(value)}
                     />
                   )}
-                </>
+                </Fragment>
               )
           }
         })}

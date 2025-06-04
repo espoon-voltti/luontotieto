@@ -41,21 +41,21 @@ export default React.memo(function BaseModal(props: Props) {
     <ModalBackground zIndex={props.zIndex}>
       <ModalWrapper
         className={props.className}
-        zIndex={props.zIndex}
+        $zIndex={props.zIndex}
         data-qa={props['data-qa']}
       >
         <ModalContainer
-          mobileFullScreen={props.mobileFullScreen}
-          margin="auto"
+          $mobileFullScreen={props.mobileFullScreen}
+          $margin="auto"
           data-qa="modal"
-          width={props.width}
-          padding={props.padding}
+          $width={props.width}
+          $padding={props.padding}
           role="alert"
         >
           <ModalTitle>
             {props.icon && (
               <>
-                <ModalIcon type={props.type}>
+                <ModalIcon $type={props.type}>
                   <FontAwesomeIcon icon={props.icon} />
                 </ModalIcon>
                 <VerticalGap $size="m" />
@@ -129,18 +129,17 @@ export const ModalCloseButton = React.memo(function ModalCloseButton({
 type ModalWidth = 'normal' | 'wide' | 'extra-wide'
 
 const ModalContainer = styled.div<{
-  mobileFullScreen?: boolean
-  noPadding?: boolean
-  padding?: SpacingSize
-  margin: string
-  width?: ModalWidth
+  $mobileFullScreen?: boolean
+  $padding?: SpacingSize | null
+  $margin: string
+  $width?: ModalWidth
 }>`
   position: relative;
   width: min(
     ${(p) =>
-      p.width === 'extra-wide'
+      p.$width === 'extra-wide'
         ? '1280px'
-        : p.width === 'wide'
+        : p.$width === 'wide'
           ? '720px'
           : '500px'},
     calc(100vw - 2 * ${defaultMargins.xxs})
@@ -151,22 +150,30 @@ const ModalContainer = styled.div<{
   box-shadow: 0 15px 75px 0 rgba(0, 0, 0, 0.5);
   border-radius: 2px;
   ${(p) =>
-    p.noPadding ? '' : `padding-left: ${defaultMargins[p.padding ?? 'XXL']}`};
+    p.$padding === null
+      ? ''
+      : `padding-left: ${defaultMargins[p.$padding ?? 'XXL']}`};
   ${(p) =>
-    p.noPadding ? '' : `padding-right: ${defaultMargins[p.padding ?? 'XXL']}`};
-  margin: ${(p) => p.margin};
+    p.$padding === null
+      ? ''
+      : `padding-right: ${defaultMargins[p.$padding ?? 'XXL']}`};
+  margin: ${(p) => p.$margin};
   overflow-y: auto;
 
   @media (max-width: ${tabletMin}) {
     ${(p) =>
-      p.noPadding ? '' : `padding-left: ${defaultMargins[p.padding ?? 's']}`};
+      p.$padding === null
+        ? ''
+        : `padding-left: ${defaultMargins[p.$padding ?? 's']}`};
     ${(p) =>
-      p.noPadding ? '' : `padding-right: ${defaultMargins[p.padding ?? 's']}`};
+      p.$padding === null
+        ? ''
+        : `padding-right: ${defaultMargins[p.$padding ?? 's']}`};
     margin-left: ${defaultMargins.s};
     margin-right: ${defaultMargins.s};
 
     ${(p) =>
-      p.mobileFullScreen
+      p.$mobileFullScreen
         ? css`
             margin-left: 0;
             margin-right: 0;
@@ -179,22 +186,22 @@ const ModalContainer = styled.div<{
   }
 `
 
-const ModalWrapper = styled.div<{ zIndex?: number }>`
+const ModalWrapper = styled.div<{ $zIndex?: number }>`
   align-items: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
   position: fixed;
-  z-index: ${(p) => (p.zIndex ? p.zIndex : modalZIndex)};
+  z-index: ${(p) => (p.$zIndex ? p.$zIndex : modalZIndex)};
   bottom: 0;
   left: 0;
   right: 0;
   top: 0;
 `
 
-const ModalIcon = styled.div<{ type?: ModalType }>`
-  background: ${({ type = 'info' }) => colors.status[type]};
+const ModalIcon = styled.div<{ $type?: ModalType }>`
+  background: ${({ $type = 'info' }) => colors.status[$type]};
   font-size: 36px;
   border-radius: 50%;
   line-height: 60px;
@@ -234,13 +241,13 @@ export const PlainModal = React.memo(function PlainModal(
     <ModalBackground>
       <StaticallyPositionedModal
         className={props.className}
-        zIndex={props.zIndex}
+        $zIndex={props.zIndex}
         data-qa={props['data-qa']}
       >
         <ModalContainer
-          noPadding
-          mobileFullScreen={props.mobileFullScreen}
-          margin={props.margin}
+          $padding={null}
+          $mobileFullScreen={props.mobileFullScreen}
+          $margin={props.margin}
           className="modal-container"
           data-qa="modal"
         >
