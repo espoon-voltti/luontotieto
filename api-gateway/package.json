@@ -9,6 +9,7 @@
     "build": "yarn clean && yarn install && tsc --build .",
     "lint": "eslint --max-warnings 0 .",
     "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
     "dev": "tsc --build . && concurrently --prefix '[{name}]' --names 'tsc,nodemon' 'tsc --build --preserveWatchOutput -w .' 'NODE_ENV=local nodemon dist/index.js'"
   },
   "dependencies": {
