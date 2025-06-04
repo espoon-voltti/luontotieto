@@ -16,7 +16,7 @@ luontotieto:
     proxy_through_nginx: false
     verify_file_av_tagged: false
   email:
-    enabled: "true"
+    enabled: "false"
     region: "eu-west-1"
     sender_address: "luontotieto@espoo.fi"
     sender_arn: "arn:aws:ses:eu-west-1:758397969161:identity/luontotieto@espoo.fi"
