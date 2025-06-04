@@ -2,8 +2,9 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { z } from 'zod'
-import _ from 'lodash'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+
 import {
   CacheProvider,
   Profile,
@@ -11,16 +12,18 @@ import {
   Strategy as SamlStrategy,
   VerifyWithRequest
 } from '@node-saml/passport-saml'
-import { logError, logWarn } from '../../logging/index.js'
-import { AppSessionUser, createLogoutToken } from '../index.js'
-import { appBaseUrl, Config, EspooSamlConfig } from '../../config.js'
-import { readFileSync } from 'node:fs'
-import certificates, { TrustedCertificates } from './certificates.js'
 import express from 'express'
-import path from 'node:path'
-import { Sessions } from '../session.js'
-import { fromCallback } from '../../utils/promise-utils.js'
+import _ from 'lodash'
+import { z } from 'zod'
+
 import { userLogin } from '../../clients/service-client.js'
+import { appBaseUrl, Config, EspooSamlConfig } from '../../config.js'
+import { logError, logWarn } from '../../logging/index.js'
+import { fromCallback } from '../../utils/promise-utils.js'
+import { AppSessionUser, createLogoutToken } from '../index.js'
+import { Sessions } from '../session.js'
+
+import certificates, { TrustedCertificates } from './certificates.js'
 
 export function createSamlConfig(
   config: EspooSamlConfig,

@@ -2,25 +2,25 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import cookieParser from 'cookie-parser'
 import { Router } from 'express'
 import expressHttpProxy from 'express-http-proxy'
-
-import { errorHandler } from './middleware/errors.js'
-import { appCommit, Config, serviceUrl } from './config.js'
-import { RedisClient } from './clients/redis-client.js'
-import { sessionSupport } from './auth/session.js'
 import passport from 'passport'
-import cookieParser from 'cookie-parser'
-import { cacheControl } from './middleware/cache-control.js'
+
+import authStatus from './auth/auth-status.js'
+import { createDevAdRouter } from './auth/dev-ad-auth.js'
 import { requireAuthentication } from './auth/index.js'
-import { csrf, csrfCookie } from './middleware/csrf.js'
+import { createPasswordAuthRouter } from './auth/password/index.js'
 import { createAdSamlStrategy, createSamlConfig } from './auth/saml/index.js'
 import redisCacheProvider from './auth/saml/passport-saml-cache-redis.js'
-import { createDevAdRouter } from './auth/dev-ad-auth.js'
 import createSamlRouter from './auth/saml/saml-routes.js'
-import authStatus from './auth/auth-status.js'
+import { sessionSupport } from './auth/session.js'
+import { RedisClient } from './clients/redis-client.js'
 import { createServiceRequestHeaders } from './clients/service-client.js'
-import { createPasswordAuthRouter } from './auth/password/index.js'
+import { appCommit, Config, serviceUrl } from './config.js'
+import { cacheControl } from './middleware/cache-control.js'
+import { csrf, csrfCookie } from './middleware/csrf.js'
+import { errorHandler } from './middleware/errors.js'
 
 export function createRouter(config: Config, redisClient: RedisClient): Router {
   const router = Router()

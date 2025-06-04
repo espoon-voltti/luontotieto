@@ -2,9 +2,10 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import express, { Router } from 'express'
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
-import express, { Router } from 'express'
+
 import { postPasswordLogin } from '../../clients/service-client.js'
 
 passport.use(

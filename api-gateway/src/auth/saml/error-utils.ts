@@ -4,6 +4,7 @@
 
 import { Request } from 'express'
 import { XMLParser } from 'fast-xml-parser'
+
 import { logDebug, logError } from '../../logging/index.js'
 
 export interface PassportSamlError extends Error {

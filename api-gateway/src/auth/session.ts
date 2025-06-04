@@ -11,10 +11,11 @@ import {
 } from 'date-fns'
 import express from 'express'
 import session from 'express-session'
-import { LogoutToken, toMiddleware } from '../utils/express.js'
-import { fromCallback } from '../utils/promise-utils.js'
+
 import { RedisClient } from '../clients/redis-client.js'
 import { SessionConfig } from '../config.js'
+import { LogoutToken, toMiddleware } from '../utils/express.js'
+import { fromCallback } from '../utils/promise-utils.js'
 
 const cookieName = 'luontotieto.session'
 
@@ -126,7 +127,7 @@ export function sessionSupport(
     if (!req.session) return
     if (!req.session.logoutToken) return
     if (!isDate(req.session.cookie.expires)) return
-    const sessionExpires = req.session.cookie.expires as Date
+    const sessionExpires = req.session.cookie.expires
     const logoutExpires = new Date(req.session.logoutToken.expiresAt)
     // Logout token should always expire at least 30 minutes later than the session
     if (differenceInMinutes(logoutExpires, sessionExpires) < 30) {

@@ -2,15 +2,18 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import express, { NextFunction, Request, Response } from 'express'
-import { Profile } from '@node-saml/passport-saml'
-import passport, { AuthenticateCallback } from 'passport'
-import { fromCallback } from '../utils/promise-utils.js'
-import { Sessions } from './session.js'
-import { logInfo } from '../logging/index.js'
-import jwt from 'jsonwebtoken'
-import { jwtKid, jwtPrivateKey } from '../config.js'
 import { readFileSync } from 'node:fs'
+
+import { Profile } from '@node-saml/passport-saml'
+import express, { NextFunction, Request, Response } from 'express'
+import jwt from 'jsonwebtoken'
+import passport, { AuthenticateCallback } from 'passport'
+
+import { jwtKid, jwtPrivateKey } from '../config.js'
+import { logInfo } from '../logging/index.js'
+import { fromCallback } from '../utils/promise-utils.js'
+
+import { Sessions } from './session.js'
 
 const UNAUTHORIZED_REPORT_DOCUMENT_PATH_PATTERN =
   '^/reports/([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})/files/report$'

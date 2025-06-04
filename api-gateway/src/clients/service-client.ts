@@ -2,8 +2,9 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import express from 'express'
 import axios, { AxiosError } from 'axios'
+import express from 'express'
+
 import { AppSessionUser, createAuthHeader } from '../auth/index.js'
 import { serviceUrl } from '../config.js'
 import { logError } from '../logging/index.js'
@@ -18,7 +19,9 @@ const systemUser: AppSessionUser = {
 
 export type ServiceRequestHeader = 'Authorization' | 'X-Request-ID'
 
-export type ServiceRequestHeaders = { [H in ServiceRequestHeader]?: string }
+export type ServiceRequestHeaders = Partial<
+  Record<ServiceRequestHeader, string>
+>
 
 export function createServiceRequestHeaders(
   req: express.Request | undefined,

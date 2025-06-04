@@ -4,6 +4,7 @@
 
 import csurf from 'csurf'
 import express from 'express'
+
 import { useSecureCookies } from '../config.js'
 
 // Middleware that does XSRF header checks

@@ -2,19 +2,22 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import _ from 'lodash'
 import { Request, Router, urlencoded } from 'express'
+import _ from 'lodash'
+import passport, { Strategy } from 'passport'
+
+import { AdUser, userLogin } from '../clients/service-client.js'
+import { appBaseUrl } from '../config.js'
 import {
   assertStringProp,
   AsyncRequestHandler,
   toRequestHandler
 } from '../utils/express.js'
-import { AdUser, userLogin } from '../clients/service-client.js'
-import { Sessions } from './session.js'
-import passport, { Strategy } from 'passport'
-import { AppSessionUser, authenticate, login, logout } from './index.js'
+
 import { parseRelayState } from './saml/index.js'
-import { appBaseUrl } from '../config.js'
+import { Sessions } from './session.js'
+
+import { AppSessionUser, authenticate, login, logout } from './index.js'
 
 class DevStrategy extends Strategy {
   constructor(private verifyUser: (req: Request) => Promise<AppSessionUser>) {
