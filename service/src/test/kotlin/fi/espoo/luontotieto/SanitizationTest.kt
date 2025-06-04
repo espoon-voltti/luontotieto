@@ -50,6 +50,5 @@ class SanitizationTest {
             val processedData = sanitizeCsvCellData(input)
             assertEquals((expectedOutputs[index]), processedData)
         }
-        throw IllegalStateException("")
     }
 }
