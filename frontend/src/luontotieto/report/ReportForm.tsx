@@ -384,7 +384,7 @@ export const ReportForm = React.memo(function ReportForm(
         prev
       )
     )
-  }, [originalFileInputs])
+  }, [originalFileInputs]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <FlexCol>
