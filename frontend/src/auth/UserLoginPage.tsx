@@ -39,8 +39,8 @@ export const UserLoginPage = React.memo(function UserLoginPage() {
 
   const onLoginSuccess = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ['auth-status'] })
-    navigate('/luontotieto')
-  }, [])
+    void navigate('/luontotieto')
+  }, [queryClient, navigate])
 
   const { mutateAsync: loginMutation, isPending } = useMutation({
     mutationFn: apiPostLogin,

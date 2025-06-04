@@ -139,7 +139,7 @@ const ChangePasswordForm = React.memo(function ChangePasswordForm({
         label: 'Ok'
       }
     })
-  }, [userId])
+  }, [userId, onClose, queryClient])
 
   const { mutateAsync: changePassword, isPending } = useMutation({
     mutationFn: apiChangeUserPassword,

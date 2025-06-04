@@ -35,19 +35,22 @@ export const NewUserPage = React.memo(function NewUserPage() {
   const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const onCreateUserSuccess = useCallback((user: User) => {
-    setShowModal({
-      title: 'Käyttäjä luotu',
-      resolve: {
-        action: () => {
-          setShowModal(null)
-          navigate(`/luontotieto/käyttäjät/${user.id}`)
-        },
-        label: 'Ok'
-      }
-    })
-    void queryClient.invalidateQueries({ queryKey: ['users'] })
-  }, [])
+  const onCreateUserSuccess = useCallback(
+    (user: User) => {
+      setShowModal({
+        title: 'Käyttäjä luotu',
+        resolve: {
+          action: () => {
+            setShowModal(null)
+            void navigate(`/luontotieto/käyttäjät/${user.id}`)
+          },
+          label: 'Ok'
+        }
+      })
+      void queryClient.invalidateQueries({ queryKey: ['users'] })
+    },
+    [navigate, queryClient]
+  )
 
   const { mutateAsync: createUser, isPending: isSaving } = useMutation({
     mutationFn: apiPostUser,

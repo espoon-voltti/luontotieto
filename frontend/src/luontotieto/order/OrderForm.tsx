@@ -560,7 +560,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
         orderFiles
       )
     )
-  }, [originalFileInputs])
+  }, [originalFileInputs]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const uniquePlanNumbers = [...new Set([...planNumbers, ...props.planNumbers])]
   const planNumberSuggestions = uniquePlanNumbers.map((pn) => ({

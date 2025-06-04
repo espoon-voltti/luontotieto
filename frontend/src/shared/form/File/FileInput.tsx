@@ -107,7 +107,7 @@ export const FileInput = <
     if (!!data.focus && inputRef.current) {
       inputRef.current.focus()
     }
-  }, [])
+  }, [data.focus])
 
   const errorMessage = errors
     ? typeof errors === 'string'

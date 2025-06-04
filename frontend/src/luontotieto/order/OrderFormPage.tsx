@@ -91,25 +91,29 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
     OrderFileValidationErrorResponse[]
   >([])
 
-  const invalidateQueries = async (
-    orderId: string | undefined,
-    reloadOrder = true
-  ) => {
-    if (reloadOrder) {
+  const invalidateQueries = useCallback(
+    async (orderId: string | undefined, reloadOrder = true) => {
+      if (reloadOrder) {
+        await queryClient.invalidateQueries({
+          queryKey: ['order', orderId ?? id]
+        })
+      }
       await queryClient.invalidateQueries({
-        queryKey: ['order', orderId ?? id]
+        queryKey: ['orderFiles', orderId ?? id]
       })
-    }
-    await queryClient.invalidateQueries({
-      queryKey: ['orderFiles', orderId ?? id]
-    })
-    await queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
-    await queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
-  }
-  const resetFormState = async (orderId: string | undefined) => {
-    setOrderFileErrors([])
-    await invalidateQueries(orderId)
-  }
+      await queryClient.invalidateQueries({ queryKey: ['plan-numbers'] })
+      await queryClient.invalidateQueries({ queryKey: ['ordering-units'] })
+    },
+    [id, queryClient]
+  )
+
+  const resetFormState = useCallback(
+    async (orderId: string | undefined) => {
+      setOrderFileErrors([])
+      await invalidateQueries(orderId)
+    },
+    [invalidateQueries]
+  )
 
   const onCreateSuccess = useCallback(
     async ({ orderId, reportId }: { orderId: string; reportId: string }) => {
@@ -119,14 +123,14 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
         resolve: {
           action: () => {
             setShowModal(null)
-            navigate(`/luontotieto/selvitys/${reportId}`)
+            void navigate(`/luontotieto/selvitys/${reportId}`)
           },
           label: 'Ok'
         }
       })
       await resetFormState(orderId)
     },
-    []
+    [navigate, resetFormState]
   )
 
   const { mutateAsync: createOrderMutation } = useMutation({
@@ -183,7 +187,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
       }
     })
     await resetFormState(orderId)
-  }, [])
+  }, [orderId, resetFormState])
 
   const { mutateAsync: updateOrderMutation } = useMutation({
     mutationFn: apiPutOrder,
@@ -222,13 +226,13 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
       resolve: {
         action: () => {
           setShowModal(null)
-          navigate(`/luontotieto`)
+          void navigate(`/luontotieto`)
         },
         label: 'Ok'
       }
     })
     await resetFormState(orderId)
-  }, [])
+  }, [orderId, navigate, resetFormState])
 
   const { mutateAsync: deleteOrderMutation, isPending: deletingOrder } =
     useMutation({

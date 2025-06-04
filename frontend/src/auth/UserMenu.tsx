@@ -95,7 +95,7 @@ export const UserMenu = React.memo(function LanguageMenu({
     onSuccess: (success: boolean) => {
       if (success) {
         queryClient.removeQueries()
-        navigate('/kirjaudu')
+        void navigate('/kirjaudu')
       }
     }
   })
@@ -126,7 +126,7 @@ export const UserMenu = React.memo(function LanguageMenu({
               key="user-management"
               className={classNames({ active: true })}
               onClick={() => {
-                navigate(`/luontotieto/käyttäjät`)
+                void navigate(`/luontotieto/käyttäjät`)
                 setOpen(false)
               }}
               role="menuitemradio"
@@ -141,7 +141,7 @@ export const UserMenu = React.memo(function LanguageMenu({
               key="admin-settings"
               className={classNames({ active: true })}
               onClick={() => {
-                navigate(`/luontotieto/pääkäyttäjän-asetukset`)
+                void navigate(`/luontotieto/pääkäyttäjän-asetukset`)
                 setOpen(false)
               }}
               role="menuitemradio"
@@ -155,7 +155,7 @@ export const UserMenu = React.memo(function LanguageMenu({
             key="user-settings"
             className={classNames({ active: true })}
             onClick={() => {
-              navigate(`/luontotieto/omat-asetukset`)
+              void navigate(`/luontotieto/omat-asetukset`)
               setOpen(false)
             }}
             role="menuitemradio"

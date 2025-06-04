@@ -66,21 +66,24 @@ export const UserManagementForm = React.memo(function UserManagementForm({
 
   const userSelectedRoleInfo = roles.find((r) => r.role === userInput.role)
 
-  const onUpdateUserSuccess = useCallback((user: User) => {
-    void queryClient.invalidateQueries({ queryKey: ['users'] })
-    void queryClient.invalidateQueries({ queryKey: ['user', user.id] })
-    setShowModal({
-      title: 'Käyttäjän tiedot päivitetty',
-      resolve: {
-        action: () => {
-          setErrorMessage(null)
-          setShowModal(null)
-          setEnableEdit(false)
-        },
-        label: 'Ok'
-      }
-    })
-  }, [])
+  const onUpdateUserSuccess = useCallback(
+    (user: User) => {
+      void queryClient.invalidateQueries({ queryKey: ['users'] })
+      void queryClient.invalidateQueries({ queryKey: ['user', user.id] })
+      setShowModal({
+        title: 'Käyttäjän tiedot päivitetty',
+        resolve: {
+          action: () => {
+            setErrorMessage(null)
+            setShowModal(null)
+            setEnableEdit(false)
+          },
+          label: 'Ok'
+        }
+      })
+    },
+    [queryClient]
+  )
 
   const { mutateAsync: updateUserMutation } = useMutation({
     mutationFn: apiPutUser,
@@ -97,20 +100,23 @@ export const UserManagementForm = React.memo(function UserManagementForm({
     }
   })
 
-  const onResetUserPasswordSuccess = useCallback((userId: string) => {
-    void queryClient.invalidateQueries({ queryKey: ['users'] })
-    void queryClient.invalidateQueries({ queryKey: ['user', userId] })
-    setShowModal({
-      title: 'Käyttäjän salasana resetoitu',
-      resolve: {
-        action: () => {
-          setShowModal(null)
+  const onResetUserPasswordSuccess = useCallback(
+    (userId: string) => {
+      void queryClient.invalidateQueries({ queryKey: ['users'] })
+      void queryClient.invalidateQueries({ queryKey: ['user', userId] })
+      setShowModal({
+        title: 'Käyttäjän salasana resetoitu',
+        resolve: {
+          action: () => {
+            setShowModal(null)
+          },
+          label: 'Ok'
         },
-        label: 'Ok'
-      },
-      text: 'Uusi salasana on lähetetty käyttäjän sähköpostiin.'
-    })
-  }, [])
+        text: 'Uusi salasana on lähetetty käyttäjän sähköpostiin.'
+      })
+    },
+    [queryClient]
+  )
 
   const { mutateAsync: resetUserPasswordMutation } = useMutation({
     mutationFn: apiResetUserPassword,

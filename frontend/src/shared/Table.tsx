@@ -10,12 +10,11 @@ import styled from 'styled-components'
 import { ITheme, colors } from './theme'
 
 interface ThProps {
-  sticky?: boolean
-  stickyColumn?: boolean
-  top?: string
-  hidden?: boolean
-  align?: 'left' | 'right' | 'center'
-  minimalWidth?: boolean
+  $sticky?: boolean
+  $stickyColumn?: boolean
+  $top?: string
+  $align?: 'left' | 'right' | 'center'
+  $minimalWidth?: boolean
   theme: ITheme
 }
 
@@ -31,18 +30,18 @@ export const Th = styled.th<ThProps>`
   border-width: 0 0 1px;
   padding-left: 12px;
   text-align: ${({ align }) => align ?? 'left'};
-  position: ${(p) => (p.sticky ? 'sticky' : 'static')};
-  top: ${(p) => (p.sticky && p.top ? p.top : 'auto')};
-  background: ${(p) => (p.sticky ? p.theme.colors.grayscale.g0 : 'none')};
+  position: ${(p) => (p.$sticky ? 'sticky' : 'static')};
+  top: ${(p) => (p.$sticky && p.$top ? p.$top : 'auto')};
+  background: ${(p) => (p.$sticky ? p.theme.colors.grayscale.g0 : 'none')};
   ${(p) =>
-    p.minimalWidth
+    p.$minimalWidth
       ? `
             width: 0;
             white-space: nowrap;
           `
       : ''}
   ${(p) =>
-    p.stickyColumn
+    p.$stickyColumn
       ? `
             left: 0;
             z-index: 3 !important;
@@ -94,7 +93,7 @@ export const SortableTh = React.memo(function SortableTh({
   'data-qa': dataQa
 }: SortableProps) {
   return (
-    <Th sticky={sticky} top={top}>
+    <Th $sticky={sticky} $top={top}>
       <CustomButton onClick={onClick} data-qa={dataQa}>
         <span>{children}</span>
         <SortableIconContainer>
