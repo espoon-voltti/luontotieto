@@ -4,7 +4,7 @@
 
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React, { FocusEventHandler, useMemo } from 'react'
+import React, { FocusEventHandler, useCallback, useMemo } from 'react'
 import styled from 'styled-components'
 
 import { colors, InputWidth, inputWidthCss } from '../theme'
@@ -61,11 +61,14 @@ function GenericSelect<T>(props: SelectWithOptionGroupsProps<T>) {
 
   const flatItems = items.flatMap((group) => group.items)
 
-  const mapItem = (item: T): SelectOption => ({
-    value: getItemValue(item),
-    label: getItemLabel(item),
-    dataQa: getItemDataQa?.(item)
-  })
+  const mapItem = useCallback(
+    (item: T): SelectOption => ({
+      value: getItemValue(item),
+      label: getItemLabel(item),
+      dataQa: getItemDataQa?.(item)
+    }),
+    [getItemLabel, getItemValue, getItemDataQa]
+  )
 
   const options = useMemo(
     () =>
@@ -73,7 +76,7 @@ function GenericSelect<T>(props: SelectWithOptionGroupsProps<T>) {
         label: group.label,
         items: group.items.map((item) => mapItem(item))
       })),
-    [items]
+    [items, mapItem]
   )
 
   return (
