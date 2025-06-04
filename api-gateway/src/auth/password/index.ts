@@ -12,9 +12,11 @@ passport.use(
   'password',
   new LocalStrategy(
     { usernameField: 'email' },
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     async (email, password, done) => {
       const response = await postPasswordLogin(email, password)
       if ('errorCode' in response) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         return done(null, false, { message: response.errorCode })
       } else {
         return done(undefined, response)
@@ -28,6 +30,7 @@ export function createPasswordAuthRouter(): Router {
   router.use(express.json())
 
   router.post('/login', (req, res, next) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     passport.authenticate(
       'password',
       (

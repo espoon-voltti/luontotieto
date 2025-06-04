@@ -82,6 +82,8 @@ export async function postPasswordLogin(email: string, password: string) {
   } catch (e) {
     if (e instanceof AxiosError) {
       logError('Login failed with expected error', undefined, undefined, e)
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
       return { errorCode: e.response?.data?.errorCode ?? 'wrong-credentials' }
     }
 

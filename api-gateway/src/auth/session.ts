@@ -37,7 +37,7 @@ export interface Sessions {
     req: express.Request,
     logoutToken?: LogoutToken['value']
   ): Promise<void>
-  logoutWithToken(token: LogoutToken['value']): Promise<unknown | undefined>
+  logoutWithToken(token: LogoutToken['value']): Promise<unknown>
   consumeLogoutToken(token: LogoutToken['value']): Promise<void>
 }
 
@@ -70,8 +70,10 @@ export function sessionSupport(
   })
 
   const middleware: express.RequestHandler = (req, res, next) => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     baseMiddleware(req, res, (errOrDefer) => {
       if (errOrDefer) next(errOrDefer)
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       else extraMiddleware(req, res, next)
     })
   }
@@ -137,13 +139,14 @@ export function sessionSupport(
 
   async function logoutWithToken(
     logoutToken: LogoutToken['value']
-  ): Promise<unknown | undefined> {
+  ): Promise<unknown> {
     if (!logoutToken) return
     const sid = await redisClient.get(logoutKey(logoutToken))
     if (!sid) return
     const session = await redisClient.get(sessionKey(sid))
     await redisClient.del([sessionKey(sid), logoutKey(logoutToken)])
     if (!session) return
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
     const user = JSON.parse(session)?.passport?.user
     if (!user) return
     return user

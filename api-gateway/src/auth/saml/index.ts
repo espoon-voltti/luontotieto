@@ -96,6 +96,7 @@ export function createAdSamlStrategy(
 
   const login = async (profile: Profile): Promise<AppSessionUser> => {
     const asString = (value: unknown) =>
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       value == null ? undefined : String(value)
 
     const aad = profile[config.userIdKey]
@@ -103,6 +104,7 @@ export function createAdSamlStrategy(
 
     const firstName = asString(profile[AD_GIVEN_NAME_KEY])?.split(' ')[0] ?? ''
     const person = await userLogin({
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions
       externalId: `${config.externalIdPrefix}:${aad}`,
       name: `${firstName} ${asString(profile[AD_FAMILY_NAME_KEY])}`,
       email: asString(profile[AD_EMAIL_KEY])
@@ -144,6 +146,7 @@ export function createAdSamlStrategy(
       .catch(done)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const logoutVerify: VerifyWithRequest = (req, profile, done) =>
     (async () => {
       if (!profile) return undefined
@@ -172,12 +175,14 @@ export function createAdSamlStrategy(
       }
     })()
       .then((user) => done(null, user))
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       .catch((err) => done(err))
 
   return new SamlStrategy(samlConfig, loginVerify, logoutVerify)
 }
 
 export function parseRelayState(req: express.Request): string | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const relayState = req.body?.RelayState || req.query.RelayState
 
   if (typeof relayState === 'string' && path.isAbsolute(relayState)) {

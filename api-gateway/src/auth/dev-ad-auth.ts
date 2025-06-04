@@ -43,6 +43,7 @@ const devUsers: AdUser[] = [
   }
 ]
 
+// eslint-disable-next-line @typescript-eslint/require-await
 const loginFormHandler: AsyncRequestHandler = async (req, res) => {
   const userOptions = devUsers.map((user, idx) => {
     const { externalId, name } = user
@@ -81,6 +82,7 @@ const loginFormHandler: AsyncRequestHandler = async (req, res) => {
 
 const verifyUser = async (req: Request): Promise<AppSessionUser> => {
   const preset = assertStringProp(req.body, 'preset')
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const person = await userLogin(JSON.parse(preset))
   return {
     id: person.id

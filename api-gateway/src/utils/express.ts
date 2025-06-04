@@ -41,7 +41,7 @@ export function assertStringProp<T, K extends keyof T>(
   const value = object[property]
   if (typeof value !== 'string') {
     throw new InvalidRequest(
-      `Expected '${String(property)}' to be string, but it is ${value}`
+      `Expected '${String(property)}' to be string, but it is ${typeof value}`
     )
   }
   return value

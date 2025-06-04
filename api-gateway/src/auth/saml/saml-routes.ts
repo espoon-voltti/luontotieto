@@ -11,6 +11,7 @@ import express, { Router, urlencoded } from 'express'
 import passport from 'passport'
 
 import { logDebug, logInfo } from '../../logging/index.js'
+import { toError } from '../../utils/error-utils.js'
 import { toMiddleware, toRequestHandler } from '../../utils/express.js'
 import { fromCallback } from '../../utils/promise-utils.js'
 import { createLogoutToken, login, logout } from '../index.js'
@@ -41,6 +42,7 @@ function createLoginHandler({
   return (req, res, next) => {
     logInfo('Login endpoint called', req)
     const options: AuthenticateOptions = {}
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     passport.authenticate(
       strategyName,
       options,
@@ -51,9 +53,11 @@ function createLoginHandler({
       ) => {
         if (err || !user) {
           const description =
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             parseDescriptionFromSamlError(err, req) ||
             'Could not parse SAML message'
 
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           if (err.message === 'InResponseTo is not valid' && req.user) {
             // When user uses browse back functionality after login we get invalid InResponseTo
             // This will ignore the error
@@ -114,8 +118,10 @@ function createLogoutHandler({
       res.redirect(redirectUrl ?? defaultNoAuthUrl)
     } catch (err) {
       logInfo(
-        `Log out failed. Description: Failed before redirecting user to IdP. Error: ${err}.`,
-        req
+        `Log out failed. Description: Failed before redirecting user to IdP.`,
+        req,
+        undefined,
+        toError(err)
       )
       throw err
     }
@@ -140,6 +146,7 @@ export default function createSamlRouter(
   const logoutHandler = createLogoutHandler(endpointConfig)
   const logoutCallback = toMiddleware(async (req) => {
     logInfo('Logout callback called', req)
+    return Promise.resolve()
   })
 
   const router = Router()
@@ -165,6 +172,7 @@ export default function createSamlRouter(
   router.get(
     `/logout/callback`,
     logoutCallback,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     passport.authenticate(strategyName),
     (req, res) => res.redirect(getRedirectUrl(req))
   )
@@ -172,6 +180,7 @@ export default function createSamlRouter(
     `/logout/callback`,
     urlencodedParser,
     logoutCallback,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     passport.authenticate(strategyName),
     (req, res) => res.redirect(getRedirectUrl(req))
   )

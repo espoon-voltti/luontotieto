@@ -13,6 +13,7 @@ import { configFromEnv, httpPort, toRedisClientOpts } from './config.js'
 import { logInfo, logError, loggingMiddleware } from './logging/index.js'
 import { fallbackErrorHandler } from './middleware/errors.js'
 import { createRouter } from './router.js'
+import { toError } from './utils/error-utils.js'
 import { trustReverseProxy } from './utils/express.js'
 
 sourceMapSupport.install()
@@ -20,10 +21,10 @@ const config = configFromEnv()
 
 const redisClient = redis.createClient(toRedisClientOpts(config.redis))
 redisClient.on('error', (err) =>
-  logError('Redis error', undefined, undefined, err)
+  logError('Redis error', undefined, undefined, toError(err))
 )
 redisClient.connect().catch((err) => {
-  logError('Unable to connect to redis', undefined, undefined, err)
+  logError('Unable to connect to redis', undefined, undefined, toError(err))
 })
 // Don't prevent the app from exiting if a redis connection is alive.
 redisClient.unref()
