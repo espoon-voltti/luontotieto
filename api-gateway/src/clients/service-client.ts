@@ -2,8 +2,9 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import express from 'express'
 import axios, { AxiosError } from 'axios'
+import express from 'express'
+
 import { AppSessionUser, createAuthHeader } from '../auth/index.js'
 import { serviceUrl } from '../config.js'
 import { logError } from '../logging/index.js'
@@ -18,7 +19,9 @@ const systemUser: AppSessionUser = {
 
 export type ServiceRequestHeader = 'Authorization' | 'X-Request-ID'
 
-export type ServiceRequestHeaders = { [H in ServiceRequestHeader]?: string }
+export type ServiceRequestHeaders = Partial<
+  Record<ServiceRequestHeader, string>
+>
 
 export function createServiceRequestHeaders(
   req: express.Request | undefined,
@@ -79,6 +82,8 @@ export async function postPasswordLogin(email: string, password: string) {
   } catch (e) {
     if (e instanceof AxiosError) {
       logError('Login failed with expected error', undefined, undefined, e)
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
       return { errorCode: e.response?.data?.errorCode ?? 'wrong-credentials' }
     }
 

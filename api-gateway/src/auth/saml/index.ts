@@ -2,8 +2,9 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { z } from 'zod'
-import _ from 'lodash'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+
 import {
   CacheProvider,
   Profile,
@@ -11,16 +12,18 @@ import {
   Strategy as SamlStrategy,
   VerifyWithRequest
 } from '@node-saml/passport-saml'
-import { logError, logWarn } from '../../logging/index.js'
-import { AppSessionUser, createLogoutToken } from '../index.js'
-import { appBaseUrl, Config, EspooSamlConfig } from '../../config.js'
-import { readFileSync } from 'node:fs'
-import certificates, { TrustedCertificates } from './certificates.js'
 import express from 'express'
-import path from 'node:path'
-import { Sessions } from '../session.js'
-import { fromCallback } from '../../utils/promise-utils.js'
+import _ from 'lodash'
+import { z } from 'zod'
+
 import { userLogin } from '../../clients/service-client.js'
+import { appBaseUrl, Config, EspooSamlConfig } from '../../config.js'
+import { logError, logWarn } from '../../logging/index.js'
+import { fromCallback } from '../../utils/promise-utils.js'
+import { AppSessionUser, createLogoutToken } from '../index.js'
+import { Sessions } from '../session.js'
+
+import certificates, { TrustedCertificates } from './certificates.js'
 
 export function createSamlConfig(
   config: EspooSamlConfig,
@@ -93,6 +96,7 @@ export function createAdSamlStrategy(
 
   const login = async (profile: Profile): Promise<AppSessionUser> => {
     const asString = (value: unknown) =>
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       value == null ? undefined : String(value)
 
     const aad = profile[config.userIdKey]
@@ -100,6 +104,7 @@ export function createAdSamlStrategy(
 
     const firstName = asString(profile[AD_GIVEN_NAME_KEY])?.split(' ')[0] ?? ''
     const person = await userLogin({
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions
       externalId: `${config.externalIdPrefix}:${aad}`,
       name: `${firstName} ${asString(profile[AD_FAMILY_NAME_KEY])}`,
       email: asString(profile[AD_EMAIL_KEY])
@@ -141,6 +146,7 @@ export function createAdSamlStrategy(
       .catch(done)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const logoutVerify: VerifyWithRequest = (req, profile, done) =>
     (async () => {
       if (!profile) return undefined
@@ -169,12 +175,14 @@ export function createAdSamlStrategy(
       }
     })()
       .then((user) => done(null, user))
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       .catch((err) => done(err))
 
   return new SamlStrategy(samlConfig, loginVerify, logoutVerify)
 }
 
 export function parseRelayState(req: express.Request): string | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const relayState = req.body?.RelayState || req.query.RelayState
 
   if (typeof relayState === 'string' && path.isAbsolute(relayState)) {

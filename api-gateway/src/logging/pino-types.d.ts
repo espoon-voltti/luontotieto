@@ -4,6 +4,7 @@
 
 import { Request } from 'express'
 import pino from 'pino'
+
 import SerializedResponse = pino.SerializedResponse
 import SerializedRequest = pino.SerializedRequest
 
