@@ -24,6 +24,7 @@ object DocumentName {
     const val LUONTOTYYPIT = "Luontotyypit"
     const val EKOYHTEYDET = "Ekoyhteydet"
     const val LAHTEET = "Lähteet"
+    const val VIERASLAJIT = "Vieraslajit"
 }
 
 enum class FileExtension(
@@ -111,6 +112,12 @@ enum class DocumentType(
 
     @DatabaseValue("paikkatieto:lahteet_pisteet")
     LAHTEET_PISTEET(TableDefinition.LAHTEET_PISTEET, DocumentName.LAHTEET),
+
+    @DatabaseValue("paikkatieto:vieraslajit_alueet")
+    VIERASLAJIT_ALUEET(TableDefinition.VIERASLAJIT_ALUEET, DocumentName.VIERASLAJIT),
+
+    @DatabaseValue("paikkatieto:vieraslajit_pisteet")
+    VIERASLAJIT_PISTEET(TableDefinition.VIERASLAJIT_PISTEET, DocumentName.VIERASLAJIT),
 
     @DatabaseValue("luontotieto:report")
     REPORT(fileExtension = FileExtension.PDF),

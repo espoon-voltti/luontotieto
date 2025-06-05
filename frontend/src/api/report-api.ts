@@ -41,6 +41,10 @@ export function getDocumentTypeTitle<
       return 'Ekoyhteydet viivat'
     case ReportFileDocumentType.LAHTEET_PISTEET:
       return 'Lähde pisteet'
+    case ReportFileDocumentType.VIERASLAJIT_ALUEET:
+      return 'Vieraslajit alueet'
+    case ReportFileDocumentType.VIERASLAJIT_PISTEET:
+      return 'Vieraslajit pisteet'
     case ReportFileDocumentType.OTHER:
       return 'Muu liite'
     case ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS:
@@ -88,6 +92,10 @@ export function getReportDocumentTypeInfo<T extends ReportFileDocumentType>(
       return 'Ekologiset yhteydet viivamaisina kohteina.'
     case ReportFileDocumentType.LAHTEET_PISTEET:
       return 'Lähteet pistemäisinä kohteina.'
+    case ReportFileDocumentType.VIERASLAJIT_ALUEET:
+      return 'Vieraslajit aluemuotoisina kohteina.'
+    case ReportFileDocumentType.VIERASLAJIT_PISTEET:
+      return 'Vieraslajit pistemäisinä kohteina.'
     case ReportFileDocumentType.OTHER:
       return 'Muu liite'
     case ReportFileDocumentType.ALUERAJAUS_LUONTOSELVITYS:
@@ -114,6 +122,8 @@ export enum ReportFileDocumentType {
   EKOYHTEYDET_ALUEET = 'EKOYHTEYDET_ALUEET',
   EKOYHTEYDET_VIIVAT = 'EKOYHTEYDET_VIIVAT',
   LAHTEET_PISTEET = 'LAHTEET_PISTEET',
+  VIERASLAJIT_ALUEET = 'VIERASLAJIT_ALUEET',
+  VIERASLAJIT_PISTEET = 'VIERASLAJIT_PISTEET',
   ALUERAJAUS_LUONTOSELVITYS = 'ALUERAJAUS_LUONTOSELVITYS',
   OTHER = 'OTHER',
   REPORT = 'REPORT'
