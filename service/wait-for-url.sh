@@ -7,7 +7,7 @@
 url="$1"
 code="${2:-200}"
 healthcheck() {
-	curl -sSw "%{http_code}" --connect-timeout 3 --max-time 5 "$url" -o /dev/null
+	curl -sSw "%{http_code}" --connect-timeout 8 --max-time 10 "$url" -o /dev/null
 }
 
 TRIES=60

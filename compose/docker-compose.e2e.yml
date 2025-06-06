@@ -25,9 +25,9 @@ services:
     environment:
       JAVA_OPTS: -server -Djava.security.egd=file:/dev/./urandom -Xms1024m -Xss512k -Xmx1024m -XX:TieredStopAtLevel=1
       SERVER_PORT: 9000
-      SPRING_DATASOURCE_URL: jdbc:postgresql://luontotieto-db:5432/luontotieto
-      SPRING_DATASOURCE_USERNAME: luontotieto
-      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_LUONTOTIETO_URL: jdbc:postgresql://luontotieto-db:5432/luontotieto
+      SPRING_DATASOURCE_LUONTOTIETO_USERNAME: luontotieto
+      SPRING_DATASOURCE_LUONTOTIETO_PASSWORD: postgres
       APP_JWT_PUBLIC_KEYS_URL: classpath:local-development/jwks.json
 
   api-gateway:

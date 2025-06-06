@@ -147,7 +147,15 @@ tasks.register("resolveDependencies") {
 tasks {
     bootRun { systemProperty("spring.profiles.active", "local") }
 
+    register("e2eTestDeps", JavaExec::class) {
+        group = "build"
+        classpath = sourceSets["e2eTest"].runtimeClasspath
+        mainClass = "com.microsoft.playwright.CLI"
+        args("install-deps")
+    }
+
     register("e2eTest", Test::class) {
+        systemProperty("spring.profiles.active", "e2etest")
         useJUnitPlatform()
         group = "verification"
         testClassesDirs = sourceSets["e2eTest"].output.classesDirs

@@ -54,6 +54,7 @@ services:
       interval: 1s
       timeout: 5s
       retries: 5
+
   geoserver:
     image: docker.osgeo.org/geoserver:2.25.x
     ports:
