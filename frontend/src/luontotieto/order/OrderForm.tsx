@@ -261,6 +261,14 @@ const defaultReportDocuments = [
   {
     checked: false,
     documentType: ReportFileDocumentType.LAHTEET_PISTEET
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.VIERASLAJIT_ALUEET
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.VIERASLAJIT_PISTEET
   }
 ]
 

@@ -420,6 +420,48 @@ enum class TableDefinition(
                     isNullable = true
                 )
             )
+    ),
+    VIERASLAJIT_ALUEET(
+        layerName = "vieraslajit_alueet",
+        sqlInsertStatement = SQL_INSERT_VIERASLAJIT_ALUEET,
+        columns =
+            listOf(
+                Column(name = "geom", kClass = Polygon::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "tieteellinen_nimi", kClass = String::class),
+                Column(name = "suomenkielinen_nimi", kClass = String::class),
+                Column(name = "yksilo_maara", kClass = Int::class, isNullable = true),
+                Column(name = "yksikko", kClass = String::class, isNullable = true),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                // Do not write pinta_ala to DB. Keep it only in the template.
+                Column(name = "pinta_ala", kClass = Double::class, isNullable = true),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
+                )
+            )
+    ),
+    VIERASLAJIT_PISTEET(
+        layerName = "vieraslajit_pisteet",
+        sqlInsertStatement = SQL_INSERT_VIERASLAJIT_PISTEET,
+        columns =
+            listOf(
+                Column(name = "geom", kClass = Point::class),
+                Column(name = "pvm", kClass = Date::class),
+                Column(name = "tieteellinen_nimi", kClass = String::class),
+                Column(name = "suomenkielinen_nimi", kClass = String::class),
+                Column(name = "yksilo_maara", kClass = Int::class, isNullable = true),
+                Column(name = "yksikko", kClass = String::class, isNullable = true),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(name = "havaitsija", kClass = String::class),
+                Column(
+                    name = "viite",
+                    kClass = String::class,
+                    isNullable = true
+                )
+            )
     )
 }
 
@@ -957,6 +999,66 @@ private const val SQL_INSERT_LAHTEET_PISTEET =
         :havaitsija,
         :tyyppi,
         :lisatieto,
+        :reportName,
+        :reportId,
+        ST_GeomFromWKB(:geom, 3879)
+    )
+    RETURNING id
+    """
+
+private const val SQL_INSERT_VIERASLAJIT_ALUEET =
+    """
+    INSERT INTO vieraslajit_alueet (
+        pvm,
+        tieteellinen_nimi,
+        suomenkielinen_nimi,
+        yksilo_maara,
+        yksikko,
+        lisatieto,
+        pinta_ala,
+        havaitsija,
+        viite,
+        selvitys_id,
+        geom
+    ) 
+    VALUES (
+        :pvm,
+        :tieteellinen_nimi,
+        :suomenkielinen_nimi,
+        :yksilo_maara,
+        :yksikko,
+        :lisatieto,
+        :pinta_ala,
+        :havaitsija,
+        :reportName,
+        :reportId,
+        ST_GeomFromWKB(:geom, 3879)
+    )
+    RETURNING id
+    """
+
+private const val SQL_INSERT_VIERASLAJIT_PISTEET =
+    """
+    INSERT INTO vieraslajit_pisteet (
+        pvm,
+        tieteellinen_nimi,
+        suomenkielinen_nimi,
+        yksilo_maara,
+        yksikko,
+        lisatieto,
+        havaitsija,
+        viite,
+        selvitys_id,
+        geom
+    ) 
+    VALUES (
+        :pvm,
+        :tieteellinen_nimi,
+        :suomenkielinen_nimi,
+        :yksilo_maara,
+        :yksikko,
+        :lisatieto,
+        :havaitsija,
         :reportName,
         :reportId,
         ST_GeomFromWKB(:geom, 3879)

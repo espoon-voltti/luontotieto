@@ -1,0 +1,16 @@
+<layer>
+  <name>vieraslajit_alueet</name>
+  <id>LayerInfoImpl--39c8a9e8:197401cf81f:-7ffe</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--3bd8cec9:18ef552d955:-7ffe</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--39c8a9e8:197401cf81f:-7fff</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2025-06-05 12:46:21.531 UTC</dateCreated>
+</layer>
