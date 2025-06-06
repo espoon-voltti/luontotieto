@@ -121,7 +121,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
 
       setShowModal({
         title: 'Tietojen tallennus epäonnistui',
-        text: `Seuravien tiedostojen tallennus epäonnistui: ${errors
+        text: `Seuraavien tiedostojen tallennus epäonnistui: ${errors
           .map((e) => `${getDocumentTypeTitle(e.documentType)}:${e.name} \r\n`)
           .join(',')}`,
         resolve: {

@@ -281,7 +281,7 @@ export const ReportForm = React.memo(function ReportForm(
     ) => {
       setFileInputs(
         fileInputs.map((fi) => {
-          if (fi.documentType === modified.documentType) {
+          if (fi.id === modified.id) {
             return {
               ...fi,
               userDescription: modified.description,

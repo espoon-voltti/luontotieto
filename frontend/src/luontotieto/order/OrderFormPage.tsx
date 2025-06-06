@@ -158,7 +158,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
       setOrderId(firstOrderId)
 
       const text = firstOrderId
-        ? `Seuravien tiedostojen tallennus epäonnistui: ${errors
+        ? `Seuraavien tiedostojen tallennus epäonnistui: ${errors
             .map((e) => `${getDocumentTypeTitle(e.documentType)}:${e.name}`)
             .join(', ')}`
         : ''
@@ -207,7 +207,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
 
       setShowModal({
         title: 'Tilauksen päivitys epäonnistui',
-        text: `Seuravien tiedostojen tallennus epäonnistui: ${errors
+        text: `Seuraavien tiedostojen tallennus epäonnistui: ${errors
           .map((e) => `${getDocumentTypeTitle(e.documentType)}:${e.name} `)
           .join(', ')}`,
         resolve: {
