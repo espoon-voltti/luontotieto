@@ -111,7 +111,7 @@ export const UserMenu = React.memo(function LanguageMenu({
     >
       <DropDownButton
         onClick={toggleOpen}
-        data-qa="logged-in-user-foobar"
+        data-qa="logged-in-user"
         aria-expanded={open}
         aria-haspopup="true"
       >
