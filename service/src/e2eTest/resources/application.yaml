@@ -29,10 +29,10 @@ luontotieto:
 spring:
   datasource:
     luontotieto:
-      jdbcUrl: "jdbc:postgresql://localhost:5432/luontotieto_it"
+      jdbcUrl: "jdbc:postgresql://${LUONTOTIETO_DB_HOST:localhost}:${LUONTOTIETO_DB_PORT:5432}/luontotieto_it"
       username: "luontotieto"
       password: "postgres"
     paikkatieto:
-      jdbcUrl: "jdbc:postgresql://localhost:5433/paikkatietodb_it"
+      jdbcUrl: "jdbc:postgresql://${PAIKKATIETO_DB_HOST:localhost}:${PAIKKATIETO_DB_PORT:5433}/paikkatietodb_it"
       username: "paikkatietodb"
       password: "postgres"

@@ -25,7 +25,7 @@ services:
       EMAIL_SENDER_ADDRESS: fake
       EMAIL_SENDER_ARN: fake
       GEOSERVER_URL: fake
-      GEOSERVER_USERNAME: fakse
+      GEOSERVER_USERNAME: fake
       GEOSERVER_PASSWORD: fake
     entrypoint: ./gradlew test
     depends_on:

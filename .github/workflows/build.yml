@@ -247,6 +247,69 @@ jobs:
             compose/tests-all.log
           retention-days: 2
 
+  e2e-test:
+    runs-on: ubuntu-latest
+    needs:
+      - service-builder
+      - dockerize
+    env:
+      BUILD: "false"
+      TAG: "${{ github.event.pull_request.head.sha || github.sha }}"
+
+    defaults:
+      run:
+        working-directory: compose
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-duration-seconds: 1200
+
+      - name: Login to Amazon ECR
+        if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Pull images
+        if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
+        run: |
+          ./e2e-test-compose pull
+
+      - name: Build images
+        if: ${{ github.actor == 'dependabot[bot]' || github.event.pull_request.head.repo.fork }}
+        run: |
+          ./e2e-test-compose build --parallel
+
+      - name: Start dependencies
+        run: |
+          ./e2e-test-compose up -d luontotieto-db redis paikkatieto-db s3-mock geoserver frontend api-gateway
+
+      - name: Run e2e tests
+        run: |
+          set -o pipefail
+          ./e2e-test-compose up --exit-code-from service-e2e-tests service-e2e-tests | tee tests.log
+
+      - name: Get logs
+        if: always()
+        run: |
+          ./e2e-test-compose logs > tests-all.log
+
+      - name: Store logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: |
+            compose/tests.log
+            compose/tests-all.log
+          retention-days: 2
+
   deploy:
     # if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
