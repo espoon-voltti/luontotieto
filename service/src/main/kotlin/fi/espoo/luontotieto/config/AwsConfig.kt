@@ -24,11 +24,11 @@ import software.amazon.awssdk.utils.AttributeMap
 @Configuration
 class AwsConfig {
     @Bean
-    @Profile("local")
+    @Profile("local", "e2etest")
     fun credentialsProviderLocal(): AwsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create("foo", "bar"))
 
     @Bean
-    @Profile("local")
+    @Profile("local", "e2etest")
     fun amazonS3Local(
         env: BucketEnv,
         credentialsProvider: AwsCredentialsProvider
@@ -58,7 +58,7 @@ class AwsConfig {
     }
 
     @Bean
-    @Profile("local")
+    @Profile("local", "e2etest")
     fun amazonS3PresignerLocal(
         env: BucketEnv,
         credentialsProvider: AwsCredentialsProvider

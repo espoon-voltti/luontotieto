@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2024 City of Espoo
+# SPDX-FileCopyrightText: 2023-2025 City of Espoo
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
@@ -7,7 +7,24 @@ app:
     public_keys_url: classpath:local-development/jwks.json
 
 luontotieto:
+  aws:
+    region: "eu-north-1"
+  s3mock:
+    url: "https://${S3_HOST:localhost}:${S3_PORT:9876}"
+  bucket:
+    data: "data"
+    proxy_through_nginx: false
+    verify_file_av_tagged: false
+  email:
+    enabled: "false"
+    region: "fake"
+    sender_address: "fake"
+    sender_arn: "fake"
   host: "http://localhost:9000"
+  geoserver:
+    base_url: "http://localhost:8000/"
+    username: "admin"
+    password: "password"
 
 spring:
   datasource:

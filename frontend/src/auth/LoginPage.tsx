@@ -54,10 +54,14 @@ export const LoginPage = React.memo(function LoginPage() {
               <LinkStyledAsButton
                 href={getLoginUrl()}
                 style={{ marginRight: '32px' }}
+                data-qa="start-ad-login"
               >
                 Espoo AD
               </LinkStyledAsButton>
-              <LinkStyledAsButton href="/kirjaudu/yrityskayttaja">
+              <LinkStyledAsButton
+                href="/kirjaudu/yrityskayttaja"
+                data-qa="start-password-login"
+              >
                 Yrityskäyttäjä
               </LinkStyledAsButton>
             </FlexRowWithGaps>
