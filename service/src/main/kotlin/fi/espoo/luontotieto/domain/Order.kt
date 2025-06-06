@@ -32,6 +32,7 @@ data class Order(
     val createdBy: String,
     val updatedBy: String,
     val assignee: String,
+    val assigneeRole: UserRole,
     val assigneeId: UUID,
     val assigneeContactPerson: String,
     val assigneeContactEmail: String,
@@ -82,6 +83,7 @@ private const val SELECT_ORDER_SQL =
            uc.name AS "createdBy",
            uu.name AS "updatedBy",
            ua.name AS "assignee",
+           ua.role AS "assigneeRole",
            o.assignee_id AS "assigneeId",
            CASE
                 WHEN r.approved IS TRUE THEN TRUE

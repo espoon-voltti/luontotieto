@@ -13,6 +13,7 @@ export interface Order extends OrderFormInput {
   created: Date
   updated: Date
   assignee: string
+  assigneeRole: string
   createdBy: string
   updatedBy: string
   hasApprovedReport: boolean

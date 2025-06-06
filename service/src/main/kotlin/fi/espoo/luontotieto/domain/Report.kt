@@ -61,6 +61,7 @@ private const val SELECT_REPORT_SQL =
            o.plan_number                              AS "o_planNumber",
            o.report_documents                         AS "o_reportDocuments",
            oua.name                                   AS "o_assignee",
+           oua.role                                   AS "o_assigneeRole",
            o.assignee_id                              AS "o_assigneeId",
            ouc.name                                   AS "o_createdBy",
            ouu.name                                   AS "o_updatedBy",
