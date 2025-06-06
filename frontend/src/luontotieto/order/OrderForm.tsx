@@ -605,7 +605,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Tilaajan yksikkö</Label>
+              <Label>Tilaajataho</Label>
               <TagAutoComplete
                 suggestions={orderingUnitSuggestions}
                 data={
