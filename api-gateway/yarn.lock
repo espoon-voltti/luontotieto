@@ -3561,7 +3561,7 @@ __metadata:
     passport: "npm:^0.7.0"
     passport-local: "npm:^1.0.0"
     pino: "npm:^9.7.0"
-    pino-http: "npm:^10.4.0"
+    pino-http: "npm:^10.5.0"
     pino-pretty: "npm:^13.0.0"
     prettier: "npm:^3.5.3"
     query-string: "npm:^9.2.0"
@@ -4182,15 +4182,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-http@npm:^10.4.0":
-  version: 10.4.0
-  resolution: "pino-http@npm:10.4.0"
+"pino-http@npm:^10.5.0":
+  version: 10.5.0
+  resolution: "pino-http@npm:10.5.0"
   dependencies:
     get-caller-file: "npm:^2.0.5"
     pino: "npm:^9.0.0"
     pino-std-serializers: "npm:^7.0.0"
-    process-warning: "npm:^4.0.0"
-  checksum: 10/2e9b865fd30eae50019e947d02e8630aea16f5495159fa984087d3d1e3f3fb0dc9a99cfeb86d04e2c48cc3e4ac90f4aaa87f1bb7752d8fc1f2b6b0d08993cceb
+    process-warning: "npm:^5.0.0"
+  checksum: 10/74941bf3a194b897ba5e2d89baf4a1453065d9c7e15b08605ee8cf8f38cf2d44ce11549c46c7cf3367b4a58d9cc94a070d422a85607920d5230eb76645fe962d
   languageName: node
   linkType: hard
 
