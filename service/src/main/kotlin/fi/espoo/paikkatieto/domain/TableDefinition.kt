@@ -428,6 +428,11 @@ enum class TableDefinition(
             listOf(
                 Column(name = "geom", kClass = Polygon::class),
                 Column(name = "pvm", kClass = Date::class),
+                Column(
+                    name = "elioryhma",
+                    kClass = String::class,
+                    sqlType = "vieraslajit_elioryhma"
+                ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
                 Column(name = "yksilo_maara", kClass = Int::class, isNullable = true),
@@ -450,6 +455,18 @@ enum class TableDefinition(
             listOf(
                 Column(name = "geom", kClass = Point::class),
                 Column(name = "pvm", kClass = Date::class),
+                Column(
+                    name = "elioryhma",
+                    kClass = String::class,
+                    sqlType = "vieraslajit_elioryhma"
+                ),
+                Column(
+                    name = "tarkkuus",
+                    kClass = String::class,
+                    sqlType = "luontotieto_mittaustyyppi",
+                    isNullable = true
+                ),
+                Column(name = "koordinaatti_tarkkuus", kClass = Double::class, isNullable = true),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
                 Column(name = "yksilo_maara", kClass = Int::class, isNullable = true),
@@ -1010,6 +1027,7 @@ private const val SQL_INSERT_VIERASLAJIT_ALUEET =
     """
     INSERT INTO vieraslajit_alueet (
         pvm,
+        elioryhma,
         tieteellinen_nimi,
         suomenkielinen_nimi,
         yksilo_maara,
@@ -1022,6 +1040,7 @@ private const val SQL_INSERT_VIERASLAJIT_ALUEET =
     ) 
     VALUES (
         :pvm,
+        :elioryhma::vieraslajit_elioryhma,
         :tieteellinen_nimi,
         :suomenkielinen_nimi,
         :yksilo_maara,
@@ -1039,10 +1058,13 @@ private const val SQL_INSERT_VIERASLAJIT_PISTEET =
     """
     INSERT INTO vieraslajit_pisteet (
         pvm,
+        elioryhma,
         tieteellinen_nimi,
         suomenkielinen_nimi,
         yksilo_maara,
         yksikko,
+        koordinaatti_tarkkuus,
+        tarkkuus,
         lisatieto,
         havaitsija,
         viite,
@@ -1051,10 +1073,13 @@ private const val SQL_INSERT_VIERASLAJIT_PISTEET =
     ) 
     VALUES (
         :pvm,
+        :elioryhma::vieraslajit_elioryhma,
         :tieteellinen_nimi,
         :suomenkielinen_nimi,
         :yksilo_maara,
         :yksikko,
+        :koordinaatti_tarkkuus,
+        :tarkkuus::luontotieto_mittaustyyppi,
         :lisatieto,
         :havaitsija,
         :reportName,
