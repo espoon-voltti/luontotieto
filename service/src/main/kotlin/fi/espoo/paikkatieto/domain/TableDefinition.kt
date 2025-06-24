@@ -460,18 +460,18 @@ enum class TableDefinition(
                     kClass = String::class,
                     sqlType = "vieraslajit_elioryhma"
                 ),
+                Column(name = "tieteellinen_nimi", kClass = String::class),
+                Column(name = "suomenkielinen_nimi", kClass = String::class),
+                Column(name = "yksilo_maara", kClass = Int::class, isNullable = true),
+                Column(name = "yksikko", kClass = String::class, isNullable = true),
+                Column(name = "lisatieto", kClass = String::class, isNullable = true),
+                Column(name = "koordinaatti_tarkkuus", kClass = Double::class, isNullable = true),
                 Column(
                     name = "tarkkuus",
                     kClass = String::class,
                     sqlType = "luontotieto_mittaustyyppi",
                     isNullable = true
                 ),
-                Column(name = "koordinaatti_tarkkuus", kClass = Double::class, isNullable = true),
-                Column(name = "tieteellinen_nimi", kClass = String::class),
-                Column(name = "suomenkielinen_nimi", kClass = String::class),
-                Column(name = "yksilo_maara", kClass = Int::class, isNullable = true),
-                Column(name = "yksikko", kClass = String::class, isNullable = true),
-                Column(name = "lisatieto", kClass = String::class, isNullable = true),
                 Column(name = "havaitsija", kClass = String::class),
                 Column(
                     name = "viite",
