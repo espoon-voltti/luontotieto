@@ -16,7 +16,7 @@ const publicPath = '/'
 /* eslint-disable no-console */
 
 async function main() {
-  const args = yargs
+  const args = yargs()
     .option('--dev', {
       describe: 'Make a development build',
       type: 'boolean',
