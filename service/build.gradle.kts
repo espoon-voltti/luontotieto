@@ -48,7 +48,7 @@ dependencies {
 
     // cve fixes
     api("org.yaml:snakeyaml:2.4")
-    api("org.xerial:sqlite-jdbc:3.49.1.0")
+    api("org.xerial:sqlite-jdbc:3.50.2.0")
     api("commons-jxpath:commons-jxpath:1.4.0")
     api("org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.39.0")
 
