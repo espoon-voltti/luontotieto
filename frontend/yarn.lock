@@ -3455,10 +3455,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^3.42.0":
-  version: 3.42.0
-  resolution: "core-js@npm:3.42.0"
-  checksum: 10/07e10c475cdb45608559778c4d8d1561204aa57c937a3e77ebc7359a95a350f8acfdbeab59c6a6532eb3b47262be0d05aba150a00b79659a91bedda4f59d9d5f
+"core-js@npm:^3.45.0":
+  version: 3.45.0
+  resolution: "core-js@npm:3.45.0"
+  checksum: 10/162cd63b4d4cb2fed7a8635e69b760f4247e5d39ea99348e0b66af8e8899395a34de1b93504eb8db2adf4c47a0756475545c3da9c24875c7c33396fa8dc061c1
   languageName: node
   linkType: hard
 
@@ -5425,7 +5425,7 @@ __metadata:
     babel-plugin-styled-components: "npm:^2.1.4"
     classnames: "npm:^2.5.1"
     concurrently: "npm:^9.1.0"
-    core-js: "npm:^3.42.0"
+    core-js: "npm:^3.45.0"
     css-loader: "npm:^7.1.0"
     date-fns: "npm:^4.1.0"
     esbuild: "npm:^0.25.0"
