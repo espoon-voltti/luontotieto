@@ -97,6 +97,11 @@ export const PageContainer = styled.div`
   margin: 0 auto;
 `
 
+export const PageContainerWider = styled.div`
+  max-width: 1352px;
+  margin: 0 auto;
+`
+
 export const sectionPadding = '60px'
 
 export const SectionContainer = styled.div<{
