@@ -1,0 +1,2 @@
+ALTER TYPE luontotyyppi_paaryhma ADD VALUE 'Rakennettu ympäristö' BEFORE 'Muu';
+COMMENT ON COLUMN luontotyypit_alueet.luontotyyppi_paaryhma IS 'Valitaan listasta: Lehdot, Kangasmetsät, Metsien erikoistyypit, Suot, Kalliometsät/kalliot, Itämeri, Rannikko, Sisävedet ja rannat, Perinnebiotoopit, Uusympäristö, Rakennettu ympäristö, Muu. Kuvio voi sisältää vain yhden luontotyypin pääryhmän. Luontotyyppimääritelmät perustuvat vuoden 2018 julkaisuun Suomen luontotyyppien uhanalaisuus 2018.';
