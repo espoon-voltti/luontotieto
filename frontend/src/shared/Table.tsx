@@ -98,7 +98,7 @@ export const SortableTh = React.memo(function SortableTh({
       <CustomButton
         onClick={onClick}
         data-qa={dataQa}
-        style={{ textAlign: 'left' }}
+        style={{ textAlign: 'left', whiteSpace: 'break-spaces' }}
       >
         <span>{children}</span>
         <SortableIconContainer>

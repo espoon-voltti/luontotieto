@@ -231,7 +231,7 @@ export const ReportListPage = React.memo(function ReportList() {
           </thead>
           <tbody>
             {orderReports(reports).map((report) => (
-              <tr key={report.id}>
+              <tr key={report.id} style={{ verticalAlign: 'top' }}>
                 <td>{formatDateTime(report.updated)}</td>
                 <td>{report.approved ? 'Hyväksytty' : 'Lähetetty'}</td>
                 <td>
