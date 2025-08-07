@@ -345,7 +345,9 @@ const filterReports = (
       : true
 
     const unitMatch = unitLower
-      ? (report.order.orderingUnit?.includes(unitLower) ?? false)
+      ? (report.order.orderingUnit ?? []).some((unit) =>
+          unit.toLowerCase().includes(unitLower)
+        )
       : true
 
     return searchQueryMatch && assigneeMatch && unitMatch
