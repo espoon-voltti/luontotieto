@@ -62,7 +62,7 @@ interface SortableProps {
   sticky?: boolean
   top?: string
   'data-qa'?: string
-  $minimalWidth?: boolean
+  className?: string
 }
 
 const CustomButton = styled.button<{ theme: ITheme }>`
@@ -90,11 +90,11 @@ export const SortableTh = React.memo(function SortableTh({
   sorted,
   sticky,
   top,
-  $minimalWidth,
+  className,
   'data-qa': dataQa
 }: SortableProps) {
   return (
-    <Th $sticky={sticky} $top={top} $minimalWidth={$minimalWidth}>
+    <Th $sticky={sticky} $top={top} className={className}>
       <CustomButton
         onClick={onClick}
         data-qa={dataQa}

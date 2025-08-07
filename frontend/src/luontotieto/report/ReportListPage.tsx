@@ -176,32 +176,33 @@ export const ReportListPage = React.memo(function ReportList() {
 
         <VerticalGap $size="L" />
 
-        <Table style={{ width: '100%' }}>
+        <FixedTable>
           <thead>
             <tr>
-              <SortableTh
+              <SortableThWithWidth
                 sorted={isSorted('updated')}
                 onClick={toggleSort('updated')}
-                $minimalWidth
+                $width="120px"
               >
                 Viimeksi päivitetty
-              </SortableTh>
-              <SortableTh
+              </SortableThWithWidth>
+              <SortableThWithWidth
                 sorted={isSorted('approved')}
                 onClick={toggleSort('approved')}
-                $minimalWidth
+                $width="110px"
               >
                 TILA
-              </SortableTh>
-              <SortableTh
+              </SortableThWithWidth>
+              <SortableThWithWidth
                 sorted={isSorted('name')}
                 onClick={toggleSort('name')}
+                $width="240px"
               >
                 TILAUKSEN NIMI
-              </SortableTh>
-              <Th style={{ width: '220px' }}>MAANKÄYTÖN SUUNNITELMAT</Th>
-              <Th style={{ width: '280px' }}>SELVITETTÄVÄT ASIAT</Th>
-              <Th style={{ width: '150px' }}>
+              </SortableThWithWidth>
+              <Th style={{ width: '200px' }}>MAANKÄYTÖN SUUNNITELMAT</Th>
+              <Th style={{ width: '200px' }}>SELVITETTÄVÄT ASIAT</Th>
+              <Th style={{ width: '180px' }}>
                 <FlexCol
                   style={{ justifyContent: 'space-between', height: '80px' }}
                 >
@@ -214,7 +215,7 @@ export const ReportListPage = React.memo(function ReportList() {
                   />
                 </FlexCol>
               </Th>
-              <Th style={{ width: '150px' }}>
+              <Th style={{ width: '180px' }}>
                 <FlexCol
                   style={{ justifyContent: 'space-between', height: '80px' }}
                 >
@@ -234,12 +235,14 @@ export const ReportListPage = React.memo(function ReportList() {
               <tr key={report.id} style={{ verticalAlign: 'top' }}>
                 <td>{formatDateTime(report.updated)}</td>
                 <td>{report.approved ? 'Hyväksytty' : 'Lähetetty'}</td>
-                <td>
+                <BreakableTd>
                   <Link to={`/luontotieto/selvitys/${report.id}`}>
                     {report.order?.name ?? report.name}
                   </Link>
-                </td>
-                <td>{report.order?.planNumber?.toString() ?? '-'}</td>
+                </BreakableTd>
+                <BreakableTd>
+                  {report.order?.planNumber?.toString() ?? '-'}
+                </BreakableTd>
                 <td>
                   <ul>
                     {report.order?.reportDocuments.map((r, index) => (
@@ -249,10 +252,12 @@ export const ReportListPage = React.memo(function ReportList() {
                     ))}
                   </ul>
                 </td>
-                <td>
+                <BreakableTd>
                   {report.order?.assigneeCompanyName ?? report.order?.assignee}
-                </td>
-                <td>{report.order?.orderingUnit?.join(', ') ?? ''}</td>
+                </BreakableTd>
+                <BreakableTd>
+                  {report.order?.orderingUnit?.join(', ') ?? ''}
+                </BreakableTd>
               </tr>
             ))}
             {reports.length == 0 && (
@@ -261,7 +266,7 @@ export const ReportListPage = React.memo(function ReportList() {
               </tr>
             )}
           </tbody>
-        </Table>
+        </FixedTable>
       </SectionContainer>
       <AccessibilityFooter />
       {showModal && (
@@ -349,4 +354,19 @@ const filterReports = (
 
 const StyledInlineButton = styled(InlineButton)`
   margin-right: 32px;
+`
+
+const FixedTable = styled(Table)`
+  width: 100%;
+  table-layout: fixed;
+`
+
+const BreakableTd = styled.td`
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+`
+
+const SortableThWithWidth = styled(SortableTh)<{ $width: string }>`
+  width: ${(p) => p.$width};
 `
