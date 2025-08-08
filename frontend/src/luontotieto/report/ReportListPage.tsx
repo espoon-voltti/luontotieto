@@ -138,7 +138,7 @@ export const ReportListPage = React.memo(function ReportList() {
 
   return (
     <PageContainerWider>
-      <SectionContainer>
+      <ResponsiveSectionContainer>
         <H2>Selvitykset</H2>
         <VerticalGap $size="m" />
         <FlexLeftRight>
@@ -196,11 +196,11 @@ export const ReportListPage = React.memo(function ReportList() {
               <SortableThWithWidth
                 sorted={isSorted('name')}
                 onClick={toggleSort('name')}
-                $width="240px"
+                $width="220px"
               >
                 TILAUKSEN NIMI
               </SortableThWithWidth>
-              <Th style={{ width: '200px' }}>MAANKÄYTÖN SUUNNITELMAT</Th>
+              <Th style={{ width: '180px' }}>MAANKÄYTÖN SUUNNITELMAT</Th>
               <Th style={{ width: '200px' }}>SELVITETTÄVÄT ASIAT</Th>
               <Th style={{ width: '180px' }}>
                 <FlexCol
@@ -267,7 +267,7 @@ export const ReportListPage = React.memo(function ReportList() {
             )}
           </tbody>
         </FixedTable>
-      </SectionContainer>
+      </ResponsiveSectionContainer>
       <AccessibilityFooter />
       {showModal && (
         <InfoModal
@@ -371,4 +371,10 @@ const BreakableTd = styled.td`
 
 const SortableThWithWidth = styled(SortableTh)<{ $width: string }>`
   width: ${(p) => p.$width};
+`
+
+const ResponsiveSectionContainer = styled(SectionContainer)`
+  @media (max-width: 1400px) {
+    padding: 32px 16px;
+  }
 `
