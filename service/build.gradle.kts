@@ -63,8 +63,8 @@ dependencies {
 
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
 
-    implementation("org.geotools:gt-geopkg:33.1")
-    implementation("org.geotools:gt-epsg-hsql:33.1")
+    implementation("org.geotools:gt-geopkg:33.2")
+    implementation("org.geotools:gt-epsg-hsql:33.2")
 
     implementation("com.zaxxer:HikariCP:6.3.0")
     implementation("org.flywaydb:flyway-core:11.9.2")
@@ -107,6 +107,8 @@ dependencies {
     implementation("org.unbescape:unbescape:1.1.6.RELEASE")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    implementation("org.apache.commons:commons-lang3:3.18.0")
 }
 
 tasks.withType<KotlinCompile> {
