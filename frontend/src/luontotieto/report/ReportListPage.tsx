@@ -27,11 +27,12 @@ import styled from 'styled-components'
 
 import { hasOrdererRole, UserContext } from '../../auth/UserContext'
 import {
+  FlexCol,
   FlexLeftRight,
   FlexRow,
   FlexRowWithGaps,
   LabeledInput,
-  PageContainer,
+  PageContainerWider,
   SectionContainer,
   Table,
   VerticalGap
@@ -51,6 +52,9 @@ export const ReportListPage = React.memo(function ReportList() {
   const [sortBy, setSortBy] = useState<ReportSortColumn | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>('ASC')
   const [filterByReportAssignee, setFilterByReportAssignee] = useState<
+    string | null
+  >(null)
+  const [filterByOrderingUnit, setFilterByOrderingUnit] = useState<
     string | null
   >(null)
   const [filterBySearchQuery, setFilterBySearchQuery] = useDebouncedState<
@@ -81,6 +85,14 @@ export const ReportListPage = React.memo(function ReportList() {
     return [null, ...new Set(assignees)]
   }, [reports])
 
+  const orderingUnits = useMemo(() => {
+    const units = (reports ?? [])
+      .flatMap((r) => r.order?.orderingUnit ?? [])
+      .sort()
+
+    return [null, ...new Set(units)]
+  }, [reports])
+
   const isSorted = (column: ReportSortColumn) =>
     sortBy === column ? sortDirection : undefined
 
@@ -98,7 +110,8 @@ export const ReportListPage = React.memo(function ReportList() {
       const filtered = filterReports(
         reports,
         filterBySearchQuery,
-        filterByReportAssignee
+        filterByReportAssignee,
+        filterByOrderingUnit
       )
 
       return sortBy === null
@@ -109,7 +122,13 @@ export const ReportListPage = React.memo(function ReportList() {
             [sortDirection === 'ASC' ? 'asc' : 'desc']
           )
     },
-    [sortBy, sortDirection, filterByReportAssignee, filterBySearchQuery]
+    [
+      sortBy,
+      sortDirection,
+      filterByReportAssignee,
+      filterByOrderingUnit,
+      filterBySearchQuery
+    ]
   )
 
   if (isLoading || !reports) {
@@ -118,8 +137,8 @@ export const ReportListPage = React.memo(function ReportList() {
   }
 
   return (
-    <PageContainer>
-      <SectionContainer>
+    <PageContainerWider>
+      <ResponsiveSectionContainer>
         <H2>Selvitykset</H2>
         <VerticalGap $size="m" />
         <FlexLeftRight>
@@ -131,6 +150,7 @@ export const ReportListPage = React.memo(function ReportList() {
               icon={faSearch}
               $clearable={true}
               backgroundColor="#F7F7F7"
+              width="L"
             />
           </FlexRowWithGaps>
           <FlexRow>
@@ -156,51 +176,73 @@ export const ReportListPage = React.memo(function ReportList() {
 
         <VerticalGap $size="L" />
 
-        <Table style={{ width: '100%' }}>
+        <FixedTable>
           <thead>
             <tr>
-              <SortableTh
+              <SortableThWithWidth
                 sorted={isSorted('updated')}
                 onClick={toggleSort('updated')}
+                $width="120px"
               >
                 Viimeksi päivitetty
-              </SortableTh>
-              <SortableTh
+              </SortableThWithWidth>
+              <SortableThWithWidth
                 sorted={isSorted('approved')}
                 onClick={toggleSort('approved')}
+                $width="110px"
               >
                 TILA
-              </SortableTh>
-              <SortableTh
+              </SortableThWithWidth>
+              <SortableThWithWidth
                 sorted={isSorted('name')}
                 onClick={toggleSort('name')}
+                $width="220px"
               >
                 TILAUKSEN NIMI
-              </SortableTh>
-              <Th style={{ width: '160px' }}>MAANKÄYTÖN SUUNNITELMAT</Th>
-              <Th style={{ width: '300px' }}>SELVITETTÄVÄT ASIAT</Th>
-              <Th style={{ width: '80px' }}>
-                SELVITYKSEN TEKIJÄ
-                <Select
-                  selectedItem={filterByReportAssignee}
-                  items={reportAssignees ?? []}
-                  getItemLabel={(u) => u ?? 'Valitse'}
-                  onChange={setFilterByReportAssignee}
-                />
+              </SortableThWithWidth>
+              <Th style={{ width: '180px' }}>MAANKÄYTÖN SUUNNITELMAT</Th>
+              <Th style={{ width: '200px' }}>SELVITETTÄVÄT ASIAT</Th>
+              <Th style={{ width: '180px' }}>
+                <FlexCol
+                  style={{ justifyContent: 'space-between', height: '80px' }}
+                >
+                  <div>SELVITYKSEN TEKIJÄ</div>
+                  <Select
+                    selectedItem={filterByReportAssignee}
+                    items={reportAssignees ?? []}
+                    getItemLabel={(u) => u ?? 'Valitse'}
+                    onChange={setFilterByReportAssignee}
+                  />
+                </FlexCol>
+              </Th>
+              <Th style={{ width: '180px' }}>
+                <FlexCol
+                  style={{ justifyContent: 'space-between', height: '80px' }}
+                >
+                  <div>TILAAJATAHO</div>
+                  <Select
+                    selectedItem={filterByOrderingUnit}
+                    items={orderingUnits ?? []}
+                    getItemLabel={(u) => u ?? 'Valitse'}
+                    onChange={setFilterByOrderingUnit}
+                  />
+                </FlexCol>
               </Th>
             </tr>
           </thead>
           <tbody>
             {orderReports(reports).map((report) => (
-              <tr key={report.id}>
+              <tr key={report.id} style={{ verticalAlign: 'top' }}>
                 <td>{formatDateTime(report.updated)}</td>
                 <td>{report.approved ? 'Hyväksytty' : 'Lähetetty'}</td>
-                <td>
+                <BreakableTd>
                   <Link to={`/luontotieto/selvitys/${report.id}`}>
                     {report.order?.name ?? report.name}
                   </Link>
-                </td>
-                <td>{report.order?.planNumber?.toString() ?? '-'}</td>
+                </BreakableTd>
+                <BreakableTd>
+                  {report.order?.planNumber?.toString() ?? '-'}
+                </BreakableTd>
                 <td>
                   <ul>
                     {report.order?.reportDocuments.map((r, index) => (
@@ -210,9 +252,12 @@ export const ReportListPage = React.memo(function ReportList() {
                     ))}
                   </ul>
                 </td>
-                <td>
+                <BreakableTd>
                   {report.order?.assigneeCompanyName ?? report.order?.assignee}
-                </td>
+                </BreakableTd>
+                <BreakableTd>
+                  {report.order?.orderingUnit?.join(', ') ?? ''}
+                </BreakableTd>
               </tr>
             ))}
             {reports.length == 0 && (
@@ -221,8 +266,8 @@ export const ReportListPage = React.memo(function ReportList() {
               </tr>
             )}
           </tbody>
-        </Table>
-      </SectionContainer>
+        </FixedTable>
+      </ResponsiveSectionContainer>
       <AccessibilityFooter />
       {showModal && (
         <InfoModal
@@ -264,24 +309,26 @@ export const ReportListPage = React.memo(function ReportList() {
           </>
         </InfoModal>
       )}
-    </PageContainer>
+    </PageContainerWider>
   )
 })
 
 const filterReports = (
   reports: ReportDetails[],
   searchQuery: string | null,
-  assignee: string | null
+  assignee: string | null,
+  orderingUnit: string | null
 ) => {
   const searchQueryToLower = searchQuery ? searchQuery.toLowerCase() : null
   const assigneeLower = assignee ? assignee.toLowerCase() : null
+  const unitLower = orderingUnit ? orderingUnit.toLowerCase() : null
   return reports.filter((report) => {
     const reportMainAssignee =
       report.order.assigneeCompanyName?.toLowerCase() ??
       report.order.assignee.toLowerCase()
-    if (searchQueryToLower) {
-      return (
-        (report.name.toLowerCase().includes(searchQueryToLower) ||
+
+    const searchQueryMatch = searchQueryToLower
+      ? (report.name.toLowerCase().includes(searchQueryToLower) ||
           reportMainAssignee.includes(searchQueryToLower) ||
           report.order.planNumber
             ?.toString()
@@ -291,18 +338,43 @@ const filterReports = (
             ?.toLowerCase()
             .includes(searchQueryToLower)) &&
         (assigneeLower ? reportMainAssignee.includes(assigneeLower) : true)
-      )
-    } else if (assigneeLower) {
-      return (
-        report.order &&
-        assigneeLower &&
-        reportMainAssignee.includes(assigneeLower)
-      )
-    }
-    return true
+      : true
+
+    const assigneeMatch = assigneeLower
+      ? report.order && reportMainAssignee.includes(assigneeLower)
+      : true
+
+    const unitMatch = unitLower
+      ? (report.order.orderingUnit ?? []).some((unit) =>
+          unit.toLowerCase().includes(unitLower)
+        )
+      : true
+
+    return searchQueryMatch && assigneeMatch && unitMatch
   })
 }
 
 const StyledInlineButton = styled(InlineButton)`
   margin-right: 32px;
+`
+
+const FixedTable = styled(Table)`
+  width: 100%;
+  table-layout: fixed;
+`
+
+const BreakableTd = styled.td`
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+`
+
+const SortableThWithWidth = styled(SortableTh)<{ $width: string }>`
+  width: ${(p) => p.$width};
+`
+
+const ResponsiveSectionContainer = styled(SectionContainer)`
+  @media (max-width: 1400px) {
+    padding: 32px 16px;
+  }
 `
