@@ -194,37 +194,37 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@node-saml/node-saml@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "@node-saml/node-saml@npm:5.0.0"
+"@node-saml/node-saml@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "@node-saml/node-saml@npm:5.1.0"
   dependencies:
     "@types/debug": "npm:^4.1.12"
-    "@types/qs": "npm:^6.9.11"
+    "@types/qs": "npm:^6.9.18"
     "@types/xml-encryption": "npm:^1.2.4"
     "@types/xml2js": "npm:^0.4.14"
     "@xmldom/is-dom-node": "npm:^1.0.1"
     "@xmldom/xmldom": "npm:^0.8.10"
-    debug: "npm:^4.3.4"
-    xml-crypto: "npm:^6.0.0"
-    xml-encryption: "npm:^3.0.2"
+    debug: "npm:^4.4.0"
+    xml-crypto: "npm:^6.1.2"
+    xml-encryption: "npm:^3.1.0"
     xml2js: "npm:^0.6.2"
     xmlbuilder: "npm:^15.1.1"
     xpath: "npm:^0.0.34"
-  checksum: 10/e886f0831321997f682e2f1c652dee4c42e47e417bbe09c7d0f237ccd4604c8212449091398157e09cef03d389e7009b01413d7dedc97f275590317aff7185ff
+  checksum: 10/bbda150b30d7fd870cea133895237e15adbf3ae887c03fdca423a2f5787a87c3f66facf62c601d86ec8cc0b32ba8b1cfe99ca99ba9eaeb4182f5759b3596ef01
   languageName: node
   linkType: hard
 
-"@node-saml/passport-saml@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "@node-saml/passport-saml@npm:5.0.0"
+"@node-saml/passport-saml@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "@node-saml/passport-saml@npm:5.1.0"
   dependencies:
-    "@node-saml/node-saml": "npm:^5.0.0"
-    "@types/express": "npm:^4.17.21"
-    "@types/passport": "npm:^1.0.16"
+    "@node-saml/node-saml": "npm:^5.1.0"
+    "@types/express": "npm:^4.17.23"
+    "@types/passport": "npm:^1.0.17"
     "@types/passport-strategy": "npm:^0.2.38"
     passport: "npm:^0.7.0"
     passport-strategy: "npm:^1.0.0"
-  checksum: 10/3142f1f69c011288edd4c6a9d252b3186c3bcf7af6d0995b52258d7c1ba1c86a5b8ee5fa9306a522cf1d6c525da775439bc50164664a72aebb86ead7244fcc9e
+  checksum: 10/11b6ffd988e7f6a4c8119963eed280280799a5396c5499920518e5a3980e3222f54402244caa3e3f72ab3a759c11b8d2d3d5f1b6d2282b7090f6b05337382d11
   languageName: node
   linkType: hard
 
@@ -534,15 +534,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:^4.17.21":
-  version: 4.17.21
-  resolution: "@types/express@npm:4.17.21"
+"@types/express@npm:^4.17.23":
+  version: 4.17.23
+  resolution: "@types/express@npm:4.17.23"
   dependencies:
     "@types/body-parser": "npm:*"
     "@types/express-serve-static-core": "npm:^4.17.33"
     "@types/qs": "npm:*"
     "@types/serve-static": "npm:*"
-  checksum: 10/7a6d26cf6f43d3151caf4fec66ea11c9d23166e4f3102edfe45a94170654a54ea08cf3103d26b3928d7ebcc24162c90488e33986b7e3a5f8941225edd5eb18c7
+  checksum: 10/cf4d540bbd90801cdc79a46107b8873404698a7fd0c3e8dd42989d52d3bd7f5b8768672e54c20835e41e27349c319bb47a404ad14c0f8db0e9d055ba1cb8a05b
   languageName: node
   linkType: hard
 
@@ -606,12 +606,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^22.15.3":
-  version: 22.15.3
-  resolution: "@types/node@npm:22.15.3"
+"@types/node@npm:^24.2.0":
+  version: 24.2.0
+  resolution: "@types/node@npm:24.2.0"
   dependencies:
-    undici-types: "npm:~6.21.0"
-  checksum: 10/6b4ff03c36598432b419980f828281aa16383e2de6eb61f73275495ef8d2cbf8cb5607659b4cae5ff8b2b2ff69913ea07ffcc0be029e4280b6e8bc138dc6629b
+    undici-types: "npm:~7.10.0"
+  checksum: 10/b81501e05f15df28102baac60afbc82d30009ee0bf4dee41b7fa326ec5789d0d83dd28c418e04dc30a9513ab6afb9813edc75042aef751336d8dcfefe099709c
   languageName: node
   linkType: hard
 
@@ -636,12 +636,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/passport@npm:*, @types/passport@npm:^1.0.12, @types/passport@npm:^1.0.16":
+"@types/passport@npm:*, @types/passport@npm:^1.0.12":
   version: 1.0.16
   resolution: "@types/passport@npm:1.0.16"
   dependencies:
     "@types/express": "npm:*"
   checksum: 10/0ee7b9a46192cb60fb4e49038417b0c10b38e50204ed05b5204b3ea9a73e25da34ca8fe05205eaf42fe977610cdbd3a0d5f2228f8661fe0b303bc758fa2a158f
+  languageName: node
+  linkType: hard
+
+"@types/passport@npm:^1.0.17":
+  version: 1.0.17
+  resolution: "@types/passport@npm:1.0.17"
+  dependencies:
+    "@types/express": "npm:*"
+  checksum: 10/3db90645d58d928796dd8e9c328dec8040b71a43f3691d42a08fb4779efcbfc7dccc43ea612066a961a41be0869800096d52fd8aaa71518a89aa4483f67f5914
   languageName: node
   linkType: hard
 
@@ -684,10 +693,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/qs@npm:*, @types/qs@npm:^6.9.11":
+"@types/qs@npm:*":
   version: 6.9.16
   resolution: "@types/qs@npm:6.9.16"
   checksum: 10/2e8918150c12735630f7ee16b770c72949274938c30306025f68aaf977227f41fe0c698ed93db1099e04916d582ac5a1faf7e3c7061c8d885d9169f59a184b6c
+  languageName: node
+  linkType: hard
+
+"@types/qs@npm:^6.9.18":
+  version: 6.14.0
+  resolution: "@types/qs@npm:6.14.0"
+  checksum: 10/1909205514d22b3cbc7c2314e2bd8056d5f05dfb21cf4377f0730ee5e338ea19957c41735d5e4806c746176563f50005bbab602d8358432e25d900bdf4970826
   languageName: node
   linkType: hard
 
@@ -1593,12 +1609,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"connect-redis@npm:^8.1.0":
-  version: 8.1.0
-  resolution: "connect-redis@npm:8.1.0"
+"connect-redis@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "connect-redis@npm:9.0.0"
   peerDependencies:
     express-session: ">=1"
-  checksum: 10/c51bc8beeb801b34d92e6fe7ade87f15d8317f78bdaf82260e49b5e0455dc5b81e2355601b799547a7b51b67d6d56158af9c126586ca7b456006c58581b73405
+    redis: ">=5"
+  checksum: 10/da5c6304a33c54128f105f5022f515fbe651ae0b28e194f2ba8b5d9def6cf59a690bb5f99715a6e69d4ef8f27273be4cd59608727cecf0e42d6cbb0fe9022d6a
   languageName: node
   linkType: hard
 
@@ -2605,13 +2622,15 @@ __metadata:
   linkType: hard
 
 "form-data@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "form-data@npm:4.0.0"
+  version: 4.0.4
+  resolution: "form-data@npm:4.0.4"
   dependencies:
     asynckit: "npm:^0.4.0"
     combined-stream: "npm:^1.0.8"
+    es-set-tostringtag: "npm:^2.1.0"
+    hasown: "npm:^2.0.2"
     mime-types: "npm:^2.1.12"
-  checksum: 10/7264aa760a8cf09482816d8300f1b6e2423de1b02bba612a136857413fdc96d7178298ced106817655facc6b89036c6e12ae31c9eb5bdc16aabf502ae8a5d805
+  checksum: 10/a4b62e21932f48702bc468cc26fb276d186e6b07b557e3dd7cc455872bdbb82db7db066844a64ad3cf40eaf3a753c830538183570462d3649fdfd705601cbcfb
   languageName: node
   linkType: hard
 
@@ -3557,15 +3576,15 @@ __metadata:
   resolution: "luontotieto-api-gateway@workspace:."
   dependencies:
     "@eslint/js": "npm:9.33.0"
-    "@node-saml/node-saml": "npm:^5.0.0"
-    "@node-saml/passport-saml": "npm:^5.0.0"
+    "@node-saml/node-saml": "npm:^5.1.0"
+    "@node-saml/passport-saml": "npm:^5.1.0"
     "@types/cookie-parser": "npm:^1.4.3"
     "@types/csurf": "npm:^1.11.2"
     "@types/express-http-proxy": "npm:^1.6.6"
     "@types/express-session": "npm:^1.18.0"
     "@types/jsonwebtoken": "npm:^9.0.2"
     "@types/lodash": "npm:^4.14.195"
-    "@types/node": "npm:^22.15.3"
+    "@types/node": "npm:^24.2.0"
     "@types/passport": "npm:^1.0.12"
     "@types/passport-local": "npm:^1"
     "@types/passport-strategy": "npm:^0.2.35"
@@ -3578,7 +3597,7 @@ __metadata:
     "@typescript-eslint/parser": "npm:^8.39.1"
     axios: "npm:^1.10.0"
     concurrently: "npm:^9.1.0"
-    connect-redis: "npm:^8.1.0"
+    connect-redis: "npm:^9.0.0"
     cookie-parser: "npm:^1.4.6"
     csurf: "npm:^1.11.0"
     date-fns: "npm:^4.1.0"
@@ -5523,10 +5542,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~6.21.0":
-  version: 6.21.0
-  resolution: "undici-types@npm:6.21.0"
-  checksum: 10/ec8f41aa4359d50f9b59fa61fe3efce3477cc681908c8f84354d8567bb3701fafdddf36ef6bff307024d3feb42c837cf6f670314ba37fc8145e219560e473d14
+"undici-types@npm:~7.10.0":
+  version: 7.10.0
+  resolution: "undici-types@npm:7.10.0"
+  checksum: 10/1f3fe777937690ab8a7a7bccabc8fdf4b3171f4899b5a384fb5f3d6b56c4b5fec2a51fbf345c9dd002ff6716fd440a37fa8fdb0e13af8eca8889f25445875ba3
   languageName: node
   linkType: hard
 
@@ -5704,7 +5723,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xml-crypto@npm:^6.0.0":
+"xml-crypto@npm:^6.1.2":
   version: 6.1.2
   resolution: "xml-crypto@npm:6.1.2"
   dependencies:
@@ -5715,14 +5734,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xml-encryption@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "xml-encryption@npm:3.0.2"
+"xml-encryption@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "xml-encryption@npm:3.1.0"
   dependencies:
     "@xmldom/xmldom": "npm:^0.8.5"
     escape-html: "npm:^1.0.3"
     xpath: "npm:0.0.32"
-  checksum: 10/081a42ca7d7e81d23229f2a1149313e934d872c33da57eda25113a613f3940ff66f73e4e2f62d37a3a38c3c7d291784047b5b729988f346fef96c7124f6dbe83
+  checksum: 10/c84c1e11692181c24a1c30123fed4fa31015c58994bbdcf091f07fa79f0fb809774b1533d191c4739bf76bb0fb95f223d393e84cc48417480a1896b2b689373b
   languageName: node
   linkType: hard
 
