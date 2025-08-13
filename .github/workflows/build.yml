@@ -138,7 +138,7 @@ jobs:
       builder_image_name: ${{ steps.builder.outputs.image_name }}
 
   owasp:
-    if: ${{ github.actor != 'dependabot[bot]' }}
+    if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') }}
     needs:
       - service-builder
     runs-on: ubuntu-latest
@@ -205,7 +205,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Configure AWS credentials
-        if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
+        if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
@@ -213,12 +213,12 @@ jobs:
           role-duration-seconds: 1200
 
       - name: Login to Amazon ECR
-        if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
+        if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Pull images
-        if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
+        if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
         run: |
           ./test-compose pull
 
@@ -264,7 +264,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Configure AWS credentials
-        if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
+        if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
@@ -272,17 +272,17 @@ jobs:
           role-duration-seconds: 1200
 
       - name: Login to Amazon ECR
-        if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
+        if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Pull images
-        if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
+        if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
         run: |
           ./e2e-test-compose pull
 
       - name: Build images
-        if: ${{ github.actor == 'dependabot[bot]' || github.event.pull_request.head.repo.fork }}
+        if: ${{ github.actor == 'dependabot[bot]' || github.actor == 'renovate[bot]' || github.event.pull_request.head.repo.fork }}
         run: |
           ./e2e-test-compose build --parallel
 
