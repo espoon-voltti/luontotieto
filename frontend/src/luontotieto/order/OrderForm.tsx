@@ -305,6 +305,8 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     setShowOrderAssigneeCompanyNameInfo
   ] = useState(false)
 
+  const [showOrderingUnitInfo, setShowOrderingUnitInfo] = useState(false)
+
   const [showPlanNumberSuggestionsInfo, setShowPlanNumberSuggestionsInfo] =
     useState(false)
 
@@ -605,7 +607,26 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
           </RowOfInputs>
           <RowOfInputs>
             <LabeledInput $cols={4}>
-              <Label>Tilaajataho</Label>
+              <FlexRow>
+                <Label>Tilaajataho</Label>
+                <InfoButton
+                  onClick={() => setShowOrderingUnitInfo(!showOrderingUnitInfo)}
+                />
+              </FlexRow>
+              {showOrderingUnitInfo && (
+                <InfoBox
+                  message={
+                    <P>
+                      Tähän kenttään kirjoitetaan Espoon kaupungin yksikkö, joka
+                      tilaa selvityksen. Tilaajia voi olla useampia. Jos tilaaja
+                      on muu kuin Espoon kaupunki, kirjoitetaan selvityksen
+                      tilaajan yritys ja/tai Yksityinen maanomistaja.
+                      Lisätietoja voi kirjoittaa tarvittaessa selvityksen
+                      kuvaukseen.
+                    </P>
+                  }
+                />
+              )}
               <TagAutoComplete
                 suggestions={orderingUnitSuggestions}
                 data={

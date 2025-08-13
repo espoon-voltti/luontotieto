@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    id("org.springframework.boot") version "3.5.3"
+    id("org.springframework.boot") version "3.5.4"
     id("io.spring.dependency-management") version "1.1.5"
     kotlin("jvm") version "2.1.0"
     kotlin("plugin.spring") version "2.1.20"
@@ -48,7 +48,7 @@ dependencies {
 
     // cve fixes
     api("org.yaml:snakeyaml:2.4")
-    api("org.xerial:sqlite-jdbc:3.49.1.0")
+    api("org.xerial:sqlite-jdbc:3.50.3.0")
     api("commons-jxpath:commons-jxpath:1.4.0")
     api("org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.39.0")
 
@@ -63,8 +63,8 @@ dependencies {
 
     implementation("org.apache.httpcomponents:httpclient:4.5.13")
 
-    implementation("org.geotools:gt-geopkg:33.1")
-    implementation("org.geotools:gt-epsg-hsql:33.1")
+    implementation("org.geotools:gt-geopkg:33.2")
+    implementation("org.geotools:gt-epsg-hsql:33.2")
 
     implementation("com.zaxxer:HikariCP:6.3.0")
     implementation("org.flywaydb:flyway-core:11.9.2")
@@ -100,13 +100,15 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.microsoft.playwright:playwright:1.52.0")
 
-    implementation("org.bouncycastle:bcprov-jdk18on:1.80")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.81")
 
     api("org.jsoup:jsoup:1.20.1")
 
     implementation("org.unbescape:unbescape:1.1.6.RELEASE")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    implementation("org.apache.commons:commons-lang3:3.18.0")
 }
 
 tasks.withType<KotlinCompile> {
