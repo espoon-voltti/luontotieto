@@ -15,7 +15,7 @@
   "dependencies": {
     "@node-saml/node-saml": "^5.0.0",
     "@node-saml/passport-saml": "^5.0.0",
-    "axios": "^1.10.0",
+    "axios": "^1.11.0",
     "connect-redis": "^9.0.0",
     "cookie-parser": "^1.4.6",
     "csurf": "^1.11.0",
