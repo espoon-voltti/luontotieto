@@ -61,7 +61,7 @@ dependencies {
         exclude("org.opensaml")
     }
 
-    implementation("org.apache.httpcomponents:httpclient:4.5.13")
+    implementation("org.apache.httpcomponents:httpclient:4.5.14")
 
     implementation("org.geotools:gt-geopkg:33.2")
     implementation("org.geotools:gt-epsg-hsql:33.2")
