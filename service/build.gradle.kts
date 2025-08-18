@@ -69,7 +69,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:6.3.2")
     implementation("org.flywaydb:flyway-core:11.11.0")
     implementation("org.flywaydb:flyway-database-postgresql:11.11.0")
-    implementation("org.postgresql:postgresql:42.7.3")
+    implementation("org.postgresql:postgresql:42.7.7")
     api(platform("org.jdbi:jdbi3-bom:3.49.5"))
     implementation("org.jdbi:jdbi3-core")
     implementation("org.jdbi:jdbi3-jackson2")
