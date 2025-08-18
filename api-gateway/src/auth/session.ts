@@ -12,8 +12,8 @@ import {
 import express from 'express'
 import session from 'express-session'
 
-import { RedisClient } from '../clients/redis-client.js'
 import { SessionConfig } from '../config.js'
+import { RedisClient } from '../index.js'
 import { LogoutToken, toMiddleware } from '../utils/express.js'
 import { fromCallback } from '../utils/promise-utils.js'
 

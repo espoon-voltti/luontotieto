@@ -20,4 +20,14 @@ SPDX-License-Identifier: LGPL-2.1-or-later
         ]]></notes>
         <cve>CVE-2022-41852</cve>
     </suppress>
+
+    <suppress>
+        <notes>Spring MVC is not used</notes>
+        <cve>CVE-2025-41242</cve>
+    </suppress>
+
+    <suppress>
+        <notes>Fix not available</notes>
+        <cve>CVE-2025-55163</cve>
+    </suppress>
 </suppressions>

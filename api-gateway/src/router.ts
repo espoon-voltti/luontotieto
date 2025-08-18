@@ -15,12 +15,13 @@ import { createAdSamlStrategy, createSamlConfig } from './auth/saml/index.js'
 import redisCacheProvider from './auth/saml/passport-saml-cache-redis.js'
 import createSamlRouter from './auth/saml/saml-routes.js'
 import { sessionSupport } from './auth/session.js'
-import { RedisClient } from './clients/redis-client.js'
 import { createServiceRequestHeaders } from './clients/service-client.js'
 import { appCommit, Config, serviceUrl } from './config.js'
 import { cacheControl } from './middleware/cache-control.js'
 import { csrf, csrfCookie } from './middleware/csrf.js'
 import { errorHandler } from './middleware/errors.js'
+
+import { RedisClient } from './index.js'
 
 export function createRouter(config: Config, redisClient: RedisClient): Router {
   const router = Router()
