@@ -502,10 +502,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:4.17.9":
-  version: 4.17.9
-  resolution: "@types/lodash@npm:4.17.9"
-  checksum: 10/49e35caaf668686be0bad9e9bef88456903a21999d3fd8bf91c302e0d5328398fb59fee793d0afbaf6edeca1b46c3e8109899d85ff3a433075178f1ab693e597
+"@types/lodash@npm:4.17.20":
+  version: 4.17.20
+  resolution: "@types/lodash@npm:4.17.20"
+  checksum: 10/8cd8ad3bd78d2e06a93ae8d6c9907981d5673655fec7cb274a4d9a59549aab5bb5b3017361280773b8990ddfccf363e14d1b37c97af8a9fe363de677f9a61524
   languageName: node
   linkType: hard
 
@@ -3361,7 +3361,7 @@ __metadata:
     "@types/express-http-proxy": "npm:1.6.6"
     "@types/express-session": "npm:1.18.0"
     "@types/jsonwebtoken": "npm:9.0.7"
-    "@types/lodash": "npm:4.17.9"
+    "@types/lodash": "npm:4.17.20"
     "@types/node": "npm:24.2.0"
     "@types/passport": "npm:1.0.16"
     "@types/passport-local": "npm:1.0.38"
