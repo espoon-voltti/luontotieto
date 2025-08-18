@@ -20,7 +20,8 @@ import { appCommit, Config, serviceUrl } from './config.js'
 import { cacheControl } from './middleware/cache-control.js'
 import { csrf, csrfCookie } from './middleware/csrf.js'
 import { errorHandler } from './middleware/errors.js'
-import {RedisClient} from "./index.js";
+
+import { RedisClient } from './index.js'
 
 export function createRouter(config: Config, redisClient: RedisClient): Router {
   const router = Router()

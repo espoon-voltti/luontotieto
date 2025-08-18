@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import type { CacheProvider } from '@node-saml/passport-saml'
-import {RedisClient} from "../../index.js";
+
+import { RedisClient } from '../../index.js'
 
 export interface ProviderOptions {
   /**

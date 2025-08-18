@@ -53,8 +53,7 @@ app.get('/health', (_, res) => {
     .catch(() => {
       res.status(503).json({ status: 'DOWN' })
     })
-  }
-)
+})
 
 app.use(loggingMiddleware)
 
