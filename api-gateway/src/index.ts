@@ -8,7 +8,6 @@ import helmet from 'helmet'
 import passport from 'passport'
 import sourceMapSupport from 'source-map-support'
 
-import { assertRedisConnection } from './clients/redis-client.js'
 import { configFromEnv, httpPort, toRedisClientOpts } from './config.js'
 import { logInfo, logError, loggingMiddleware } from './logging/index.js'
 import { fallbackErrorHandler } from './middleware/errors.js'
@@ -20,6 +19,9 @@ sourceMapSupport.install()
 const config = configFromEnv()
 
 const redisClient = redis.createClient(toRedisClientOpts(config.redis))
+
+export type RedisClient = typeof redisClient
+
 redisClient.on('error', (err) =>
   logError('Redis error', undefined, undefined, toError(err))
 )
@@ -41,14 +43,19 @@ app.use(
 )
 
 app.get('/health', (_, res) => {
-  assertRedisConnection(redisClient)
+  if (!redisClient.isReady) throw new Error('not connected to redis')
+
+  redisClient
+    .ping()
     .then(() => {
       res.status(200).json({ status: 'UP' })
     })
     .catch(() => {
       res.status(503).json({ status: 'DOWN' })
     })
-})
+  }
+)
+
 app.use(loggingMiddleware)
 
 passport.serializeUser<Express.User>((user, done) => done(null, user))
