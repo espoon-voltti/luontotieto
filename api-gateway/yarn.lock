@@ -553,21 +553,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/passport@npm:*, @types/passport@npm:^1.0.17":
+"@types/passport@npm:*, @types/passport@npm:1.0.17, @types/passport@npm:^1.0.17":
   version: 1.0.17
   resolution: "@types/passport@npm:1.0.17"
   dependencies:
     "@types/express": "npm:*"
   checksum: 10/3db90645d58d928796dd8e9c328dec8040b71a43f3691d42a08fb4779efcbfc7dccc43ea612066a961a41be0869800096d52fd8aaa71518a89aa4483f67f5914
-  languageName: node
-  linkType: hard
-
-"@types/passport@npm:1.0.16":
-  version: 1.0.16
-  resolution: "@types/passport@npm:1.0.16"
-  dependencies:
-    "@types/express": "npm:*"
-  checksum: 10/0ee7b9a46192cb60fb4e49038417b0c10b38e50204ed05b5204b3ea9a73e25da34ca8fe05205eaf42fe977610cdbd3a0d5f2228f8661fe0b303bc758fa2a158f
   languageName: node
   linkType: hard
 
@@ -3370,7 +3361,7 @@ __metadata:
     "@types/jsonwebtoken": "npm:9.0.7"
     "@types/lodash": "npm:4.17.9"
     "@types/node": "npm:24.2.0"
-    "@types/passport": "npm:1.0.16"
+    "@types/passport": "npm:1.0.17"
     "@types/passport-local": "npm:1.0.38"
     "@types/passport-strategy": "npm:0.2.38"
     "@types/pino-http": "npm:5.8.4"
