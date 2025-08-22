@@ -2296,14 +2296,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-xml-parser@npm:5.2.2":
-  version: 5.2.2
-  resolution: "fast-xml-parser@npm:5.2.2"
+"fast-xml-parser@npm:5.2.5":
+  version: 5.2.5
+  resolution: "fast-xml-parser@npm:5.2.5"
   dependencies:
     strnum: "npm:^2.1.0"
   bin:
     fxparser: src/cli/cli.js
-  checksum: 10/d1a9a88d76dc6ce23d47836bbfc6239120211602833e64ca8bfd5f5f5ad1230128a033bbe136052e860c4d817f5385f4ec8bb3b31bb3ca0963e121e5d7b60264
+  checksum: 10/305017cff6968a34cbac597317be1516e85c44f650f30d982c84f8c30043e81fd38d39a8810d570136c921399dd43b9ac4775bdfbbbcfee96456f3c086b48bdd
   languageName: node
   linkType: hard
 
@@ -3376,7 +3376,7 @@ __metadata:
     express: "npm:5.1.0"
     express-http-proxy: "npm:2.1.1"
     express-session: "npm:1.18.0"
-    fast-xml-parser: "npm:5.2.2"
+    fast-xml-parser: "npm:5.2.5"
     helmet: "npm:8.1.0"
     jsonwebtoken: "npm:9.0.2"
     lodash: "npm:4.17.21"
