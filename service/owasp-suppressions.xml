@@ -30,4 +30,14 @@ SPDX-License-Identifier: LGPL-2.1-or-later
         <notes>Fix not available</notes>
         <cve>CVE-2025-55163</cve>
     </suppress>
+
+    <suppress>
+        <notes>Waiting for a fix in AWS SDK S3 2.33.6+</notes>
+        <cve>CVE-2025-58057</cve>
+    </suppress>
+
+    <suppress>
+        <notes>Waiting for a fix in AWS SDK S3 2.33.6+</notes>
+        <cve>CVE-2025-58056</cve>
+    </suppress>
 </suppressions>
