@@ -562,16 +562,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/pino-http@npm:5.8.4":
-  version: 5.8.4
-  resolution: "@types/pino-http@npm:5.8.4"
+"@types/pino-http@npm:6.1.0":
+  version: 6.1.0
+  resolution: "@types/pino-http@npm:6.1.0"
   dependencies:
-    "@types/pino": "npm:6.3"
-  checksum: 10/9520c7ea5e2f4b6950d0635d26d3e37f70ef8199c3f6815e9f8dca887a9e967f81b4f1228b91d63b9506f4e9f3cac921170fd84b07ba62fbbe675b4d2579951a
+    pino-http: "npm:*"
+  checksum: 10/5a458c55ba160dcdcb4840810b051c8f2fe2081bc4e0ac4fa3d76596900bf71d9172664dded0e5f0c0787ec8ae791d27901765f1548b1d99d065ce9a2b340548
   languageName: node
   linkType: hard
 
-"@types/pino-pretty@npm:*, @types/pino-pretty@npm:5.0.0":
+"@types/pino-pretty@npm:5.0.0":
   version: 5.0.0
   resolution: "@types/pino-pretty@npm:5.0.0"
   dependencies:
@@ -580,24 +580,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/pino-std-serializers@npm:*, @types/pino-std-serializers@npm:4.0.0":
+"@types/pino-std-serializers@npm:4.0.0":
   version: 4.0.0
   resolution: "@types/pino-std-serializers@npm:4.0.0"
   dependencies:
     pino-std-serializers: "npm:*"
   checksum: 10/5ec2a45549092c445c97bfd19a3c44186e43754095a31eebdb11ac77a3f2d3dab1a81d504c696ae86dc904f8ae1c591618dbe4ce4ffe07c65c1a005c6e98a29f
-  languageName: node
-  linkType: hard
-
-"@types/pino@npm:6.3":
-  version: 6.3.12
-  resolution: "@types/pino@npm:6.3.12"
-  dependencies:
-    "@types/node": "npm:*"
-    "@types/pino-pretty": "npm:*"
-    "@types/pino-std-serializers": "npm:*"
-    sonic-boom: "npm:^2.1.0"
-  checksum: 10/c7e49c483fdf9a2ff9cc922c8246fdc54eede07b2b42ee9c8bc4ceefe7416002191f3508355968e36452d603d1c0b97db3fe709d5133434942396f19e0ec8a47
   languageName: node
   linkType: hard
 
@@ -3349,7 +3337,7 @@ __metadata:
     "@types/passport": "npm:1.0.17"
     "@types/passport-local": "npm:1.0.38"
     "@types/passport-strategy": "npm:0.2.38"
-    "@types/pino-http": "npm:5.8.4"
+    "@types/pino-http": "npm:6.1.0"
     "@types/pino-pretty": "npm:5.0.0"
     "@types/pino-std-serializers": "npm:4.0.0"
     "@types/source-map-support": "npm:0.5.10"
@@ -3973,7 +3961,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-http@npm:10.5.0":
+"pino-http@npm:*, pino-http@npm:10.5.0":
   version: 10.5.0
   resolution: "pino-http@npm:10.5.0"
   dependencies:
@@ -4637,15 +4625,6 @@ __metadata:
     ip-address: "npm:^9.0.5"
     smart-buffer: "npm:^4.2.0"
   checksum: 10/ffcb622c22481dfcd7589aae71fbfd71ca34334064d181df64bf8b7feaeee19706aba4cffd1de35cc7bbaeeaa0af96be2d7f40fcbc7bc0ab69533a7ae9ffc4fb
-  languageName: node
-  linkType: hard
-
-"sonic-boom@npm:^2.1.0":
-  version: 2.8.0
-  resolution: "sonic-boom@npm:2.8.0"
-  dependencies:
-    atomic-sleep: "npm:^1.0.0"
-  checksum: 10/05351d9f44bac59b2a4ab42ee22bf81b8c3bbd22db20183d78d5f2067557eb623e0eaf93b2bc0f8417bee92ca372bc26e0d83e3bdb0ffebcc33738ac1c191876
   languageName: node
   linkType: hard
 
