@@ -51,7 +51,7 @@
     "@types/passport": "1.0.17",
     "@types/passport-local": "1.0.38",
     "@types/passport-strategy": "0.2.38",
-    "@types/pino-http": "5.8.4",
+    "@types/pino-http": "6.1.0",
     "@types/pino-pretty": "5.0.0",
     "@types/pino-std-serializers": "4.0.0",
     "@types/source-map-support": "0.5.10",
