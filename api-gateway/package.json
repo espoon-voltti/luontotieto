@@ -21,7 +21,7 @@
     "csurf": "1.11.0",
     "date-fns": "4.1.0",
     "express": "5.1.0",
-    "express-http-proxy": "2.1.1",
+    "express-http-proxy": "2.1.2",
     "express-session": "1.18.2",
     "fast-xml-parser": "5.2.5",
     "helmet": "8.1.0",
