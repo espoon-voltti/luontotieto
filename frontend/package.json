@@ -37,7 +37,7 @@
     "react-tag-autocomplete": "7.5.1",
     "react-textarea-autosize": "8.5.9",
     "styled-components": "6.1.19",
-    "uuid": "11.1.0"
+    "uuid": "13.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.28.4",
