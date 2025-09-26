@@ -86,7 +86,7 @@ dependencies {
     implementation("software.amazon.awssdk:s3")
     implementation("software.amazon.awssdk:ses")
 
-    implementation("org.apache.tika:tika-core:3.2.2")
+    implementation("org.apache.tika:tika-core:3.2.3")
 
     implementation("com.auth0:java-jwt:4.5.0")
 
