@@ -109,7 +109,7 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:5.1.0")
 
-    implementation("org.apache.commons:commons-lang3:3.18.0")
+    implementation("org.apache.commons:commons-lang3:3.19.0")
 }
 
 tasks.withType<KotlinCompile> {
