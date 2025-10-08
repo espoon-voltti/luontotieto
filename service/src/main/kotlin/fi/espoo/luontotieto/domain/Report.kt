@@ -169,6 +169,7 @@ fun Handle.getReport(
                 $SELECT_REPORT_SQL
                 JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
                 WHERE r.id = :id
+                ORDER BY r.observed_species
             """
     ).bind("id", id)
         .bind("userId", user.id)

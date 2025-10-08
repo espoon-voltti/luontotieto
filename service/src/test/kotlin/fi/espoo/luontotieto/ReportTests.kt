@@ -295,7 +295,7 @@ class ReportTests : FullApplicationTest() {
         assertTrue(approvedReport.approved)
         assertEquals(
             approvedReport.observedSpecies,
-            listOf("Ilves", "Torakka", "Jänis", "Perhonen")
+            listOf("Ilves", "Jänis", "Perhonen", "Torakka")
         )
         assertEquals(approvedReport.cost, reportCost)
         assertEquals(expectedOrderYear, approvedReport.order?.year)
