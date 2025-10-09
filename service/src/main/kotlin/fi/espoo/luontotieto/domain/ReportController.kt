@@ -170,9 +170,12 @@ class ReportController {
     fun getReportById(
         user: AuthenticatedUser,
         @PathVariable id: UUID
-    ) = jdbi.inTransactionUnchecked { tx -> tx.getReport(id, user) }.also {
-        logger.audit(user, AuditEvent.GET_REPORT_BY_ID, mapOf("id" to "$id"))
-    }
+    ) = jdbi
+        .inTransactionUnchecked { tx ->
+            tx.getReport(id, user)
+        }.also {
+            logger.audit(user, AuditEvent.GET_REPORT_BY_ID, mapOf("id" to "$id"))
+        }
 
     @GetMapping()
     fun getReports(user: AuthenticatedUser) =
