@@ -170,6 +170,34 @@ class GpkgReaderTest {
     }
 
     @Test
+    fun `reads liito_orava_alueet Geopackage file with missing enums`() {
+        // File is missing enum definitions, but contains int values that map to enums
+        val file = File("src/test/resources/test-data/liito_orava_alueet_no_enums.gpkg")
+
+        val validEnums =
+            listOf(
+                PaikkaTietoEnum("liito_orava_aluetyyppi", "Ydinalue"),
+                PaikkaTietoEnum("liito_orava_aluetyyppi", "Elinalue"),
+                PaikkaTietoEnum("liito_orava_aluetyyppi", "Soveltuva"),
+                PaikkaTietoEnum("luontotieto_mittaustyyppi", "GPS"),
+                PaikkaTietoEnum("luontotieto_mittaustyyppi", "Muu"),
+                PaikkaTietoEnum("luontotieto_mittaustyyppi", "Tarkkuusmitattu")
+            )
+
+        GpkgReader(file, TableDefinition.LIITO_ORAVA_ALUEET, validEnums).use { reader ->
+            val actual = reader.asSequence().toList()
+            assertEquals(1, actual.size)
+            val feature = actual[0]
+
+            // Int values mapped to correct enum value by index
+            assertEquals("Elinalue", feature.columns["aluetyyppi"])
+            assertEquals("GPS", feature.columns["tarkkuus"])
+
+            assertEquals(0, feature.errors.size)
+        }
+    }
+
+    @Test
     fun `reads lepakko_alueet GeoPackage file`() {
         val file = File("src/test/resources/test-data/lepakko_alueet.gpkg")
         val geomHash = mutableSetOf<Int>()
