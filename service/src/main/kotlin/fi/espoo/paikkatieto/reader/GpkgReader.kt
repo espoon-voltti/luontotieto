@@ -76,6 +76,7 @@ class GpkgReader(
 
     override fun next(): GpkgFeature {
         val gpkgFeature = reader.next()
+        val enumValuesByColumn = validEnums.groupBy { it.name }.mapValues { it.value.map { e -> e.value } }
         val columns =
             tableDefinition.columns.associate { column ->
                 val isGeometryColumn = column.kClass.isSubclassOf(Geometry::class)
@@ -83,26 +84,25 @@ class GpkgReader(
                     val geom = gpkgFeature.getAttribute(column.name) ?: gpkgFeature.defaultGeometry
                     Pair(column.name, geom)
                 } else {
-                    Pair(column.name, getAttribute(column.name, gpkgFeature))
+                    Pair(
+                        column.name,
+                        getAttribute(column.name, gpkgFeature, enumValuesByColumn[column.sqlType] ?: emptyList())
+                    )
                 }
             }
 
         val errors =
             tableDefinition.columns.mapNotNull { column ->
                 val isGeometryColumn = column.kClass.isSubclassOf(Geometry::class)
+                val enumValues = enumValuesByColumn[column.sqlType] ?: emptyList()
                 val attr =
                     if (isGeometryColumn) {
                         gpkgFeature.getAttribute(column.name) ?: gpkgFeature.defaultGeometry
                     } else {
-                        getAttribute(column.name, gpkgFeature)
+                        getAttribute(column.name, gpkgFeature, enumValues)
                     }
 
-                val allowedColumnValues =
-                    validEnums
-                        .filter { it.name == column.sqlType }
-                        .map { it.value }
-
-                column.validate(gpkgFeature.id, attr, allowedColumnValues)
+                column.validate(gpkgFeature.id, attr, enumValues)
             }
 
         return GpkgFeature(columns = columns, errors = errors)
@@ -110,9 +110,12 @@ class GpkgReader(
 
     private fun getAttribute(
         column: String,
-        gpkgFeature: SimpleFeature
+        gpkgFeature: SimpleFeature,
+        enumValues: List<String>
     ): Any? =
-        gpkgFeature.getAttribute(column)
+        gpkgFeature
+            .getAttribute(column)
+            .let { if (it is Int && it in enumValues.indices) enumValues[it] else it }
             ?: gpkgFeature.getAttribute(column.uppercase())
             ?: gpkgFeature.getAttribute(
                 column.lowercase().replaceFirstChar {
