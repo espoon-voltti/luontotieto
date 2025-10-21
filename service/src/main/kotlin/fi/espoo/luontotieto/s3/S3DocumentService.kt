@@ -59,7 +59,10 @@ class S3DocumentService(
 
             logger.info { "Found $tags for the file" }
 
-            val hasTag = tags.tagSet().any { tag -> tag.key() == "av-status" && tag.value() == "CLEAN" }
+            val hasTag =
+                tags
+                    .tagSet()
+                    .any { tag -> tag.key() == "GuardDutyMalwareScanStatus" && tag.value() == "NO_THREATS_FOUND" }
 
             if (!hasTag) {
                 logger.warn { "No clean tag found for the file" }
