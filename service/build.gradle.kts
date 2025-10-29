@@ -63,7 +63,7 @@ dependencies {
 
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
 
-    implementation("org.geotools:gt-geopkg:33.2")
+    implementation("org.geotools:gt-geopkg:34.0")
     implementation("org.geotools:gt-epsg-hsql:34.0")
 
     implementation("com.zaxxer:HikariCP:7.0.2")
