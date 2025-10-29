@@ -87,7 +87,7 @@ fun Handle.getAppUser(id: UUID) =
         """
         SELECT id, external_id, name, email, role, active, password_updated as "passwordUpdated"
         FROM users 
-        WHERE id = :id AND NOT system_user
+        WHERE id = :id AND NOT is_system_user
         """.trimIndent()
     ).bind("id", id)
         .mapTo<AppUser>()
@@ -101,7 +101,7 @@ fun Handle.getAppUserWithPassword(email: String) =
         SELECT id, external_id, name, email, password_hash AS password, role, 
         active, password_updated as "passwordUpdated"
         FROM users 
-        WHERE email = :email AND NOT system_user AND password_hash IS NOT NULL
+        WHERE email = :email AND NOT is_system_user AND password_hash IS NOT NULL
         """.trimIndent()
     ).bind("email", email)
         .mapTo<AppUserWithPassword>()
