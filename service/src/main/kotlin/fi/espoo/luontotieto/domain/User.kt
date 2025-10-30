@@ -116,7 +116,7 @@ fun Handle.putUser(
                 UPDATE users 
                  SET email = :email, name = :name, role = :role, 
                  active = :active,  updated_by = :updatedBy
-                 WHERE id = :id AND NOT system_user
+                 WHERE id = :id AND NOT is_system_user
                  RETURNING *
                ) 
              $SELECT_USER_SQL
@@ -134,7 +134,7 @@ fun Handle.getUserPasswordHash(id: UUID) =
         """
         SELECT password_hash AS password
         FROM users 
-        WHERE id = :id AND NOT system_user AND password_hash IS NOT NULL
+        WHERE id = :id AND NOT is_system_user AND password_hash IS NOT NULL
         """.trimIndent()
     ).bind("id", id)
         .mapTo<String>()
@@ -171,7 +171,7 @@ fun Handle.getUser(id: UUID) =
     createQuery(
         """
                 $SELECT_USER_SQL
-                WHERE u.id = :id AND NOT u.system_user
+                WHERE u.id = :id AND NOT u.is_system_user
             """
     ).bind("id", id)
         .mapTo<User>()
@@ -193,7 +193,7 @@ fun Handle.getUsers() =
     createQuery(
         """
                 $SELECT_USER_SQL
-                WHERE NOT u.system_user
+                WHERE NOT u.is_system_user
                 ORDER BY u.name
             """
     ).mapTo<User>()

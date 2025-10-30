@@ -74,7 +74,7 @@ abstract class FullApplicationTest {
             tx
                 .createUpdate(
                     """
-                INSERT INTO users (id, updated, external_id, name, email, role, system_user) 
+                INSERT INTO users (id, updated, external_id, name, email, role, is_system_user) 
                 VALUES (:id, now(), 'api-gw', 'api-gw system-user', NULL, 'katselija', true)
             """
                 ).bind("id", systemUser.id)

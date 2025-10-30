@@ -14,12 +14,12 @@ CREATE TABLE users (
     first_name text NOT NULL,
     last_name text NOT NULL,
     email text,
-    system_user bool DEFAULT FALSE
+    is_system_user bool DEFAULT FALSE
 );
 
 CREATE UNIQUE INDEX uniq$users$external_id ON users(external_id);
 
-INSERT INTO users (id, external_id, first_name, last_name, email, system_user)
+INSERT INTO users (id, external_id, first_name, last_name, email, is_system_user)
 VALUES ('00000000-0000-0000-0000-000000000000', 'api-gw', 'api-gw', 'system-user', NULL, TRUE);
 
 
