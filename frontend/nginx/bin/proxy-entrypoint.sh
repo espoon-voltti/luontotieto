@@ -19,13 +19,9 @@ if [ "${API_GATEWAY_URL:-X}" = 'X' ]; then
   exit 1
 fi
 
-for template in /etc/nginx/conf.d/*.template /etc/nginx/*.template; do
-    if ! test -f "$template"; then
-      continue
-    fi
-    target=$(echo "$template" | sed -e "s/.template$//")
 
-    erb "$template" > "$target"
+for directory in /etc/nginx/conf.d/ /etc/nginx/; do
+  gomplate --input-dir="$directory" --output-map="$directory"'{{ .in | strings.ReplaceAll ".template" "" }}'
 done
 
 if [ "${DEBUG:-false}" = "true" ]; then
