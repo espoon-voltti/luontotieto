@@ -31,16 +31,25 @@ ARG CACHE_BUST=none
 ENV NGINX_ENV=local \
     TZ=UTC
 
-RUN apt-get update \
-    && apt-get -y dist-upgrade \
-    && apt-get -y --no-install-recommends install ruby \
-    && apt-get remove --auto-remove -y nginx-module-image-filter \
-    && curl -sSfL https://github.com/espoon-voltti/s3-downloader/releases/download/v1.4.1/s3downloader-linux-amd64 \
-    -o /bin/s3download \
-    && chmod +x /bin/s3download \
-    && echo "520ea232e83a7cefe2a87d4f2af8433e383a4351464e213b7dd3b78ca0dc200f  /bin/s3download" | sha256sum -c - \
-    && rm -rf /var/lib/apt/lists/*
+# https://github.com/hairyhenderson/gomplate
+ARG GOMPLATE_VERSION=v4.3.3
+ARG GOMPLATE_SHA256="ca281666e86f2f09218c1653e1908f572c0e349e9de64cb4ea93ade9333f0596"
+# https://github.com/espoon-voltti/s3-downloader/
+ARG S3_DOWNLOADER_VERSION=v1.4.1
+ARG S3_DOWNLOADER_SHA256="520ea232e83a7cefe2a87d4f2af8433e383a4351464e213b7dd3b78ca0dc200f"
 
+RUN apt-get update \
+ && apt-get -y dist-upgrade \
+ && apt-get remove --auto-remove -y nginx-module-image-filter \
+ && curl -sSfL "https://github.com/hairyhenderson/gomplate/releases/download/${GOMPLATE_VERSION}/gomplate_linux-amd64" \
+      -o /bin/gomplate \
+ && chmod +x /bin/gomplate \
+ && echo "${GOMPLATE_SHA256}  /bin/gomplate" | sha256sum -c - \
+ && curl -sSfL "https://github.com/espoon-voltti/s3-downloader/releases/download/${S3_DOWNLOADER_VERSION}/s3downloader-linux-amd64" \
+      -o /bin/s3download \
+ && chmod +x /bin/s3download \
+ && echo "${S3_DOWNLOADER_SHA256}  /bin/s3download" | sha256sum -c - \
+ && rm -rf /var/lib/apt/lists/*
 
 COPY ./nginx/bin/ /bin/
 COPY ./nginx/etc/ /etc/
