@@ -107,7 +107,7 @@ dependencies {
 
     implementation("org.unbescape:unbescape:1.1.6.RELEASE")
 
-    implementation("com.squareup.okhttp3:okhttp:5.2.1")
+    implementation("com.squareup.okhttp3:okhttp:5.3.0")
 
     implementation("org.apache.commons:commons-lang3:3.19.0")
 }
