@@ -69,11 +69,13 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
   const [showModal, setShowModal] = useState<InfoModalStateProps | null>(null)
   const [approveError, setApproveError] = useState<string | null>(null)
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (report) {
       setReportCost(report.cost ?? '')
     }
   }, [report])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const closeModal = () => {
     setShowModal(null)

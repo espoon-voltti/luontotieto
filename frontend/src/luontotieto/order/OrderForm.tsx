@@ -563,6 +563,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
     props.onChange(validInput)
   }, [validInput, props, orderFiles])
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setOrderFiles(
       createFileInputs(
@@ -571,6 +572,7 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
       )
     )
   }, [originalFileInputs]) // eslint-disable-line react-hooks/exhaustive-deps
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const uniquePlanNumbers = [...new Set([...planNumbers, ...props.planNumbers])]
   const planNumberSuggestions = uniquePlanNumbers.map((pn) => ({
