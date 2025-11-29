@@ -25,13 +25,13 @@ jobs:
   lint-shell:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: espoon-voltti/voltti-actions/shellcheck@master
 
   check-licenses:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Reuse Compliance Check
         uses: fsfe/reuse-action@v6
 
@@ -66,7 +66,7 @@ jobs:
             test: "false"
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Build image
         uses: espoon-voltti/voltti-actions/docker-build-push@master
@@ -114,7 +114,7 @@ jobs:
       builder: builder
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Build builder
         uses: espoon-voltti/voltti-actions/docker-build-push@master
@@ -143,7 +143,7 @@ jobs:
       - service-builder
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
@@ -203,7 +203,7 @@ jobs:
         working-directory: compose
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Configure AWS credentials
         if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
@@ -262,7 +262,7 @@ jobs:
         working-directory: compose
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Configure AWS credentials
         if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
