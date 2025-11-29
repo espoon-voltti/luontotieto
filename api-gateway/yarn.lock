@@ -1485,15 +1485,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:4, debug@npm:^4, debug@npm:^4.3.1, debug@npm:^4.3.2, debug@npm:^4.3.4, debug@npm:^4.3.5, debug@npm:^4.4.0":
-  version: 4.4.0
-  resolution: "debug@npm:4.4.0"
+"debug@npm:4, debug@npm:^4, debug@npm:^4.3.1, debug@npm:^4.3.2, debug@npm:^4.3.4, debug@npm:^4.3.5, debug@npm:^4.4.0, debug@npm:^4.4.3":
+  version: 4.4.3
+  resolution: "debug@npm:4.4.3"
   dependencies:
     ms: "npm:^2.1.3"
   peerDependenciesMeta:
     supports-color:
       optional: true
-  checksum: 10/1847944c2e3c2c732514b93d11886575625686056cd765336212dc15de2d2b29612b6cd80e1afba767bb8e1803b778caf9973e98169ef1a24a7a7009e1820367
+  checksum: 10/9ada3434ea2993800bd9a1e320bd4aa7af69659fb51cca685d390949434bc0a8873c21ed7c9b852af6f2455a55c6d050aa3937d52b3c69f796dab666f762acad
   languageName: node
   linkType: hard
 
@@ -1503,18 +1503,6 @@ __metadata:
   dependencies:
     ms: "npm:^2.1.1"
   checksum: 10/d86fd7be2b85462297ea16f1934dc219335e802f629ca9a69b63ed8ed041dda492389bb2ee039217c02e5b54792b1c51aa96ae954cf28634d363a2360c7a1639
-  languageName: node
-  linkType: hard
-
-"debug@npm:^4.4.3":
-  version: 4.4.3
-  resolution: "debug@npm:4.4.3"
-  dependencies:
-    ms: "npm:^2.1.3"
-  peerDependenciesMeta:
-    supports-color:
-      optional: true
-  checksum: 10/9ada3434ea2993800bd9a1e320bd4aa7af69659fb51cca685d390949434bc0a8873c21ed7c9b852af6f2455a55c6d050aa3937d52b3c69f796dab666f762acad
   languageName: node
   linkType: hard
 
@@ -2563,7 +2551,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"http-errors@npm:2.0.0, http-errors@npm:^2.0.0":
+"http-errors@npm:2.0.0":
   version: 2.0.0
   resolution: "http-errors@npm:2.0.0"
   dependencies:
@@ -2573,6 +2561,19 @@ __metadata:
     statuses: "npm:2.0.1"
     toidentifier: "npm:1.0.1"
   checksum: 10/0e7f76ee8ff8a33e58a3281a469815b893c41357378f408be8f6d4aa7d1efafb0da064625518e7078381b6a92325949b119dc38fcb30bdbc4e3a35f78c44c439
+  languageName: node
+  linkType: hard
+
+"http-errors@npm:^2.0.0, http-errors@npm:~2.0.1":
+  version: 2.0.1
+  resolution: "http-errors@npm:2.0.1"
+  dependencies:
+    depd: "npm:~2.0.0"
+    inherits: "npm:~2.0.4"
+    setprototypeof: "npm:~1.2.0"
+    statuses: "npm:~2.0.2"
+    toidentifier: "npm:~1.0.1"
+  checksum: 10/9fe31bc0edf36566c87048aed1d3d0cbe03552564adc3541626a0613f542d753fbcb13bdfcec0a3a530dbe1714bb566c89d46244616b66bddd26ac413b06a207
   languageName: node
   linkType: hard
 
@@ -2586,19 +2587,6 @@ __metadata:
     statuses: "npm:>= 1.5.0 < 2"
     toidentifier: "npm:1.0.0"
   checksum: 10/157cb95296118e9c37034f04d5c372916db03bcb6b1097caf693fbc9cf85ac881c8cbdf892140acb7ede6cad6a1a3dbf86a8031b2b127dc47bfc0600b3fda8a0
-  languageName: node
-  linkType: hard
-
-"http-errors@npm:~2.0.1":
-  version: 2.0.1
-  resolution: "http-errors@npm:2.0.1"
-  dependencies:
-    depd: "npm:~2.0.0"
-    inherits: "npm:~2.0.4"
-    setprototypeof: "npm:~1.2.0"
-    statuses: "npm:~2.0.2"
-    toidentifier: "npm:~1.0.1"
-  checksum: 10/9fe31bc0edf36566c87048aed1d3d0cbe03552564adc3541626a0613f542d753fbcb13bdfcec0a3a530dbe1714bb566c89d46244616b66bddd26ac413b06a207
   languageName: node
   linkType: hard
 
@@ -4583,7 +4571,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"statuses@npm:2.0.1, statuses@npm:^2.0.1":
+"statuses@npm:2.0.1":
   version: 2.0.1
   resolution: "statuses@npm:2.0.1"
   checksum: 10/18c7623fdb8f646fb213ca4051be4df7efb3484d4ab662937ca6fbef7ced9b9e12842709872eb3020cc3504b93bde88935c9f6417489627a7786f24f8031cbcb
@@ -4597,7 +4585,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"statuses@npm:~2.0.2":
+"statuses@npm:^2.0.1, statuses@npm:~2.0.2":
   version: 2.0.2
   resolution: "statuses@npm:2.0.2"
   checksum: 10/6927feb50c2a75b2a4caab2c565491f7a93ad3d8dbad7b1398d52359e9243a20e2ebe35e33726dee945125ef7a515e9097d8a1b910ba2bbd818265a2f6c39879
