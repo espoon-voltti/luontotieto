@@ -82,7 +82,7 @@ dependencies {
     api(platform("com.fasterxml.jackson:jackson-bom:2.20.1"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    api(platform("software.amazon.awssdk:bom:2.39.6"))
+    api(platform("software.amazon.awssdk:bom:2.40.2"))
     implementation("software.amazon.awssdk:s3")
     implementation("software.amazon.awssdk:ses")
 
