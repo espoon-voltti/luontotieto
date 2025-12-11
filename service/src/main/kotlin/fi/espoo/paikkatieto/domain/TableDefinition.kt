@@ -367,7 +367,18 @@ enum class TableDefinition(
                     name = "viite",
                     kClass = String::class,
                     isNullable = true
-                )
+                ),
+                Column(
+                    name = "natura_luontotyyppi",
+                    kClass = String::class,
+                    isNullable = true
+                ),
+                Column(
+                    name = "natura_edustavuus",
+                    kClass = String::class,
+                    isNullable = true,
+                    sqlType = "natura_edustavuus_luokka"
+                ),
             )
     ),
     EKOYHTEYDET_ALUEET(
@@ -931,8 +942,10 @@ private const val SQL_INSERT_LUONTOTYYPIT_ALUEET =
         lumo_luokka,
         viite,
         selvitys_id,
-        geom
-    ) 
+        geom,
+        natura_luontotyyppi,
+        natura_edustavuus
+    )
     VALUES (
         :vuosi,
         :havaitsija,
@@ -949,7 +962,9 @@ private const val SQL_INSERT_LUONTOTYYPIT_ALUEET =
         :lumo_luokka::luontotyyppi_lumo_luokka,
         :reportName,
         :reportId,
-        ST_GeomFromWKB(:geom, 3879)
+        ST_GeomFromWKB(:geom, 3879),
+        :natura_luontotyyppi,
+        :natura_edustavuus::natura_edustavuus_luokka
     )
     RETURNING id
     """
