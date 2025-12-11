@@ -63,7 +63,7 @@ dependencies {
 
     implementation("org.apache.httpcomponents:httpclient:4.5.14")
 
-    implementation("org.geotools:gt-geopkg:34.0")
+    implementation("org.geotools:gt-geopkg:34.1")
     implementation("org.geotools:gt-epsg-hsql:34.1")
 
     implementation("com.zaxxer:HikariCP:7.0.2")
@@ -82,7 +82,7 @@ dependencies {
     api(platform("com.fasterxml.jackson:jackson-bom:2.20.1"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    api(platform("software.amazon.awssdk:bom:2.39.6"))
+    api(platform("software.amazon.awssdk:bom:2.40.2"))
     implementation("software.amazon.awssdk:s3")
     implementation("software.amazon.awssdk:ses")
 
