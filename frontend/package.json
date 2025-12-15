@@ -32,7 +32,7 @@
     "react": "19.2.1",
     "react-csv": "2.2.2",
     "react-dom": "19.2.1",
-    "react-focus-lock": "2.13.6",
+    "react-focus-lock": "2.13.7",
     "react-router-dom": "7.10.1",
     "react-tag-autocomplete": "7.5.1",
     "react-textarea-autosize": "8.5.9",
