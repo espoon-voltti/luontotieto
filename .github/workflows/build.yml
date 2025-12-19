@@ -159,7 +159,7 @@ jobs:
           mask-password: 'true'
 
       - name: Cache dependency check database
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: dependency-check-data
           key: dependency-check-data-${{ github.run_id }}-${{ github.run_attempt }}
@@ -177,7 +177,7 @@ jobs:
               ./gradlew --no-daemon dependencyCheckUpdate
 
       - name: Force caching dependency-check-data # If job fails cache is not saved without this
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: dependency-check-data
           key: dependency-check-data-${{ github.run_id }}-${{ github.run_attempt }}
