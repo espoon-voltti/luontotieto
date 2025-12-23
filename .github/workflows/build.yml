@@ -312,7 +312,7 @@ jobs:
           retention-days: 2
 
   deploy:
-    if: github.event.pull_request.user.login != 'renovate[bot]'
+    if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
     needs:
       - dockerize
