@@ -46,8 +46,8 @@ spring:
           socketTimeout: 30000
   servlet:
     multipart:
-      max-file-size: 150MB
-      max-request-size: 150MB
+      max-file-size: 200MB
+      max-request-size: 200MB
   sql:
     init:
       continue-on-error: false
