@@ -103,7 +103,7 @@ dependencies {
 
     implementation("org.bouncycastle:bcprov-jdk18on:1.83")
 
-    api("org.jsoup:jsoup:1.21.2")
+    api("org.jsoup:jsoup:1.22.1")
 
     implementation("org.unbescape:unbescape:1.1.6.RELEASE")
 
