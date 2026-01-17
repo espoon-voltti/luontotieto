@@ -44,7 +44,7 @@
     "@babel/preset-env": "7.28.5",
     "@eslint/compat": "2.0.0",
     "@types/file-saver": "2.0.7",
-    "@types/lodash": "4.17.21",
+    "@types/lodash": "4.17.23",
     "@types/node": "24.10.4",
     "@types/react-csv": "1.1.10",
     "@types/react-dom": "19.2.3",
