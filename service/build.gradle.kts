@@ -11,7 +11,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "2.3.0"
     kotlin("plugin.spring") version "2.3.0"
-    id("org.flywaydb.flyway") version "11.20.1"
+    id("org.flywaydb.flyway") version "11.20.2"
     id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
     id("org.owasp.dependencycheck") version "12.2.0"
 
@@ -67,8 +67,8 @@ dependencies {
     implementation("org.geotools:gt-epsg-hsql:34.1")
 
     implementation("com.zaxxer:HikariCP:7.0.2")
-    implementation("org.flywaydb:flyway-core:11.20.1")
-    implementation("org.flywaydb:flyway-database-postgresql:11.20.1")
+    implementation("org.flywaydb:flyway-core:11.20.2")
+    implementation("org.flywaydb:flyway-database-postgresql:11.20.2")
     implementation("org.postgresql:postgresql:42.7.8")
     api(platform("org.jdbi:jdbi3-bom:3.51.0"))
     implementation("org.jdbi:jdbi3-core")
