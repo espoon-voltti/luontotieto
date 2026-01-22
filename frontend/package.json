@@ -45,7 +45,7 @@
     "@eslint/compat": "2.0.1",
     "@types/file-saver": "2.0.7",
     "@types/lodash": "4.17.23",
-    "@types/node": "24.10.8",
+    "@types/node": "24.10.9",
     "@types/react-csv": "1.1.10",
     "@types/react-dom": "19.2.3",
     "@types/react-router-dom": "5.3.3",
