@@ -22,11 +22,9 @@ import { AuthGuard } from './auth/AuthGuard'
 import { LoginPage } from './auth/LoginPage'
 import { UserContextProvider } from './auth/UserContext'
 import { UserHeader } from './auth/UserHeader'
+import EspooLogo from './images/EspooLogoPrimary.svg'
 import { FlexRowWithGaps } from './shared/layout'
 import { H1 } from './shared/typography'
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
 const Header = styled.nav`
   height: 80px;
@@ -59,7 +57,11 @@ function App() {
         <Fragment>
           <Header>
             <FlexRowWithGaps>
-              <img src={EspooLogo} width="100px" alt="Espoon kaupunki" />
+              <img
+                src={EspooLogo as string}
+                width="100px"
+                alt="Espoon kaupunki"
+              />
               <Link to="/luontoselvitys">
                 <H1>Luontotietoportaali</H1>
               </Link>
