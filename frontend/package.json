@@ -27,7 +27,7 @@
     "core-js": "3.47.0",
     "date-fns": "4.1.0",
     "file-saver": "2.0.5",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "polished": "4.3.1",
     "react": "19.2.3",
     "react-csv": "2.2.2",
