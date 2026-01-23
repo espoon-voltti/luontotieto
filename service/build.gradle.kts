@@ -81,6 +81,9 @@ dependencies {
 
     api(platform("com.fasterxml.jackson:jackson-bom:2.20.1"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
+    implementation("com.fasterxml.jackson.module:jackson-module-parameter-names")
 
     api(platform("software.amazon.awssdk:bom:2.41.8"))
     implementation("software.amazon.awssdk:s3")
