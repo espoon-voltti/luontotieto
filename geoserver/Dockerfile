@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-FROM docker.osgeo.org/geoserver:2.28.x
+FROM docker.osgeo.org/geoserver:2.28.0
 
 ARG CACHE_BUST=none
 
