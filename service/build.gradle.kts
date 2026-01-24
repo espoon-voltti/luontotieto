@@ -90,7 +90,7 @@ dependencies {
 
     implementation("com.auth0:java-jwt:4.5.0")
 
-    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
+    implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("ch.qos.logback:logback-access:1.5.25")
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
 
