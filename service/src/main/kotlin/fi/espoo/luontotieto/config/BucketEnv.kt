@@ -51,9 +51,11 @@ fun <T> Environment.lookup(
         .asSequence()
         .mapNotNull { legacyKey ->
             try {
-                getProperty(legacyKey, clazz)?.also {
-                    logger.warn {
-                        "Using deprecated configuration key $legacyKey instead of $key (environment variable ${key.toSystemEnvKey()})"
+                getProperty(legacyKey)?.let { value ->
+                    convertValue(value, clazz)?.also {
+                        logger.warn {
+                            "Using deprecated configuration key $legacyKey instead of $key (environment variable ${key.toSystemEnvKey()})"
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -61,10 +63,24 @@ fun <T> Environment.lookup(
             }
         }.firstOrNull()
         ?: try {
-            getProperty(key, clazz)
+            getProperty(key)?.let { value -> convertValue(value, clazz) }
         } catch (e: Exception) {
             throw EnvLookupException(key, e)
         }
+
+private fun <T> convertValue(value: String, clazz: Class<T>): T? {
+    @Suppress("UNCHECKED_CAST")
+    return when (clazz) {
+        String::class.java -> value as T
+        Boolean::class.java, java.lang.Boolean::class.java -> value.toBoolean() as T
+        Int::class.java, Integer::class.java -> value.toInt() as T
+        Long::class.java, java.lang.Long::class.java -> value.toLong() as T
+        Double::class.java, java.lang.Double::class.java -> value.toDouble() as T
+        Region::class.java -> Region.of(value) as T
+        URI::class.java -> URI.create(value) as T
+        else -> value as? T
+    }
+}
 
 private val logger = KotlinLogging.logger {}
 
