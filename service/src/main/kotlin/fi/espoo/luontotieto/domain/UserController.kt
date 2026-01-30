@@ -173,7 +173,9 @@ class UserController {
                     )
                 }
 
-                val passwordHash = encoder.encode(data.newPassword)
+                val passwordHash =
+                    encoder.encode(data.newPassword)
+                        ?: throw IllegalStateException("Password encoding failed")
                 val result = tx.putPassword(user.id, passwordHash, user, true)
                 sesEmailClient.send(
                     Email(
@@ -197,7 +199,9 @@ class UserController {
         user.checkRoles(UserRole.ADMIN)
         val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
         val generatedString = generatePassword()
-        val passwordHash = encoder.encode(generatedString)
+        val passwordHash =
+            encoder.encode(generatedString)
+                ?: throw IllegalStateException("Password encoding failed")
         return jdbi
             .inTransactionUnchecked { tx ->
                 val result = tx.putPassword(id, passwordHash, user, false)
@@ -234,6 +238,8 @@ data class PasswordAndHash(
 private fun generatePasswordAndHash(): PasswordAndHash {
     val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
     val generatedString = generatePassword()
-    val passwordHash = encoder.encode(generatedString)
+    val passwordHash =
+        encoder.encode(generatedString)
+            ?: throw IllegalStateException("Password encoding failed")
     return PasswordAndHash(generatedString, passwordHash)
 }

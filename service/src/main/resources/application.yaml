@@ -21,6 +21,9 @@ luontotieto:
     password: ${GEOSERVER_PASSWORD}
 
 spring:
+  threads:
+    virtual:
+      enabled: false  # Disable virtual threads to avoid potential issues
   main:
     banner-mode: "off"
   application:

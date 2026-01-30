@@ -7,18 +7,18 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    id("org.springframework.boot") version "3.5.10"
-    id("io.spring.dependency-management") version "1.1.7"
-    kotlin("jvm") version "2.3.0"
-    kotlin("plugin.spring") version "2.3.0"
-    id("org.flywaydb.flyway") version "11.20.2"
-    id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
-    id("org.owasp.dependencycheck") version "12.2.0"
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.flyway)
+    alias(libs.plugins.ktlint.gradle)
+    alias(libs.plugins.owasp)
 
     idea
 }
 
-java { sourceCompatibility = JavaVersion.VERSION_21 }
+java { sourceCompatibility = JavaVersion.VERSION_25 }
 
 repositories {
     maven { url = uri("https://repo.osgeo.org/repository/release/") }
@@ -47,75 +47,78 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     // cve fixes
-    api("org.yaml:snakeyaml:2.5")
-    api("org.xerial:sqlite-jdbc:3.51.1.0")
-    api("commons-jxpath:commons-jxpath:1.4.0")
-    api("org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.39.0")
+    api(libs.snakeyaml)
+    api(libs.sqlite.jdbc)
+    api(libs.commons.jxpath)
+    api(libs.eclipse.emf.ecore.xmi)
 
     api("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springframework.ws:spring-ws-security") {
         exclude("org.opensaml")
     }
 
-    implementation("org.apache.httpcomponents:httpclient:4.5.14")
+    implementation(libs.httpclient)
 
-    implementation("org.geotools:gt-geopkg:34.2")
-    implementation("org.geotools:gt-epsg-hsql:34.2")
+    implementation(libs.geotools.geopkg)
+    implementation(libs.geotools.epsg.hsql)
 
-    implementation("com.zaxxer:HikariCP:7.0.2")
-    implementation("org.flywaydb:flyway-core:11.20.2")
-    implementation("org.flywaydb:flyway-database-postgresql:11.20.2")
-    implementation("org.postgresql:postgresql:42.7.9")
-    api(platform("org.jdbi:jdbi3-bom:3.51.0"))
+    implementation(libs.hikaricp)
+    implementation(libs.flyway.core)
+    implementation(libs.flyway.database.postgresql)
+    implementation(libs.postgresql)
+    api(platform(libs.jdbi.bom))
     implementation("org.jdbi:jdbi3-core")
     implementation("org.jdbi:jdbi3-jackson2")
     implementation("org.jdbi:jdbi3-kotlin")
     implementation("org.jdbi:jdbi3-postgres")
 
-    implementation("com.github.kittinunf.fuel:fuel:2.3.1")
-    implementation("com.github.kittinunf.fuel:fuel-jackson:2.3.1")
+    implementation(libs.fuel)
+    implementation(libs.fuel.jackson)
 
-    api(platform("com.fasterxml.jackson:jackson-bom:2.21.0"))
+    api(platform(libs.jackson.bom))
+    implementation("com.fasterxml.jackson.core:jackson-core")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    api(platform("software.amazon.awssdk:bom:2.41.12"))
+    api(platform(libs.aws.bom))
     implementation("software.amazon.awssdk:s3")
     implementation("software.amazon.awssdk:ses")
 
-    implementation("org.apache.tika:tika-core:3.2.3")
+    implementation(libs.tika.core)
 
-    implementation("com.auth0:java-jwt:4.5.0")
+    implementation(libs.java.jwt)
 
-    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
-    implementation("ch.qos.logback:logback-access:1.5.25")
-    implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
+    implementation(libs.logstash.logback.encoder)
+    implementation(libs.logback.access)
+    implementation(libs.kotlin.logging)
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit5"))
-    api(platform("org.junit:junit-bom:6.0.2"))
+    api(platform(libs.junit.bom))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("com.microsoft.playwright:playwright:1.57.0")
+    testImplementation(libs.playwright)
 
-    implementation("org.bouncycastle:bcprov-jdk18on:1.83")
+    implementation(libs.bouncycastle.bcprov)
 
-    api("org.jsoup:jsoup:1.22.1")
+    api(libs.jsoup)
 
-    implementation("org.unbescape:unbescape:1.1.6.RELEASE")
+    implementation(libs.unbescape)
 
-    implementation("com.squareup.okhttp3:okhttp:5.3.2")
+    implementation(libs.okhttp)
 
-    implementation("org.apache.commons:commons-lang3:3.20.0")
+    implementation(libs.commons.lang3)
 }
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = JvmTarget.JVM_21
+        jvmTarget = JvmTarget.JVM_25
     }
 }
 

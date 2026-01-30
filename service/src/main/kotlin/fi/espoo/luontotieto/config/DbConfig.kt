@@ -4,7 +4,7 @@
 
 package fi.espoo.luontotieto.config
 
-import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import fi.espoo.luontotieto.common.DatabaseEnum
@@ -52,8 +52,8 @@ class DbConfig {
     @Bean("jdbi-luontotieto")
     fun jdbiLuontotieto(
         @LuontotietoDataSource dataSource: HikariDataSource,
-        jsonMapper: JsonMapper
-    ) = configureJdbi(Jdbi.create(dataSource), jsonMapper)
+        objectMapper: ObjectMapper
+    ) = configureJdbi(Jdbi.create(dataSource), objectMapper)
 
     @Bean
     @PaikkatietoDataSource
@@ -69,13 +69,13 @@ class DbConfig {
     @Bean("jdbi-paikkatieto")
     fun jdbiPaikkatieto(
         @PaikkatietoDataSource dataSource: HikariDataSource,
-        jsonMapper: JsonMapper
-    ) = configureJdbi(Jdbi.create(dataSource), jsonMapper)
+        objectMapper: ObjectMapper
+    ) = configureJdbi(Jdbi.create(dataSource), objectMapper)
 }
 
 private fun configureJdbi(
     jdbi: Jdbi,
-    jsonMapper: JsonMapper
+    objectMapper: ObjectMapper
 ): Jdbi {
     jdbi
         .installPlugin(KotlinPlugin())
@@ -83,7 +83,7 @@ private fun configureJdbi(
         .installPlugin(Jackson2Plugin())
     jdbi.registerArgument(databaseEnumArgumentFactory)
     jdbi.getConfig(ColumnMappers::class.java).coalesceNullPrimitivesToDefaults = false
-    jdbi.getConfig(Jackson2Config::class.java).mapper = jsonMapper
+    jdbi.getConfig(Jackson2Config::class.java).mapper = objectMapper
     return jdbi
 }
 
