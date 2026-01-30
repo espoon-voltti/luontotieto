@@ -45,7 +45,7 @@ inline fun <reified T> Environment.lookup(
 fun <T> Environment.lookup(
     key: String,
     deprecatedKeys: Array<out String>,
-    clazz: Class<T>
+    clazz: Class<out T>
 ): T? =
     deprecatedKeys
         .asSequence()
