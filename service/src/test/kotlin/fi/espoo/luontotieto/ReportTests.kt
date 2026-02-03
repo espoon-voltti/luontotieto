@@ -4,6 +4,7 @@
 
 package fi.espoo.luontotieto
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import fi.espoo.luontotieto.common.BadRequest
 import fi.espoo.luontotieto.config.AuthenticatedUser
 import fi.espoo.luontotieto.domain.DocumentType
@@ -34,6 +35,8 @@ class ReportTests : FullApplicationTest() {
     @Autowired lateinit var reportController: ReportController
 
     @Autowired lateinit var orderController: OrderController
+
+    @Autowired lateinit var objectMapper: ObjectMapper
 
     @Test
     fun `create report with all data and fetch`() {
@@ -518,5 +521,23 @@ class ReportTests : FullApplicationTest() {
         assertEquals(expected["additionalInformation"], params["additionalInformation"])
         assertEquals(expected["reportLink"], params["reportLink"])
         assertEquals(expected["reportDocumentLink"], params["reportDocumentLink"])
+    }
+
+    @Test
+    fun `isPublic field serializes correctly as isPublic not public`() {
+        val createOrderResponse =
+            createOrderAndReport(controller = orderController, name = "Test report for serialization")
+        val reportResponse = reportController.getReportById(adminUser, createOrderResponse.reportId)
+
+        // Serialize to JSON
+        val json = objectMapper.writeValueAsString(reportResponse)
+        val jsonNode = objectMapper.readTree(json)
+
+        // Verify that the field is named "isPublic" not "public"
+        assertTrue(jsonNode.has("isPublic"), "JSON should contain 'isPublic' field")
+        assertFalse(jsonNode.has("public"), "JSON should NOT contain 'public' field")
+
+        // Verify the value is correct
+        assertEquals(false, jsonNode.get("isPublic").asBoolean())
     }
 }
