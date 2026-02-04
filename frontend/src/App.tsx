@@ -57,11 +57,7 @@ function App() {
         <Fragment>
           <Header>
             <FlexRowWithGaps>
-              <img
-                src={EspooLogo as string}
-                width="100px"
-                alt="Espoon kaupunki"
-              />
+              <img src={EspooLogo} width="100px" alt="Espoon kaupunki" />
               <Link to="/luontoselvitys">
                 <H1>Luontotietoportaali</H1>
               </Link>

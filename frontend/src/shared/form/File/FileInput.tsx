@@ -89,7 +89,7 @@ export const FileInput = <
   accept,
   required
 }: FileInputProps<T>) => {
-  const inputRef = useRef<HTMLInputElement | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null!)
 
   const [file, setFile] = useState(data.file ?? null)
   const [description, setDescription] = useDebouncedState(data.description)
