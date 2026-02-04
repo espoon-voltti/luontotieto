@@ -20,7 +20,6 @@ fun defaultJsonMapper(): ObjectMapper =
             KotlinModule
                 .Builder()
                 .enable(KotlinFeature.SingletonSupport)
-                .enable(KotlinFeature.KotlinPropertyNameAsImplicitName)
                 .build(),
             JavaTimeModule()
             // Note: Jdk8Module and ParameterNamesModule are no longer needed in Jackson 2.20+

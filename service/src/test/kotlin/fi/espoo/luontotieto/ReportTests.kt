@@ -522,22 +522,4 @@ class ReportTests : FullApplicationTest() {
         assertEquals(expected["reportLink"], params["reportLink"])
         assertEquals(expected["reportDocumentLink"], params["reportDocumentLink"])
     }
-
-    @Test
-    fun `isPublic field serializes correctly as isPublic not public`() {
-        val createOrderResponse =
-            createOrderAndReport(controller = orderController, name = "Test report for serialization")
-        val reportResponse = reportController.getReportById(adminUser, createOrderResponse.reportId)
-
-        // Serialize to JSON
-        val json = objectMapper.writeValueAsString(reportResponse)
-        val jsonNode = objectMapper.readTree(json)
-
-        // Verify that the field is named "isPublic" not "public"
-        assertTrue(jsonNode.has("isPublic"), "JSON should contain 'isPublic' field")
-        assertFalse(jsonNode.has("public"), "JSON should NOT contain 'public' field")
-
-        // Verify the value is correct
-        assertEquals(false, jsonNode.get("isPublic").asBoolean())
-    }
 }

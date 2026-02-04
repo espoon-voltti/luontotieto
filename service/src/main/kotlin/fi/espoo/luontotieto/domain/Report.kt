@@ -4,6 +4,7 @@
 
 package fi.espoo.luontotieto.domain
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.common.databaseValue
 import fi.espoo.luontotieto.common.sanitizeCsvCellData
@@ -25,6 +26,8 @@ data class Report(
     val updated: OffsetDateTime,
     val createdBy: String,
     val updatedBy: String,
+    // Required for Jackson 2.21.0+, which broke Kotlin Boolean naming
+    @get:JsonProperty("isPublic")
     val isPublic: Boolean?,
     val noObservations: List<DocumentType>?,
     val observedSpecies: List<String>?,
@@ -34,6 +37,8 @@ data class Report(
     companion object {
         data class ReportInput(
             val name: String,
+            // Required for Jackson 2.21.0+
+            @get:JsonProperty("isPublic")
             val isPublic: Boolean?,
             val noObservations: List<DocumentType>?
         )
