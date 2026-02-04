@@ -31,8 +31,8 @@ export const DateRange = React.memo(function DateRange({
   end,
   onChange
 }: Props) {
-  const startDateInputRef = useRef<HTMLInputElement>(null)
-  const endDateInputRef = useRef<HTMLInputElement>(null)
+  const startDateInputRef = useRef<HTMLInputElement>(null!)
+  const endDateInputRef = useRef<HTMLInputElement>(null!)
 
   const [startDate, setStartDate] = useState(start ?? '')
   const [endDate, setEndDate] = useState(end ?? '')

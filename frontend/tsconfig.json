@@ -6,7 +6,7 @@
       "dom",
       "es2020"
     ],
-    "types": [],
+    "types": ["node"],
     "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
