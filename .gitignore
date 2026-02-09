@@ -8,6 +8,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+.git-blame-ignore-revs
 
 ### STS ###
 .apt_generated
@@ -39,3 +40,9 @@ out/
 
 ### VS Code ###
 .vscode/
+git
+### AI tools ###
+.github/hooks
+.github/skills
+AGENTS.md
+ai

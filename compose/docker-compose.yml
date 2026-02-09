@@ -56,7 +56,7 @@ services:
       retries: 5
 
   geoserver:
-    image: docker.osgeo.org/geoserver:2.25.x
+    image: docker.osgeo.org/geoserver:2.26.0
     ports:
       - "8000:8080"
     volumes:
