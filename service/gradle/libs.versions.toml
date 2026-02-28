@@ -35,7 +35,7 @@ aws-bom = { module = "software.amazon.awssdk:bom", version.ref = "aws" }
 bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 commons-jxpath = { module = "commons-jxpath:commons-jxpath", version = "1.4.0" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.20.0" }
-eclipse-emf-ecore-xmi = { module = "org.eclipse.emf:org.eclipse.emf.ecore.xmi", version = "2.39.0" }
+eclipse-emf-ecore-xmi = { module = "org.eclipse.emf:org.eclipse.emf.ecore.xmi", version = "2.40.0" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 fuel = { module = "com.github.kittinunf.fuel:fuel", version.ref = "fuel" }
