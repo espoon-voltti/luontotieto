@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
 [versions]
-aws = "2.42.6"
+aws = "2.42.10"
 bouncycastle = "1.83"
 flyway = "12.0.3"
 fuel = "2.3.1"
