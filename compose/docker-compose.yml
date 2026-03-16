@@ -61,6 +61,7 @@ services:
       - "8000:8080"
     volumes:
       - ../geoserver/data_dir:/opt/geoserver_data/
+      - ../geoserver/update_credentials.sh:/opt/update_credentials.sh:ro
     depends_on:
       - paikkatieto-db
     environment:
