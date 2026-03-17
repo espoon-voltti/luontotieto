@@ -26,6 +26,7 @@ POSTGRES_PASSWORD: postgres                     # Password
 EXTRA_JAVA_OPTS: -DALLOW_ENV_PARAMETRIZATION=true -DGEOSERVER_CONSOLE_DISABLED=true -Xms256m -Xmx512m
 GEOSERVER_ADMIN_PASSWORD: plain:password        # In production please use hashed password, see section below
 GEOSERVER_WFS_PASSWORD: plain:wfs_password      # In production please use hashed password, see section below
+GEOSERVER_WFS_USER: wfs                         # Optional user name for the automated WFS login
 ```
 
 ### Password hashing
@@ -60,3 +61,5 @@ Copy the hash and provide it either in `GEOSERVER_ADMIN_PASSWORD` or `GEOSERVER_
      ![Configure the layer](docs/add-layer-3.png "Configure the layer")
 
 5. Commit changes in `geoserver/*` to Git.
+
+The GeoServer entrypoint calls `/opt/update_credentials.sh` before Tomcat starts. The script rewrites the admin credentials and, when `GEOSERVER_WFS_PASSWORD` is configured, appends or refreshes the `GEOSERVER_WFS_USER` entry so that the dedicated WFS login survives every restart; keep the checked-in `users.xml` in sync with the environment variables above to keep that process deterministic.

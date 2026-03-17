@@ -8,5 +8,7 @@ FROM docker.osgeo.org/geoserver:2.27.5
 ARG CACHE_BUST=none
 
 COPY ./data_dir /opt/geoserver_data/
+COPY ./update_credentials.sh /opt/update_credentials.sh
+RUN chmod +x /opt/update_credentials.sh
 
 EXPOSE 8080
