@@ -40,7 +40,7 @@ flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 fuel = { module = "com.github.kittinunf.fuel:fuel", version.ref = "fuel" }
 fuel-jackson = { module = "com.github.kittinunf.fuel:fuel-jackson", version.ref = "fuel" }
-geotools-epsg-hsql = { module = "org.geotools:gt-epsg-hsql", version = "34.2" }
+geotools-epsg-hsql = { module = "org.geotools:gt-epsg-hsql", version = "34.3" }
 geotools-geopkg = { module = "org.geotools:gt-geopkg", version = "34.2" }
 hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
 httpclient = { module = "org.apache.httpcomponents:httpclient", version.ref = "httpclient" }
