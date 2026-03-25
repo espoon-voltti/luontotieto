@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
 [versions]
-aws = "2.42.11"
+aws = "2.42.16"
 bouncycastle = "1.83"
-flyway = "12.1.0"
+flyway = "12.1.1"
 fuel = "2.3.1"
 hikaricp = "7.0.2"
 httpclient = "4.5.14"
@@ -15,17 +15,17 @@ java-jwt = "4.5.1"
 jdbi = "3.51.0"
 jsoup = "1.22.1"
 junit = "6.0.3"
-kotlin = "2.3.10"
+kotlin = "2.3.20"
 kotlin-logging = "3.0.5"
 ktlint = "1.4.1"
 ktlint-gradle = "14.2.0"
 logback-access = "1.5.32"
-logstash-logback = "8.1"
+logstash-logback = "9.0"
 okhttp = "5.3.2"
 owasp = "12.2.0"
 playwright = "1.58.0"
 postgresql = "42.7.10"
-spring-boot = "4.0.3"
+spring-boot = "4.0.4"
 spring-dependency-management = "1.1.7"
 tika = "3.2.3"
 unbescape = "1.1.6.RELEASE"
@@ -40,8 +40,8 @@ flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 fuel = { module = "com.github.kittinunf.fuel:fuel", version.ref = "fuel" }
 fuel-jackson = { module = "com.github.kittinunf.fuel:fuel-jackson", version.ref = "fuel" }
-geotools-epsg-hsql = { module = "org.geotools:gt-epsg-hsql", version = "34.2" }
-geotools-geopkg = { module = "org.geotools:gt-geopkg", version = "34.2" }
+geotools-epsg-hsql = { module = "org.geotools:gt-epsg-hsql", version = "34.3" }
+geotools-geopkg = { module = "org.geotools:gt-geopkg", version = "34.3" }
 hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
 httpclient = { module = "org.apache.httpcomponents:httpclient", version.ref = "httpclient" }
 jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jackson" }
@@ -56,7 +56,7 @@ okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 playwright = { module = "com.microsoft.playwright:playwright", version.ref = "playwright" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 snakeyaml = { module = "org.yaml:snakeyaml", version = "2.6" }
-sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version = "3.51.2.0" }
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version = "3.51.3.0" }
 tika-core = { module = "org.apache.tika:tika-core", version.ref = "tika" }
 unbescape = { module = "org.unbescape:unbescape", version.ref = "unbescape" }
 

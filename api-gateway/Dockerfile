@@ -28,11 +28,15 @@ FROM builder
 
 ENV NODE_ENV production
 
+ARG S3_DOWNLOADER_VERSION=v1.5.1
+ARG S3_DOWNLOADER_SHA256="cb751589ca60749c42b65009671d6076435e7454b8980ee98884e296a1ec6cb8"
+
 RUN apt-get update \
       && apt-get -y dist-upgrade \
       && apt-get -y install curl \
-      && curl -sSfL https://github.com/espoon-voltti/s3-downloader/releases/download/v1.4.1/s3downloader-linux-amd64 \
+      && curl -sSfL https://github.com/espoon-voltti/s3-downloader/releases/download/${S3_DOWNLOADER_VERSION}/s3downloader-linux-amd64 \
       -o /bin/s3download \
+      && echo "${S3_DOWNLOADER_SHA256}  /bin/s3download" | sha256sum -c - \
       && chmod +x /bin/s3download
 
 ARG build=none

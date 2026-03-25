@@ -16,7 +16,7 @@ SPDX-License-Identifier: LGPL-2.1-or-later
             <onMatch>NEUTRAL</onMatch>
         </filter>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <jsonFactoryDecorator class="fi.espoo.luontotieto.config.JsonLoggingConfig"/>
+            <decorator class="fi.espoo.luontotieto.config.JsonLoggingConfig"/>
             <includeTags>false</includeTags>
             <excludeMdcKeyName>spanExportable</excludeMdcKeyName>
             <excludeMdcKeyName>X-B3-ParentSpanId</excludeMdcKeyName>
