@@ -4,12 +4,12 @@
 
 package fi.espoo.luontotieto.config
 
-import com.fasterxml.jackson.core.JsonStreamContext
 import net.logstash.logback.mask.ValueMasker
+import tools.jackson.core.TokenStreamContext
 
 class SsnMasker : ValueMasker {
     override fun mask(
-        context: JsonStreamContext?,
+        context: TokenStreamContext?,
         value: Any?
     ): Any =
         if (value is String) {

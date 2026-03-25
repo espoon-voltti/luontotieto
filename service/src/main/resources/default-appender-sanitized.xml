@@ -13,11 +13,11 @@ SPDX-License-Identifier: LGPL-2.1-or-later
 
   <appender name="VOLTTI_DEFAULT_APPENDER_SANITIZED" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-      <jsonFactoryDecorator class="fi.espoo.luontotieto.config.JsonLoggingConfig"/>
-      <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
+      <decorator class="fi.espoo.luontotieto.config.JsonLoggingConfig"/>
+      <decorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
         <!--Hide social security numbers from logs-->
         <valueMasker class="fi.espoo.luontotieto.config.SsnMasker" />
-      </jsonGeneratorDecorator>
+      </decorator>
       <providers>
         <logLevel><fieldName>logLevel</fieldName></logLevel>
         <loggerName><fieldName>loggerName</fieldName></loggerName>
