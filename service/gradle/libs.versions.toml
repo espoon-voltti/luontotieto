@@ -27,7 +27,7 @@ playwright = "1.58.0"
 postgresql = "42.7.10"
 spring-boot = "4.0.4"
 spring-dependency-management = "1.1.7"
-tika = "3.2.3"
+tika = "3.3.0"
 unbescape = "1.1.6.RELEASE"
 
 [libraries]
