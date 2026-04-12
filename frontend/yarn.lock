@@ -1765,13 +1765,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/unitless@npm:0.10.0":
-  version: 0.10.0
-  resolution: "@emotion/unitless@npm:0.10.0"
-  checksum: 10/6851c16edce01c494305f43b2cad7a26b939a821131b7c354e49b8e3b012c8810024755b0f4a03ef51117750309e55339825a97bd10411fb3687e68904769106
-  languageName: node
-  linkType: hard
-
 "@esbuild/aix-ppc64@npm:0.28.0":
   version: 0.28.0
   resolution: "@esbuild/aix-ppc64@npm:0.28.0"
@@ -2478,13 +2471,6 @@ __metadata:
     "@types/react": "npm:*"
     csstype: "npm:^3.2.2"
   checksum: 10/fd9130e344c65992ce67accaf3af239573fa69434fc851ef956fafa1f1c03e8b007af8a2acf899ab4526bb42d326b7e07a64f9cd69a445715b6403617675cdd1
-  languageName: node
-  linkType: hard
-
-"@types/stylis@npm:4.2.7":
-  version: 4.2.7
-  resolution: "@types/stylis@npm:4.2.7"
-  checksum: 10/068c7fd64ee2e1649b06615da57c76dd9f5be1836e310ebf94aa08193c3544d48944079ce6e94ba89b72b716944f217234a86fecc28185246c1787f02ad0eae1
   languageName: node
   linkType: hard
 
@@ -5292,7 +5278,7 @@ __metadata:
     react-tag-autocomplete: "npm:7.5.1"
     react-textarea-autosize: "npm:8.5.9"
     style-loader: "npm:4.0.0"
-    styled-components: "npm:6.3.12"
+    styled-components: "npm:6.4.0"
     ts-loader: "npm:9.5.7"
     ts-node: "npm:10.9.2"
     typescript: "npm:5.9.3"
@@ -5420,7 +5406,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:^3.3.11, nanoid@npm:^3.3.7":
+"nanoid@npm:^3.3.11":
   version: 3.3.11
   resolution: "nanoid@npm:3.3.11"
   bin:
@@ -6147,17 +6133,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:8.4.49":
-  version: 8.4.49
-  resolution: "postcss@npm:8.4.49"
-  dependencies:
-    nanoid: "npm:^3.3.7"
-    picocolors: "npm:^1.1.1"
-    source-map-js: "npm:^1.2.1"
-  checksum: 10/28fe1005b1339870e0a5006375ba5ac1213fd69800f79e7db09c398e074421ba6e162898e94f64942fed554037fd292db3811d87835d25ab5ef7f3c9daacb6ca
-  languageName: node
-  linkType: hard
-
 "postcss@npm:8.5.9, postcss@npm:^8.4.40":
   version: 8.5.9
   resolution: "postcss@npm:8.5.9"
@@ -6733,13 +6708,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shallowequal@npm:1.1.0":
-  version: 1.1.0
-  resolution: "shallowequal@npm:1.1.0"
-  checksum: 10/f4c1de0837f106d2dbbfd5d0720a5d059d1c66b42b580965c8f06bb1db684be8783538b684092648c981294bf817869f743a066538771dbecb293df78f765e00
-  languageName: node
-  linkType: hard
-
 "shebang-command@npm:^2.0.0":
   version: 2.0.0
   resolution: "shebang-command@npm:2.0.0"
@@ -6988,26 +6956,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-components@npm:6.3.12":
-  version: 6.3.12
-  resolution: "styled-components@npm:6.3.12"
+"styled-components@npm:6.4.0":
+  version: 6.4.0
+  resolution: "styled-components@npm:6.4.0"
   dependencies:
     "@emotion/is-prop-valid": "npm:1.4.0"
-    "@emotion/unitless": "npm:0.10.0"
-    "@types/stylis": "npm:4.2.7"
     css-to-react-native: "npm:3.2.0"
     csstype: "npm:3.2.3"
-    postcss: "npm:8.4.49"
-    shallowequal: "npm:1.1.0"
     stylis: "npm:4.3.6"
-    tslib: "npm:2.8.1"
   peerDependencies:
+    css-to-react-native: ">= 3.2.0"
     react: ">= 16.8.0"
     react-dom: ">= 16.8.0"
+    react-native: ">= 0.68.0"
   peerDependenciesMeta:
+    css-to-react-native:
+      optional: true
     react-dom:
       optional: true
-  checksum: 10/0825d2ad39395f10f8abf60b87aca0673bd653fbff84b3da1298479eb32e44ff1b744f5ef026dd06c24fcb3b9c35886f5cbe8163622c05719d8e754ed42640f1
+    react-native:
+      optional: true
+  checksum: 10/df2914444d1d4e950be68cee686dae37ff243917f71be523a0dbac62ecfe22d04344547efe7d9722e9f137d76248171a2cc37208d9d9b425445e48dee89e71ca
   languageName: node
   linkType: hard
 
@@ -7178,17 +7147,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:2.8.1, tslib@npm:^2.0.0, tslib@npm:^2.0.3, tslib@npm:^2.1.0":
-  version: 2.8.1
-  resolution: "tslib@npm:2.8.1"
-  checksum: 10/3e2e043d5c2316461cb54e5c7fe02c30ef6dccb3384717ca22ae5c6b5bc95232a6241df19c622d9c73b809bea33b187f6dbc73030963e29950c2141bc32a79f7
-  languageName: node
-  linkType: hard
-
 "tslib@npm:^1.8.1":
   version: 1.14.1
   resolution: "tslib@npm:1.14.1"
   checksum: 10/7dbf34e6f55c6492637adb81b555af5e3b4f9cc6b998fb440dac82d3b42bdc91560a35a5fb75e20e24a076c651438234da6743d139e4feabf0783f3cdfe1dddb
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.0.0, tslib@npm:^2.0.3, tslib@npm:^2.1.0":
+  version: 2.8.1
+  resolution: "tslib@npm:2.8.1"
+  checksum: 10/3e2e043d5c2316461cb54e5c7fe02c30ef6dccb3384717ca22ae5c6b5bc95232a6241df19c622d9c73b809bea33b187f6dbc73030963e29950c2141bc32a79f7
   languageName: node
   linkType: hard
 
