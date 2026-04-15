@@ -181,6 +181,7 @@ tasks {
             ossIndex.apply {
                 username = System.getenv("OSS_INDEX_USERNAME")
                 password = System.getenv("OSS_INDEX_PASSWORD")
+                url = "https://api.guide.sonatype.com"
             }
         }
         nvd.apply { apiKey = System.getenv("NVD_API_KEY") }
