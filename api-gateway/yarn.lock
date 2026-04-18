@@ -178,6 +178,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nodable/entities@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@nodable/entities@npm:1.1.0"
+  checksum: 10/708e656b1e5d4e9e1b962c16cee4d05a3aed8f3e7e855214f81475f026abb3491fc6a7b4b37f0136ae31ddc7fce43ff4d69b14e1369f14ac1c51a0c2f010411d
+  languageName: node
+  linkType: hard
+
 "@node-saml/node-saml@npm:5.1.0, @node-saml/node-saml@npm:^5.1.0":
   version: 5.1.0
   resolution: "@node-saml/node-saml@npm:5.1.0"
@@ -2140,16 +2147,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-xml-parser@npm:5.5.12":
-  version: 5.5.12
-  resolution: "fast-xml-parser@npm:5.5.12"
+"fast-xml-parser@npm:5.6.0":
+  version: 5.6.0
+  resolution: "fast-xml-parser@npm:5.6.0"
   dependencies:
+    "@nodable/entities": "npm:^1.1.0"
     fast-xml-builder: "npm:^1.1.4"
     path-expression-matcher: "npm:^1.5.0"
     strnum: "npm:^2.2.3"
   bin:
     fxparser: src/cli/cli.js
-  checksum: 10/302eb610c1d991721757ca20a9d113873e6288f19d1de73fbebd9925990830abc1cc8fb1e38bfb7be7841764f6455cafff19ce696c790ce82cc944a68868d37d
+  checksum: 10/8ac171a569f997772b21a9cfdf0d94e3b376d211d914582afcf777a40919e8cb724e676f09e2959b2a5fe24c829fd59fc499ff7252d8c6722b8d8228d9015c0f
   languageName: node
   linkType: hard
 
@@ -3240,7 +3248,7 @@ __metadata:
     express: "npm:5.2.1"
     express-http-proxy: "npm:2.1.2"
     express-session: "npm:1.19.0"
-    fast-xml-parser: "npm:5.5.12"
+    fast-xml-parser: "npm:5.6.0"
     helmet: "npm:8.1.0"
     jsonwebtoken: "npm:9.0.2"
     lodash: "npm:4.18.1"
