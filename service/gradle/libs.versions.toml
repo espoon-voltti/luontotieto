@@ -4,7 +4,7 @@
 
 [versions]
 aws = "2.42.31"
-bouncycastle = "1.83"
+bouncycastle = "1.84"
 flyway = "12.3.0"
 fuel = "2.3.1"
 hikaricp = "7.0.2"
