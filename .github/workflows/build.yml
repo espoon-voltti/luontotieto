@@ -159,11 +159,12 @@ jobs:
           mask-password: 'true'
 
       - name: Load OWASP cache
-        uses: espoon-voltti/voltti-actions/owasp-cache-get@feature/owasp-cache-get
+        uses: espoon-voltti/voltti-actions/owasp-cache-get@master
         with:
           gh_token: ${{ secrets.VOLTTI_OWASP_TOKEN }}
           t_cache_base: "./"
           t_cache_dir: "dependency-check-data"
+          fail_on_miss: "true"
 
       - name: Run service OWASP tests
         shell: bash
