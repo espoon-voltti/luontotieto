@@ -9,6 +9,9 @@ services:
     image: 767398123997.dkr.ecr.eu-north-1.amazonaws.com/luontotieto/frontend:${TAG:-master}
     build:
       context: ../frontend/
+    read_only: true
+    tmpfs:
+      - /nginx:uid=101,gid=101,size=64m
     ports:
       - "8765:80"
     environment:
@@ -20,6 +23,10 @@ services:
     image: 767398123997.dkr.ecr.eu-north-1.amazonaws.com/luontotieto/service:${TAG:-master}
     build:
       context: ../service/
+    read_only: true
+    tmpfs:
+      - /config:uid=1000,gid=1000,size=64m
+      - /tmp:mode=1777,size=128m
     ports:
       - "9000:9000"
     environment:
@@ -34,6 +41,9 @@ services:
     image: 767398123997.dkr.ecr.eu-north-1.amazonaws.com/luontotieto/api-gateway:${TAG:-master}
     build:
       context: ../api-gateway/
+    read_only: true
+    tmpfs:
+      - /config:uid=1001,gid=1001,size=64m
     ports:
       - "8888:8888"
     environment:

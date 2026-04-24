@@ -19,18 +19,20 @@ if [ "${API_GATEWAY_URL:-X}" = 'X' ]; then
   exit 1
 fi
 
+mkdir -p /nginx/config
+cp -r /etc/nginx/* /nginx/config/
 
-for directory in /etc/nginx/conf.d/ /etc/nginx/; do
+for directory in /nginx/config/conf.d/ /nginx/config/; do
   gomplate --input-dir="$directory" --output-map="$directory"'{{ .in | strings.ReplaceAll ".template" "" }}'
 done
 
 if [ "${DEBUG:-false}" = "true" ]; then
-  cat /etc/nginx/nginx.conf
-  cat /etc/nginx/conf.d/default.conf
+  cat /nginx/config/nginx.conf
+  cat /nginx/config/conf.d/default.conf
 fi
 
 if [ "${BASIC_AUTH_ENABLED:-false}" = 'true' ]; then
-  echo "$BASIC_AUTH_CREDENTIALS" > /etc/nginx/.htpasswd
+  echo "$BASIC_AUTH_CREDENTIALS" > /nginx/config/.htpasswd
 fi
 
 
