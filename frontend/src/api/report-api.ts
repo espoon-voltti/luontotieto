@@ -316,7 +316,7 @@ const apiPostReportFile = async (
         id: file.id,
         name: file.file.name,
         errors: 'Tuntematon virhe'
-      } as ReportFileValidationErrorResponse
+      }
     })
 }
 

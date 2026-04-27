@@ -253,7 +253,7 @@ const apiPostOrderFile = async (
         name: file.name,
         status: 500,
         errors: 'Tuntematon virhe'
-      } as OrderFileValidationErrorResponse
+      }
     })
 }
 
