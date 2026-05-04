@@ -10,7 +10,6 @@ import fi.espoo.paikkatieto.reader.GpkgFeature
 import fi.espoo.paikkatieto.reader.GpkgReader
 import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.reader.GpkgValidationErrorReason
-import org.locationtech.jts.io.WKTReader
 import java.io.File
 import java.io.IOException
 import java.sql.Date
@@ -18,6 +17,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import org.locationtech.jts.io.WKTReader
 
 class GpkgReaderTest {
     @Test
@@ -45,9 +45,9 @@ class GpkgReaderTest {
                             "lisatieto" to null,
                             "kunta" to 79,
                             "tarkkuus" to "GPS",
-                            "viite" to "11"
+                            "viite" to "11",
                         ),
-                    errors = emptyList()
+                    errors = emptyList(),
                 ),
                 GpkgFeature(
                     columns =
@@ -64,10 +64,10 @@ class GpkgReaderTest {
                             "lisatieto" to null,
                             "kunta" to 79,
                             "tarkkuus" to "Muu",
-                            "viite" to "Espoo"
+                            "viite" to "Espoo",
                         ),
-                    errors = emptyList()
-                )
+                    errors = emptyList(),
+                ),
             )
         GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET, emptyList()).use { reader ->
             val actual = reader.asSequence().toList()
@@ -83,8 +83,10 @@ class GpkgReaderTest {
                 .read(
                     """
                     POLYGON ((25477807.241104946 6679802.40297119, 25477911.620408114 6679758.50094668, 25477810.37696384 6679735.205994899, 25477810.37696384 6679735.205994899, 25477807.241104946 6679802.40297119))"
-                    """.trimIndent()
-                ).also { it.srid = 3879 }
+                    """
+                        .trimIndent()
+                )
+                .also { it.srid = 3879 }
 
         val expected: List<GpkgFeature> =
             listOf(
@@ -99,9 +101,9 @@ class GpkgReaderTest {
                             "lisatieto" to null,
                             "kunta" to 79,
                             "tarkkuus" to "Muu",
-                            "viite" to "Espoo 4/2024"
+                            "viite" to "Espoo 4/2024",
                         ),
-                    errors = emptyList()
+                    errors = emptyList(),
                 )
             )
         GpkgReader(file, TableDefinition.LIITO_ORAVA_ALUEET, emptyList()).use { reader ->
@@ -118,8 +120,10 @@ class GpkgReaderTest {
                 .read(
                     """
                     POLYGON ((25477807.241104946 6679802.40297119, 25477911.620408114 6679758.50094668, 25477810.37696384 6679735.205994899, 25477810.37696384 6679735.205994899, 25477807.241104946 6679802.40297119))"
-                    """.trimIndent()
-                ).also { it.srid = 3879 }
+                    """
+                        .trimIndent()
+                )
+                .also { it.srid = 3879 }
 
         val expected: List<GpkgFeature> =
             listOf(
@@ -134,7 +138,7 @@ class GpkgReaderTest {
                             "lisatieto" to null,
                             "kunta" to "79",
                             "tarkkuus" to null,
-                            "viite" to "Espoo 4/2024"
+                            "viite" to "Espoo 4/2024",
                         ),
                     errors =
                         listOf(
@@ -142,31 +146,32 @@ class GpkgReaderTest {
                                 id = "liito_orava_alueet.1",
                                 column = "aluetyyppi",
                                 value = "Elinalue",
-                                reason = GpkgValidationErrorReason.INVALID_VALUE
+                                reason = GpkgValidationErrorReason.INVALID_VALUE,
                             ),
                             GpkgValidationError(
                                 id = "liito_orava_alueet.1",
                                 column = "kunta",
                                 value = "79",
-                                reason = GpkgValidationErrorReason.WRONG_TYPE
+                                reason = GpkgValidationErrorReason.WRONG_TYPE,
                             ),
                             GpkgValidationError(
                                 id = "liito_orava_alueet.1",
                                 column = "tarkkuus",
                                 value = null,
-                                reason = GpkgValidationErrorReason.IS_NULL
-                            )
-                        )
+                                reason = GpkgValidationErrorReason.IS_NULL,
+                            ),
+                        ),
                 )
             )
         GpkgReader(
-            file,
-            TableDefinition.LIITO_ORAVA_ALUEET,
-            listOf(PaikkaTietoEnum("liito_orava_aluetyyppi", "Ydinalue"))
-        ).use { reader ->
-            val actual = reader.asSequence().toList()
-            assertEquals(expected, actual)
-        }
+                file,
+                TableDefinition.LIITO_ORAVA_ALUEET,
+                listOf(PaikkaTietoEnum("liito_orava_aluetyyppi", "Ydinalue")),
+            )
+            .use { reader ->
+                val actual = reader.asSequence().toList()
+                assertEquals(expected, actual)
+            }
     }
 
     @Test
@@ -181,7 +186,7 @@ class GpkgReaderTest {
                 PaikkaTietoEnum("liito_orava_aluetyyppi", "Soveltuva"),
                 PaikkaTietoEnum("luontotieto_mittaustyyppi", "GPS"),
                 PaikkaTietoEnum("luontotieto_mittaustyyppi", "Muu"),
-                PaikkaTietoEnum("luontotieto_mittaustyyppi", "Tarkkuusmitattu")
+                PaikkaTietoEnum("luontotieto_mittaustyyppi", "Tarkkuusmitattu"),
             )
 
         GpkgReader(file, TableDefinition.LIITO_ORAVA_ALUEET, validEnums).use { reader ->
@@ -217,7 +222,9 @@ class GpkgReaderTest {
     fun `throws exception when file does not exist`() {
         val file = File("src/test/resources/test-data/non_existent_file.gpkg")
         assertFailsWith(IOException::class) {
-            GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET, emptyList()).use { reader -> reader.hasNext() }
+            GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET, emptyList()).use { reader ->
+                reader.hasNext()
+            }
         }
     }
 
@@ -233,7 +240,9 @@ class GpkgReaderTest {
     fun `throws exception when file is not a valid GeoPackage file`() {
         val file = File("src/test/resources/test-data/broken_file.gpkg")
         assertFailsWith(IOException::class) {
-            GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET, emptyList()).use { reader -> reader.hasNext() }
+            GpkgReader(file, TableDefinition.LIITO_ORAVA_PISTEET, emptyList()).use { reader ->
+                reader.hasNext()
+            }
         }
     }
 

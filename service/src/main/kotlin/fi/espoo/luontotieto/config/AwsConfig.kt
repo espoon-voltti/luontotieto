@@ -25,27 +25,24 @@ import software.amazon.awssdk.utils.AttributeMap
 class AwsConfig {
     @Bean
     @Profile("local", "e2etest")
-    fun credentialsProviderLocal(): AwsCredentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create("foo", "bar"))
+    fun credentialsProviderLocal(): AwsCredentialsProvider =
+        StaticCredentialsProvider.create(AwsBasicCredentials.create("foo", "bar"))
 
     @Bean
     @Profile("local", "e2etest")
-    fun amazonS3Local(
-        env: BucketEnv,
-        credentialsProvider: AwsCredentialsProvider
-    ): S3Client {
+    fun amazonS3Local(env: BucketEnv, credentialsProvider: AwsCredentialsProvider): S3Client {
         val attrs =
-            AttributeMap
-                .builder()
+            AttributeMap.builder()
                 .put(SdkHttpConfigurationOption.TRUST_ALL_CERTIFICATES, true)
                 .build()
         val client =
-            S3Client
-                .builder()
+            S3Client.builder()
                 .httpClient(DefaultSdkHttpClientBuilder().buildWithDefaults(attrs))
                 .region(Region.US_EAST_1)
                 .serviceConfiguration(
                     S3Configuration.builder().pathStyleAccessEnabled(true).build()
-                ).endpointOverride(env.s3MockUrl)
+                )
+                .endpointOverride(env.s3MockUrl)
                 .credentialsProvider(credentialsProvider)
                 .build()
 
@@ -61,14 +58,12 @@ class AwsConfig {
     @Profile("local", "e2etest")
     fun amazonS3PresignerLocal(
         env: BucketEnv,
-        credentialsProvider: AwsCredentialsProvider
+        credentialsProvider: AwsCredentialsProvider,
     ): S3Presigner =
-        S3Presigner
-            .builder()
+        S3Presigner.builder()
             .region(env.region)
-            .serviceConfiguration(
-                S3Configuration.builder().pathStyleAccessEnabled(true).build()
-            ).endpointOverride(env.s3MockUrl)
+            .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
+            .endpointOverride(env.s3MockUrl)
             .credentialsProvider(credentialsProvider)
             .build()
 
@@ -78,36 +73,18 @@ class AwsConfig {
 
     @Bean
     @Profile("production")
-    fun amazonS3Prod(
-        env: BucketEnv,
-        credentialsProvider: AwsCredentialsProvider
-    ): S3Client =
-        S3Client
-            .builder()
-            .region(env.region)
-            .credentialsProvider(credentialsProvider)
-            .build()
+    fun amazonS3Prod(env: BucketEnv, credentialsProvider: AwsCredentialsProvider): S3Client =
+        S3Client.builder().region(env.region).credentialsProvider(credentialsProvider).build()
 
     @Bean
     @Profile("production")
     fun amazonS3PresignerProd(
         env: BucketEnv,
-        credentialsProvider: AwsCredentialsProvider
+        credentialsProvider: AwsCredentialsProvider,
     ): S3Presigner =
-        S3Presigner
-            .builder()
-            .region(env.region)
-            .credentialsProvider(credentialsProvider)
-            .build()
+        S3Presigner.builder().region(env.region).credentialsProvider(credentialsProvider).build()
 
     @Bean
-    fun amazonSES(
-        env: EmailEnv,
-        awsCredentialsProvider: AwsCredentialsProvider?
-    ): SesClient =
-        SesClient
-            .builder()
-            .credentialsProvider(awsCredentialsProvider)
-            .region(env.region)
-            .build()
+    fun amazonSES(env: EmailEnv, awsCredentialsProvider: AwsCredentialsProvider?): SesClient =
+        SesClient.builder().credentialsProvider(awsCredentialsProvider).region(env.region).build()
 }

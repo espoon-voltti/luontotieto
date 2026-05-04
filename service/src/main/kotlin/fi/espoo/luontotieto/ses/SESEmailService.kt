@@ -24,16 +24,10 @@ import software.amazon.awssdk.services.ses.model.SendEmailRequest
 
 private val logger = KotlinLogging.logger {}
 
-data class Email(
-    val toAddress: String,
-    val content: EmailContent,
-)
+data class Email(val toAddress: String, val content: EmailContent)
 
 @Service
-class SESEmailClient(
-    private val client: SesClient,
-    private val env: EmailEnv,
-) {
+class SESEmailClient(private val client: SesClient, private val env: EmailEnv) {
     private val charset = "UTF-8"
 
     fun send(email: Email) {
@@ -63,37 +57,31 @@ ${Jsoup.clean(content.html, Safelist.basic())}
         logger.info { "Sending email" }
         try {
             val request =
-                SendEmailRequest
-                    .builder()
+                SendEmailRequest.builder()
                     .destination(Destination.builder().toAddresses(toAddress).build())
                     .sourceArn(arn)
                     .message(
-                        Message
-                            .builder()
+                        Message.builder()
                             .body(
-                                Body
-                                    .builder()
-                                    .html(
-                                        Content
-                                            .builder()
-                                            .charset(charset)
-                                            .data(html)
-                                            .build()
-                                    ).text(
-                                        Content
-                                            .builder()
+                                Body.builder()
+                                    .html(Content.builder().charset(charset).data(html).build())
+                                    .text(
+                                        Content.builder()
                                             .charset(charset)
                                             .data(content.text)
                                             .build()
-                                    ).build()
-                            ).subject(
-                                Content
-                                    .builder()
+                                    )
+                                    .build()
+                            )
+                            .subject(
+                                Content.builder()
                                     .charset(charset)
                                     .data(Parser.unescapeEntities(sanitizedTitle, false))
                                     .build()
-                            ).build()
-                    ).source(fromAddress)
+                            )
+                            .build()
+                    )
+                    .source(fromAddress)
                     .build()
 
             client.sendEmail(request)

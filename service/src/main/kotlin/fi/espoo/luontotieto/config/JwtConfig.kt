@@ -13,34 +13,29 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.core.Base64Variants
 import com.fasterxml.jackson.module.kotlin.jacksonMapperBuilder
 import com.fasterxml.jackson.module.kotlin.readValue
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import java.io.InputStream
 import java.math.BigInteger
 import java.security.KeyFactory
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.security.spec.RSAPublicKeySpec
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 
 @Configuration
 class JwtConfig {
     @Bean
     fun rsaJwtAlgorithm(env: AppEnv): Algorithm {
-        val publicKeys =
-            env.jwt.publicKeysUrl
-                .toURL()
-                .openStream()
-                .use { loadPublicKeys(it) }
+        val publicKeys = env.jwt.publicKeysUrl.toURL().openStream().use { loadPublicKeys(it) }
         return Algorithm.RSA256(JwtKeys(publicKeys))
     }
 
     @Bean
-    fun jwtVerifier(algorithm: Algorithm): JWTVerifier = JWT.require(algorithm).acceptLeeway(1).build()
+    fun jwtVerifier(algorithm: Algorithm): JWTVerifier =
+        JWT.require(algorithm).acceptLeeway(1).build()
 }
 
-class JwtKeys(
-    private val publicKeys: Map<String, RSAPublicKey>
-) : RSAKeyProvider {
+class JwtKeys(private val publicKeys: Map<String, RSAPublicKey>) : RSAKeyProvider {
     override fun getPrivateKeyId(): String? = null
 
     override fun getPrivateKey(): RSAPrivateKey? = null
@@ -50,15 +45,9 @@ class JwtKeys(
 
 fun loadPublicKeys(inputStream: InputStream): Map<String, RSAPublicKey> {
     @JsonIgnoreProperties(ignoreUnknown = true)
-    class Jwk(
-        val kid: String,
-        val n: ByteArray,
-        val e: ByteArray
-    )
+    class Jwk(val kid: String, val n: ByteArray, val e: ByteArray)
 
-    class JwkSet(
-        val keys: List<Jwk>
-    )
+    class JwkSet(val keys: List<Jwk>)
 
     val kf = KeyFactory.getInstance("RSA")
     return jacksonMapperBuilder()
@@ -68,11 +57,7 @@ fun loadPublicKeys(inputStream: InputStream): Map<String, RSAPublicKey> {
         .keys
         .associate {
             it.kid to
-                kf.generatePublic(
-                    RSAPublicKeySpec(
-                        BigInteger(1, it.n),
-                        BigInteger(1, it.e)
-                    )
-                ) as RSAPublicKey
+                kf.generatePublic(RSAPublicKeySpec(BigInteger(1, it.n), BigInteger(1, it.e)))
+                    as RSAPublicKey
         }
 }

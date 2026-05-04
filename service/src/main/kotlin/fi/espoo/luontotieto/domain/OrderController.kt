@@ -26,6 +26,10 @@ import fi.espoo.paikkatieto.domain.updateAluerajausLuontoselvitystilaus
 import fi.espoo.paikkatieto.reader.GpkgReader
 import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.reader.GpkgValidationErrorReason
+import java.io.File
+import java.io.IOException
+import java.net.URL
+import java.util.UUID
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
@@ -47,36 +51,23 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.io.File
-import java.io.IOException
-import java.net.URL
-import java.util.UUID
 
 @RestController
 @RequestMapping("/orders")
 class OrderController {
-    @Qualifier("jdbi-luontotieto")
-    @Autowired
-    lateinit var jdbi: Jdbi
+    @Qualifier("jdbi-luontotieto") @Autowired lateinit var jdbi: Jdbi
 
-    @Qualifier("jdbi-paikkatieto")
-    @Autowired
-    lateinit var paikkatietoJdbi: Jdbi
+    @Qualifier("jdbi-paikkatieto") @Autowired lateinit var paikkatietoJdbi: Jdbi
 
-    @Autowired
-    lateinit var sesEmailClient: SESEmailClient
+    @Autowired lateinit var sesEmailClient: SESEmailClient
 
-    @Autowired
-    lateinit var documentClient: S3DocumentService
+    @Autowired lateinit var documentClient: S3DocumentService
 
-    @Autowired
-    lateinit var bucketEnv: BucketEnv
+    @Autowired lateinit var bucketEnv: BucketEnv
 
-    @Autowired
-    lateinit var emailEnv: EmailEnv
+    @Autowired lateinit var emailEnv: EmailEnv
 
-    @Autowired
-    lateinit var luontotietoHost: LuontotietoHost
+    @Autowired lateinit var luontotietoHost: LuontotietoHost
 
     private val logger = KotlinLogging.logger {}
 
@@ -93,29 +84,20 @@ class OrderController {
     }
 
     @GetMapping("/{id}")
-    fun getOrderById(
-        user: AuthenticatedUser,
-        @PathVariable id: UUID
-    ): Order {
+    fun getOrderById(user: AuthenticatedUser, @PathVariable id: UUID): Order {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         return jdbi.inTransactionUnchecked { tx -> tx.getOrder(id) }
     }
 
-    data class CreateOrderResponse(
-        val orderId: UUID,
-        val reportId: UUID,
-    )
+    data class CreateOrderResponse(val orderId: UUID, val reportId: UUID)
 
-    data class OrderIdAndReport(
-        val orderId: UUID,
-        val report: Report,
-    )
+    data class OrderIdAndReport(val orderId: UUID, val report: Report)
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     fun createOrderFromScratch(
         user: AuthenticatedUser,
-        @RequestBody body: OrderInput
+        @RequestBody body: OrderInput,
     ): CreateOrderResponse {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         val response =
@@ -126,10 +108,11 @@ class OrderController {
                         tx.insertReport(
                             Report.Companion.ReportInput(body.name, null, null),
                             user,
-                            orderId
+                            orderId,
                         )
                     OrderIdAndReport(orderId, report)
-                }.also {
+                }
+                .also {
                     logger.audit(user, AuditEvent.CREATE_ORDER, mapOf("id" to "${it.orderId}"))
                 }
 
@@ -143,7 +126,7 @@ class OrderController {
     fun updateOrder(
         user: AuthenticatedUser,
         @PathVariable id: UUID,
-        @RequestBody order: OrderInput
+        @RequestBody order: OrderInput,
     ): Report {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         return jdbi
@@ -152,21 +135,17 @@ class OrderController {
                 val createdOrder = tx.putOrder(id, order, user)
                 val updatedReport = tx.getReportByOrderId(id, user)
 
-                /**
-                 * Reflect the changes also to paikkatietodata
-                 */
+                /** Reflect the changes also to paikkatietodata */
                 paikkatietoJdbi.inTransactionUnchecked { ptx ->
                     ptx.updateAluerajausLuontoselvitystilaus(updatedReport.id, createdOrder)
                 }
                 updatedReport
-            }.also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
+            }
+            .also { logger.audit(user, AuditEvent.UPDATE_ORDER, mapOf("id" to "$id")) }
     }
 
     @DeleteMapping("/{orderId}")
-    fun deleteOrder(
-        user: AuthenticatedUser,
-        @PathVariable orderId: UUID,
-    ) {
+    fun deleteOrder(user: AuthenticatedUser, @PathVariable orderId: UUID) {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         val dataBucket = bucketEnv.data
         jdbi
@@ -177,7 +156,7 @@ class OrderController {
                 if (reportFiles.isNotEmpty()) {
                     throw BadRequest(
                         "Tilausta ei voi poistaa koska selvitykseen on jo tallennettu tiedostoja",
-                        "order-delete-failed-existing-files"
+                        "order-delete-failed-existing-files",
                     )
                 }
                 val orderFiles = tx.getOrderFiles(orderId, user)
@@ -188,7 +167,8 @@ class OrderController {
                 paikkatietoJdbi.inTransactionUnchecked { ptx ->
                     ptx.deleteAluerajausLuontoselvitystilaus(report.id)
                 }
-            }.also { logger.audit(user, AuditEvent.DELETE_ORDER, mapOf("id" to "$orderId")) }
+            }
+            .also { logger.audit(user, AuditEvent.DELETE_ORDER, mapOf("id" to "$orderId")) }
     }
 
     @PostMapping("/{orderId}/files", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -199,7 +179,7 @@ class OrderController {
         @RequestPart("file") file: MultipartFile,
         @RequestPart("id") id: String,
         @RequestPart("description") description: String?,
-        @RequestParam("documentType") documentType: OrderDocumentType
+        @RequestParam("documentType") documentType: OrderDocumentType,
     ): ResponseEntity<List<GpkgValidationError>> {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         canUpdateOrder(orderId, user)
@@ -208,10 +188,9 @@ class OrderController {
         val fileName = getAndCheckFileName(file)
         val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
 
-        val paikkatietoEnums =
-            paikkatietoJdbi.inTransactionUnchecked { ptx ->
-                ptx.getPaikkaTietoEnums()
-            }
+        val paikkatietoEnums = paikkatietoJdbi.inTransactionUnchecked { ptx ->
+            ptx.getPaikkaTietoEnums()
+        }
 
         val fileId = UUID.fromString(id)
         var savedId: UUID? = null
@@ -223,7 +202,8 @@ class OrderController {
                 file.transferTo(tmpGpkgFile)
                 val gpkgReader: GpkgReader?
                 try {
-                    gpkgReader = GpkgReader(File(tmpGpkgFile.toUri()), tableDefinition, paikkatietoEnums)
+                    gpkgReader =
+                        GpkgReader(File(tmpGpkgFile.toUri()), tableDefinition, paikkatietoEnums)
                 } catch (e: IOException) {
                     logger.error("Error reading GeoPackage file: $fileName", e)
                     throw BadRequest("Error reading GeoPackage file: ${file.name}")
@@ -233,15 +213,14 @@ class OrderController {
                     val data = reader.asSequence().toList()
                     if (data.isEmpty()) {
                         logger.error("No data in file: $fileName")
-                        return ResponseEntity
-                            .badRequest()
+                        return ResponseEntity.badRequest()
                             .body(
                                 listOf(
                                     GpkgValidationError(
                                         "-1",
                                         "geom",
                                         null,
-                                        GpkgValidationErrorReason.IS_NULL
+                                        GpkgValidationErrorReason.IS_NULL,
                                     )
                                 )
                             )
@@ -257,7 +236,7 @@ class OrderController {
                         val params =
                             tx.getAluerajausLuontoselvitysTilausParams(
                                 report,
-                                luontotietoHost.getReportUrl(report.id)
+                                luontotietoHost.getReportUrl(report.id),
                             )
 
                         paikkatietoJdbi.inTransactionUnchecked { ptx ->
@@ -265,30 +244,40 @@ class OrderController {
                                 reader.tableDefinition,
                                 report,
                                 data.asSequence(),
-                                params
+                                params,
                             )
                         }
                     }
                 }
             }
 
-            savedId =
-                jdbi.inTransactionUnchecked { tx ->
-                    tx.insertOrderFile(
-                        OrderFileInput(fileId, orderId, description, contentType, fileName, documentType),
-                        user
-                    )
-                }
+            savedId = jdbi.inTransactionUnchecked { tx ->
+                tx.insertOrderFile(
+                    OrderFileInput(
+                        fileId,
+                        orderId,
+                        description,
+                        contentType,
+                        fileName,
+                        documentType,
+                    ),
+                    user,
+                )
+            }
 
             documentClient.upload(
                 dataBucket,
-                MultipartDocument(name = "$orderId/$savedId", file = file, contentType = contentType)
+                MultipartDocument(
+                    name = "$orderId/$savedId",
+                    file = file,
+                    contentType = contentType,
+                ),
             )
 
             logger.audit(
                 user,
                 AuditEvent.ADD_ORDER_FILE,
-                mapOf("id" to "$orderId", "file" to "$savedId")
+                mapOf("id" to "$orderId", "file" to "$savedId"),
             )
         } catch (e: Exception) {
             logger.error("Error uploading file: ", e)
@@ -301,18 +290,16 @@ class OrderController {
     }
 
     @GetMapping("/{orderId}/files")
-    fun getOrderFiles(
-        user: AuthenticatedUser,
-        @PathVariable orderId: UUID
-    ) = jdbi
-        .inTransactionUnchecked { tx -> tx.getOrderFiles(orderId, user) }
-        .also { logger.audit(user, AuditEvent.GET_ORDER_FILES, mapOf("id" to "$orderId")) }
+    fun getOrderFiles(user: AuthenticatedUser, @PathVariable orderId: UUID) =
+        jdbi
+            .inTransactionUnchecked { tx -> tx.getOrderFiles(orderId, user) }
+            .also { logger.audit(user, AuditEvent.GET_ORDER_FILES, mapOf("id" to "$orderId")) }
 
     @DeleteMapping("/{orderId}/files/{fileId}")
     fun deleteOrderFile(
         user: AuthenticatedUser,
         @PathVariable orderId: UUID,
-        @PathVariable fileId: UUID
+        @PathVariable fileId: UUID,
     ) {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         val dataBucket = bucketEnv.data
@@ -324,11 +311,12 @@ class OrderController {
                 paikkatietoJdbi.inTransactionUnchecked { ptx ->
                     ptx.deleteAluerajausLuontoselvitystilaus(report.id)
                 }
-            }.also {
+            }
+            .also {
                 logger.audit(
                     user,
                     AuditEvent.DELETE_ORDER_FILE,
-                    mapOf("id" to "$orderId", "file" to "$fileId")
+                    mapOf("id" to "$orderId", "file" to "$fileId"),
                 )
             }
     }
@@ -337,7 +325,7 @@ class OrderController {
     fun getOrderFileById(
         user: AuthenticatedUser,
         @PathVariable orderId: UUID,
-        @PathVariable fileId: UUID
+        @PathVariable fileId: UUID,
     ): URL {
         val dataBucket = bucketEnv.data
 
@@ -348,7 +336,7 @@ class OrderController {
                     logger.audit(
                         user,
                         AuditEvent.GET_ORDER_FILE_BY_ID,
-                        mapOf("id" to "$orderId", "file" to "$fileId")
+                        mapOf("id" to "$orderId", "file" to "$fileId"),
                     )
                 }
         val contentDisposition =
@@ -361,28 +349,22 @@ class OrderController {
 
     /**
      * Helper to check if order has a approved report and can there for not be updated
+     *
      * @return Report when the report is not approved
      */
-    private fun canUpdateOrder(
-        orderId: UUID,
-        user: AuthenticatedUser
-    ): Report =
+    private fun canUpdateOrder(orderId: UUID, user: AuthenticatedUser): Report =
         jdbi.inTransactionUnchecked { tx ->
             val report = tx.getReportByOrderId(orderId, user)
             if (report.approved) {
                 throw BadRequest(
                     "Tilausta ei voi päivittää koska siihen liittyvä selvitys on jo hyväksytty",
-                    errorCode = "order-delete-failed-report-approved"
+                    errorCode = "order-delete-failed-report-approved",
                 )
             }
             report
         }
 
-    private fun sendReportCreatedEmail(
-        report: Report,
-        assigneeId: UUID,
-        contactEmail: String?
-    ) {
+    private fun sendReportCreatedEmail(report: Report, assigneeId: UUID, contactEmail: String?) {
         try {
             jdbi.inTransactionUnchecked { tx ->
                 val user = tx.getUser(assigneeId)
@@ -394,8 +376,8 @@ class OrderController {
                             Emails.getReportCreatedEmail(
                                 HtmlSafe(report.name),
                                 HtmlSafe(report.order?.description ?: ""),
-                                luontotietoHost.getReportUrl(report.id)
-                            )
+                                luontotietoHost.getReportUrl(report.id),
+                            ),
                         )
                     )
                 }

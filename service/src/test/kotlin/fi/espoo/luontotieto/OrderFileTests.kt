@@ -6,16 +6,15 @@ package fi.espoo.luontotieto
 
 import fi.espoo.luontotieto.domain.OrderController
 import fi.espoo.luontotieto.domain.OrderDocumentType
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.mock.web.MockMultipartFile
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.mock.web.MockMultipartFile
 
 class OrderFileTests : FullApplicationTest() {
-    @Autowired
-    lateinit var controller: OrderController
+    @Autowired lateinit var controller: OrderController
 
     @Test
     fun `create order files and fetch and delete`() {
@@ -33,7 +32,7 @@ class OrderFileTests : FullApplicationTest() {
                 ),
             documentType = OrderDocumentType.ORDER_INFO,
             description = "Test Description",
-            id = UUID.randomUUID().toString()
+            id = UUID.randomUUID().toString(),
         )
 
         val orderFileResponse = controller.getOrderFiles(adminUser, createdOrder.orderId)
@@ -51,7 +50,7 @@ class OrderFileTests : FullApplicationTest() {
         val s3Doc =
             controller.documentClient.get(
                 controller.bucketEnv.data,
-                "${createdOrder.orderId}/${orderFileResponse.first { it.fileName == "tilaus_ohje.txt" }.id}"
+                "${createdOrder.orderId}/${orderFileResponse.first { it.fileName == "tilaus_ohje.txt" }.id}",
             )
 
         assertEquals("ORDER INFO CONTENT", String(s3Doc.bytes))
@@ -59,7 +58,7 @@ class OrderFileTests : FullApplicationTest() {
         controller.deleteOrderFile(
             user = adminUser,
             orderId = createdOrder.orderId,
-            fileId = fileResponse.id
+            fileId = fileResponse.id,
         )
 
         val orderFilesAfterDelete = controller.getOrderFiles(adminUser, createdOrder.orderId)

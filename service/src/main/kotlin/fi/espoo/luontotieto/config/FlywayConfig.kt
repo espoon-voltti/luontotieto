@@ -13,9 +13,7 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class PaikkatietoFlywayConfig {
-    @Qualifier("paikkatieto-datasource")
-    @Autowired
-    private val dataSource: HikariDataSource? = null
+    @Qualifier("paikkatieto-datasource") @Autowired private val dataSource: HikariDataSource? = null
 
     @PostConstruct
     fun migrateFlyway() {
@@ -29,9 +27,7 @@ class PaikkatietoFlywayConfig {
 
 @Configuration
 class LuontotietoFlywayConfig {
-    @Qualifier("luontotieto-datasource")
-    @Autowired
-    private val dataSource: HikariDataSource? = null
+    @Qualifier("luontotieto-datasource") @Autowired private val dataSource: HikariDataSource? = null
 
     @PostConstruct
     fun migrateFlyway() {

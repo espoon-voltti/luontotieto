@@ -9,14 +9,14 @@ import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.common.databaseValue
 import fi.espoo.luontotieto.common.sanitizeCsvCellData
 import fi.espoo.luontotieto.config.AuthenticatedUser
-import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.kotlin.mapTo
-import org.jdbi.v3.core.mapper.Nested
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
+import org.jdbi.v3.core.Handle
+import org.jdbi.v3.core.kotlin.mapTo
+import org.jdbi.v3.core.mapper.Nested
 
 data class Report(
     val id: UUID,
@@ -27,20 +27,18 @@ data class Report(
     val createdBy: String,
     val updatedBy: String,
     // Required for Jackson 2.21.0+, which broke Kotlin Boolean naming
-    @get:JsonProperty("isPublic")
-    val isPublic: Boolean?,
+    @get:JsonProperty("isPublic") val isPublic: Boolean?,
     val noObservations: List<DocumentType>?,
     val observedSpecies: List<String>?,
     val cost: BigDecimal?,
-    @Nested("o_") val order: Order?
+    @Nested("o_") val order: Order?,
 ) {
     companion object {
         data class ReportInput(
             val name: String,
             // Required for Jackson 2.21.0+
-            @get:JsonProperty("isPublic")
-            val isPublic: Boolean?,
-            val noObservations: List<DocumentType>?
+            @get:JsonProperty("isPublic") val isPublic: Boolean?,
+            val noObservations: List<DocumentType>?,
         )
     }
 }
@@ -93,10 +91,10 @@ private const val SELECT_REPORT_SQL =
 fun Handle.insertReport(
     data: Report.Companion.ReportInput,
     user: AuthenticatedUser,
-    orderI: UUID? = null
+    orderI: UUID? = null,
 ): Report =
     createQuery(
-        """
+            """
             WITH report AS (
                 INSERT INTO report (name, created_by, updated_by, order_id, is_public) 
                 VALUES (:name, :createdBy, :updatedBy, :orderId, :isPublic)
@@ -104,7 +102,8 @@ fun Handle.insertReport(
             ) 
             $SELECT_REPORT_SQL
             """
-    ).bind("name", data.name)
+        )
+        .bind("name", data.name)
         .bind("isPublic", data.isPublic)
         .bind("orderId", orderI)
         .bind("createdBy", user.id)
@@ -117,10 +116,10 @@ fun Handle.updateReportApproved(
     approve: Boolean,
     observedSpecies: List<String>,
     user: AuthenticatedUser,
-    reportCost: BigDecimal? = null
+    reportCost: BigDecimal? = null,
 ): Report =
     createUpdate(
-        """
+            """
             UPDATE report 
               SET
                 approved = :approved,
@@ -129,7 +128,8 @@ fun Handle.updateReportApproved(
                 cost = :cost
             WHERE id = :reportId
             """
-    ).bind("reportId", reportId)
+        )
+        .bind("reportId", reportId)
         .bind("approved", approve)
         .bind("observedSpecies", observedSpecies.toTypedArray())
         .bind("updatedBy", user.id)
@@ -141,11 +141,11 @@ fun Handle.updateReportApproved(
 fun Handle.putReport(
     id: UUID,
     report: Report.Companion.ReportInput,
-    user: AuthenticatedUser
+    user: AuthenticatedUser,
 ): Report {
     val noObservations = report.noObservations?.map { dt -> dt.databaseValue() }?.toTypedArray()
     return createQuery(
-        """
+            """
             WITH report AS (
                 UPDATE report r
                  SET name = :name, updated_by = :updatedBy, no_observations = :noObservations, is_public = :isPublic
@@ -155,7 +155,8 @@ fun Handle.putReport(
             ) 
             $SELECT_REPORT_SQL
             """
-    ).bind("name", report.name)
+        )
+        .bind("name", report.name)
         .bind("isPublic", report.isPublic)
         .bind("noObservations", noObservations)
         .bind("id", id)
@@ -165,34 +166,30 @@ fun Handle.putReport(
         .getOrNull() ?: throw NotFound()
 }
 
-fun Handle.getReport(
-    id: UUID,
-    user: AuthenticatedUser
-): Report =
+fun Handle.getReport(id: UUID, user: AuthenticatedUser): Report =
     createQuery(
-        """ 
+            """ 
                 $SELECT_REPORT_SQL
                 JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
                 WHERE r.id = :id
                 ORDER BY r.observed_species
             """
-    ).bind("id", id)
+        )
+        .bind("id", id)
         .bind("userId", user.id)
         .mapTo<Report>()
         .findOne()
         .getOrNull() ?: throw NotFound()
 
-fun Handle.getReportByOrderId(
-    orderId: UUID,
-    user: AuthenticatedUser
-): Report =
+fun Handle.getReportByOrderId(orderId: UUID, user: AuthenticatedUser): Report =
     createQuery(
-        """ 
+            """ 
                 $SELECT_REPORT_SQL
                 JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
                 WHERE o.id = :id
             """
-    ).bind("id", orderId)
+        )
+        .bind("id", orderId)
         .bind("userId", user.id)
         .mapTo<Report>()
         .findOne()
@@ -201,17 +198,18 @@ fun Handle.getReportByOrderId(
 fun Handle.getReports(
     user: AuthenticatedUser,
     startDate: LocalDate? = null,
-    endDate: LocalDate? = null
+    endDate: LocalDate? = null,
 ): List<Report> {
     val whereClause = reportsDateWhereClause(startDate, endDate)
     return createQuery(
-        """
+            """
                 $SELECT_REPORT_SQL
                 JOIN users u ON (u.id = :userId AND ((u.id = o.assignee_id) OR u.role != 'yrityskäyttäjä'))
                 $whereClause
                 ORDER BY r.created DESC
             """
-    ).bind("userId", user.id)
+        )
+        .bind("userId", user.id)
         .apply {
             if (startDate !== null) {
                 bind("startDate", startDate)
@@ -219,13 +217,14 @@ fun Handle.getReports(
             if (endDate !== null) {
                 bind("endDate", endDate)
             }
-        }.mapTo<Report>()
+        }
+        .mapTo<Report>()
         .list() ?: emptyList()
 }
 
 fun Handle.getAluerajausLuontoselvitysTilausParams(
     report: Report,
-    reportLink: String
+    reportLink: String,
 ): Map<String, Any?> =
     mapOf(
         "name" to report.order?.name,
@@ -234,12 +233,12 @@ fun Handle.getAluerajausLuontoselvitysTilausParams(
         "reportId" to report.id,
         "reportLink" to reportLink,
         "reportStatus" to if (report.approved) "Hyväksytty" else "Lähetetty",
-        "year" to report.order?.year
+        "year" to report.order?.year,
     )
 
 fun Handle.getObservedSpecies(reportId: UUID): List<String> =
     createQuery(
-        """
+            """
             SELECT suomenkielinen_nimi
             FROM muut_huomioitavat_lajit_alueet
             WHERE selvitys_id = :reportId
@@ -252,18 +251,16 @@ fun Handle.getObservedSpecies(reportId: UUID): List<String> =
             FROM muut_huomioitavat_lajit_pisteet
             WHERE selvitys_id = :reportId
             """
-    ).bind("reportId", reportId)
+        )
+        .bind("reportId", reportId)
         .mapTo<String>()
         .toList()
 
-data class PaikkaTietoEnum(
-    val name: String,
-    val value: String
-)
+data class PaikkaTietoEnum(val name: String, val value: String)
 
 fun Handle.getPaikkaTietoEnums(): List<PaikkaTietoEnum> =
     createQuery(
-        """
+            """
             SELECT
                 t.typname AS name,
                 e.enumlabel AS value
@@ -274,7 +271,8 @@ fun Handle.getPaikkaTietoEnums(): List<PaikkaTietoEnum> =
             JOIN
                 pg_namespace n ON n.oid = t.typnamespace
             """
-    ).mapTo<PaikkaTietoEnum>()
+        )
+        .mapTo<PaikkaTietoEnum>()
         .toList()
 
 fun Handle.getAluerajausLuontoselvitysParams(
@@ -282,12 +280,13 @@ fun Handle.getAluerajausLuontoselvitysParams(
     id: UUID,
     observedSpecies: Set<String>,
     reportLink: String,
-    reportDocumentLink: String
+    reportDocumentLink: String,
 ): Map<String, Any?> {
     val report = this.getReport(id, user)
     val reportFiles = this.getReportFiles(id)
-    val reportAreaFile =
-        reportFiles.firstOrNull { it.documentType === DocumentType.ALUERAJAUS_LUONTOSELVITYS }
+    val reportAreaFile = reportFiles.firstOrNull {
+        it.documentType === DocumentType.ALUERAJAUS_LUONTOSELVITYS
+    }
 
     val observations = reportFiles.mapNotNull { it.documentType.documentName }.toSet()
     val noObservations =
@@ -304,7 +303,8 @@ fun Handle.getAluerajausLuontoselvitysParams(
                 } else {
                     "$it (havaittu)"
                 }
-            }.plus(noObservations.map { "$it (ei havaittu)" })
+            }
+            .plus(noObservations.map { "$it (ei havaittu)" })
             .sorted()
             .toTypedArray()
 
@@ -318,7 +318,7 @@ fun Handle.getAluerajausLuontoselvitysParams(
         "additionalInformation" to reportAreaFile?.description,
         "reportLink" to reportLink,
         "reportDocumentLink" to reportDocumentLink,
-        "surveyedData" to surveyedData
+        "surveyedData" to surveyedData,
     )
 }
 
@@ -328,22 +328,23 @@ const val CSV_RECORD_SEPARATOR = "\r\n"
 fun reportsToCsv(reports: List<Report>): String {
     val csvHeader =
         listOf(
-            "id",
-            "tilauksen nimi",
-            "hyväksytty",
-            "selvitykseen liittyvät suunnitelmat",
-            "tilaajayksikkö",
-            "tilaaja",
-            "tilauksen luontipvm",
-            "tilausvuosi",
-            "selvittäjä",
-            "viimeisin muokkaaja",
-            "viimeisin muokkauspvm",
-            "selvitetyt tiedot",
-            "muut huomioitavat lajit",
-            "ei löydettyjä havaintoja",
-            "selvityksen toteutunut hinta"
-        ).joinToString(CSV_FIELD_SEPARATOR, postfix = CSV_RECORD_SEPARATOR)
+                "id",
+                "tilauksen nimi",
+                "hyväksytty",
+                "selvitykseen liittyvät suunnitelmat",
+                "tilaajayksikkö",
+                "tilaaja",
+                "tilauksen luontipvm",
+                "tilausvuosi",
+                "selvittäjä",
+                "viimeisin muokkaaja",
+                "viimeisin muokkauspvm",
+                "selvitetyt tiedot",
+                "muut huomioitavat lajit",
+                "ei löydettyjä havaintoja",
+                "selvityksen toteutunut hinta",
+            )
+            .joinToString(CSV_FIELD_SEPARATOR, postfix = CSV_RECORD_SEPARATOR)
 
     val csvContent = StringBuilder()
     csvContent.append(csvHeader)
@@ -352,19 +353,17 @@ fun reportsToCsv(reports: List<Report>): String {
         val planNumbers = sanitizeCsvCellData(report.order?.planNumber?.joinToString(",") ?: "")
         val orderingUnits = sanitizeCsvCellData(report.order?.orderingUnit?.joinToString(",") ?: "")
         val reportDocuments =
-
             sanitizeCsvCellData(
-                report.order
-                    ?.reportDocuments
-                    ?.map { rd -> rd.documentType }
-                    ?.joinToString(",") ?: ""
+                report.order?.reportDocuments?.map { rd -> rd.documentType }?.joinToString(",")
+                    ?: ""
             )
 
         val observedSpecies = sanitizeCsvCellData(report.observedSpecies?.joinToString(",") ?: "")
 
         val noObservations = sanitizeCsvCellData(report.noObservations?.joinToString(",") ?: "")
 
-        val assigneeOrCompany = sanitizeCsvCellData(report.order?.assigneeCompanyName ?: report.order?.assignee ?: "")
+        val assigneeOrCompany =
+            sanitizeCsvCellData(report.order?.assigneeCompanyName ?: report.order?.assignee ?: "")
 
         csvContent
             .append(report.id)
@@ -389,9 +388,8 @@ fun reportsToCsv(reports: List<Report>): String {
             .append(CSV_FIELD_SEPARATOR)
             .append(report.updated)
             .append(CSV_FIELD_SEPARATOR)
-            .append(
-                reportDocuments
-            ).append(CSV_FIELD_SEPARATOR)
+            .append(reportDocuments)
+            .append(CSV_FIELD_SEPARATOR)
             .append(observedSpecies)
             .append(CSV_FIELD_SEPARATOR)
             .append(noObservations)
@@ -403,10 +401,7 @@ fun reportsToCsv(reports: List<Report>): String {
     return csvContent.toString()
 }
 
-private fun reportsDateWhereClause(
-    startDate: LocalDate?,
-    endDate: LocalDate?
-): String {
+private fun reportsDateWhereClause(startDate: LocalDate?, endDate: LocalDate?): String {
     val query = StringBuilder()
     if (startDate !== null) {
         query.append("WHERE cast(r.created as date) >= :startDate")

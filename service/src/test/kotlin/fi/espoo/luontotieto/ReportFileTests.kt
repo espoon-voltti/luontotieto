@@ -7,10 +7,6 @@ package fi.espoo.luontotieto
 import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.OrderController
 import fi.espoo.luontotieto.domain.ReportController
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
-import org.springframework.mock.web.MockMultipartFile
-import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.io.FileInputStream
 import java.util.UUID
@@ -18,13 +14,15 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.mock.web.MockMultipartFile
+import org.springframework.web.multipart.MultipartFile
 
 class ReportFileTests : FullApplicationTest() {
-    @Autowired
-    lateinit var controller: ReportController
+    @Autowired lateinit var controller: ReportController
 
-    @Autowired
-    lateinit var orderController: OrderController
+    @Autowired lateinit var orderController: OrderController
 
     @Test
     fun `create report files and fetch and delete`() {
@@ -48,7 +46,7 @@ class ReportFileTests : FullApplicationTest() {
         controller.deleteReportFile(
             user = customerUser,
             reportId = createOrderResponse.reportId,
-            fileId = fileResponse.id
+            fileId = fileResponse.id,
         )
 
         val reportFileResponseAfterDelete =
@@ -65,7 +63,7 @@ class ReportFileTests : FullApplicationTest() {
                 "liito_orava_pisteet.gpkg",
                 "liito_orava_pisteet.gpkg",
                 "application/x-sqlite3",
-                FileInputStream(file)
+                FileInputStream(file),
             )
 
         val response =
@@ -75,7 +73,7 @@ class ReportFileTests : FullApplicationTest() {
                 file = multipartFile,
                 documentType = DocumentType.LIITO_ORAVA_PISTEET,
                 description = "Test Description",
-                id = UUID.randomUUID().toString()
+                id = UUID.randomUUID().toString(),
             )
 
         val errors = response.body
@@ -101,11 +99,11 @@ class ReportFileTests : FullApplicationTest() {
                         "selvitys.pdf",
                         "selvitys.pdf",
                         "application/pdf",
-                        "TEST FILE CONTENT".toByteArray()
+                        "TEST FILE CONTENT".toByteArray(),
                     ),
                 documentType = DocumentType.REPORT,
                 description = "Test Description",
-                id = UUID.randomUUID().toString()
+                id = UUID.randomUUID().toString(),
             )
 
         val errors = response.body
@@ -120,11 +118,11 @@ class ReportFileTests : FullApplicationTest() {
                     "lisatieto.pdf",
                     "lisatieto.pdf",
                     "application/pdf",
-                    "MORE INFORMATION".toByteArray()
+                    "MORE INFORMATION".toByteArray(),
                 ),
             documentType = DocumentType.OTHER,
             description = "Test Description",
-            id = UUID.randomUUID().toString()
+            id = UUID.randomUUID().toString(),
         )
 
         val reportFileResponse = controller.getReportFiles(adminUser, createOrderResponse.reportId)
@@ -135,7 +133,7 @@ class ReportFileTests : FullApplicationTest() {
         val s3Doc =
             controller.documentClient.get(
                 controller.bucketEnv.data,
-                "${createOrderResponse.reportId}/${reportFileResponse.first { it.fileName == "selvitys.pdf" }.id}"
+                "${createOrderResponse.reportId}/${reportFileResponse.first { it.fileName == "selvitys.pdf" }.id}",
             )
         assertEquals("TEST FILE CONTENT", String(s3Doc.bytes))
     }

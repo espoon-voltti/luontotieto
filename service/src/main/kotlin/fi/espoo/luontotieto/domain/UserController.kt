@@ -14,6 +14,7 @@ import fi.espoo.luontotieto.config.LuontotietoHost
 import fi.espoo.luontotieto.config.audit
 import fi.espoo.luontotieto.ses.Email
 import fi.espoo.luontotieto.ses.SESEmailClient
+import java.util.UUID
 import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.jdbi.v3.core.Jdbi
@@ -31,14 +32,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
 
 @RestController
 @RequestMapping("/users")
 class UserController {
-    @Qualifier("jdbi-luontotieto")
-    @Autowired
-    lateinit var jdbi: Jdbi
+    @Qualifier("jdbi-luontotieto") @Autowired lateinit var jdbi: Jdbi
 
     @Autowired lateinit var sesEmailClient: SESEmailClient
 
@@ -50,7 +48,7 @@ class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     fun createUser(
         user: AuthenticatedUser,
-        @RequestBody body: User.Companion.CreateCustomerUser
+        @RequestBody body: User.Companion.CreateCustomerUser,
     ): User {
         user.checkRoles(UserRole.ADMIN)
         val passwordAndHash = generatePasswordAndHash()
@@ -63,24 +61,22 @@ class UserController {
                         Emails.getUserCreatedEmail(
                             luontotietoHost.getCustomerUserLoginUrl(),
                             HtmlSafe(createdUser.email ?: ""),
-                            passwordAndHash.password
-                        )
+                            passwordAndHash.password,
+                        ),
                     )
                 )
 
                 createdUser
-            }.also { logger.audit(user, AuditEvent.CREATE_USER, mapOf("id" to "$it")) }
+            }
+            .also { logger.audit(user, AuditEvent.CREATE_USER, mapOf("id" to "$it")) }
     }
 
     @GetMapping("/{id}")
-    fun getUser(
-        user: AuthenticatedUser,
-        @PathVariable id: UUID
-    ): User {
+    fun getUser(user: AuthenticatedUser, @PathVariable id: UUID): User {
         if (user.isSystemUser() || user.role == UserRole.ADMIN) {
-            return jdbi.inTransactionUnchecked { tx -> tx.getUser(id) }.also {
-                logger.audit(user, AuditEvent.GET_USER, mapOf("id" to "$id"))
-            }
+            return jdbi
+                .inTransactionUnchecked { tx -> tx.getUser(id) }
+                .also { logger.audit(user, AuditEvent.GET_USER, mapOf("id" to "$id")) }
         } else {
             throw NotFound()
         }
@@ -89,7 +85,7 @@ class UserController {
     @GetMapping()
     fun getUsers(
         user: AuthenticatedUser,
-        @RequestParam includeInactive: Boolean = true
+        @RequestParam includeInactive: Boolean = true,
     ): List<User> {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         return jdbi
@@ -98,30 +94,33 @@ class UserController {
                     if (user.role === UserRole.ADMIN) {
                         includeInactive || u.active
                     } else {
-                        (u.role === UserRole.CUSTOMER || u.id == user.id) &&
-                            includeInactive ||
+                        (u.role === UserRole.CUSTOMER || u.id == user.id) && includeInactive ||
                             u.active
                     }
                 }
-            }.also { logger.audit(user, AuditEvent.GET_USERS) }
+            }
+            .also { logger.audit(user, AuditEvent.GET_USERS) }
     }
 
     @PutMapping("/{id}")
     fun updateUser(
         user: AuthenticatedUser,
         @PathVariable id: UUID,
-        @RequestBody data: User.Companion.UserInput
+        @RequestBody data: User.Companion.UserInput,
     ): User {
         user.checkRoles(UserRole.ADMIN)
         return jdbi
             .inTransactionUnchecked { tx ->
                 val currentUserData = tx.getUser(id)
                 val updatedEmailForCustomer =
-                    data.role == UserRole.CUSTOMER && currentUserData.email != data.email && data.email.isNotEmpty()
+                    data.role == UserRole.CUSTOMER &&
+                        currentUserData.email != data.email &&
+                        data.email.isNotEmpty()
                 val updatedUser = tx.putUser(id, data, user)
 
                 if (updatedEmailForCustomer) {
-                    // If email was updated for a customer user, reset password and send an email with the new password
+                    // If email was updated for a customer user, reset password and send an email
+                    // with the new password
                     val passwordAndHash = generatePasswordAndHash()
                     tx.putPassword(updatedUser.id, passwordAndHash.hash, user, false)
                     sesEmailClient.send(
@@ -130,22 +129,21 @@ class UserController {
                             Emails.getUserEmailUpdatedEmail(
                                 luontotietoHost.getCustomerUserLoginUrl(),
                                 HtmlSafe(data.email),
-                                passwordAndHash.password
-                            )
+                                passwordAndHash.password,
+                            ),
                         )
                     )
                 }
 
                 updatedUser
-            }.also {
-                logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id"))
             }
+            .also { logger.audit(user, AuditEvent.UPDATE_USER, mapOf("id" to "$id")) }
     }
 
     @PutMapping("/password")
     fun updateUserPassword(
         user: AuthenticatedUser,
-        @RequestBody data: User.Companion.UpdatePasswordPayload
+        @RequestBody data: User.Companion.UpdatePasswordPayload,
     ): UUID {
         user.checkRoles(UserRole.CUSTOMER)
 
@@ -161,7 +159,7 @@ class UserController {
                     logger.info("User entered invalid current password.")
                     throw BadRequest(
                         "User entered invalid current password.",
-                        "wrong-current-password"
+                        "wrong-current-password",
                     )
                 }
 
@@ -169,7 +167,7 @@ class UserController {
                     logger.info("New password cannot be same as the current password.")
                     throw BadRequest(
                         "New password cannot be same as the current password.",
-                        "new-password-already-in-use"
+                        "new-password-already-in-use",
                     )
                 }
 
@@ -181,21 +179,19 @@ class UserController {
                     Email(
                         result.email,
                         Emails.getUserPasswordUpdatedEmail(
-                            luontotietoHost.getCustomerUserLoginUrl(),
-                        )
+                            luontotietoHost.getCustomerUserLoginUrl()
+                        ),
                     )
                 )
                 result.id
-            }.also {
+            }
+            .also {
                 logger.audit(user, AuditEvent.UPDATE_USER_PASSWORD, mapOf("id" to "${user.id}"))
             }
     }
 
     @PutMapping("/{id}/password/reset")
-    fun updateUserPassword(
-        user: AuthenticatedUser,
-        @PathVariable id: UUID,
-    ): UUID {
+    fun updateUserPassword(user: AuthenticatedUser, @PathVariable id: UUID): UUID {
         user.checkRoles(UserRole.ADMIN)
         val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
         val generatedString = generatePassword()
@@ -210,36 +206,32 @@ class UserController {
                         result.email,
                         Emails.getPasswordResetedEmail(
                             luontotietoHost.getCustomerUserLoginUrl(),
-                            generatedString
-                        )
+                            generatedString,
+                        ),
                     )
                 )
                 result.id
-            }.also {
+            }
+            .also {
                 logger.audit(user, AuditEvent.RESET_USER_PASSWORD, mapOf("id" to "${user.id}"))
             }
     }
 }
 
-private fun generatePassword(): String =
-    buildString {
-        append(RandomStringUtils.randomAlphanumeric(6))
-        append("-")
-        append(RandomStringUtils.randomAlphanumeric(6))
-        append("-")
-        append(RandomStringUtils.randomAlphanumeric(6))
-    }
+private fun generatePassword(): String = buildString {
+    append(RandomStringUtils.randomAlphanumeric(6))
+    append("-")
+    append(RandomStringUtils.randomAlphanumeric(6))
+    append("-")
+    append(RandomStringUtils.randomAlphanumeric(6))
+}
 
-data class PasswordAndHash(
-    val password: String,
-    val hash: String
-)
+data class PasswordAndHash(val password: String, val hash: String)
 
 private fun generatePasswordAndHash(): PasswordAndHash {
     val encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
     val generatedString = generatePassword()
     val passwordHash =
-        encoder.encode(generatedString)
-            ?: throw IllegalStateException("Password encoding failed")
+        encoder.encode(generatedString) ?: throw IllegalStateException("Password encoding failed")
     return PasswordAndHash(generatedString, passwordHash)
 }

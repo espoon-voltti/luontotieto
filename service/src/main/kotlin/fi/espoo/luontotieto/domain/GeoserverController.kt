@@ -21,9 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/geoserver")
 class GeoserverController {
-    data class GeoServerReponseStatus(
-        val isSuccess: Boolean
-    )
+    data class GeoServerReponseStatus(val isSuccess: Boolean)
 
     @Autowired lateinit var env: GeoserverEnv
 
@@ -40,8 +38,7 @@ class GeoserverController {
         val credentials = Credentials.basic(env.userName, env.password)
 
         val request =
-            Request
-                .Builder()
+            Request.Builder()
                 .url("${env.baseUrl}geoserver/rest/reload")
                 .header("Authorization", credentials)
                 .post(okhttp3.RequestBody.create("application/xml".toMediaType(), ""))

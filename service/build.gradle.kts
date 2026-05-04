@@ -34,7 +34,9 @@ sourceSets {
     }
 }
 
-val e2eTestImplementation: Configuration by configurations.getting { extendsFrom(configurations.testImplementation.get()) }
+val e2eTestImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+}
 
 configurations["e2eTestRuntimeOnly"].extendsFrom(configurations.testRuntimeOnly.get())
 
@@ -42,9 +44,7 @@ idea { module { testSources = testSources + sourceSets["e2eTest"].kotlin.sourceD
 
 ktfmt { kotlinLangStyle() }
 
-ktlint {
-    version.set(libs.versions.ktlint.asProvider().get())
-}
+ktlint { version.set(libs.versions.ktlint.asProvider().get()) }
 
 dependencies {
     api(kotlin("stdlib"))
@@ -61,9 +61,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    implementation("org.springframework.ws:spring-ws-security") {
-        exclude("org.opensaml")
-    }
+    implementation("org.springframework.ws:spring-ws-security") { exclude("org.opensaml") }
 
     implementation(libs.httpclient)
 
@@ -145,7 +143,8 @@ tasks.register("resolveDependencies") {
             .map {
                 val files = it.resolve()
                 it.name to files.size
-            }.groupBy({ (_, count) -> count }) { (name, _) -> name }
+            }
+            .groupBy({ (_, count) -> count }) { (name, _) -> name }
             .forEach { (count, names) ->
                 println(
                     "Resolved $count dependency files for configurations: ${names.joinToString(", ")}"

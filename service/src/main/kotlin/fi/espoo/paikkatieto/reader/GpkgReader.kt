@@ -6,49 +6,43 @@ package fi.espoo.paikkatieto.reader
 
 import fi.espoo.luontotieto.domain.PaikkaTietoEnum
 import fi.espoo.paikkatieto.domain.TableDefinition
-import mu.KotlinLogging
-import org.geotools.api.data.SimpleFeatureReader
-import org.geotools.api.feature.simple.SimpleFeature
-import org.geotools.geopkg.GeoPackage
-import org.locationtech.jts.geom.Geometry
 import java.io.Closeable
 import java.io.File
 import java.io.IOException
 import java.util.Locale
 import kotlin.reflect.full.isSubclassOf
+import mu.KotlinLogging
+import org.geotools.api.data.SimpleFeatureReader
+import org.geotools.api.feature.simple.SimpleFeature
+import org.geotools.geopkg.GeoPackage
+import org.locationtech.jts.geom.Geometry
 
 private val logger = KotlinLogging.logger {}
 
-class GpkgReaderException(
-    msg: String
-) : IOException(msg)
+class GpkgReaderException(msg: String) : IOException(msg)
 
 enum class GpkgValidationErrorReason {
     IS_NULL,
     WRONG_TYPE,
-    INVALID_VALUE
+    INVALID_VALUE,
 }
 
 data class GpkgValidationError(
     val id: String,
     val column: String,
     val value: Any?,
-    val reason: GpkgValidationErrorReason
+    val reason: GpkgValidationErrorReason,
 )
 
-data class GpkgFeature(
-    val columns: Map<String, Any?>,
-    val errors: List<GpkgValidationError>
-) {
+data class GpkgFeature(val columns: Map<String, Any?>, val errors: List<GpkgValidationError>) {
     fun isValid() = errors.isEmpty()
 }
 
 class GpkgReader(
     private val file: File,
     val tableDefinition: TableDefinition,
-    private val validEnums: List<PaikkaTietoEnum>
-) : Iterator<GpkgFeature>,
-    Closeable {
+    private val validEnums: List<PaikkaTietoEnum>,
+) : Iterator<GpkgFeature>, Closeable {
     private lateinit var gpkg: GeoPackage
     private var reader: SimpleFeatureReader
 
@@ -76,7 +70,8 @@ class GpkgReader(
 
     override fun next(): GpkgFeature {
         val gpkgFeature = reader.next()
-        val enumValuesByColumn = validEnums.groupBy { it.name }.mapValues { it.value.map { e -> e.value } }
+        val enumValuesByColumn =
+            validEnums.groupBy { it.name }.mapValues { it.value.map { e -> e.value } }
         val columns =
             tableDefinition.columns.associate { column ->
                 val isGeometryColumn = column.kClass.isSubclassOf(Geometry::class)
@@ -86,7 +81,11 @@ class GpkgReader(
                 } else {
                     Pair(
                         column.name,
-                        getAttribute(column.name, gpkgFeature, enumValuesByColumn[column.sqlType] ?: emptyList())
+                        getAttribute(
+                            column.name,
+                            gpkgFeature,
+                            enumValuesByColumn[column.sqlType] ?: emptyList(),
+                        ),
                     )
                 }
             }
@@ -111,11 +110,11 @@ class GpkgReader(
     private fun getAttribute(
         column: String,
         gpkgFeature: SimpleFeature,
-        enumValues: List<String>
+        enumValues: List<String>,
     ): Any? =
-        gpkgFeature
-            .getAttribute(column)
-            .let { if (it is Int && it in enumValues.indices) enumValues[it] else it }
+        gpkgFeature.getAttribute(column).let {
+            if (it is Int && it in enumValues.indices) enumValues[it] else it
+        }
             ?: gpkgFeature.getAttribute(column.uppercase())
             ?: gpkgFeature.getAttribute(
                 column.lowercase().replaceFirstChar {

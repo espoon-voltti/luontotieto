@@ -30,7 +30,7 @@ class SanitizationTest {
                 // Special character: semicolon
                 "Text;with;semicolons",
                 // Special character: double quotes
-                "Text with \"quotes\""
+                "Text with \"quotes\"",
             )
 
         val expectedOutputs =
@@ -43,7 +43,7 @@ class SanitizationTest {
                 "\"'\\rCRLF\"",
                 "\"Text, with, commas\"",
                 "\"Text;with;semicolons\"",
-                "\"Text with \"\"quotes\"\"\""
+                "\"Text with \"\"quotes\"\"\"",
             )
 
         dangerousInputs.forEachIndexed { index, input ->

@@ -7,16 +7,15 @@ package fi.espoo.luontotieto
 import fi.espoo.luontotieto.common.AdUser
 import fi.espoo.luontotieto.common.Unauthorized
 import fi.espoo.luontotieto.common.userIsLockedOrInDelayPeriod
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class SystemControllerTests : FullApplicationTest() {
-    @Autowired
-    lateinit var controller: SystemController
+    @Autowired lateinit var controller: SystemController
 
     @Test
     fun passwordLoginOk() {
@@ -24,8 +23,7 @@ class SystemControllerTests : FullApplicationTest() {
         val jdbi = controller.jdbi
         val password = "password.1A"
         jdbi.inTransactionUnchecked {
-            it
-                .createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
+            it.createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
                 .bind("password", encoder.encode(password))
                 .bind("id", customerUser.id)
                 .execute()
@@ -42,10 +40,10 @@ class SystemControllerTests : FullApplicationTest() {
         val password = "password.1A"
         val email = "yritys@example.com"
         jdbi.inTransactionUnchecked {
-            it
-                .createUpdate(
+            it.createUpdate(
                     "UPDATE users SET active = false, password_hash = :password WHERE id = :id"
-                ).bind("password", encoder.encode(password))
+                )
+                .bind("password", encoder.encode(password))
                 .bind("id", customerUser.id)
                 .execute()
         }
@@ -63,8 +61,7 @@ class SystemControllerTests : FullApplicationTest() {
         val wrongPassword = "wrong password"
         val email = "yritys@example.com"
         jdbi.inTransactionUnchecked {
-            it
-                .createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
+            it.createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
                 .bind("password", encoder.encode(password))
                 .bind("id", customerUser.id)
                 .execute()
@@ -82,19 +79,17 @@ class SystemControllerTests : FullApplicationTest() {
             controller.passwordLogin(PasswordUser(email, wrongPassword))
         }
 
-        jdbi
-            .inTransactionUnchecked {
-                // After three failed attempts there should be a delay on next try
-                val userIsLockedOut = it.userIsLockedOrInDelayPeriod(email)
-                assertEquals(userIsLockedOut, "account-login-delay")
-            }
+        jdbi.inTransactionUnchecked {
+            // After three failed attempts there should be a delay on next try
+            val userIsLockedOut = it.userIsLockedOrInDelayPeriod(email)
+            assertEquals(userIsLockedOut, "account-login-delay")
+        }
     }
 
     @Test
     fun adLoginInactive() {
         jdbi.inTransactionUnchecked {
-            it
-                .createUpdate("UPDATE users SET active = false WHERE id = :id")
+            it.createUpdate("UPDATE users SET active = false WHERE id = :id")
                 .bind("id", adminUser.id)
                 .execute()
         }
@@ -102,7 +97,7 @@ class SystemControllerTests : FullApplicationTest() {
         assertFailsWith(Unauthorized::class) {
             controller.adLogin(
                 systemUser,
-                AdUser(externalId = "test:01", name = "Teija Testaaja", email = null)
+                AdUser(externalId = "test:01", name = "Teija Testaaja", email = null),
             )
         }
     }

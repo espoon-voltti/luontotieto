@@ -6,8 +6,8 @@ package fi.espoo.luontotieto.s3
 
 import fi.espoo.luontotieto.common.BadRequest
 import fi.espoo.luontotieto.domain.DocumentType
-import org.springframework.web.multipart.MultipartFile
 import java.io.InputStream
+import org.springframework.web.multipart.MultipartFile
 
 val tika: org.apache.tika.Tika = org.apache.tika.Tika()
 
@@ -16,12 +16,10 @@ fun checkFileContentType(file: InputStream): String {
     return detectedContentType
 }
 
-fun getAndCheckFileName(file: MultipartFile) = (file.originalFilename?.takeIf { it.isNotBlank() } ?: throw BadRequest("Filename missing"))
+fun getAndCheckFileName(file: MultipartFile) =
+    (file.originalFilename?.takeIf { it.isNotBlank() } ?: throw BadRequest("Filename missing"))
 
-fun checkFileExtension(
-    file: MultipartFile,
-    documentType: DocumentType
-) {
+fun checkFileExtension(file: MultipartFile, documentType: DocumentType) {
     val fileExtension =
         file.originalFilename?.substringAfterLast(".") ?: throw BadRequest("File extension missing")
 

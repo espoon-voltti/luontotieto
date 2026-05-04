@@ -9,6 +9,9 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import fi.espoo.luontotieto.common.DatabaseEnum
 import fi.espoo.luontotieto.common.databaseValue
+import java.sql.PreparedStatement
+import java.util.Optional
+import java.util.function.Function
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.argument.Argument
 import org.jdbi.v3.core.argument.ArgumentFactory
@@ -25,15 +28,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
-import java.sql.PreparedStatement
-import java.util.Optional
-import java.util.function.Function
 
-@Qualifier("luontotieto")
-annotation class LuontotietoDataSource
+@Qualifier("luontotieto") annotation class LuontotietoDataSource
 
-@Qualifier("paikkatieto")
-annotation class PaikkatietoDataSource
+@Qualifier("paikkatieto") annotation class PaikkatietoDataSource
 
 @Configuration
 class DbConfig {
@@ -45,14 +43,13 @@ class DbConfig {
     @Bean("luontotieto-datasource")
     @LuontotietoDataSource
     @Primary
-    fun luontotietoDataSource(
-        @LuontotietoDataSource hikariConf: HikariConfig
-    ) = HikariDataSource(hikariConf)
+    fun luontotietoDataSource(@LuontotietoDataSource hikariConf: HikariConfig) =
+        HikariDataSource(hikariConf)
 
     @Bean("jdbi-luontotieto")
     fun jdbiLuontotieto(
         @LuontotietoDataSource dataSource: HikariDataSource,
-        objectMapper: ObjectMapper
+        objectMapper: ObjectMapper,
     ) = configureJdbi(Jdbi.create(dataSource), objectMapper)
 
     @Bean
@@ -62,21 +59,17 @@ class DbConfig {
 
     @Bean("paikkatieto-datasource")
     @PaikkatietoDataSource
-    fun paikkatietoDataSource(
-        @PaikkatietoDataSource hikariConf: HikariConfig
-    ) = HikariDataSource(hikariConf)
+    fun paikkatietoDataSource(@PaikkatietoDataSource hikariConf: HikariConfig) =
+        HikariDataSource(hikariConf)
 
     @Bean("jdbi-paikkatieto")
     fun jdbiPaikkatieto(
         @PaikkatietoDataSource dataSource: HikariDataSource,
-        objectMapper: ObjectMapper
+        objectMapper: ObjectMapper,
     ) = configureJdbi(Jdbi.create(dataSource), objectMapper)
 }
 
-private fun configureJdbi(
-    jdbi: Jdbi,
-    objectMapper: ObjectMapper
-): Jdbi {
+private fun configureJdbi(jdbi: Jdbi, objectMapper: ObjectMapper): Jdbi {
     jdbi
         .installPlugin(KotlinPlugin())
         .installPlugin(PostgresPlugin())
@@ -87,36 +80,30 @@ private fun configureJdbi(
     return jdbi
 }
 
-private class CustomObjectArgument(
-    private val value: Any
-) : Argument {
-    override fun apply(
-        position: Int,
-        statement: PreparedStatement,
-        ctx: StatementContext
-    ) = statement.setObject(position, value)
+private class CustomObjectArgument(private val value: Any) : Argument {
+    override fun apply(position: Int, statement: PreparedStatement, ctx: StatementContext) =
+        statement.setObject(position, value)
 
     override fun toString(): String = value.toString()
 }
 
-private val databaseEnumArgumentFactory =
-    ArgumentFactory.Preparable { type, _ ->
-        val erasedType = GenericTypes.getErasedType(type)
-        if (DatabaseEnum::class.java.isAssignableFrom(erasedType) && erasedType.isEnum) {
-            val sqlType = (erasedType.enumConstants[0] as DatabaseEnum).sqlType
-            Optional.of(
-                Function { nullableValue ->
-                    CustomObjectArgument(
-                        PGobject().apply {
-                            this.type = sqlType
-                            if (nullableValue != null && nullableValue is DatabaseEnum) {
-                                this.value = nullableValue.databaseValue()
-                            }
+private val databaseEnumArgumentFactory = ArgumentFactory.Preparable { type, _ ->
+    val erasedType = GenericTypes.getErasedType(type)
+    if (DatabaseEnum::class.java.isAssignableFrom(erasedType) && erasedType.isEnum) {
+        val sqlType = (erasedType.enumConstants[0] as DatabaseEnum).sqlType
+        Optional.of(
+            Function { nullableValue ->
+                CustomObjectArgument(
+                    PGobject().apply {
+                        this.type = sqlType
+                        if (nullableValue != null && nullableValue is DatabaseEnum) {
+                            this.value = nullableValue.databaseValue()
                         }
-                    )
-                }
-            )
-        } else {
-            Optional.empty()
-        }
+                    }
+                )
+            }
+        )
+    } else {
+        Optional.empty()
     }
+}

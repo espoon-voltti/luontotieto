@@ -11,9 +11,6 @@ import fi.espoo.luontotieto.domain.User
 import fi.espoo.luontotieto.domain.UserController
 import fi.espoo.luontotieto.domain.UserRole
 import fi.espoo.luontotieto.domain.getUserPasswordHash
-import org.jdbi.v3.core.kotlin.inTransactionUnchecked
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,17 +18,19 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import org.jdbi.v3.core.kotlin.inTransactionUnchecked
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
 
 class UserControllerTests : FullApplicationTest() {
-    @Autowired
-    lateinit var controller: UserController
+    @Autowired lateinit var controller: UserController
 
     @Test
     fun createUserOk() {
         val createdUser =
             controller.createUser(
                 adminUser,
-                User.Companion.CreateCustomerUser("new-user@example.com", "Company Oy")
+                User.Companion.CreateCustomerUser("new-user@example.com", "Company Oy"),
             )
 
         assertEquals(UserRole.CUSTOMER, createdUser.role)
@@ -80,7 +79,9 @@ class UserControllerTests : FullApplicationTest() {
 
     @Test
     fun updateUserOk() {
-        val oldPasswordHash = jdbi.inTransactionUnchecked { it.getUserPasswordHash(customerUser.id) }
+        val oldPasswordHash = jdbi.inTransactionUnchecked {
+            it.getUserPasswordHash(customerUser.id)
+        }
         val email = "${UUID.randomUUID()}@example.com"
         val name = "${UUID.randomUUID()}"
         val updatedUser =
@@ -91,10 +92,12 @@ class UserControllerTests : FullApplicationTest() {
                     email = email,
                     name = name,
                     role = UserRole.CUSTOMER,
-                    active = false
-                )
+                    active = false,
+                ),
             )
-        val updatedPasswordHash = jdbi.inTransactionUnchecked { it.getUserPasswordHash(customerUser.id) }
+        val updatedPasswordHash = jdbi.inTransactionUnchecked {
+            it.getUserPasswordHash(customerUser.id)
+        }
 
         assertNotEquals(updatedPasswordHash, oldPasswordHash)
         assertFalse(updatedUser.active)
@@ -114,8 +117,8 @@ class UserControllerTests : FullApplicationTest() {
                         email = "new@example.com",
                         name = "New Name",
                         role = UserRole.CUSTOMER,
-                        active = false
-                    )
+                        active = false,
+                    ),
                 )
             }
         }
@@ -128,8 +131,7 @@ class UserControllerTests : FullApplicationTest() {
         val currentPassword = "password.1A"
         val currentHash = encoder.encode(currentPassword)
         jdbi.inTransactionUnchecked {
-            it
-                .createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
+            it.createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
                 .bind("password", currentHash)
                 .bind("id", customerUser.id)
                 .execute()
@@ -139,7 +141,7 @@ class UserControllerTests : FullApplicationTest() {
 
         controller.updateUserPassword(
             customerUser,
-            User.Companion.UpdatePasswordPayload(currentPassword, newPassword)
+            User.Companion.UpdatePasswordPayload(currentPassword, newPassword),
         )
 
         val updatedHash = jdbi.inTransactionUnchecked { it.getUserPasswordHash(customerUser.id) }
@@ -157,8 +159,7 @@ class UserControllerTests : FullApplicationTest() {
         val currentPassword = "password.1A"
         val currentHash = encoder.encode(currentPassword)
         jdbi.inTransactionUnchecked {
-            it
-                .createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
+            it.createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
                 .bind("password", currentHash)
                 .bind("id", customerUser.id)
                 .execute()
@@ -169,7 +170,7 @@ class UserControllerTests : FullApplicationTest() {
         assertFailsWith(BadRequest::class) {
             controller.updateUserPassword(
                 customerUser,
-                User.Companion.UpdatePasswordPayload(currentPassword, newPassword)
+                User.Companion.UpdatePasswordPayload(currentPassword, newPassword),
             )
         }
     }
@@ -181,8 +182,7 @@ class UserControllerTests : FullApplicationTest() {
         val currentPassword = "password.1A"
         val currentHash = encoder.encode(currentPassword)
         jdbi.inTransactionUnchecked {
-            it
-                .createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
+            it.createUpdate("UPDATE users SET password_hash = :password WHERE id = :id")
                 .bind("password", currentHash)
                 .bind("id", customerUser.id)
                 .execute()
@@ -193,14 +193,14 @@ class UserControllerTests : FullApplicationTest() {
         assertFailsWith(BadRequest::class) {
             controller.updateUserPassword(
                 customerUser,
-                User.Companion.UpdatePasswordPayload("password.1B", newPassword)
+                User.Companion.UpdatePasswordPayload("password.1B", newPassword),
             )
         }
 
         assertFailsWith(BadRequest::class) {
             controller.updateUserPassword(
                 customerUser,
-                User.Companion.UpdatePasswordPayload(currentPassword, currentPassword)
+                User.Companion.UpdatePasswordPayload(currentPassword, currentPassword),
             )
         }
     }
@@ -212,7 +212,7 @@ class UserControllerTests : FullApplicationTest() {
             assertFailsWith(NotFound::class) {
                 controller.updateUserPassword(
                     user,
-                    User.Companion.UpdatePasswordPayload("password.1A", "password.2A")
+                    User.Companion.UpdatePasswordPayload("password.1A", "password.2A"),
                 )
             }
         }

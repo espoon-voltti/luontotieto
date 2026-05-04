@@ -7,6 +7,13 @@ package fi.espoo.luontotieto.s3
 import com.github.kittinunf.fuel.core.Response
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.BucketEnv
+import java.awt.image.BufferedImage
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.net.URL
+import java.time.Duration
+import javax.imageio.ImageIO
 import mu.KotlinLogging
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpStatus
@@ -25,13 +32,6 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.model.S3Exception
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
-import java.awt.image.BufferedImage
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.net.URL
-import java.time.Duration
-import javax.imageio.ImageIO
 
 private const val INTERNAL_REDIRECT_PREFIX = "/internal_redirect/"
 private val logger = KotlinLogging.logger {}
@@ -40,29 +40,22 @@ private val logger = KotlinLogging.logger {}
 class S3DocumentService(
     private val s3Client: S3Client,
     private val s3Presigner: S3Presigner,
-    private val env: BucketEnv
+    private val env: BucketEnv,
 ) : DocumentService {
-    fun checkFileIsClean(
-        bucketName: String,
-        keyName: String,
-    ) {
+    fun checkFileIsClean(bucketName: String, keyName: String) {
         logger.info { "Check file $keyName has av tag" }
         try {
             val objectTaggingRequest =
-                GetObjectTaggingRequest
-                    .builder()
-                    .bucket(bucketName)
-                    .key(keyName)
-                    .build()
+                GetObjectTaggingRequest.builder().bucket(bucketName).key(keyName).build()
 
             val tags = s3Client.getObjectTagging(objectTaggingRequest)
 
             logger.info { "Found $tags for the file" }
 
             val hasTag =
-                tags
-                    .tagSet()
-                    .any { tag -> tag.key() == "GuardDutyMalwareScanStatus" && tag.value() == "NO_THREATS_FOUND" }
+                tags.tagSet().any { tag ->
+                    tag.key() == "GuardDutyMalwareScanStatus" && tag.value() == "NO_THREATS_FOUND"
+                }
 
             if (!hasTag) {
                 logger.warn { "No clean tag found for the file" }
@@ -84,61 +77,43 @@ class S3DocumentService(
         }
     }
 
-    override fun get(
-        bucketName: String,
-        key: String
-    ): Document {
+    override fun get(bucketName: String, key: String): Document {
         if (env.verifyFileAvTagged) {
             checkFileIsClean(bucketName, key)
         }
-        val request =
-            GetObjectRequest
-                .builder()
-                .bucket(bucketName)
-                .key(key)
-                .build()
+        val request = GetObjectRequest.builder().bucket(bucketName).key(key).build()
         val stream = s3Client.getObject(request) ?: throw NotFound("File not found")
         return stream.use {
             Document(
                 name = key,
                 bytes = it.readAllBytes(),
-                contentType = it.response().contentType()
+                contentType = it.response().contentType(),
             )
         }
     }
 
-    fun download(
-        bucketName: String,
-        key: String
-    ): ResponseInputStream<GetObjectResponse> {
-        val request =
-            GetObjectRequest
-                .builder()
-                .bucket(bucketName)
-                .key(key)
-                .build()
+    fun download(bucketName: String, key: String): ResponseInputStream<GetObjectResponse> {
+        val request = GetObjectRequest.builder().bucket(bucketName).key(key).build()
         return s3Client.getObject(request) ?: throw NotFound("File not found")
     }
 
     fun presignedGetUrl(
         bucketName: String,
         key: String,
-        contentDisposition: ContentDisposition
+        contentDisposition: ContentDisposition,
     ): URL {
         if (env.verifyFileAvTagged) {
             checkFileIsClean(bucketName, key)
         }
         val request =
-            GetObjectRequest
-                .builder()
+            GetObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
                 .responseContentDisposition(contentDisposition.toString())
                 .build()
 
         val getObjectPresignRequest =
-            GetObjectPresignRequest
-                .builder()
+            GetObjectPresignRequest.builder()
                 .signatureDuration(Duration.ofMinutes(1))
                 .getObjectRequest(request)
                 .build()
@@ -149,35 +124,29 @@ class S3DocumentService(
     override fun response(
         bucketName: String,
         key: String,
-        contentDisposition: ContentDisposition
+        contentDisposition: ContentDisposition,
     ): ResponseEntity<Any> {
         val presignedUrl = presignedGetUrl(bucketName, key, contentDisposition)
 
         return if (env.proxyThroughNginx) {
             val url = "$INTERNAL_REDIRECT_PREFIX$presignedUrl"
-            ResponseEntity
-                .ok()
+            ResponseEntity.ok()
                 .header("X-Accel-Redirect", url)
                 .header("Content-Disposition", contentDisposition.toString())
                 .body(null)
         } else {
             // nginx is not available in development => redirect to the presigned S3 url
-            ResponseEntity
-                .status(HttpStatus.FOUND)
+            ResponseEntity.status(HttpStatus.FOUND)
                 .header("Location", presignedUrl.toString())
                 .header("Content-Disposition", contentDisposition.toString())
                 .body(null)
         }
     }
 
-    override fun upload(
-        bucketName: String,
-        document: MultipartDocument
-    ): DocumentLocation {
+    override fun upload(bucketName: String, document: MultipartDocument): DocumentLocation {
         val key = document.name
         val request =
-            PutObjectRequest
-                .builder()
+            PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
                 .contentType(document.contentType)
@@ -194,16 +163,8 @@ class S3DocumentService(
         return DocumentLocation(bucket = bucketName, key = key)
     }
 
-    override fun delete(
-        bucketName: String,
-        key: String
-    ) {
-        val request =
-            DeleteObjectRequest
-                .builder()
-                .bucket(bucketName)
-                .key(key)
-                .build()
+    override fun delete(bucketName: String, key: String) {
+        val request = DeleteObjectRequest.builder().bucket(bucketName).key(key).build()
         s3Client.deleteObject(request)
     }
 }
@@ -218,8 +179,7 @@ fun removeExifDataIfImage(file: MultipartFile): Pair<InputStream, Long> {
 
     // Open the image and process it
     val image: BufferedImage =
-        ImageIO.read(file.inputStream)
-            ?: return Pair(file.inputStream, file.size)
+        ImageIO.read(file.inputStream) ?: return Pair(file.inputStream, file.size)
 
     // Create a new BufferedImage to effectively strip EXIF metadata
     val newImage = BufferedImage(image.width, image.height, image.type)
@@ -252,7 +212,8 @@ private fun getImageFormat(document: MultipartFile): String? {
     }
 }
 
-fun fuelResponseToS3URL(response: Response): String = response.headers["X-Accel-Redirect"].first().replace(INTERNAL_REDIRECT_PREFIX, "")
+fun fuelResponseToS3URL(response: Response): String =
+    response.headers["X-Accel-Redirect"].first().replace(INTERNAL_REDIRECT_PREFIX, "")
 
 fun responseEntityToS3URL(response: ResponseEntity<Any>): String =
     response.headers["X-Accel-Redirect"]!!.first().replace(INTERNAL_REDIRECT_PREFIX, "")

@@ -14,9 +14,7 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class HttpFilterConfig {
-    @Qualifier("jdbi-luontotieto")
-    @Autowired
-    lateinit var jdbi: Jdbi
+    @Qualifier("jdbi-luontotieto") @Autowired lateinit var jdbi: Jdbi
 
     @Bean
     fun jwtTokenParser(jwtVerifier: JWTVerifier) =
