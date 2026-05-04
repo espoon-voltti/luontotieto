@@ -19,13 +19,9 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
-)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 abstract class PlaywrightTest {
-    @Qualifier("jdbi-luontotieto")
-    @Autowired
-    protected lateinit var jdbi: Jdbi
+    @Qualifier("jdbi-luontotieto") @Autowired protected lateinit var jdbi: Jdbi
 
     protected lateinit var playwright: Playwright
     protected lateinit var browser: Browser
@@ -54,25 +50,23 @@ abstract class PlaywrightTest {
                     WHERE sequence_schema = 'public'
                   );
                 END ${'$'}${'$'} LANGUAGE plpgsql;
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
         }
 
         playwright = Playwright.create()
         browser =
-            playwright.chromium().launch(
-                BrowserType
-                    .LaunchOptions()
-                    .setHeadless(runningInDocker)
-                    .setTimeout(10_000.0)
-            )
+            playwright
+                .chromium()
+                .launch(
+                    BrowserType.LaunchOptions().setHeadless(runningInDocker).setTimeout(10_000.0)
+                )
     }
 
     @BeforeEach
     fun beforeEachSuper() {
-        jdbi.withHandleUnchecked { tx ->
-            tx.execute("SELECT reset_database()")
-        }
+        jdbi.withHandleUnchecked { tx -> tx.execute("SELECT reset_database()") }
     }
 
     @AfterAll
@@ -87,9 +81,7 @@ abstract class PlaywrightTest {
         page.setDefaultTimeout(timeout)
         page.setDefaultNavigationTimeout(timeout)
         if (E2E_DEBUG_LOGGING) {
-            page.onDOMContentLoaded {
-                println("DOMContentLoaded")
-            }
+            page.onDOMContentLoaded { println("DOMContentLoaded") }
             page.onConsoleMessage { println("Console ${it.type()}: ${it.text()}") }
             page.onPageError { println("PageError") }
             page.onRequest { println("Request ${it.method()} ${it.url()}") }

@@ -2,14 +2,10 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import org.springframework.boot.context.properties.ConfigurationProperties
 import java.net.URI
+import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "app")
-data class AppEnv(
-    val jwt: JwtEnv
-) {
-    data class JwtEnv(
-        val publicKeysUrl: URI
-    )
+data class AppEnv(val jwt: JwtEnv) {
+    data class JwtEnv(val publicKeysUrl: URI)
 }

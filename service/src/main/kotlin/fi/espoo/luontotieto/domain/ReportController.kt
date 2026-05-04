@@ -30,6 +30,14 @@ import fi.espoo.paikkatieto.domain.updateAluerajausLuontoselvitystilausSelvitysT
 import fi.espoo.paikkatieto.reader.GpkgReader
 import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.writer.GpkgWriter
+import java.io.File
+import java.io.IOException
+import java.math.BigDecimal
+import java.net.URL
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.time.LocalDate
+import java.util.UUID
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
@@ -55,25 +63,13 @@ import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.io.File
-import java.io.IOException
-import java.math.BigDecimal
-import java.net.URL
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.time.LocalDate
-import java.util.UUID
 
 @RestController
 @RequestMapping("/reports")
 class ReportController {
-    @Qualifier("jdbi-luontotieto")
-    @Autowired
-    lateinit var jdbi: Jdbi
+    @Qualifier("jdbi-luontotieto") @Autowired lateinit var jdbi: Jdbi
 
-    @Qualifier("jdbi-paikkatieto")
-    @Autowired
-    lateinit var paikkatietoJdbi: Jdbi
+    @Qualifier("jdbi-paikkatieto") @Autowired lateinit var paikkatietoJdbi: Jdbi
 
     @Autowired lateinit var documentClient: S3DocumentService
 
@@ -95,7 +91,7 @@ class ReportController {
         @RequestPart("file") file: MultipartFile,
         @RequestPart("id") id: String,
         @RequestPart("description") description: String?,
-        @RequestParam("documentType") documentType: DocumentType
+        @RequestParam("documentType") documentType: DocumentType,
     ): ResponseEntity<List<GpkgValidationError>> {
         val dataBucket = bucketEnv.data
 
@@ -103,8 +99,9 @@ class ReportController {
         val fileName = getAndCheckFileName(file)
         val contentType = file.inputStream.use { stream -> checkFileContentType(stream) }
 
-        val paikkatietoEnums =
-            paikkatietoJdbi.inTransactionUnchecked { ptx -> ptx.getPaikkaTietoEnums() }
+        val paikkatietoEnums = paikkatietoJdbi.inTransactionUnchecked { ptx ->
+            ptx.getPaikkaTietoEnums()
+        }
 
         val tableDefinition = documentType.tableDefinition
 
@@ -121,26 +118,24 @@ class ReportController {
                 }
 
                 gpkgReader.use { reader -> reader.asSequence().flatMap { it.errors }.toList() }
-            }
-                ?: emptyList()
+            } ?: emptyList()
 
         if (errors.isEmpty()) {
-            val savedId =
-                jdbi.inTransactionUnchecked { tx ->
-                    // Check that user has permission to report
-                    val report = tx.getReport(reportId, user)
-                    tx.insertReportFile(
-                        ReportFileInput(
-                            UUID.fromString(id),
-                            report.id,
-                            description,
-                            contentType,
-                            fileName,
-                            documentType
-                        ),
-                        user
-                    )
-                }
+            val savedId = jdbi.inTransactionUnchecked { tx ->
+                // Check that user has permission to report
+                val report = tx.getReport(reportId, user)
+                tx.insertReportFile(
+                    ReportFileInput(
+                        UUID.fromString(id),
+                        report.id,
+                        description,
+                        contentType,
+                        fileName,
+                        documentType,
+                    ),
+                    user,
+                )
+            }
 
             try {
                 documentClient.upload(
@@ -148,13 +143,13 @@ class ReportController {
                     MultipartDocument(
                         name = "$reportId/$savedId",
                         file = file,
-                        contentType = contentType
-                    )
+                        contentType = contentType,
+                    ),
                 )
                 logger.audit(
                     user,
                     AuditEvent.ADD_REPORT_FILE,
-                    mapOf("id" to "$reportId", "file" to "$savedId")
+                    mapOf("id" to "$reportId", "file" to "$savedId"),
                 )
                 return ResponseEntity.status(HttpStatus.CREATED).body(errors)
             } catch (e: Exception) {
@@ -167,44 +162,32 @@ class ReportController {
     }
 
     @GetMapping("/{id}")
-    fun getReportById(
-        user: AuthenticatedUser,
-        @PathVariable id: UUID
-    ) = jdbi
-        .inTransactionUnchecked { tx ->
-            tx.getReport(id, user)
-        }.also {
-            logger.audit(user, AuditEvent.GET_REPORT_BY_ID, mapOf("id" to "$id"))
-        }
+    fun getReportById(user: AuthenticatedUser, @PathVariable id: UUID) =
+        jdbi
+            .inTransactionUnchecked { tx -> tx.getReport(id, user) }
+            .also { logger.audit(user, AuditEvent.GET_REPORT_BY_ID, mapOf("id" to "$id")) }
 
     @GetMapping()
     fun getReports(user: AuthenticatedUser) =
-        jdbi.inTransactionUnchecked { tx -> tx.getReports(user) }.also {
-            logger.audit(
-                user,
-                AuditEvent.GET_REPORTS,
-            )
-        }
+        jdbi
+            .inTransactionUnchecked { tx -> tx.getReports(user) }
+            .also { logger.audit(user, AuditEvent.GET_REPORTS) }
 
     @GetMapping("/csv")
     fun getReportsAsCsv(
         user: AuthenticatedUser,
         @RequestParam startDate: LocalDate?,
-        @RequestParam endDate: LocalDate?
+        @RequestParam endDate: LocalDate?,
     ): ResponseEntity<Resource> {
         val reports =
-            jdbi.inTransactionUnchecked { tx -> tx.getReports(user, startDate, endDate) }.also {
-                logger.audit(
-                    user,
-                    AuditEvent.GET_REPORTS_AS_CSV,
-                )
-            }
+            jdbi
+                .inTransactionUnchecked { tx -> tx.getReports(user, startDate, endDate) }
+                .also { logger.audit(user, AuditEvent.GET_REPORTS_AS_CSV) }
         val contentDisposition = ContentDisposition.attachment().filename("reports.csv").build()
 
         val res = reportsToCsv(reports).byteInputStream()
         val inputStreamResource = InputStreamResource(res)
-        return ResponseEntity
-            .ok()
+        return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
             .body(inputStreamResource)
@@ -215,20 +198,20 @@ class ReportController {
         user: AuthenticatedUser,
         @PathVariable id: UUID,
         @RequestBody report: Report.Companion.ReportInput,
-        @RequestParam("sendUpdatedEmail") sendUpdatedEmail: Boolean? = true
+        @RequestParam("sendUpdatedEmail") sendUpdatedEmail: Boolean? = true,
     ): Report {
         println("sendUpdatedEmail $sendUpdatedEmail")
         val reportResponse =
-            jdbi.inTransactionUnchecked { tx -> tx.putReport(id, report, user) }.also {
-                logger.audit(user, AuditEvent.UPDATE_REPORT, mapOf("id" to "$id"))
-            }
+            jdbi
+                .inTransactionUnchecked { tx -> tx.putReport(id, report, user) }
+                .also { logger.audit(user, AuditEvent.UPDATE_REPORT, mapOf("id" to "$id")) }
 
         if (emailEnv.enabled && sendUpdatedEmail == true) {
             val reportUpdatedEmail =
                 Emails.getReportUpdatedEmail(
                     HtmlSafe(reportResponse.name),
                     HtmlSafe(reportResponse.order?.assignee ?: ""),
-                    luontotietoHost.getReportUrl(reportResponse.id)
+                    luontotietoHost.getReportUrl(reportResponse.id),
                 )
             sendReportEmails(reportUpdatedEmail, reportResponse)
         }
@@ -241,29 +224,28 @@ class ReportController {
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
         @RequestParam("overrideReportName") overrideReportName: Boolean? = false,
-        @RequestParam("reportCost") reportCost: BigDecimal? = null
+        @RequestParam("reportCost") reportCost: BigDecimal? = null,
     ) {
         user.checkRoles(UserRole.ADMIN, UserRole.ORDERER)
         val dataBucket = bucketEnv.data
 
-        val paikkatietoEnums =
-            paikkatietoJdbi.inTransactionUnchecked { ptx -> ptx.getPaikkaTietoEnums() }
-        val reportFiles =
-            jdbi.inTransactionUnchecked { tx ->
-                tx.getPaikkaTietoReportFiles(
-                    reportId,
-                )
-            }
+        val paikkatietoEnums = paikkatietoJdbi.inTransactionUnchecked { ptx ->
+            ptx.getPaikkaTietoEnums()
+        }
+        val reportFiles = jdbi.inTransactionUnchecked { tx ->
+            tx.getPaikkaTietoReportFiles(reportId)
+        }
 
         val report = jdbi.inTransactionUnchecked { tx -> tx.getReport(reportId, user) }
 
         /**
-         * Document types required in order can be changed even after a report document has been added.
-         * We make sure to only upload the data for document types that are defined in the order
-         * during the time that approval takes place.
-         * (Note: The old document type files are still stored in the s3)
+         * Document types required in order can be changed even after a report document has been
+         * added. We make sure to only upload the data for document types that are defined in the
+         * order during the time that approval takes place. (Note: The old document type files are
+         * still stored in the s3)
          */
-        val uploadReportDocumentTypes = arrayOf(DocumentType.ALUERAJAUS_LUONTOSELVITYS).toMutableList()
+        val uploadReportDocumentTypes =
+            arrayOf(DocumentType.ALUERAJAUS_LUONTOSELVITYS).toMutableList()
         val orderDefinedReportDocumentTypes = report.order?.reportDocuments?.map { it.documentType }
         uploadReportDocumentTypes.addAll(orderDefinedReportDocumentTypes ?: emptyList())
 
@@ -281,7 +263,6 @@ class ReportController {
          * because the observed species value is deferred from the muut_huomioitavat_lajit tables
          * that need to be inserted first.
          */
-
         val sortedReaders = readers.sortedBy { it.tableDefinition.layerName.contains("aluerajaus") }
 
         paikkatietoJdbi.inTransactionUnchecked { ptx ->
@@ -293,9 +274,7 @@ class ReportController {
                                 val observedSpecies = ptx.getObservedSpecies(reportId)
                                 val reportDocumentLink =
                                     if (report.isPublic == true) {
-                                        luontotietoHost.getReportDocumentDownloadUrl(
-                                            reportId
-                                        )
+                                        luontotietoHost.getReportDocumentDownloadUrl(reportId)
                                     } else {
                                         "Ei julkinen"
                                     }
@@ -306,7 +285,7 @@ class ReportController {
                                         id = reportId,
                                         observedSpecies = observedSpecies.toSet(),
                                         reportLink = luontotietoHost.getReportUrl(reportId),
-                                        reportDocumentLink = reportDocumentLink
+                                        reportDocumentLink = reportDocumentLink,
                                     )
                                 }
                             }
@@ -320,7 +299,7 @@ class ReportController {
                         throw BadRequest(
                             "Error validating paikkatieto files",
                             "error-validating-paikkatieto-data",
-                            errors.map { e -> "${e.id}:${e.column}:${e.value}:${e.reason}" }
+                            errors.map { e -> "${e.id}:${e.column}:${e.value}:${e.reason}" },
                         )
                     }
 
@@ -330,13 +309,13 @@ class ReportController {
                             report,
                             data.asSequence(),
                             params,
-                            user.isAdmin() && overrideReportName == true
+                            user.isAdmin() && overrideReportName == true,
                         )
                     } catch (e: Exception) {
                         logger.error("Error saving paikkatieto data", e)
                         throw BadRequest(
                             "Error saving paikkatietodata",
-                            "error-saving-paikkatieto-data"
+                            "error-saving-paikkatieto-data",
                         )
                     }
                 }
@@ -346,12 +325,12 @@ class ReportController {
         jdbi
             .inTransactionUnchecked { tx ->
                 tx.updateReportApproved(reportId, true, observed.distinct(), user, reportCost)
-            }.also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
-
-        paikkatietoJdbi
-            .inTransactionUnchecked { tx ->
-                tx.updateAluerajausLuontoselvitystilausSelvitysTila(reportId, true)
             }
+            .also { logger.audit(user, AuditEvent.APPROVE_REPORT, mapOf("id" to "$reportId")) }
+
+        paikkatietoJdbi.inTransactionUnchecked { tx ->
+            tx.updateAluerajausLuontoselvitystilausSelvitysTila(reportId, true)
+        }
 
         if (emailEnv.enabled) {
             val userResponse = jdbi.inTransactionUnchecked { tx -> tx.getUser(user.id) }
@@ -359,7 +338,7 @@ class ReportController {
                 Emails.getReportApprovedEmail(
                     HtmlSafe(report.name),
                     HtmlSafe(userResponse.name),
-                    luontotietoHost.getReportUrl(report.id)
+                    luontotietoHost.getReportUrl(report.id),
                 )
             sendReportEmails(reportApprovedEmail, report)
         }
@@ -367,10 +346,7 @@ class ReportController {
 
     @PostMapping("/{reportId}/reopen")
     @ResponseStatus(HttpStatus.CREATED)
-    fun reopenReport(
-        user: AuthenticatedUser,
-        @PathVariable reportId: UUID,
-    ) {
+    fun reopenReport(user: AuthenticatedUser, @PathVariable reportId: UUID) {
         user.checkRoles(UserRole.ADMIN)
 
         val report = jdbi.inTransactionUnchecked { tx -> tx.getReport(reportId, user) }
@@ -392,47 +368,44 @@ class ReportController {
         jdbi
             .inTransactionUnchecked { tx ->
                 tx.updateReportApproved(reportId, false, listOf(), user, report.cost)
-            }.also { logger.audit(user, AuditEvent.REOPEN_REPORT, mapOf("id" to "$reportId")) }
-
-        paikkatietoJdbi
-            .inTransactionUnchecked { tx ->
-                tx.updateAluerajausLuontoselvitystilausSelvitysTila(reportId, false)
             }
+            .also { logger.audit(user, AuditEvent.REOPEN_REPORT, mapOf("id" to "$reportId")) }
+
+        paikkatietoJdbi.inTransactionUnchecked { tx ->
+            tx.updateAluerajausLuontoselvitystilausSelvitysTila(reportId, false)
+        }
     }
 
     @GetMapping("/{reportId}/files")
-    fun getReportFiles(
-        user: AuthenticatedUser,
-        @PathVariable reportId: UUID
-    ): List<ReportFile> =
+    fun getReportFiles(user: AuthenticatedUser, @PathVariable reportId: UUID): List<ReportFile> =
         jdbi
             .inTransactionUnchecked { tx ->
                 // This is done to check that user has access to the report
                 val report = tx.getReport(reportId, user)
                 tx.getReportFiles(reportId)
-            }.also {
-                logger.audit(user, AuditEvent.GET_REPORT_FILES, mapOf("id" to "$reportId"))
             }
+            .also { logger.audit(user, AuditEvent.GET_REPORT_FILES, mapOf("id" to "$reportId")) }
 
     @GetMapping("/{reportId}/files/{fileId}")
     fun getReportFileById(
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
-        @PathVariable fileId: UUID
+        @PathVariable fileId: UUID,
     ): URL {
         val dataBucket = bucketEnv.data
 
         val reportFile =
-            jdbi.inTransactionUnchecked { tx -> tx.getReportFileById(reportId, fileId) }.also {
-                logger.audit(
-                    user,
-                    AuditEvent.GET_REPORT_FILE_BY_ID,
-                    mapOf("id" to "$reportId", "file" to "$fileId")
-                )
-            }
+            jdbi
+                .inTransactionUnchecked { tx -> tx.getReportFileById(reportId, fileId) }
+                .also {
+                    logger.audit(
+                        user,
+                        AuditEvent.GET_REPORT_FILE_BY_ID,
+                        mapOf("id" to "$reportId", "file" to "$fileId"),
+                    )
+                }
         val contentDisposition =
-            ContentDisposition
-                .attachment()
+            ContentDisposition.attachment()
                 .filename(reportFile.fileName, StandardCharsets.UTF_8)
                 .build()
         val fileUrl =
@@ -441,24 +414,21 @@ class ReportController {
     }
 
     @GetMapping("/{reportId}/files/report")
-    fun getReportFileById(
-        @PathVariable reportId: UUID
-    ): ResponseEntity<Resource> {
+    fun getReportFileById(@PathVariable reportId: UUID): ResponseEntity<Resource> {
         val dataBucket = bucketEnv.data
 
-        val reportFile =
-            jdbi.inTransactionUnchecked { tx -> tx.getReportDocumentForReport(reportId) }
+        val reportFile = jdbi.inTransactionUnchecked { tx ->
+            tx.getReportDocumentForReport(reportId)
+        }
 
         val contentDisposition =
-            ContentDisposition
-                .attachment()
+            ContentDisposition.attachment()
                 .filename(reportFile.fileName, StandardCharsets.UTF_8)
                 .build()
 
         val res = documentClient.download(dataBucket, "$reportId/${reportFile.id}")
         val inputStreamResource = InputStreamResource(res)
-        return ResponseEntity
-            .ok()
+        return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
             .contentType(MediaType.parseMediaType(res.response().contentType()))
             .contentLength(res.response().contentLength())
@@ -469,48 +439,44 @@ class ReportController {
     fun deleteReportFile(
         user: AuthenticatedUser,
         @PathVariable reportId: UUID,
-        @PathVariable fileId: UUID
+        @PathVariable fileId: UUID,
     ) {
         val dataBucket = bucketEnv.data
 
         documentClient.delete(dataBucket, "$reportId/$fileId")
 
-        jdbi.inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }.also {
-            logger.audit(
-                user,
-                AuditEvent.DELETE_REPORT_FILE,
-                mapOf("id" to "$reportId", "file" to "$fileId")
-            )
-        }
+        jdbi
+            .inTransactionUnchecked { tx -> tx.deleteReportFile(reportId, fileId) }
+            .also {
+                logger.audit(
+                    user,
+                    AuditEvent.DELETE_REPORT_FILE,
+                    mapOf("id" to "$reportId", "file" to "$fileId"),
+                )
+            }
     }
 
     @GetMapping("/template/{documentType}.gpkg")
-    fun getGpkgTemplate(
-        @PathVariable documentType: DocumentType
-    ): ResponseEntity<Resource> {
+    fun getGpkgTemplate(@PathVariable documentType: DocumentType): ResponseEntity<Resource> {
         val tableDefinition = documentType.tableDefinition ?: throw NotFound()
         val file =
-            GpkgWriter
-                .write(tableDefinition) { column ->
+            GpkgWriter.write(tableDefinition) { column ->
                     paikkatietoJdbi.inTransactionUnchecked { tx -> tx.getEnumRange(column) }
-                }?.takeIf { Files.size(it) > 0 }
-                ?: throw NotFound()
+                }
+                ?.takeIf { Files.size(it) > 0 } ?: throw NotFound()
 
         val resource = UrlResource(file.toUri())
 
-        return ResponseEntity
-            .ok()
+        return ResponseEntity.ok()
             .header(
                 HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"${tableDefinition.layerName}.gpkg\""
-            ).header(HttpHeaders.CONTENT_TYPE, "application/geopackage+sqlite3")
+                "attachment; filename=\"${tableDefinition.layerName}.gpkg\"",
+            )
+            .header(HttpHeaders.CONTENT_TYPE, "application/geopackage+sqlite3")
             .body(resource)
     }
 
-    private fun sendReportEmails(
-        email: EmailContent,
-        report: Report
-    ) {
+    private fun sendReportEmails(email: EmailContent, report: Report) {
         try {
             jdbi.inTransactionUnchecked { tx ->
                 val emails = mutableListOf<String?>()
@@ -533,7 +499,7 @@ class ReportController {
         bucketName: String,
         fileName: String,
         reportFile: ReportFile,
-        paikkaTietoEnums: List<PaikkaTietoEnum>
+        paikkaTietoEnums: List<PaikkaTietoEnum>,
     ): GpkgReader? {
         val tableDefinition = reportFile.documentType.tableDefinition ?: return null
         val document = documentClient.get(bucketName, fileName)

@@ -7,12 +7,12 @@ package fi.espoo.luontotieto
 import fi.espoo.luontotieto.common.databaseValue
 import fi.espoo.luontotieto.domain.DocumentType
 import fi.espoo.luontotieto.domain.ReportController
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.MediaType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 
 class GpkgTemplateTest : FullApplicationTest() {
     @Autowired lateinit var controller: ReportController
@@ -28,13 +28,10 @@ class GpkgTemplateTest : FullApplicationTest() {
             assertTrue(file.contentAsByteArray.isNotEmpty())
             assertEquals(
                 MediaType.valueOf("application/geopackage+sqlite3"),
-                response.headers.contentType
+                response.headers.contentType,
             )
             assertTrue(response.headers.contentDisposition.isAttachment)
-            assertTrue(
-                response.headers.contentDisposition.filename
-                    ?.endsWith(".gpkg") == true
-            )
+            assertTrue(response.headers.contentDisposition.filename?.endsWith(".gpkg") == true)
         }
     }
 }

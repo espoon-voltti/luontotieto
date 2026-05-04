@@ -3,18 +3,18 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 package fi.espoo.luontotieto.config
 
+import java.net.URI
+import java.util.Locale
 import mu.KotlinLogging
 import org.springframework.core.env.Environment
 import software.amazon.awssdk.regions.Region
-import java.net.URI
-import java.util.Locale
 
 data class BucketEnv(
     val s3MockUrl: URI?,
     val proxyThroughNginx: Boolean,
     val data: String,
     val region: Region,
-    val verifyFileAvTagged: Boolean
+    val verifyFileAvTagged: Boolean,
 ) {
     fun allBuckets() = listOf(data)
 
@@ -25,15 +25,12 @@ data class BucketEnv(
                 proxyThroughNginx = env.lookup("luontotieto.bucket.proxy_through_nginx"),
                 data = env.lookup("luontotieto.bucket.data"),
                 region = Region.of(env.lookup("luontotieto.aws.region")),
-                verifyFileAvTagged = env.lookup("luontotieto.bucket.verify_file_av_tagged")
+                verifyFileAvTagged = env.lookup("luontotieto.bucket.verify_file_av_tagged"),
             )
     }
 }
 
-inline fun <reified T> Environment.lookup(
-    key: String,
-    vararg deprecatedKeys: String
-): T {
+inline fun <reified T> Environment.lookup(key: String, vararg deprecatedKeys: String): T {
     val value = lookup(key, deprecatedKeys, T::class.java)
     if (value == null && null !is T) {
         error("Missing required configuration: $key (environment variable ${key.toSystemEnvKey()})")
@@ -45,7 +42,7 @@ inline fun <reified T> Environment.lookup(
 fun <T> Environment.lookup(
     key: String,
     deprecatedKeys: Array<out String>,
-    clazz: Class<out T>
+    clazz: Class<out T>,
 ): T? =
     deprecatedKeys
         .asSequence()
@@ -59,7 +56,8 @@ fun <T> Environment.lookup(
             } catch (e: Exception) {
                 throw EnvLookupException(legacyKey, e)
             }
-        }.firstOrNull()
+        }
+        .firstOrNull()
         ?: try {
             getProperty(key, clazz)
         } catch (e: Exception) {
@@ -68,12 +66,10 @@ fun <T> Environment.lookup(
 
 private val logger = KotlinLogging.logger {}
 
-class EnvLookupException(
-    key: String,
-    cause: Throwable
-) : RuntimeException(
+class EnvLookupException(key: String, cause: Throwable) :
+    RuntimeException(
         "Failed to lookup configuration key $key (environment variable ${key.toSystemEnvKey()})",
-        cause
+        cause,
     )
 
 // Reference: Spring SystemEnvironmentPropertySource

@@ -11,13 +11,13 @@ import fi.espoo.luontotieto.domain.OrderInput
 import fi.espoo.luontotieto.domain.OrderReportDocument
 import fi.espoo.luontotieto.domain.ReportController
 import fi.espoo.paikkatieto.reader.GpkgValidationError
-import org.springframework.http.ResponseEntity
-import org.springframework.mock.web.MockMultipartFile
-import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.io.FileInputStream
 import java.time.LocalDate
 import java.util.UUID
+import org.springframework.http.ResponseEntity
+import org.springframework.mock.web.MockMultipartFile
+import org.springframework.web.multipart.MultipartFile
 
 fun createOrderAndReport(
     controller: OrderController,
@@ -35,7 +35,7 @@ fun createOrderAndReport(
     contactPhone: String = "04012345678",
     orderingUnit: List<String> = listOf("Orava yksikkö", "Karhuryhmä"),
     assigneeCompanyName: String? = null,
-    orderYear: Int = 2030
+    orderYear: Int = 2030,
 ): OrderController.CreateOrderResponse =
     controller.createOrderFromScratch(
         user = adminUser,
@@ -54,13 +54,13 @@ fun createOrderAndReport(
                 contactPhone = contactPhone,
                 contactPerson = contactPerson,
                 orderingUnit = orderingUnit,
-                year = orderYear
-            )
+                year = orderYear,
+            ),
     )
 
 fun createLiitoOravaPisteetReportFile(
     controller: ReportController,
-    reportId: UUID
+    reportId: UUID,
 ): ResponseEntity<List<GpkgValidationError>> {
     val file = File("src/test/resources/test-data/liito_orava_pisteet.gpkg")
     val multipartFile: MultipartFile =
@@ -68,7 +68,7 @@ fun createLiitoOravaPisteetReportFile(
             "liito_orava_pisteet.gpkg",
             "liito_orava_pisteet.gpkg",
             "application/x-sqlite3",
-            FileInputStream(file)
+            FileInputStream(file),
         )
 
     return controller.uploadReportFile(
@@ -77,6 +77,6 @@ fun createLiitoOravaPisteetReportFile(
         file = multipartFile,
         documentType = DocumentType.LIITO_ORAVA_PISTEET,
         description = "Test Description",
-        id = UUID.randomUUID().toString()
+        id = UUID.randomUUID().toString(),
     )
 }

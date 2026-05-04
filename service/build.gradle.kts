@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import com.ncorti.ktfmt.gradle.tasks.KtfmtFormatTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
@@ -12,6 +13,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
     alias(libs.plugins.flyway)
+    alias(libs.plugins.ktfmt)
     alias(libs.plugins.ktlint.gradle)
     alias(libs.plugins.owasp)
 
@@ -32,15 +34,17 @@ sourceSets {
     }
 }
 
-val e2eTestImplementation: Configuration by configurations.getting { extendsFrom(configurations.testImplementation.get()) }
+val e2eTestImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+}
 
 configurations["e2eTestRuntimeOnly"].extendsFrom(configurations.testRuntimeOnly.get())
 
 idea { module { testSources = testSources + sourceSets["e2eTest"].kotlin.sourceDirectories } }
 
-ktlint {
-    version.set("1.4.1")
-}
+ktfmt { kotlinLangStyle() }
+
+ktlint { version.set(libs.versions.ktlint.asProvider().get()) }
 
 dependencies {
     api(kotlin("stdlib"))
@@ -57,9 +61,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    implementation("org.springframework.ws:spring-ws-security") {
-        exclude("org.opensaml")
-    }
+    implementation("org.springframework.ws:spring-ws-security") { exclude("org.opensaml") }
 
     implementation(libs.httpclient)
 
@@ -141,7 +143,8 @@ tasks.register("resolveDependencies") {
             .map {
                 val files = it.resolve()
                 it.name to files.size
-            }.groupBy({ (_, count) -> count }) { (name, _) -> name }
+            }
+            .groupBy({ (_, count) -> count }) { (name, _) -> name }
             .forEach { (count, names) ->
                 println(
                     "Resolved $count dependency files for configurations: ${names.joinToString(", ")}"
@@ -152,6 +155,11 @@ tasks.register("resolveDependencies") {
 
 tasks {
     bootRun { systemProperty("spring.profiles.active", "local") }
+
+    register<KtfmtFormatTask>("ktfmtPrecommit") {
+        source = project.fileTree(rootDir)
+        include("**/*.kt")
+    }
 
     register("e2eTestDeps", JavaExec::class) {
         group = "build"

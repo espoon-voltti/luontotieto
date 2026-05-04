@@ -8,62 +8,36 @@ import org.springframework.http.ContentDisposition
 import org.springframework.http.ResponseEntity
 import org.springframework.web.multipart.MultipartFile
 
-data class Document(
-    val name: String,
-    val bytes: ByteArray,
-    val contentType: String
-)
+data class Document(val name: String, val bytes: ByteArray, val contentType: String)
 
-data class MultipartDocument(
-    val name: String,
-    val file: MultipartFile,
-    val contentType: String
-)
+data class MultipartDocument(val name: String, val file: MultipartFile, val contentType: String)
 
-data class DocumentLocation(
-    val bucket: String,
-    val key: String
-)
+data class DocumentLocation(val bucket: String, val key: String)
 
 interface DocumentService {
-    fun get(
-        bucketName: String,
-        key: String
-    ): Document
+    fun get(bucketName: String, key: String): Document
 
     fun response(
         bucketName: String,
         key: String,
-        contentDisposition: ContentDisposition
+        contentDisposition: ContentDisposition,
     ): ResponseEntity<Any>
 
-    fun responseAttachment(
-        bucketName: String,
-        key: String,
-        fileName: String?
-    ) = response(
-        bucketName,
-        key,
-        ContentDisposition.attachment().filename(fileName, Charsets.UTF_8).build()
-    )
+    fun responseAttachment(bucketName: String, key: String, fileName: String?) =
+        response(
+            bucketName,
+            key,
+            ContentDisposition.attachment().filename(fileName, Charsets.UTF_8).build(),
+        )
 
-    fun responseInline(
-        bucketName: String,
-        key: String,
-        fileName: String?
-    ) = response(
-        bucketName,
-        key,
-        ContentDisposition.inline().filename(fileName, Charsets.UTF_8).build()
-    )
+    fun responseInline(bucketName: String, key: String, fileName: String?) =
+        response(
+            bucketName,
+            key,
+            ContentDisposition.inline().filename(fileName, Charsets.UTF_8).build(),
+        )
 
-    fun upload(
-        bucketName: String,
-        document: MultipartDocument
-    ): DocumentLocation
+    fun upload(bucketName: String, document: MultipartDocument): DocumentLocation
 
-    fun delete(
-        bucketName: String,
-        key: String
-    )
+    fun delete(bucketName: String, key: String)
 }

@@ -14,15 +14,12 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpFilter
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import java.util.UUID
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
-import java.util.UUID
 
-data class AuthenticatedUser(
-    val id: UUID,
-    val role: UserRole
-) {
+data class AuthenticatedUser(val id: UUID, val role: UserRole) {
     fun isSystemUser() = id == UUID.fromString("00000000-0000-0000-0000-000000000000")
 
     fun isAdmin() = role == UserRole.ADMIN
@@ -34,13 +31,11 @@ data class AuthenticatedUser(
     }
 }
 
-class JwtToAuthenticatedUser(
-    val jdbi: Jdbi
-) : HttpFilter() {
+class JwtToAuthenticatedUser(val jdbi: Jdbi) : HttpFilter() {
     override fun doFilter(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        chain: FilterChain
+        chain: FilterChain,
     ) {
         val user =
             request.getDecodedJwt()?.subject?.let { subject ->
@@ -61,20 +56,20 @@ class HttpAccessControl : HttpFilter() {
     override fun doFilter(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        chain: FilterChain
+        chain: FilterChain,
     ) {
         if (request.requiresAuthentication()) {
             val authenticatedUser = request.getAuthenticatedUser()
             if (authenticatedUser == null) {
                 return response.sendError(
                     HttpServletResponse.SC_UNAUTHORIZED,
-                    "fi.espoo.luontotieto.common.Unauthorized"
+                    "fi.espoo.luontotieto.common.Unauthorized",
                 )
             }
             if (!request.isAuthorized(authenticatedUser)) {
                 return response.sendError(
                     HttpServletResponse.SC_FORBIDDEN,
-                    "fi.espoo.luontotieto.common.Forbidden"
+                    "fi.espoo.luontotieto.common.Forbidden",
                 )
             }
         }
@@ -86,12 +81,10 @@ class HttpAccessControl : HttpFilter() {
         when {
             requestURI == "/health" ||
                 requestURI == "/actuator/health" ||
-                requestURI
-                    .matches(
-                        "^/reports/([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})/files/report$"
-                            .toRegex()
-                    )
-            -> false
+                requestURI.matches(
+                    "^/reports/([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})/files/report$"
+                        .toRegex()
+                ) -> false
 
             else -> true
         }
@@ -103,20 +96,19 @@ class HttpAccessControl : HttpFilter() {
         }
 }
 
-class JwtTokenDecoder(
-    private val jwtVerifier: JWTVerifier
-) : HttpFilter() {
+class JwtTokenDecoder(private val jwtVerifier: JWTVerifier) : HttpFilter() {
     private val logger = KotlinLogging.logger {}
 
     override fun doFilter(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        chain: FilterChain
+        chain: FilterChain,
     ) {
         try {
-            request.getBearerToken()?.takeIf { it.isNotEmpty() }?.let {
-                request.setDecodedJwt(jwtVerifier.verify(it))
-            }
+            request
+                .getBearerToken()
+                ?.takeIf { it.isNotEmpty() }
+                ?.let { request.setDecodedJwt(jwtVerifier.verify(it)) }
         } catch (e: JWTVerificationException) {
             logger.error(e) { "JWT token verification failed" }
         }
@@ -124,7 +116,8 @@ class JwtTokenDecoder(
     }
 }
 
-fun HttpServletRequest.getAuthenticatedUser(): AuthenticatedUser? = getAttribute(ATTR_USER) as AuthenticatedUser?
+fun HttpServletRequest.getAuthenticatedUser(): AuthenticatedUser? =
+    getAttribute(ATTR_USER) as AuthenticatedUser?
 
 private const val ATTR_USER = "luontotieto.user"
 private const val ATTR_JWT = "luontotieto.jwt"
@@ -133,4 +126,5 @@ private fun HttpServletRequest.getDecodedJwt(): DecodedJWT? = getAttribute(ATTR_
 
 private fun HttpServletRequest.setDecodedJwt(jwt: DecodedJWT) = setAttribute(ATTR_JWT, jwt)
 
-private fun HttpServletRequest.getBearerToken(): String? = getHeader("Authorization")?.substringAfter("Bearer ", missingDelimiterValue = "")
+private fun HttpServletRequest.getBearerToken(): String? =
+    getHeader("Authorization")?.substringAfter("Bearer ", missingDelimiterValue = "")

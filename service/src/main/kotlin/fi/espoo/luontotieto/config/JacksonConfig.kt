@@ -17,11 +17,8 @@ import org.springframework.context.annotation.Configuration
 fun defaultJsonMapper(): ObjectMapper =
     ObjectMapper().apply {
         registerModules(
-            KotlinModule
-                .Builder()
-                .enable(KotlinFeature.SingletonSupport)
-                .build(),
-            JavaTimeModule()
+            KotlinModule.Builder().enable(KotlinFeature.SingletonSupport).build(),
+            JavaTimeModule(),
             // Note: Jdk8Module and ParameterNamesModule are no longer needed in Jackson 2.20+
         )
         disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

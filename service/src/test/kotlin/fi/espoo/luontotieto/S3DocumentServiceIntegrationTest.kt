@@ -8,6 +8,10 @@ import fi.espoo.luontotieto.config.BucketEnv
 import fi.espoo.luontotieto.s3.DocumentService
 import fi.espoo.luontotieto.s3.MultipartDocument
 import fi.espoo.luontotieto.s3.S3DocumentService
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,10 +19,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.mock.web.MockMultipartFile
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 class S3DocumentServiceIntegrationTest : FullApplicationTest() {
     @Autowired private lateinit var s3Client: S3Client
@@ -44,8 +44,8 @@ class S3DocumentServiceIntegrationTest : FullApplicationTest() {
             MultipartDocument(
                 name = "test",
                 file = MockMultipartFile("test", byteArrayOf(0x11, 0x22, 0x33)),
-                contentType = "text/plain"
-            )
+                contentType = "text/plain",
+            ),
         )
 
         val response = documentClientNoProxy.responseAttachment(bucketEnv.data, "test", null)
@@ -61,8 +61,8 @@ class S3DocumentServiceIntegrationTest : FullApplicationTest() {
             MultipartDocument(
                 name = "test",
                 file = MockMultipartFile("test", byteArrayOf(0x33, 0x22, 0x11)),
-                contentType = "text/plain"
-            )
+                contentType = "text/plain",
+            ),
         )
 
         val response = documentClient.responseAttachment(bucketEnv.data, "test", null)
@@ -78,8 +78,8 @@ class S3DocumentServiceIntegrationTest : FullApplicationTest() {
             MultipartDocument(
                 name = "test",
                 file = MockMultipartFile("test", byteArrayOf(0x11, 0x33, 0x22)),
-                contentType = "text/plain"
-            )
+                contentType = "text/plain",
+            ),
         )
 
         val document = documentClient.get(bucketEnv.data, "test")

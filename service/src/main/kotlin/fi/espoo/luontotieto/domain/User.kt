@@ -7,26 +7,19 @@ package fi.espoo.luontotieto.domain
 import fi.espoo.luontotieto.common.DatabaseEnum
 import fi.espoo.luontotieto.common.NotFound
 import fi.espoo.luontotieto.config.AuthenticatedUser
+import java.time.OffsetDateTime
+import java.util.UUID
+import kotlin.jvm.optionals.getOrNull
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.enums.DatabaseValue
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
-import java.time.OffsetDateTime
-import java.util.UUID
-import kotlin.jvm.optionals.getOrNull
 
 enum class UserRole : DatabaseEnum {
-    @DatabaseValue("pääkäyttäjä")
-    ADMIN,
-
-    @DatabaseValue("tilaaja")
-    ORDERER,
-
-    @DatabaseValue("katselija")
-    VIEWER,
-
-    @DatabaseValue("yrityskäyttäjä")
-    CUSTOMER;
+    @DatabaseValue("pääkäyttäjä") ADMIN,
+    @DatabaseValue("tilaaja") ORDERER,
+    @DatabaseValue("katselija") VIEWER,
+    @DatabaseValue("yrityskäyttäjä") CUSTOMER;
 
     override val sqlType = "users_role"
 }
@@ -49,18 +42,12 @@ data class User(
             val email: String,
             val name: String,
             val role: UserRole,
-            val active: Boolean
+            val active: Boolean,
         )
 
-        data class CreateCustomerUser(
-            val email: String,
-            val name: String,
-        )
+        data class CreateCustomerUser(val email: String, val name: String)
 
-        data class UpdatePasswordPayload(
-            val currentPassword: String,
-            val newPassword: String,
-        )
+        data class UpdatePasswordPayload(val currentPassword: String, val newPassword: String)
     }
 }
 
@@ -86,10 +73,10 @@ private const val SELECT_USER_SQL =
 fun Handle.insertUser(
     data: User.Companion.CreateCustomerUser,
     user: AuthenticatedUser,
-    passwordHash: String
+    passwordHash: String,
 ): User =
     createQuery(
-        """
+            """
             WITH users AS (
                 INSERT INTO users (email, name, role, password_hash, created_by, updated_by, password_updated) 
                 VALUES (:email, :name, :role, :passwordHash, :createdBy, :updatedBy, false)
@@ -97,7 +84,8 @@ fun Handle.insertUser(
                 ) 
             $SELECT_USER_SQL
             """
-    ).bindKotlin(data)
+        )
+        .bindKotlin(data)
         .bind("role", UserRole.CUSTOMER)
         .bind("passwordHash", passwordHash)
         .bind("createdBy", user.id)
@@ -105,13 +93,9 @@ fun Handle.insertUser(
         .mapTo<User>()
         .one()
 
-fun Handle.putUser(
-    id: UUID,
-    data: User.Companion.UserInput,
-    user: AuthenticatedUser
-): User =
+fun Handle.putUser(id: UUID, data: User.Companion.UserInput, user: AuthenticatedUser): User =
     createQuery(
-        """
+            """
              WITH users AS (
                 UPDATE users 
                  SET email = :email, name = :name, role = :role, 
@@ -121,7 +105,8 @@ fun Handle.putUser(
                ) 
              $SELECT_USER_SQL
             """
-    ).bindKotlin(data)
+        )
+        .bindKotlin(data)
         .bind("id", id)
         .bind("updatedBy", user.id)
         .mapTo<User>()
@@ -130,36 +115,36 @@ fun Handle.putUser(
 
 fun Handle.getUserPasswordHash(id: UUID) =
     createQuery(
-        // language=SQL
-        """
-        SELECT password_hash AS password
-        FROM users 
-        WHERE id = :id AND NOT is_system_user AND password_hash IS NOT NULL
-        """.trimIndent()
-    ).bind("id", id)
+            // language=SQL
+            """
+            SELECT password_hash AS password
+            FROM users 
+            WHERE id = :id AND NOT is_system_user AND password_hash IS NOT NULL
+            """
+                .trimIndent()
+        )
+        .bind("id", id)
         .mapTo<String>()
         .findOne()
         .getOrNull()
 
-data class UpdatePasswordResult(
-    val id: UUID,
-    val email: String
-)
+data class UpdatePasswordResult(val id: UUID, val email: String)
 
 fun Handle.putPassword(
     id: UUID,
     password: String,
     user: AuthenticatedUser,
-    passwordUpdated: Boolean
+    passwordUpdated: Boolean,
 ): UpdatePasswordResult =
     createQuery(
-        """
+            """
                 UPDATE users 
                  SET password_hash = :password, updated_by = :updatedBy, password_updated = :passwordUpdated
                  WHERE id = :id
                  RETURNING id, email
             """
-    ).bind("id", id)
+        )
+        .bind("id", id)
         .bind("updatedBy", user.id)
         .bind("password", password)
         .bind("passwordUpdated", passwordUpdated)
@@ -169,32 +154,35 @@ fun Handle.putPassword(
 
 fun Handle.getUser(id: UUID) =
     createQuery(
-        """
+            """
                 $SELECT_USER_SQL
                 WHERE u.id = :id AND NOT u.is_system_user
             """
-    ).bind("id", id)
+        )
+        .bind("id", id)
         .mapTo<User>()
         .findOne()
         .getOrNull() ?: throw NotFound()
 
 fun Handle.getAuthUser(id: UUID) =
     createQuery(
-        """
+            """
                 $SELECT_USER_SQL
                 WHERE u.id = :id
             """
-    ).bind("id", id)
+        )
+        .bind("id", id)
         .mapTo<User>()
         .findOne()
         .getOrNull() ?: throw NotFound()
 
 fun Handle.getUsers() =
     createQuery(
-        """
+            """
                 $SELECT_USER_SQL
                 WHERE NOT u.is_system_user
                 ORDER BY u.name
             """
-    ).mapTo<User>()
+        )
+        .mapTo<User>()
         .list() ?: emptyList()

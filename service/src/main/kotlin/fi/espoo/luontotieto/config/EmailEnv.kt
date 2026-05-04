@@ -16,22 +16,10 @@ data class EmailEnv(
     companion object {
         fun fromEnvironment(env: Environment) =
             EmailEnv(
-                enabled =
-                    env.lookup(
-                        "luontotieto.email.enabled",
-                    ),
-                region =
-                    env.lookup(
-                        "luontotieto.email.region",
-                    ),
-                senderArn =
-                    env.lookup(
-                        "luontotieto.email.sender_arn",
-                    ),
-                senderAddress =
-                    env.lookup(
-                        "luontotieto.email.sender_address",
-                    )
+                enabled = env.lookup("luontotieto.email.enabled"),
+                region = env.lookup("luontotieto.email.region"),
+                senderArn = env.lookup("luontotieto.email.sender_arn"),
+                senderAddress = env.lookup("luontotieto.email.sender_address"),
             )
     }
 }

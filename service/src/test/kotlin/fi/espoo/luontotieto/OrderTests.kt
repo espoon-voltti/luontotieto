@@ -14,29 +14,27 @@ import fi.espoo.luontotieto.domain.OrderInput
 import fi.espoo.luontotieto.domain.OrderReportDocument
 import fi.espoo.luontotieto.domain.ReportController
 import fi.espoo.luontotieto.domain.UserRole
-import org.junit.jupiter.api.assertThrows
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.mock.web.MockMultipartFile
 import java.io.File
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import org.junit.jupiter.api.assertThrows
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.mock.web.MockMultipartFile
 
 class OrderTests : FullApplicationTest() {
-    @Autowired
-    lateinit var controller: OrderController
+    @Autowired lateinit var controller: OrderController
 
-    @Autowired
-    lateinit var reportController: ReportController
+    @Autowired lateinit var reportController: ReportController
 
     @Test
     fun `create order with all data and fetch`() {
         val orderReportDocuments =
             listOf(
                 OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_PISTEET),
-                OrderReportDocument("Test description 2", DocumentType.LIITO_ORAVA_ALUEET)
+                OrderReportDocument("Test description 2", DocumentType.LIITO_ORAVA_ALUEET),
             )
         val createdOrder =
             createOrderAndReport(controller = controller, reportDocuments = orderReportDocuments)
@@ -52,8 +50,8 @@ class OrderTests : FullApplicationTest() {
             orderResponse.reportDocuments,
             listOf(
                 OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_PISTEET),
-                OrderReportDocument("Test description 2", DocumentType.LIITO_ORAVA_ALUEET)
-            )
+                OrderReportDocument("Test description 2", DocumentType.LIITO_ORAVA_ALUEET),
+            ),
         )
         assertEquals("Yritys Oy", orderResponse.assignee)
         assertEquals("Person Name", orderResponse.assigneeContactPerson)
@@ -117,8 +115,8 @@ class OrderTests : FullApplicationTest() {
                     contactPhone = "040123456789",
                     orderingUnit = listOf("Orava yksikkö"),
                     returnDate = LocalDate.of(2026, 1, 1),
-                    year = 2026
-                )
+                    year = 2026,
+                ),
             )
 
         assertEquals("New name", updatedReport.order?.name)
@@ -169,13 +167,14 @@ class OrderTests : FullApplicationTest() {
                     "tilaus_ohje.txt",
                     "tilaus_ohje.txt",
                     "text/plain",
-                    "ORDER INFO CONTENT".toByteArray()
+                    "ORDER INFO CONTENT".toByteArray(),
                 ),
             documentType = OrderDocumentType.ORDER_INFO,
             description = "Test Description",
-            id = UUID.randomUUID().toString()
+            id = UUID.randomUUID().toString(),
         )
-        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use { inStream ->
+        File("src/test/resources/test-data/aluerajaus_luontoselvitys.gpkg").inputStream().use {
+            inStream ->
             assertEquals(
                 controller
                     .uploadOrderFile(
@@ -186,15 +185,15 @@ class OrderTests : FullApplicationTest() {
                                 "aluerajaus_luontoselvitys_tilaus.gpkg",
                                 "aluerajaus_luontoselvitys_tilaus.gpkg",
                                 "application/geopackage+sqlite3",
-                                inStream
+                                inStream,
                             ),
-                        description =
-                            "Alustava aluerajaus tilaukselle.",
+                        description = "Alustava aluerajaus tilaukselle.",
                         documentType = OrderDocumentType.ORDER_AREA,
-                        id = UUID.randomUUID().toString()
-                    ).statusCode
+                        id = UUID.randomUUID().toString(),
+                    )
+                    .statusCode
                     .value(),
-                201
+                201,
             )
         }
 
@@ -213,10 +212,7 @@ class OrderTests : FullApplicationTest() {
                     assigneeId = customerUser.id,
                     reportDocuments =
                         listOf(
-                            OrderReportDocument(
-                                "Test description",
-                                DocumentType.LIITO_ORAVA_ALUEET
-                            )
+                            OrderReportDocument("Test description", DocumentType.LIITO_ORAVA_ALUEET)
                         ),
                     assigneeContactEmail = "email@example.com",
                     assigneeContactPerson = "Person Name",
@@ -226,8 +222,8 @@ class OrderTests : FullApplicationTest() {
                     contactPhone = "040123456789",
                     orderingUnit = listOf("Orava yksikkö"),
                     returnDate = LocalDate.of(2026, 1, 1),
-                    year = 2026
-                )
+                    year = 2026,
+                ),
             )
         }
         assertThrows<BadRequest> { controller.deleteOrder(adminUser, createdOrder.orderId) }
@@ -241,11 +237,11 @@ class OrderTests : FullApplicationTest() {
                         "tilaus_ohje.txt",
                         "tilaus_ohje.txt",
                         "text/plain",
-                        "ORDER INFO CONTENT".toByteArray()
+                        "ORDER INFO CONTENT".toByteArray(),
                     ),
                 documentType = OrderDocumentType.ORDER_INFO,
                 description = "Test Description",
-                id = UUID.randomUUID().toString()
+                id = UUID.randomUUID().toString(),
             )
         }
         val orderFileResponse = controller.getOrderFiles(adminUser, createdOrder.orderId)
@@ -258,7 +254,7 @@ class OrderTests : FullApplicationTest() {
             controller.deleteOrderFile(
                 user = adminUser,
                 orderId = createdOrder.orderId,
-                fileId = fileResponse.id
+                fileId = fileResponse.id,
             )
         }
     }

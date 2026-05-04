@@ -32,11 +32,14 @@ object AuthenticatedUserResolver : HandlerMethodArgumentResolver {
         parameter: MethodParameter,
         mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
-        binderFactory: WebDataBinderFactory?
+        binderFactory: WebDataBinderFactory?,
     ): AuthenticatedUser? {
-        val user = webRequest.getNativeRequest(HttpServletRequest::class.java)?.getAuthenticatedUser()
+        val user =
+            webRequest.getNativeRequest(HttpServletRequest::class.java)?.getAuthenticatedUser()
         if (user == null && !parameter.isOptional) {
-            error("fi.espoo.luontotieto.common.Unauthorized request (${webRequest.getDescription(false)})")
+            error(
+                "fi.espoo.luontotieto.common.Unauthorized request (${webRequest.getDescription(false)})"
+            )
         }
         return user
     }

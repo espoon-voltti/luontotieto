@@ -37,13 +37,13 @@ enum class AuditEvent {
     UPDATE_USER,
     UPDATE_USER_PASSWORD,
     RESET_USER_PASSWORD,
-    DELETE_ORDER
+    DELETE_ORDER,
 }
 
 fun KLogger.audit(
     user: AuthenticatedUser,
     eventCode: AuditEvent,
-    meta: Map<String, String> = emptyMap()
+    meta: Map<String, String> = emptyMap(),
 ) {
     val data = mapOf<String, Any?>("userId" to user.id, "meta" to meta)
     warn(AUDIT_MARKER, eventCode.name, StructuredArguments.entries(data))

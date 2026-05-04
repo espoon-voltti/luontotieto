@@ -17,13 +17,11 @@ import org.springframework.test.context.ActiveProfiles
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    classes = [SharedIntegrationTestConfig::class]
+    classes = [SharedIntegrationTestConfig::class],
 )
 @ActiveProfiles("test")
 abstract class FullApplicationTest {
-    @Qualifier("jdbi-luontotieto")
-    @Autowired
-    protected lateinit var jdbi: Jdbi
+    @Qualifier("jdbi-luontotieto") @Autowired protected lateinit var jdbi: Jdbi
 
     @BeforeAll
     fun beforeAll() {
@@ -45,7 +43,8 @@ abstract class FullApplicationTest {
                     WHERE sequence_schema = 'public'
                   );
                 END ${'$'}${'$'} LANGUAGE plpgsql;
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
         }
     }
@@ -54,30 +53,30 @@ abstract class FullApplicationTest {
     fun beforeEach() {
         jdbi.withHandleUnchecked { tx ->
             tx.execute("SELECT reset_database()")
-            tx
-                .createUpdate(
+            tx.createUpdate(
                     """
                 INSERT INTO users (id, updated, external_id, name, email) 
                 VALUES (:id, now(), 'test:01', 'Teija Testaaja', NULL)
             """
-                ).bind("id", adminUser.id)
+                )
+                .bind("id", adminUser.id)
                 .execute()
 
-            tx
-                .createUpdate(
+            tx.createUpdate(
                     """
                 INSERT INTO users (id, updated, external_id, name, email, role) 
                 VALUES (:id, now(), NULL, 'Yritys Oy', 'yritys@example.com', 'yrityskäyttäjä')
             """
-                ).bind("id", customerUser.id)
+                )
+                .bind("id", customerUser.id)
                 .execute()
-            tx
-                .createUpdate(
+            tx.createUpdate(
                     """
                 INSERT INTO users (id, updated, external_id, name, email, role, is_system_user) 
                 VALUES (:id, now(), 'api-gw', 'api-gw system-user', NULL, 'katselija', true)
             """
-                ).bind("id", systemUser.id)
+                )
+                .bind("id", systemUser.id)
                 .execute()
         }
     }

@@ -8,17 +8,14 @@ import net.logstash.logback.mask.ValueMasker
 import tools.jackson.core.TokenStreamContext
 
 class SsnMasker : ValueMasker {
-    override fun mask(
-        context: TokenStreamContext?,
-        value: Any?
-    ): Any =
+    override fun mask(context: TokenStreamContext?, value: Any?): Any =
         if (value is String) {
             value.replace(
                 Regex(
                     "(?<!-|[\\dA-z])(\\d{2})(\\d{2})(\\d{2})[-+ABCDEFUVWXY](\\d{3})[\\dA-Z](?!-)",
-                    RegexOption.IGNORE_CASE
+                    RegexOption.IGNORE_CASE,
                 ),
-                "REDACTED-SSN"
+                "REDACTED-SSN",
             )
         } else {
             value ?: "null"

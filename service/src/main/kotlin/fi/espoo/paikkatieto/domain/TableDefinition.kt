@@ -9,6 +9,10 @@ import fi.espoo.luontotieto.domain.Report
 import fi.espoo.paikkatieto.reader.GpkgFeature
 import fi.espoo.paikkatieto.reader.GpkgValidationError
 import fi.espoo.paikkatieto.reader.GpkgValidationErrorReason
+import java.sql.Date
+import java.util.UUID
+import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
 import org.locationtech.jts.geom.Geometry
@@ -16,21 +20,17 @@ import org.locationtech.jts.geom.LineString
 import org.locationtech.jts.geom.Point
 import org.locationtech.jts.geom.Polygon
 import org.locationtech.jts.io.WKBWriter
-import java.sql.Date
-import java.util.UUID
-import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 
 data class Column(
     val name: String,
     val kClass: KClass<out Any>,
     val isNullable: Boolean = false,
-    val sqlType: String? = null
+    val sqlType: String? = null,
 ) {
     fun validate(
         id: String,
         value: Any?,
-        allowedValues: List<String> = emptyList()
+        allowedValues: List<String> = emptyList(),
     ): GpkgValidationError? =
         when {
             value == null && !isNullable ->
@@ -38,7 +38,7 @@ data class Column(
                     id = id,
                     column = name,
                     value = null,
-                    reason = GpkgValidationErrorReason.IS_NULL
+                    reason = GpkgValidationErrorReason.IS_NULL,
                 )
 
             value != null &&
@@ -54,7 +54,7 @@ data class Column(
                     id = id,
                     column = name,
                     value = errorValue,
-                    reason = GpkgValidationErrorReason.WRONG_TYPE
+                    reason = GpkgValidationErrorReason.WRONG_TYPE,
                 )
             }
 
@@ -63,7 +63,7 @@ data class Column(
                     id = id,
                     column = name,
                     value = value,
-                    reason = GpkgValidationErrorReason.INVALID_VALUE
+                    reason = GpkgValidationErrorReason.INVALID_VALUE,
                 )
             }
 
@@ -74,17 +74,17 @@ data class Column(
 enum class TableDefinition(
     val layerName: String,
     val sqlInsertStatement: String,
-    val columns: List<Column>
+    val columns: List<Column>,
 ) {
     ALUERAJAUS_LUONTOSELVITYSTILAUS(
         layerName = "aluerajaus_luontoselvitystilaus",
         sqlInsertStatement = SQL_INSERT_ALUERAJAUS_LUONTOSELVITYSTILAUS,
-        columns = listOf(Column(name = "geom", kClass = Polygon::class))
+        columns = listOf(Column(name = "geom", kClass = Polygon::class)),
     ),
     ALUERAJAUS_LUONTOSELVITYS(
         layerName = "aluerajaus_luontoselvitys",
         sqlInsertStatement = SQL_INSERT_ALUERAJAUS_LUONTOSELVITYS,
-        columns = listOf(Column(name = "geom", kClass = Polygon::class))
+        columns = listOf(Column(name = "geom", kClass = Polygon::class)),
     ),
     LIITO_ORAVA_PISTEET(
         layerName = "liito_orava_pisteet",
@@ -101,7 +101,7 @@ enum class TableDefinition(
                 Column(
                     name = "pesatyyppi",
                     kClass = String::class,
-                    sqlType = "liito_orava_pesatyyppi"
+                    sqlType = "liito_orava_pesatyyppi",
                 ),
                 Column(name = "pesankorkeus", kClass = Int::class),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
@@ -109,14 +109,10 @@ enum class TableDefinition(
                 Column(
                     name = "tarkkuus",
                     kClass = String::class,
-                    sqlType = "luontotieto_mittaustyyppi"
+                    sqlType = "luontotieto_mittaustyyppi",
                 ),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     LIITO_ORAVA_ALUEET(
         layerName = "liito_orava_alueet",
@@ -129,7 +125,7 @@ enum class TableDefinition(
                 Column(
                     name = "aluetyyppi",
                     kClass = String::class,
-                    sqlType = "liito_orava_aluetyyppi"
+                    sqlType = "liito_orava_aluetyyppi",
                 ),
                 Column(name = "aluekuvaus", kClass = String::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
@@ -137,14 +133,10 @@ enum class TableDefinition(
                 Column(
                     name = "tarkkuus",
                     kClass = String::class,
-                    sqlType = "luontotieto_mittaustyyppi"
+                    sqlType = "luontotieto_mittaustyyppi",
                 ),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     LIITO_ORAVA_YHTEYSVIIVAT(
         layerName = "liito_orava_yhteysviivat",
@@ -160,14 +152,10 @@ enum class TableDefinition(
                 Column(
                     name = "tarkkuus",
                     kClass = String::class,
-                    sqlType = "luontotieto_mittaustyyppi"
+                    sqlType = "luontotieto_mittaustyyppi",
                 ),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     MUUT_HUOMIOITAVAT_LAJIT_PISTEET(
         layerName = "muut_huomioitavat_lajit_pisteet",
@@ -179,7 +167,7 @@ enum class TableDefinition(
                 Column(
                     name = "elioryhma",
                     kClass = String::class,
-                    sqlType = "muut_huomioitavat_lajit_elioryhma"
+                    sqlType = "muut_huomioitavat_lajit_elioryhma",
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
@@ -191,18 +179,14 @@ enum class TableDefinition(
                 Column(
                     name = "tarkkuus",
                     kClass = String::class,
-                    sqlType = "luontotieto_mittaustyyppi"
+                    sqlType = "luontotieto_mittaustyyppi",
                 ),
                 Column(name = "yksilo_maara", kClass = Int::class),
                 Column(name = "yksikko", kClass = String::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
                 Column(name = "havaitsija", kClass = String::class),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     MUUT_HUOMIOITAVAT_LAJIT_VIIVAT(
         layerName = "muut_huomioitavat_lajit_viivat",
@@ -214,7 +198,7 @@ enum class TableDefinition(
                 Column(
                     name = "elioryhma",
                     kClass = String::class,
-                    sqlType = "muut_huomioitavat_lajit_elioryhma"
+                    sqlType = "muut_huomioitavat_lajit_elioryhma",
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
@@ -226,12 +210,8 @@ enum class TableDefinition(
                 Column(name = "pituus", kClass = Double::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
                 Column(name = "havaitsija", kClass = String::class),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     MUUT_HUOMIOITAVAT_LAJIT_ALUEET(
         layerName = "muut_huomioitavat_lajit_alueet",
@@ -243,7 +223,7 @@ enum class TableDefinition(
                 Column(
                     name = "elioryhma",
                     kClass = String::class,
-                    sqlType = "muut_huomioitavat_lajit_elioryhma"
+                    sqlType = "muut_huomioitavat_lajit_elioryhma",
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
@@ -257,12 +237,8 @@ enum class TableDefinition(
                 Column(name = "pinta_ala", kClass = Double::class, isNullable = true),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
                 Column(name = "havaitsija", kClass = String::class),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     LEPAKKO_VIIVAT(
         layerName = "lepakko_viivat",
@@ -274,12 +250,8 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "kuvaus", kClass = String::class),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     LEPAKKO_ALUEET(
         layerName = "lepakko_alueet",
@@ -291,12 +263,8 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "luokka", kClass = String::class, sqlType = "lepakko_luokka"),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     LUMO_ALUEET(
         layerName = "lumo_alueet",
@@ -309,12 +277,8 @@ enum class TableDefinition(
                 Column(name = "nimi", kClass = String::class, isNullable = true),
                 Column(name = "lumo_luokka", kClass = String::class, sqlType = "lumo_luokka"),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     NORO_VIIVAT(
         layerName = "noro_viivat",
@@ -325,12 +289,8 @@ enum class TableDefinition(
                 Column(name = "pvm", kClass = Date::class),
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     LUONTOTYYPIT_ALUEET(
         layerName = "luontotyypit_alueet",
@@ -344,13 +304,13 @@ enum class TableDefinition(
                 Column(
                     name = "luontotyyppi_paaryhma",
                     kClass = String::class,
-                    sqlType = "luontotyyppi_paaryhma"
+                    sqlType = "luontotyyppi_paaryhma",
                 ),
                 Column(name = "luontotyyppi", kClass = String::class),
                 Column(
                     name = "uhanalaisuusluokka",
                     kClass = String::class,
-                    sqlType = "IUCN_luokka_luontotyypit"
+                    sqlType = "IUCN_luokka_luontotyypit",
                 ),
                 Column(name = "edustavuus", kClass = String::class, sqlType = "edustavuus_luokka"),
                 Column(name = "kuvaus", kClass = String::class),
@@ -361,25 +321,17 @@ enum class TableDefinition(
                 Column(
                     name = "lumo_luokka",
                     kClass = String::class,
-                    sqlType = "luontotyyppi_lumo_luokka"
+                    sqlType = "luontotyyppi_lumo_luokka",
                 ),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                ),
-                Column(
-                    name = "natura_luontotyyppi",
-                    kClass = String::class,
-                    isNullable = true
-                ),
+                Column(name = "viite", kClass = String::class, isNullable = true),
+                Column(name = "natura_luontotyyppi", kClass = String::class, isNullable = true),
                 Column(
                     name = "natura_edustavuus",
                     kClass = String::class,
                     isNullable = true,
-                    sqlType = "natura_edustavuus_luokka"
+                    sqlType = "natura_edustavuus_luokka",
                 ),
-            )
+            ),
     ),
     EKOYHTEYDET_ALUEET(
         layerName = "ekoyhteydet_alueet",
@@ -391,12 +343,8 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "laatu", kClass = String::class, sqlType = "yhteyden_laatu"),
                 Column(name = "lisatieto", kClass = String::class),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     EKOYHTEYDET_VIIVAT(
         layerName = "ekoyhteydet_viivat",
@@ -408,12 +356,8 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "laatu", kClass = String::class, sqlType = "yhteyden_laatu"),
                 Column(name = "lisatieto", kClass = String::class),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     LAHTEET_PISTEET(
         layerName = "lahteet_pisteet",
@@ -425,12 +369,8 @@ enum class TableDefinition(
                 Column(name = "havaitsija", kClass = String::class),
                 Column(name = "tyyppi", kClass = String::class),
                 Column(name = "lisatieto", kClass = String::class),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     VIERASLAJIT_ALUEET(
         layerName = "vieraslajit_alueet",
@@ -442,7 +382,7 @@ enum class TableDefinition(
                 Column(
                     name = "elioryhma",
                     kClass = String::class,
-                    sqlType = "vieraslajit_elioryhma"
+                    sqlType = "vieraslajit_elioryhma",
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
@@ -452,12 +392,8 @@ enum class TableDefinition(
                 // Do not write pinta_ala to DB. Keep it only in the template.
                 Column(name = "pinta_ala", kClass = Double::class, isNullable = true),
                 Column(name = "havaitsija", kClass = String::class),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
     ),
     VIERASLAJIT_PISTEET(
         layerName = "vieraslajit_pisteet",
@@ -469,7 +405,7 @@ enum class TableDefinition(
                 Column(
                     name = "elioryhma",
                     kClass = String::class,
-                    sqlType = "vieraslajit_elioryhma"
+                    sqlType = "vieraslajit_elioryhma",
                 ),
                 Column(name = "tieteellinen_nimi", kClass = String::class),
                 Column(name = "suomenkielinen_nimi", kClass = String::class),
@@ -481,16 +417,12 @@ enum class TableDefinition(
                     name = "tarkkuus",
                     kClass = String::class,
                     sqlType = "luontotieto_mittaustyyppi",
-                    isNullable = true
+                    isNullable = true,
                 ),
                 Column(name = "havaitsija", kClass = String::class),
-                Column(
-                    name = "viite",
-                    kClass = String::class,
-                    isNullable = true
-                )
-            )
-    )
+                Column(name = "viite", kClass = String::class, isNullable = true),
+            ),
+    ),
 }
 
 fun Handle.insertPaikkatieto(
@@ -498,7 +430,7 @@ fun Handle.insertPaikkatieto(
     report: Report,
     data: Sequence<GpkgFeature>,
     params: Map<String, Any?> = emptyMap(),
-    overrideReportName: Boolean = false
+    overrideReportName: Boolean = false,
 ): Array<Int> {
     val batchInsert = prepareBatch(tableDefinition.sqlInsertStatement)
     data.forEach {
@@ -513,20 +445,14 @@ fun Handle.insertPaikkatieto(
     return batchInsert.execute().toTypedArray()
 }
 
-fun Handle.deletePaikkatieto(
-    tableDefinition: TableDefinition,
-    reportId: UUID,
-): Int {
+fun Handle.deletePaikkatieto(tableDefinition: TableDefinition, reportId: UUID): Int {
     val deleteQuery = "DELETE FROM ${tableDefinition.layerName} WHERE selvitys_id = :reportId"
     return createUpdate(deleteQuery).bind("reportId", reportId).execute()
 }
 
-fun Handle.updateAluerajausLuontoselvitystilaus(
-    reportId: UUID,
-    order: Order,
-): Int =
+fun Handle.updateAluerajausLuontoselvitystilaus(reportId: UUID, order: Order): Int =
     createQuery(
-        """
+            """
         WITH updated AS (
             UPDATE aluerajaus_luontoselvitystilaus
                 SET tilauksen_nimi = :name,
@@ -538,7 +464,8 @@ fun Handle.updateAluerajausLuontoselvitystilaus(
         )
         SELECT COUNT(*) FROM updated;
             """
-    ).bind("reportId", reportId)
+        )
+        .bind("reportId", reportId)
         .bind("name", order.name)
         .bind("contactPerson", order.contactPerson)
         .bind("unit", order.orderingUnit?.joinToString(","))
@@ -548,10 +475,10 @@ fun Handle.updateAluerajausLuontoselvitystilaus(
 
 fun Handle.updateAluerajausLuontoselvitystilausSelvitysTila(
     reportId: UUID,
-    reportApproved: Boolean
+    reportApproved: Boolean,
 ): Int =
     createQuery(
-        """
+            """
         WITH updated AS (
             UPDATE aluerajaus_luontoselvitystilaus
                 SET selvitys_tila = :selvitys_tila
@@ -560,7 +487,8 @@ fun Handle.updateAluerajausLuontoselvitystilausSelvitysTila(
         )
         SELECT COUNT(*) FROM updated;
             """
-    ).bind("reportId", reportId)
+        )
+        .bind("reportId", reportId)
         .bind("selvitys_tila", if (reportApproved) "Hyväksytty" else "Lähetetty")
         .mapTo<Int>()
         .one()
