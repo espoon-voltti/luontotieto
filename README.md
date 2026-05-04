@@ -42,7 +42,7 @@ To run E2E tests (requires DB, api-gateway and frontend running)
 - `./gradlew e2eTest`
 
 To format code
-- `./gradlew ktlintFormat`
+- `./gradlew ktfmtFormat ktlintFormat`
 
 ### API-gateway
 
