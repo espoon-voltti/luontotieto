@@ -1,0 +1,106 @@
+# SPDX-FileCopyrightText: 2017-2026 City of Espoo
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+[tools]
+java = "zulu-25"
+lefthook = "2.1.6"
+node = "24.15.0"
+"npm:pm2" = "6.0.14"
+uv = "0.11.7"
+"pipx:reuse" = "6.2.0"
+yarn = "4.12.0"
+
+[tasks.start]
+description = "Start the development environment"
+dir = "compose"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+
+docker compose up -d
+pm2 start
+
+echo ""
+echo "Waiting for services to start (press Ctrl-C to skip)..."
+
+trap 'echo ""; echo "Skipped waiting. Services may still be starting."; exit 0' INT
+
+check() {
+  local name=$1 port=$2
+
+  if curl -s -o /dev/null "http://localhost:${port}" 2>/dev/null; then
+    echo "  ${name} is up (port ${port})"
+    return 0
+  fi
+
+  local status
+  status=$(pm2 jlist 2>/dev/null | node -e "
+    try {
+      const apps = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+      const app = apps.find(a => a.name === '$name');
+      console.log(app ? app.pm2_env.status : 'unknown');
+    } catch { console.log('unknown'); }
+  " 2>/dev/null || echo "unknown")
+
+  if [ "$status" = "errored" ] || [ "$status" = "stopped" ]; then
+    echo ""
+    echo "ERROR: pm2 app '${name}' is in '${status}' state."
+    echo "Check logs: mise exec -- pm2 logs ${name} --nostream --lines 100"
+    exit 1
+  fi
+
+  return 1
+}
+
+apigw_up=
+service_up=
+frontend_up=
+
+while [ -z "$apigw_up" ] || [ -z "$service_up" ] || [ -z "$frontend_up" ]; do
+  if [ -z "$apigw_up" ]    && check api-gateway 3000; then apigw_up=1;    fi
+  if [ -z "$service_up" ]  && check service     8080; then service_up=1;  fi
+  if [ -z "$frontend_up" ] && check frontend    9000; then frontend_up=1; fi
+
+  if [ -z "$apigw_up" ] || [ -z "$service_up" ] || [ -z "$frontend_up" ]; then
+    sleep 1
+  fi
+done
+
+trap - INT
+
+echo ""
+echo "Development environment started."
+echo "Open http://localhost:9000/ in your browser."
+"""
+
+[tasks.restart]
+description = "Restart services in the development environment"
+usage = """
+arg "[services]" var=#true help="Service(s) to restart" {
+    choices "all" "frontend" "api-gateway" "service"
+}
+"""
+dir = "compose"
+run = """
+pm2 restart {{ usage.services | default(value=["all"]) | join(sep=" ") }}
+"""
+
+[tasks.stop]
+description = "Stop the development environment"
+dir = "compose"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+
+pm2 kill
+docker compose down
+
+echo "Development environment stopped."
+"""
+
+[tasks.sandbox]
+description = "Manage the Colima VM sandbox"
+dir = ".sandbox"
+usage = 'arg "[args]" var=#true'
+run = "node sandbox.mjs {{arg(name='args')}}"
