@@ -42,7 +42,9 @@ out/
 .vscode/
 git
 ### AI tools ###
-.github/hooks
-.github/skills
 AGENTS.md
-ai
+.claude/
+.superpowers/
+docs/superpowers/
+.worktrees/
+service/.kotlin
