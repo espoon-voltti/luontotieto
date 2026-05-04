@@ -25,20 +25,48 @@ pm2 start
 echo ""
 echo "Waiting for services to start (press Ctrl-C to skip)..."
 
-wait_for_port() {
-  local name=$1 port=$2
-  while ! curl -s -o /dev/null "http://localhost:${port}" 2>/dev/null; do
-    sleep 1
-  done
-  echo "  ${name} is up (port ${port})"
-}
-
 trap 'echo ""; echo "Skipped waiting. Services may still be starting."; exit 0' INT
 
-wait_for_port apigw 3000 &
-wait_for_port service 8080 &
-wait_for_port frontend 9000 &
-wait
+check() {
+  local name=$1 port=$2
+
+  if curl -s -o /dev/null "http://localhost:${port}" 2>/dev/null; then
+    echo "  ${name} is up (port ${port})"
+    return 0
+  fi
+
+  local status
+  status=$(pm2 jlist 2>/dev/null | node -e "
+    try {
+      const apps = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+      const app = apps.find(a => a.name === '$name');
+      console.log(app ? app.pm2_env.status : 'unknown');
+    } catch { console.log('unknown'); }
+  " 2>/dev/null || echo "unknown")
+
+  if [ "$status" = "errored" ] || [ "$status" = "stopped" ]; then
+    echo ""
+    echo "ERROR: pm2 app '${name}' is in '${status}' state."
+    echo "Check logs: mise exec -- pm2 logs ${name} --nostream --lines 100"
+    exit 1
+  fi
+
+  return 1
+}
+
+apigw_up=
+service_up=
+frontend_up=
+
+while [ -z "$apigw_up" ] || [ -z "$service_up" ] || [ -z "$frontend_up" ]; do
+  if [ -z "$apigw_up" ]    && check api-gateway 3000; then apigw_up=1;    fi
+  if [ -z "$service_up" ]  && check service     8080; then service_up=1;  fi
+  if [ -z "$frontend_up" ] && check frontend    9000; then frontend_up=1; fi
+
+  if [ -z "$apigw_up" ] || [ -z "$service_up" ] || [ -z "$frontend_up" ]; then
+    sleep 1
+  fi
+done
 
 trap - INT
 
