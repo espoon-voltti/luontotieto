@@ -18,7 +18,11 @@ class PaikkatietoFlywayConfig {
     @PostConstruct
     fun migrateFlyway() {
         val dataSource = dataSource ?: return
-        val config = Flyway.configure().dataSource(dataSource).locations("db/paikkatieto/migration")
+        val config =
+            Flyway.configure()
+                .dataSource(dataSource)
+                .locations("db/paikkatieto/migration")
+                .validateMigrationNaming(true)
 
         val flyway = Flyway(config)
         flyway.migrate()
@@ -32,7 +36,11 @@ class LuontotietoFlywayConfig {
     @PostConstruct
     fun migrateFlyway() {
         val dataSource = dataSource ?: return
-        val config = Flyway.configure().dataSource(dataSource).locations("db/luontotieto/migration")
+        val config =
+            Flyway.configure()
+                .dataSource(dataSource)
+                .locations("db/luontotieto/migration")
+                .validateMigrationNaming(true)
 
         val flyway = Flyway(config)
         flyway.migrate()
