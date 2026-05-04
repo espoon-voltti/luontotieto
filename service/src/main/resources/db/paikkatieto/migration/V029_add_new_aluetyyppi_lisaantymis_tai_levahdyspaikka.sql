@@ -1,1 +1,0 @@
-ALTER TYPE liito_orava_aluetyyppi ADD VALUE IF NOT EXISTS 'Lisääntymis- tai levähdyspaikka';
