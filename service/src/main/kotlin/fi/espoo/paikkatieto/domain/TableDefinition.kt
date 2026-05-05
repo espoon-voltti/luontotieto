@@ -146,7 +146,17 @@ enum class TableDefinition(
                 Column(name = "geom", kClass = LineString::class),
                 Column(name = "pvm", kClass = Date::class),
                 Column(name = "havaitsija", kClass = String::class),
-                Column(name = "laatu", kClass = String::class, sqlType = "laatu"),
+                Column(
+                    name = "laatu",
+                    kClass = String::class,
+                    sqlType = "liito_orava_yhteyden_laatu",
+                ),
+                Column(
+                    name = "luokka",
+                    kClass = String::class,
+                    isNullable = true,
+                    sqlType = "liito_orava_yhteyden_luokka",
+                ),
                 Column(name = "lisatieto", kClass = String::class, isNullable = true),
                 Column(name = "kunta", kClass = Int::class, isNullable = true),
                 Column(
@@ -622,17 +632,19 @@ private const val SQL_INSERT_LIITO_ORAVA_YHTEYSVIIVAT =
         pvm,
         havaitsija,
         laatu,
+        luokka,
         lisatieto,
         viite,
         kunta,
         tarkkuus,
         geom,
         selvitys_id
-    ) 
+    )
     VALUES (
         :pvm,
         :havaitsija,
-        :laatu::laatu,
+        :laatu::liito_orava_yhteyden_laatu,
+        :luokka::liito_orava_yhteyden_luokka,
         :lisatieto,
         :reportName,
         :kunta,
