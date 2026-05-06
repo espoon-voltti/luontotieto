@@ -2,7 +2,12 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { faExternalLink, faPlus } from '@fortawesome/free-solid-svg-icons'
+import {
+  faChevronDown,
+  faChevronUp,
+  faExternalLink,
+  faPlus
+} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   Order,
@@ -15,6 +20,7 @@ import {
 import {
   getDocumentTypeTitle,
   getReportDocumentTypeInfo,
+  isDeprecatedReportDocumentType,
   ReportFileDocumentType
 } from 'api/report-api'
 import { getUserRole, User, UserRole } from 'api/users-api'
@@ -38,6 +44,7 @@ import { InputField } from 'shared/form/InputField'
 import { SelectOptionsGroup } from 'shared/form/SelectOptionsGroup'
 import { TagAutoComplete } from 'shared/form/TagAutoComplete/TagAutoComplete'
 import { TextArea } from 'shared/form/TextArea'
+import { colors } from 'shared/theme'
 import { useDebouncedState } from 'shared/useDebouncedState'
 import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
@@ -244,10 +251,6 @@ const defaultReportDocuments = [
   },
   {
     checked: false,
-    documentType: ReportFileDocumentType.NORO_VIIVAT
-  },
-  {
-    checked: false,
     documentType: ReportFileDocumentType.LUONTOTYYPIT_ALUEET
   },
   {
@@ -260,15 +263,19 @@ const defaultReportDocuments = [
   },
   {
     checked: false,
-    documentType: ReportFileDocumentType.LAHTEET_PISTEET
-  },
-  {
-    checked: false,
     documentType: ReportFileDocumentType.VIERASLAJIT_ALUEET
   },
   {
     checked: false,
     documentType: ReportFileDocumentType.VIERASLAJIT_PISTEET
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.NORO_VIIVAT
+  },
+  {
+    checked: false,
+    documentType: ReportFileDocumentType.LAHTEET_PISTEET
   }
 ]
 
@@ -383,6 +390,14 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
             return { ...orderReportDocument, checked: true }
           }
         })
+  )
+
+  const [deprecatedExpanded, setDeprecatedExpanded] = useState(
+    () =>
+      props.mode === 'EDIT' &&
+      props.order.reportDocuments.some((rd) =>
+        isDeprecatedReportDocumentType(rd.documentType)
+      )
   )
 
   const updateReportDocuments = (item: OrderCheckBoxComponentInput) => {
@@ -1030,21 +1045,55 @@ export const OrderForm = React.memo(function OrderForm(props: Props) {
               )}
               <VerticalGap $size="s" />
 
-              {reportDocuments.map((rd, index) => (
-                <ReportDocumentRow
-                  key={index}
-                  index={index}
-                  onCheck={(checked) =>
-                    updateReportDocuments({
-                      checked,
-                      documentType: rd.documentType
-                    })
-                  }
-                  checked={rd.checked}
-                  documentType={rd.documentType}
-                  disabled={props.disabled ?? false}
-                />
-              ))}
+              {reportDocuments
+                .filter(
+                  (rd) => !isDeprecatedReportDocumentType(rd.documentType)
+                )
+                .map((rd, index) => (
+                  <ReportDocumentRow
+                    key={rd.documentType}
+                    index={index}
+                    onCheck={(checked) =>
+                      updateReportDocuments({
+                        checked,
+                        documentType: rd.documentType
+                      })
+                    }
+                    checked={rd.checked}
+                    documentType={rd.documentType}
+                    disabled={props.disabled ?? false}
+                  />
+                ))}
+              <VerticalGap $size="s" />
+              <InlineButton
+                text={
+                  deprecatedExpanded
+                    ? 'Piilota käytöstä poistuneet'
+                    : 'Näytä käytöstä poistuneet'
+                }
+                icon={deprecatedExpanded ? faChevronUp : faChevronDown}
+                onClick={() => setDeprecatedExpanded(!deprecatedExpanded)}
+              />
+              {deprecatedExpanded &&
+                reportDocuments
+                  .filter((rd) =>
+                    isDeprecatedReportDocumentType(rd.documentType)
+                  )
+                  .map((rd, index) => (
+                    <ReportDocumentRow
+                      key={rd.documentType}
+                      index={index}
+                      onCheck={(checked) =>
+                        updateReportDocuments({
+                          checked,
+                          documentType: rd.documentType
+                        })
+                      }
+                      checked={rd.checked}
+                      documentType={rd.documentType}
+                      disabled={props.disabled ?? false}
+                    />
+                  ))}
             </LabeledInput>
           </RowOfInputs>
         </GroupOfInputRows>
@@ -1070,11 +1119,17 @@ const ReportDocumentRow = React.memo(function ReportDocumentRow({
   onCheck
 }: ReportDocumentProps) {
   const [showInfo, setShowInfo] = useState(false)
+  const title = getDocumentTypeTitle(documentType)
+  const label = isDeprecatedReportDocumentType(documentType) ? (
+    <DeprecatedLabel>{title}</DeprecatedLabel>
+  ) : (
+    title
+  )
   return (
     <FlexRowWithGaps $gapSize="m">
       <StyledCheckBox
         key={index}
-        label={getDocumentTypeTitle(documentType)}
+        label={label}
         checked={checked}
         onChange={onCheck}
         disabled={disabled}
@@ -1089,6 +1144,10 @@ const ReportDocumentRow = React.memo(function ReportDocumentRow({
 
 const StyledCheckBox = styled(Checkbox)`
   min-width: 300px;
+`
+
+const DeprecatedLabel = styled.span`
+  color: ${colors.grayscale.g70};
 `
 
 interface OrderCheckBoxComponentInput extends OrderReportDocumentInput {

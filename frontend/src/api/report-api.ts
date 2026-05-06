@@ -83,7 +83,7 @@ export function getReportDocumentTypeInfo<T extends ReportFileDocumentType>(
     case ReportFileDocumentType.LUMO_ALUEET:
       return 'Aluemuotoiset rajaukset kohteista, jotka voidaan luokitella Espoon Lumo-kriteeristön mukaisesti.'
     case ReportFileDocumentType.NORO_VIIVAT:
-      return 'Havumetsävyöhykkeen norot viivamaisina kohteina.'
+      return 'Tämä on vanha paikkatietomalli viivamaisille havumetsävyöhykkeen noroille. Älä käytä tätä enää uusissa tilauksissa. Norot tulee kuvioida aluemaisina luontotyyppeinä.'
     case ReportFileDocumentType.LUONTOTYYPIT_ALUEET:
       return 'Luontotyyppikuvioiden aluerajaukset.'
     case ReportFileDocumentType.EKOYHTEYDET_ALUEET:
@@ -91,7 +91,7 @@ export function getReportDocumentTypeInfo<T extends ReportFileDocumentType>(
     case ReportFileDocumentType.EKOYHTEYDET_VIIVAT:
       return 'Ekologiset yhteydet viivamaisina kohteina.'
     case ReportFileDocumentType.LAHTEET_PISTEET:
-      return 'Lähteet pistemäisinä kohteina.'
+      return 'Tämä on vanha paikkatietomalli pistemäisille lähdekohteille. Älä käytä tätä enää uusissa tilauksissa. Lähteet tulee kuvioida aluemaisina luontotyyppeinä.'
     case ReportFileDocumentType.VIERASLAJIT_ALUEET:
       return 'Vieraslajit aluemuotoisina kohteina.'
     case ReportFileDocumentType.VIERASLAJIT_PISTEET:
@@ -128,6 +128,15 @@ export enum ReportFileDocumentType {
   OTHER = 'OTHER',
   REPORT = 'REPORT'
 }
+
+export const DEPRECATED_REPORT_DOCUMENT_TYPES: ReportFileDocumentType[] = [
+  ReportFileDocumentType.NORO_VIIVAT,
+  ReportFileDocumentType.LAHTEET_PISTEET
+]
+
+export const isDeprecatedReportDocumentType = (
+  dt: ReportFileDocumentType
+): boolean => DEPRECATED_REPORT_DOCUMENT_TYPES.includes(dt)
 
 export interface ReportFormInput {
   name: string
