@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.23.0
+# syntax=docker/dockerfile:1.24.0
 # SPDX-FileCopyrightText: 2023-2024 City of Espoo
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
