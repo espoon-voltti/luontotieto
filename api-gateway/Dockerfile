@@ -39,6 +39,14 @@ RUN apt-get update \
       && echo "${S3_DOWNLOADER_SHA256}  /bin/s3download" | sha256sum -c - \
       && chmod +x /bin/s3download
 
+RUN userdel -r node \
+ && addgroup --gid 1000 luontotieto \
+ && adduser --uid 1000 --gid 1000 --gecos "" -q --home /home/luontotieto --disabled-password luontotieto \
+ && mkdir -p /config \
+ && chown luontotieto:luontotieto /config
+
+VOLUME /config
+
 ARG build=none
 ARG commit=none
 
@@ -47,6 +55,8 @@ ENV APP_COMMIT "$commit"
 
 LABEL fi.espoo.build="$build" \
       fi.espoo.commit="$commit"
+
+USER luontotieto
 
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["node", "dist/index.js"]
