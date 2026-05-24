@@ -3035,9 +3035,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-plugin-styled-components@npm:2.2.0":
-  version: 2.2.0
-  resolution: "babel-plugin-styled-components@npm:2.2.0"
+"babel-plugin-styled-components@npm:2.3.0":
+  version: 2.3.0
+  resolution: "babel-plugin-styled-components@npm:2.3.0"
   dependencies:
     "@babel/helper-annotate-as-pure": "npm:^7.25.9"
     "@babel/helper-module-imports": "npm:^7.25.9"
@@ -3046,7 +3046,7 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0
     styled-components: ">= 2"
-  checksum: 10/467f70cff7f16f93119830bfde48411d78cce2d4e45548c885634ee5edad61ba7a19d72c6629d0cb00f613c6fb0e254e88bb81e346f34ca345c9243beba4e5a5
+  checksum: 10/30453bb7dee5d782d417a29332b09d865da6759951f340a865b1c29c5ab8aad50dd9de984aba014cbac451924faf702aba72bb42c9e5a81c475e1de84d0bb7a4
   languageName: node
   linkType: hard
 
@@ -5304,7 +5304,7 @@ __metadata:
     "@typescript-eslint/parser": "npm:8.59.4"
     axios: "npm:1.16.1"
     babel-loader: "npm:10.1.1"
-    babel-plugin-styled-components: "npm:2.2.0"
+    babel-plugin-styled-components: "npm:2.3.0"
     classnames: "npm:2.5.1"
     concurrently: "npm:9.2.1"
     core-js: "npm:3.49.0"
