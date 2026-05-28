@@ -375,7 +375,6 @@ export const ReportForm = React.memo(function ReportForm(
     props.onChange(reportInput)
   }, [reportInput, props])
 
-  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setFileInputs((prev) =>
       createFileInputs(
@@ -386,7 +385,6 @@ export const ReportForm = React.memo(function ReportForm(
       )
     )
   }, [originalFileInputs]) // eslint-disable-line react-hooks/exhaustive-deps
-  /* eslint-enable react-hooks/set-state-in-effect */
 
   return (
     <FlexCol>
