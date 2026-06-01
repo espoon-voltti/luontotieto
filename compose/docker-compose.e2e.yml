@@ -6,7 +6,7 @@ version: '3.5'
 
 services:
   frontend:
-    image: 767398123997.dkr.ecr.eu-north-1.amazonaws.com/luontotieto/frontend:${TAG:-master}
+    image: ghcr.io/espoon-voltti/luontotieto/frontend:${TAG:-master}
     build:
       context: ../frontend/
     read_only: true
@@ -20,7 +20,7 @@ services:
       HTTP_SCHEME: http
 
   service:
-    image: 767398123997.dkr.ecr.eu-north-1.amazonaws.com/luontotieto/service:${TAG:-master}
+    image: ghcr.io/espoon-voltti/luontotieto/service:${TAG:-master}
     build:
       context: ../service/
     read_only: true
@@ -38,7 +38,7 @@ services:
       APP_JWT_PUBLIC_KEYS_URL: classpath:local-development/jwks.json
 
   api-gateway:
-    image: 767398123997.dkr.ecr.eu-north-1.amazonaws.com/luontotieto/api-gateway:${TAG:-master}
+    image: ghcr.io/espoon-voltti/luontotieto/api-gateway:${TAG:-master}
     build:
       context: ../api-gateway/
     read_only: true
