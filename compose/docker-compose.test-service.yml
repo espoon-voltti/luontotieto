@@ -6,7 +6,7 @@ version: '3.5'
 
 services:
   service-tests:
-    image: 767398123997.dkr.ecr.eu-north-1.amazonaws.com/luontotieto/service-builder:${TAG:-master}
+    image: ghcr.io/espoon-voltti/luontotieto/service-builder:${TAG:-master}
     build:
       context: ../service/
       target: builder
