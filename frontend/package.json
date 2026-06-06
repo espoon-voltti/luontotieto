@@ -74,7 +74,7 @@
     "postcss-preset-env": "11.3.0",
     "prettier": "3.8.3",
     "style-loader": "4.0.0",
-    "ts-loader": "9.5.7",
+    "ts-loader": "9.6.0",
     "ts-node": "10.9.2",
     "typescript": "6.0.3",
     "typescript-eslint": "8.60.1",
