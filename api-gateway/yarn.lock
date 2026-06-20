@@ -2165,9 +2165,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-xml-parser@npm:5.9.0":
-  version: 5.9.0
-  resolution: "fast-xml-parser@npm:5.9.0"
+"fast-xml-parser@npm:5.9.2":
+  version: 5.9.2
+  resolution: "fast-xml-parser@npm:5.9.2"
   dependencies:
     "@nodable/entities": "npm:^2.2.0"
     fast-xml-builder: "npm:^1.2.0"
@@ -2177,7 +2177,7 @@ __metadata:
     xml-naming: "npm:^0.1.0"
   bin:
     fxparser: src/cli/cli.js
-  checksum: 10/b01e20423a4906b7d4dd7a0ea39eda102b510c21ff3ba26bfd4d694ad2f64b95b9211060be3f28089b9754d50d852a6834684de00e29f686559229fafceb824f
+  checksum: 10/c2ef301453d9db188469615c90bb552aab628c1b5b564e02db17e0295781bcc449cb174bad8638f5760cfb673e0f2df875495838b08f78ed5c0c5c6f51175ade
   languageName: node
   linkType: hard
 
@@ -3285,7 +3285,7 @@ __metadata:
     express: "npm:5.2.1"
     express-http-proxy: "npm:2.1.2"
     express-session: "npm:1.19.0"
-    fast-xml-parser: "npm:5.9.0"
+    fast-xml-parser: "npm:5.9.2"
     helmet: "npm:8.2.0"
     jsonwebtoken: "npm:9.0.2"
     lodash: "npm:4.18.1"
