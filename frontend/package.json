@@ -36,7 +36,7 @@
     "react-router-dom": "7.18.0",
     "react-tag-autocomplete": "7.5.1",
     "react-textarea-autosize": "8.5.9",
-    "styled-components": "6.4.2",
+    "styled-components": "6.4.3",
     "uuid": "14.0.1"
   },
   "devDependencies": {
