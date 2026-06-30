@@ -167,6 +167,7 @@ jobs:
         shell: bash
         run: |
           docker run --rm \
+              -e CI=true \
               -e NVD_API_KEY=${{ secrets.NVD_API_KEY }} \
               -v $(pwd)/dependency-check-data:/root/.gradle/dependency-check-data \
               ${{ needs.service-builder.outputs.builder_image }} \

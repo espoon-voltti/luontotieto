@@ -180,6 +180,10 @@ tasks {
 
     dependencyCheck {
         failBuildOnCVSS = 0.0f
+        // In CI, use only the prebuilt nightly NVD cache mounted by owasp-cache-get
+        // and never fetch updates at analyze time. Locally keep autoUpdate on so a
+        // dev run can populate/refresh its own database.
+        autoUpdate = System.getenv("CI") != "true"
         analyzers.apply {
             assemblyEnabled = false
             centralEnabled = false
