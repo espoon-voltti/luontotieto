@@ -283,7 +283,7 @@ jobs:
           retention-days: 2
 
   ecr-push:
-    if: ${{ !github.event.pull_request.head.repo.fork }}
+    if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
     needs:
       - dockerize
     runs-on: ubuntu-latest
