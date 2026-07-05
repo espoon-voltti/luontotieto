@@ -15,9 +15,9 @@
     "build:serve": "node build.js --dev --watch --serve"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "7.2.0",
-    "@fortawesome/free-regular-svg-icons": "7.2.0",
-    "@fortawesome/free-solid-svg-icons": "7.2.0",
+    "@fortawesome/fontawesome-svg-core": "7.3.0",
+    "@fortawesome/free-regular-svg-icons": "7.3.0",
+    "@fortawesome/free-solid-svg-icons": "7.3.0",
     "@fortawesome/react-fontawesome": "3.3.1",
     "@react-spring/web": "10.1.2",
     "@tanstack/react-query": "5.101.2",
