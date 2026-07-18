@@ -96,6 +96,6 @@
   },
   "packageManager": "yarn@4.17.1",
   "resolutions": {
-    "shell-quote": "1.9.0"
+    "shell-quote": "1.10.0"
   }
 }
