@@ -40,8 +40,8 @@
     "uuid": "14.0.1"
   },
   "devDependencies": {
-    "@babel/core": "7.29.7",
-    "@babel/preset-env": "7.29.7",
+    "@babel/core": "8.0.1",
+    "@babel/preset-env": "8.0.2",
     "@eslint/compat": "2.1.0",
     "@types/file-saver": "2.0.7",
     "@types/lodash": "4.17.24",
