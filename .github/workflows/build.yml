@@ -24,13 +24,13 @@ jobs:
   lint-shell:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.0
       - uses: espoon-voltti/voltti-actions/shellcheck@master
 
   check-licenses:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.0
       - name: Reuse Compliance Check
         uses: fsfe/reuse-action@v6.0.0
 
@@ -65,7 +65,7 @@ jobs:
             test: "false"
 
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.0
 
       - name: Setup Docker building
         id: setup
@@ -113,7 +113,7 @@ jobs:
       builder: builder
 
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.0
 
       - name: Setup Docker building
         id: setup
@@ -146,7 +146,7 @@ jobs:
       - service-builder
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.0
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4.4.0
@@ -185,7 +185,7 @@ jobs:
         working-directory: compose
 
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.0
 
       - name: Login to GitHub Container Registry
         if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
@@ -239,7 +239,7 @@ jobs:
         working-directory: compose
 
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.0
 
       - name: Login to GitHub Container Registry
         if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
