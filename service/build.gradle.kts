@@ -46,6 +46,17 @@ ktfmt { kotlinLangStyle() }
 
 ktlint { version.set(libs.versions.ktlint.asProvider().get()) }
 
+// cve fixes above the Spring Boot BOM; drop each once Boot manages a higher version
+extra["tomcat.version"] = "11.0.24" // 8 CVEs, worst CVE-2026-53434 (9.1)
+
+extra["netty.version"] = "4.2.16.Final" // 10 CVEs, worst CVE-2026-55851 (8.7)
+
+extra["httpcore5.version"] = "5.4.3" // CVE-2026-54399, -54428 (7.5)
+
+extra["log4j2.version"] = "2.25.5" // CVE-2026-49844 (6.3)
+
+extra["jackson-2-bom.version"] = libs.versions.jackson.get() // CVE-2026-54515 (5.3)
+
 dependencies {
     api(kotlin("stdlib"))
     implementation("org.jetbrains.kotlin:kotlin-reflect")
