@@ -44,21 +44,10 @@ jobs:
           - luontotieto/api-gateway-tests
           - luontotieto/geoserver
     steps:
-      - name: Delete untagged versions of ${{ matrix.package }}
-        uses: actions/delete-package-versions@v5.0.0
+      - uses: espoon-voltti/voltti-actions/ghcr-cleanup@master
         with:
-          owner: espoon-voltti
-          package-name: ${{ matrix.package }}
-          package-type: container
-          delete-only-untagged-versions: 'true'
-
-      - name: Keep newest 100 versions of ${{ matrix.package }}
-        uses: actions/delete-package-versions@v5.0.0
-        with:
-          owner: espoon-voltti
-          package-name: ${{ matrix.package }}
-          package-type: container
-          min-versions-to-keep: 100
+          package: ${{ matrix.package }}
+          keep: 100
 
   keep-one:
     if: ${{ github.event.schedule == '17 2 * * 0' || github.event.inputs.mode == 'keep-1' }}
@@ -75,18 +64,7 @@ jobs:
           - luontotieto/api-gateway-tests
           - luontotieto/geoserver
     steps:
-      - name: Delete untagged versions of ${{ matrix.package }}
-        uses: actions/delete-package-versions@v5.0.0
+      - uses: espoon-voltti/voltti-actions/ghcr-cleanup@master
         with:
-          owner: espoon-voltti
-          package-name: ${{ matrix.package }}
-          package-type: container
-          delete-only-untagged-versions: 'true'
-
-      - name: Keep only the newest version of ${{ matrix.package }}
-        uses: actions/delete-package-versions@v5.0.0
-        with:
-          owner: espoon-voltti
-          package-name: ${{ matrix.package }}
-          package-type: container
-          min-versions-to-keep: 1
+          package: ${{ matrix.package }}
+          keep: 1
