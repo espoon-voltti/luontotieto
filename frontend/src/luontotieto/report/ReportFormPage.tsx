@@ -104,8 +104,7 @@ export const ReportFormPage = React.memo(function ReportFormPage() {
     onSuccess: onUpdateReportSuccess,
     onError: (
       responses: (
-        | ReportFileSuccessResponse
-        | ReportFileValidationErrorResponse
+        ReportFileSuccessResponse | ReportFileValidationErrorResponse
       )[]
     ) => {
       // void queryClient.invalidateQueries({ queryKey: ['report', id] })

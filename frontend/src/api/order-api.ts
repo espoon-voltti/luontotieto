@@ -281,8 +281,7 @@ export const apiGetorderingUnits = (): Promise<string[]> =>
   apiClient.get<string[]>(`/orders/ordering-units`).then((res) => res.data)
 
 export type DeleteorderErrorCode =
-  | 'order-delete-failed-existing-files'
-  | 'order-delete-failed-report-approved'
+  'order-delete-failed-existing-files' | 'order-delete-failed-report-approved'
 
 export const DeleteOrderError: Record<DeleteorderErrorCode, string> = {
   'order-delete-failed-existing-files':

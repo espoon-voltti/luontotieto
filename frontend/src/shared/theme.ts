@@ -7,17 +7,7 @@ import { css } from 'styled-components'
 export const tabletMin = '600px'
 
 export type SpacingSize =
-  | 'zero'
-  | 'xxs'
-  | 'xs'
-  | 's'
-  | 'm'
-  | 'L'
-  | 'XL'
-  | 'XXL'
-  | 'X3L'
-  | 'X4L'
-  | 'X5L'
+  'zero' | 'xxs' | 'xs' | 's' | 'm' | 'L' | 'XL' | 'XXL' | 'X3L' | 'X4L' | 'X5L'
 
 export function isSpacingSize(x: unknown): x is SpacingSize {
   return (
@@ -130,12 +120,14 @@ export const inputWidthCss = (width: InputWidth) => css`
   max-width: ${inputWidths[width]};
 
   @media (max-width: ${tabletMin}) {
-    ${width === 'L' || width === 'XL'
-      ? css`
-          width: 100%;
-          max-width: 100%;
-        `
-      : ''}
+    ${
+      width === 'L' || width === 'XL'
+        ? css`
+            width: 100%;
+            max-width: 100%;
+          `
+        : ''
+    }
   }
 `
 

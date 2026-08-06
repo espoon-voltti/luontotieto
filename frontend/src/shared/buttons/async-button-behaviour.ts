@@ -8,8 +8,7 @@ const onSuccessTimeout = 800
 const clearStateTimeout = 3000
 
 type ButtonState<T> =
-  | { state: 'idle' | 'in-progress' | 'failure' }
-  | { state: 'success'; value: T }
+  { state: 'idle' | 'in-progress' | 'failure' } | { state: 'success'; value: T }
 
 const idle: ButtonState<never> = { state: 'idle' }
 const inProgress: ButtonState<never> = { state: 'in-progress' }

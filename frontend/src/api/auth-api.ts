@@ -20,9 +20,7 @@ export async function getAuthStatus(): Promise<AuthStatus> {
 }
 
 export type LoginErrorCode =
-  | 'account-is-locked'
-  | 'account-login-delay'
-  | 'wrong-credentials'
+  'account-is-locked' | 'account-login-delay' | 'wrong-credentials'
 
 export const LoginError: Record<LoginErrorCode, string> = {
   'account-is-locked': 'Tili on lukittu. Yritä uudelleen myöhemmin.',
