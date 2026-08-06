@@ -63,9 +63,7 @@ interface ChangePasswordPayload {
 }
 
 export type ChangePasswordErrorCode =
-  | 'wrong-current-password'
-  | 'new-password-already-in-use'
-  | 'weak-password'
+  'wrong-current-password' | 'new-password-already-in-use' | 'weak-password'
 
 export const ChangePasswordError: Record<ChangePasswordErrorCode, string> = {
   'wrong-current-password': 'Väärä nykyinen salasana',

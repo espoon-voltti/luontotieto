@@ -106,8 +106,7 @@ interface OrderFileInputElementExisting {
 }
 
 type OrderFileInputElement =
-  | OrderFileInputElementNew
-  | OrderFileInputElementExisting
+  OrderFileInputElementNew | OrderFileInputElementExisting
 
 function createExistingFileInputs(
   orderFiles: OrderFile[]
