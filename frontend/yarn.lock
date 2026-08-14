@@ -5452,7 +5452,7 @@ __metadata:
     react-tag-autocomplete: "npm:7.5.1"
     react-textarea-autosize: "npm:8.5.9"
     style-loader: "npm:4.0.0"
-    styled-components: "npm:6.5.0"
+    styled-components: "npm:6.5.2"
     ts-loader: "npm:9.6.2"
     ts-node: "npm:10.9.2"
     typescript: "npm:6.0.3"
@@ -7122,9 +7122,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-components@npm:6.5.0":
-  version: 6.5.0
-  resolution: "styled-components@npm:6.5.0"
+"styled-components@npm:6.5.2":
+  version: 6.5.2
+  resolution: "styled-components@npm:6.5.2"
   dependencies:
     "@emotion/is-prop-valid": "npm:1.4.0"
     css-to-react-native: "npm:3.2.0"
@@ -7142,7 +7142,7 @@ __metadata:
       optional: true
     react-native:
       optional: true
-  checksum: 10/3e502161bd06a54d861c23c2222d5bba63e0deaa97042c761ed8041d8ba3ac841649fe4090f86b65055aedadf93686129466acbe3ca2b2967b711b92c3c61893
+  checksum: 10/c3a68fae97f021495c328fcf34ba6b32cee79bb6fee35e997b464c8a462a587bc6c80450836dd90915e2acaa35bd86fd7bb158cc84b952cb637fc77ffe8626ae
   languageName: node
   linkType: hard
 
