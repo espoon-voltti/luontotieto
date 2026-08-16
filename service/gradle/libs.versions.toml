@@ -5,7 +5,7 @@
 [versions]
 aws = "2.52.1"
 bouncycastle = "1.85.2"
-flyway = "13.2.0"
+flyway = "13.3.0"
 fuel = "2.3.1"
 hikaricp = "7.1.0"
 httpclient = "4.5.14"
