@@ -12,11 +12,22 @@ SPDX-License-Identifier: LGPL-2.1-or-later
         <cve>CVE-2025-67721</cve>
         <cve>CVE-2026-25477</cve>
         <cve>CVE-2026-21853</cve>
-        <cve>CVE-2026-66299</cve>
     </suppress>
     <suppress until="2026-11-01Z">
         <notes>Kotlin build tooling; 2.4.10 is the latest stable release.</notes>
         <cpe>cpe:/a:jetbrains:kotlin</cpe>
         <cve>CVE-2026-53914</cve>
+    </suppress>
+    <suppress>
+        <notes>
+            tika-core 4.0.0 is newer than the fixed 4.0.0-beta-1; dependency-check
+            mis-orders the pre-release qualifier and flags a version that already
+            contains the fix. CVE-2026-66755 is also in the ISA-Tab parser, which
+            ships in tika-parsers - only tika-core is on the classpath.
+            No expiry: 4.0.0 will never stop sorting after 4.0.0-beta-1.
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.apache\.tika/tika-core@.*$</packageUrl>
+        <cve>CVE-2026-66755</cve>
+        <cve>CVE-2026-66756</cve>
     </suppress>
 </suppressions>
