@@ -25,7 +25,7 @@ Voltti IDP (dev/test):
 
 Requirements:
 
-- Python 3.8 (recommended to use [pyenv](https://github.com/pyenv/pyenv))
+- Python 3.11 (recommended to use [pyenv](https://github.com/pyenv/pyenv))
 - [pipenv](https://pipenv.pypa.io/en/latest/install/)
 
 SAML 2.0 metadata (XML) can contain multiple entities (usually different environments) and those entities can contain

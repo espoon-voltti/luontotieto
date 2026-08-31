@@ -10,7 +10,7 @@
     "lint": "eslint --max-warnings 0 .",
     "lint:fix": "eslint . --fix",
     "type-check": "tsc --noEmit",
-    "dev": "tsc --build . && concurrently --prefix '[{name}]' --names 'tsc,nodemon' 'tsc --build --preserveWatchOutput -w .' 'NODE_ENV=local nodemon dist/index.js'"
+    "dev": "tsc --build . && concurrently --prefix '[{name}]' --names 'tsc,node' 'tsc --build --preserveWatchOutput -w .' 'NODE_ENV=local node --watch-path=./dist dist/index.js'"
   },
   "dependencies": {
     "@node-saml/node-saml": "5.1.0",
@@ -62,7 +62,6 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-prettier": "5.5.6",
-    "nodemon": "3.1.14",
     "prettier": "3.9.6",
     "ts-node": "10.9.2",
     "typescript": "6.0.3",
