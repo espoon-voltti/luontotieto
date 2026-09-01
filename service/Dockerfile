@@ -91,6 +91,9 @@ RUN addgroup --gid ${GROUP_ID} ${USERNAME} \
 
 VOLUME /config
 VOLUME /tmp
+# GeoTools writes java.util.prefs under $HOME, which is on the read-only
+# root filesystem the ECS task definitions set in AWS.
+VOLUME ${HOME_DIR}
 
 COPY --from=builder /app/target/ .
 
