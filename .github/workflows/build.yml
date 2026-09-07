@@ -12,7 +12,9 @@ env:
   AWS_REGION: eu-north-1
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # The event is part of the group so that a push to master does not cancel the
+  # weekly rebuild, which runs on master too.
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
 
 permissions:
@@ -141,7 +143,7 @@ jobs:
       builder_image_name: ${{ steps.builder.outputs.image_name }}
 
   owasp:
-    if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') }}
+    if: ${{ github.actor != 'dependabot[bot]' }}
     needs:
       - service-builder
     runs-on: ubuntu-latest
@@ -284,7 +286,10 @@ jobs:
           retention-days: 2
 
   ecr-push:
-    if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
+    # Only master builds are ever deployed, and only master builds can read
+    # AWS_ROLE. Branch images stay in GHCR, which is what the compose files and
+    # the owasp job pull from anyway.
+    if: ${{ github.ref == 'refs/heads/master' && !github.event.pull_request.head.repo.fork }}
     needs:
       - dockerize
     runs-on: ubuntu-latest
@@ -333,7 +338,10 @@ jobs:
           done
 
   deploy:
-    if: github.event.pull_request.user.login != 'renovate[bot]'
+    # The weekly rebuild runs unattended at 01:30 on Monday, and both
+    # environments require a reviewer, so a deploy job it queues waits until the
+    # next push to master cancels the run. The image it built still reaches ECR.
+    if: ${{ github.ref == 'refs/heads/master' && github.event_name != 'schedule' }}
     runs-on: ubuntu-latest
     needs:
       - ecr-push
