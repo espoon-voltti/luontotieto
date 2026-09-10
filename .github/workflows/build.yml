@@ -321,9 +321,15 @@ jobs:
           set -euo pipefail
           for image in service frontend api-gateway geoserver; do
             src="ghcr.io/espoon-voltti/luontotieto/${image}:${SHA}"
-            dst="${ECR}/luontotieto/${image}:${SHA}"
-            echo "Copying ${src} -> ${dst}"
-            docker buildx imagetools create --prefer-index=false --tag "${dst}" "${src}"
+            dst="${ECR}/luontotieto/${image}"
+            tags=(--tag "${dst}:${SHA}")
+            # The scan reports key on :master, so only a master build may write
+            # it. Both tags go in one call, so the layers are copied once.
+            if [ "${GITHUB_REF}" = "refs/heads/master" ]; then
+              tags+=(--tag "${dst}:master")
+            fi
+            echo "Copying ${src} -> ${dst}:${SHA}"
+            docker buildx imagetools create --prefer-index=false "${tags[@]}" "${src}"
           done
 
   deploy:
