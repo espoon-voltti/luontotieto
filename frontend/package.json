@@ -42,7 +42,7 @@
   "devDependencies": {
     "@babel/core": "8.0.1",
     "@babel/preset-env": "8.0.2",
-    "@eslint/compat": "2.1.0",
+    "@eslint/compat": "2.1.1",
     "@types/file-saver": "2.0.7",
     "@types/lodash": "4.17.25",
     "@types/node": "24.13.3",
