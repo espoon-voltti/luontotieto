@@ -46,6 +46,24 @@ ktfmt { kotlinLangStyle() }
 
 ktlint { version.set(libs.versions.ktlint.asProvider().get()) }
 
+// ktfmt 0.64 builds against kotlin-compiler-embeddable 2.3.20 and ktlint 1.4.1 against 2.0.21.
+// The Kotlin plugin aligns both to the project's version, and the intellij-core they bundle cannot
+// initialise against 2.4.20: "Extensions storage is not registered". Only the formatter classpaths
+// are pinned, so the compiler used to build the service is unaffected.
+// Remove once ktfmt-gradle and ktlint ship releases supporting it.
+configurations
+    .matching { it.name == "ktfmt" || it.name.startsWith("ktlint") }
+    .configureEach {
+        resolutionStrategy.eachDependency {
+            if (
+                requested.group == "org.jetbrains.kotlin" &&
+                    requested.name == "kotlin-compiler-embeddable"
+            ) {
+                useVersion("2.4.10")
+            }
+        }
+    }
+
 // cve fixes above the Spring Boot BOM; drop each once Boot manages a higher version
 extra["tomcat.version"] = "11.0.25" // 10 CVEs, 4 critical, worst CVE-2026-65182
 
