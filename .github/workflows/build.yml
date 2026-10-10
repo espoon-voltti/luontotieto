@@ -217,7 +217,7 @@ jobs:
 
       - name: Store logs
         if: always()
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: integration-test-results
           path: |
@@ -275,7 +275,7 @@ jobs:
 
       - name: Store logs
         if: always()
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: e2e-test-results
           path: |
