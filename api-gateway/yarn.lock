@@ -1911,9 +1911,9 @@ __metadata:
   linkType: hard
 
 "fast-copy@npm:^4.0.0":
-  version: 4.0.1
-  resolution: "fast-copy@npm:4.0.1"
-  checksum: 10/849f6208fec2356fdf91bd67d5c107b3ad14bf0fc24039b4254044e824ff3bea7e2e26125e5f83defcf6d3d8db103eaf536b32a78c99151223903f91829b9efd
+  version: 4.1.2
+  resolution: "fast-copy@npm:4.1.2"
+  checksum: 10/4198167e409f9e82796db958a6445d94be776721124e5b2eebc91c3cf321840ae700695c356d3f69d9c2fcbe6d19e49eb38ce0d27f39396d2ed39c45064b0a79
   languageName: node
   linkType: hard
 
