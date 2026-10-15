@@ -11,14 +11,15 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,
-    "baseUrl": "src",
+    "paths": { "*": ["./src/*"] },
     "noEmit": true,
-    "jsx": "react"
+    "jsx": "react",
+    "skipLibCheck": true
   }
 }
