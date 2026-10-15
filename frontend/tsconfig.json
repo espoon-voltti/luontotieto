@@ -2,23 +2,21 @@
   "compilerOptions": {
     "target": "es2020",
     "module": "esnext",
-    "lib": [
-      "dom",
-      "es2020"
-    ],
+    "lib": ["dom", "es2020"],
     "types": ["node"],
     "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,
-    "baseUrl": "src",
+    "paths": { "*": ["./src/*"] },
     "noEmit": true,
-    "jsx": "react"
+    "jsx": "react",
+    "skipLibCheck": true
   }
 }

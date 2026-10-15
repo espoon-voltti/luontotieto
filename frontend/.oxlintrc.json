@@ -1,0 +1,31 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["../.oxlintrc.json"],
+
+  "ignorePatterns": ["node_modules", ".yarn", "dist"],
+
+  "jsPlugins": ["eslint-plugin-lodash"],
+  "rules": {
+    "eslint/arrow-body-style": "off",
+    "oxc/no-accumulating-spread": "off",
+    "react/purity": "off",
+    "react/set-state-in-effect": "off",
+    "unicorn/no-useless-spread": "off"
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "typescript/consistent-type-imports": "off",
+        "typescript/dot-notation": "off"
+      }
+    },
+    {
+      // Only files that end up in the bundles
+      "files": ["src/**"],
+      "rules": {
+        "lodash/import-scope": ["error", "method"]
+      }
+    }
+  ]
+}

@@ -34,6 +34,30 @@ jobs:
       - name: Reuse Compliance Check
         uses: fsfe/reuse-action@v6.0.0
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24.21.0'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Lint api-gateway
+        working-directory: api-gateway
+        run: |
+          yarn install --immutable
+          yarn lint
+
+      - name: Lint frontend
+        working-directory: frontend
+        run: |
+          yarn install --immutable
+          yarn lint
+
   cache-bust:
     runs-on: ubuntu-latest
     steps:

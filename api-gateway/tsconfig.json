@@ -11,9 +11,5 @@
     "strict": true,
     "target": "es2019"
   },
-  "exclude": [
-    ".git",
-    "node_modules",
-    "dist"
-  ]
+  "exclude": [".git", "node_modules", "dist"]
 }

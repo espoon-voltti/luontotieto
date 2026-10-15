@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["../.oxlintrc.json"],
+  "ignorePatterns": ["node_modules", ".yarn", "dist", "build"],
+  "rules": {
+    "eslint/arrow-body-style": "off",
+    "oxc/no-accumulating-spread": "off",
+    "unicorn/no-useless-spread": "off"
+  },
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "rules": {
+        "typescript/consistent-type-imports": "off",
+        "typescript/dot-notation": "off"
+      }
+    }
+  ]
+}

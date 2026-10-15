@@ -69,6 +69,8 @@ extra["tomcat.version"] = "11.0.25" // 10 CVEs, 4 critical, worst CVE-2026-65182
 
 extra["jackson-2-bom.version"] = libs.versions.jackson.get() // CVE-2026-54515 (5.3)
 
+extra["netty.version"] = "4.2.19.Final" // CVE-2026-89044
+
 dependencies {
     api(kotlin("stdlib"))
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -78,6 +80,16 @@ dependencies {
     api(libs.sqlite.jdbc)
     api(libs.commons.jxpath)
     api(libs.eclipse.emf.ecore.xmi)
+
+    // CVE-2026-85532, CVE-2026-87830, CVE-2026-88920, CVE-2026-89238, CVE-2026-92121,
+    // CVE-2026-92899, CVE-2026-95616
+    implementation(libs.wss4j.ws.security.common) { exclude("org.opensaml") }
+    implementation(libs.wss4j.ws.security.dom) { exclude("org.opensaml") }
+
+    // Bouncy Castle 1.82 from wss4j: GHSA-574f-3g2m-x479, GHSA-9pwp-9qqc-pr26,
+    // GHSA-p93r-85wp-75v3, GHSA-qp49-qgx5-5m26, GHSA-c3fc-8qff-9hwx
+    implementation(libs.bouncycastle.bcpkix)
+    implementation(libs.bouncycastle.bcutil)
 
     api("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")

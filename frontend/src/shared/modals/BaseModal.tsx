@@ -264,7 +264,7 @@ export const ModalHeader = React.memo(function ModalHeader({
   ...props
 }: {
   children: React.ReactNode
-  headingComponent: React.ComponentType<{
+  headingComponent?: React.ComponentType<{
     children: React.ReactNode
     tabIndex?: number
     onBlur?: FocusEventHandler<HTMLElement>

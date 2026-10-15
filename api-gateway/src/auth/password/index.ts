@@ -12,7 +12,6 @@ passport.use(
   'password',
   new LocalStrategy(
     { usernameField: 'email' },
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     async (email, password, done) => {
       const response = await postPasswordLogin(email, password)
       if ('errorCode' in response) {

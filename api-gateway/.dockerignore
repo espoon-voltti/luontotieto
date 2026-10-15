@@ -14,4 +14,3 @@
 !.yarn/releases
 !.yarn/plugins
 !.yarnrc.yml
-!eslint.config.js

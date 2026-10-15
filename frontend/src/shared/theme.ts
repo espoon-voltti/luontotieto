@@ -7,7 +7,17 @@ import { css } from 'styled-components'
 export const tabletMin = '600px'
 
 export type SpacingSize =
-  'zero' | 'xxs' | 'xs' | 's' | 'm' | 'L' | 'XL' | 'XXL' | 'X3L' | 'X4L' | 'X5L'
+  | 'zero'
+  | 'xxs'
+  | 'xs'
+  | 's'
+  | 'm'
+  | 'L'
+  | 'XL'
+  | 'XXL'
+  | 'X3L'
+  | 'X4L'
+  | 'X5L'
 
 export function isSpacingSize(x: unknown): x is SpacingSize {
   return (

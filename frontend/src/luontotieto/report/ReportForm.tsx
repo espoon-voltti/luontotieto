@@ -79,7 +79,8 @@ interface ReportFileInputElementExisting {
 }
 
 type ReportFileInputElement =
-  ReportFileInputElementNew | ReportFileInputElementExisting
+  | ReportFileInputElementNew
+  | ReportFileInputElementExisting
 
 function getAcceptedFileTypes(
   documentType: ReportFileDocumentType
