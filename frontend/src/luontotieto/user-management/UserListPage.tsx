@@ -131,7 +131,7 @@ export const UserListPage = React.memo(function UserListPage() {
                 <td>{user.active ? 'Aktiivinen' : 'Epäaktiivinen'}</td>
               </tr>
             ))}
-            {users.length == 0 && (
+            {users.length === 0 && (
               <tr>
                 <td colSpan={4}>Ei näytettäviä käyttäjiä</td>
               </tr>

@@ -21,7 +21,7 @@ RUN yarn build
 
 FROM builder AS test
 
-RUN yarn lint
+RUN yarn type-check
 #RUN yarn test
 
 FROM builder

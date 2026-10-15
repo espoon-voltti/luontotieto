@@ -2,10 +2,7 @@
   "compilerOptions": {
     "target": "es2020",
     "module": "esnext",
-    "lib": [
-      "dom",
-      "es2020"
-    ],
+    "lib": ["dom", "es2020"],
     "types": ["node"],
     "declaration": true,
     "esModuleInterop": true,

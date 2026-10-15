@@ -91,3 +91,11 @@ License: LGPL-2.1-or-later
 Files: geoserver/data_dir/*
 Copyright: 2014-2020 Open Source Geospatial Foundation. 2001-2014 OpenPlans
 License: GPL-2.0-only
+
+Files: *.oxfmtrc.json
+Copyright: 2026 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: *.oxlintrc.json
+Copyright: 2026 City of Espoo
+License: LGPL-2.1-or-later

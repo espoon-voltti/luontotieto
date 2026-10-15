@@ -52,7 +52,7 @@ To start API-gateway in http://localhost:3000
 - `yarn dev`
 
 To lint and format code
-- `yarn lint --fix`
+- `yarn lint:fix`
 
 ### Frontend
 
@@ -62,7 +62,7 @@ To start frontend in http://localhost:9000
 - `yarn dev`
 
 To lint and format code
-- `yarn lint --fix`
+- `yarn lint:fix`
 
 ### GeoServer
 

@@ -281,7 +281,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
           destination={location.state?.referer ?? undefined}
         />
         <VerticalGap $size="s" />
-        {props.mode == 'CREATE' && (
+        {props.mode === 'CREATE' && (
           <OrderForm
             key={order?.updated.toString()}
             mode="CREATE"
@@ -293,7 +293,7 @@ export const OrderFormPage = React.memo(function OrderFormPage(props: Props) {
           />
         )}
 
-        {props.mode == 'EDIT' && order && orderFiles && (
+        {props.mode === 'EDIT' && order && orderFiles && (
           <OrderForm
             key={order.updated.toString()}
             mode="EDIT"

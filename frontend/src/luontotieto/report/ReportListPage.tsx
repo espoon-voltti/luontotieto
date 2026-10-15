@@ -260,7 +260,7 @@ export const ReportListPage = React.memo(function ReportList() {
                 </BreakableTd>
               </tr>
             ))}
-            {reports.length == 0 && (
+            {reports.length === 0 && (
               <tr>
                 <td colSpan={4}>Ei näytettäviä selvityksiä</td>
               </tr>

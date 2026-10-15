@@ -146,7 +146,6 @@ export function createAdSamlStrategy(
       .catch(done)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const logoutVerify: VerifyWithRequest = (req, profile, done) =>
     (async () => {
       if (!profile) return undefined
@@ -191,7 +190,7 @@ export function parseRelayState(req: express.Request): string | undefined {
     } else {
       const baseUrl = appBaseUrl.replace(/\/$/, '')
       const redirect = new URL(relayState, baseUrl)
-      if (redirect.origin == baseUrl) {
+      if (redirect.origin === baseUrl) {
         return redirect.href
       }
     }
