@@ -43,7 +43,9 @@ import org.w3c.dom.Element
  * These tests cover what a GeoServer upgrade can break: the users and roles the startup script
  * installs, the published layer set, the schema and data of every layer, and the path from an
  * approved report through PostGIS to WFS. GeoServer must read the same paikkatieto database as the
- * service under test (PAIKKATIETO_DB_NAME in the e2e compose file).
+ * service under test: the e2e configuration defaults to `paikkatietodb`, which the compose
+ * GeoServer serves. Locally that is the development database, so every row this class inserts is
+ * removed afterwards.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -239,17 +241,21 @@ class GeoserverWfsTest {
                 .value(),
         )
         reportController.approveReport(adminUser, created.reportId, false, null)
-        assertTrue(geoserverController.reloadSchemas(adminUser).isSuccess)
-
         val filter = "selvitys_id='${created.reportId}'"
-        val features = getFeatures("liito_orava_pisteet", filter)
-        assertEquals(2, features.size)
-        val koivu = features.single { it.attributes["puulaji"] == "Koivu" }
-        assertEquals(reportName, koivu.attributes["viite"])
-        assertEquals("2024-03-17", koivu.attributes["pvm"])
-        assertCoordinates("POINT (25478090.217030223 6679589.505727745)", koivu.coordinates)
+        try {
+            assertTrue(geoserverController.reloadSchemas(adminUser).isSuccess)
 
-        reportController.reopenReport(adminUser, created.reportId)
+            val features = getFeatures("liito_orava_pisteet", filter)
+            assertEquals(2, features.size)
+            val koivu = features.single { it.attributes["puulaji"] == "Koivu" }
+            assertEquals(reportName, koivu.attributes["viite"])
+            assertEquals("2024-03-17", koivu.attributes["pvm"])
+            assertCoordinates("POINT (25478090.217030223 6679589.505727745)", koivu.coordinates)
+        } finally {
+            // Reopening removes the approved rows from the shared paikkatieto database even
+            // when an assertion above fails
+            reportController.reopenReport(adminUser, created.reportId)
+        }
         assertEquals(emptyList(), getFeatures("liito_orava_pisteet", filter))
     }
 

@@ -33,8 +33,9 @@ spring:
       username: "luontotieto"
       password: "postgres"
     paikkatieto:
-      # GeoServer serves the WFS from the paikkatietodb database, so the e2e compose
-      # file points the service to the same database
-      jdbcUrl: "jdbc:postgresql://${PAIKKATIETO_DB_HOST:localhost}:${PAIKKATIETO_DB_PORT:5433}/${PAIKKATIETO_DB_NAME:paikkatietodb_it}"
+      # The compose GeoServer serves its WFS from the paikkatietodb database, and the WFS
+      # tests read back what the service writes, so the e2e service uses the same database
+      # both locally and in CI. The tests remove the rows they insert.
+      jdbcUrl: "jdbc:postgresql://${PAIKKATIETO_DB_HOST:localhost}:${PAIKKATIETO_DB_PORT:5433}/${PAIKKATIETO_DB_NAME:paikkatietodb}"
       username: "paikkatietodb"
       password: "postgres"

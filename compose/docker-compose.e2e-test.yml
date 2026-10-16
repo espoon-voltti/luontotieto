@@ -52,8 +52,6 @@ services:
       LUONTOTIETO_DB_PORT: 5432
       PAIKKATIETO_DB_HOST: paikkatieto-db
       PAIKKATIETO_DB_PORT: 5432
-      # Same database as the GeoServer datastore, so the WFS tests see what the service writes
-      PAIKKATIETO_DB_NAME: paikkatietodb
       S3_HOST: s3-mock
       S3_PORT: 9191
       EMAIL_ENABLED: false
