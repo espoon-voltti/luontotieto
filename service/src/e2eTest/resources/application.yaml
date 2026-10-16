@@ -22,9 +22,9 @@ luontotieto:
     sender_arn: "fake"
   host: "http://localhost:9000"
   geoserver:
-    base_url: "http://localhost:8000/"
-    username: "admin"
-    password: "password"
+    base_url: "${GEOSERVER_URL:http://localhost:8000/}"
+    username: "${GEOSERVER_USERNAME:admin}"
+    password: "${GEOSERVER_PASSWORD:password}"
 
 spring:
   datasource:
@@ -33,6 +33,8 @@ spring:
       username: "luontotieto"
       password: "postgres"
     paikkatieto:
-      jdbcUrl: "jdbc:postgresql://${PAIKKATIETO_DB_HOST:localhost}:${PAIKKATIETO_DB_PORT:5433}/paikkatietodb_it"
+      # GeoServer serves the WFS from the paikkatietodb database, so the e2e compose
+      # file points the service to the same database
+      jdbcUrl: "jdbc:postgresql://${PAIKKATIETO_DB_HOST:localhost}:${PAIKKATIETO_DB_PORT:5433}/${PAIKKATIETO_DB_NAME:paikkatietodb_it}"
       username: "paikkatietodb"
       password: "postgres"
