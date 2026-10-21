@@ -8,10 +8,6 @@ Espoo AD (staging):
 
 - `espooad-internal-staging.2022.pem`
 
-Voltti IDP (dev/test):
-
-- `idp.test.espoon-voltti.fi.pem`
-
 ## Update list of trusted IdP certificates
 
 1. Obtain URL for IdP metadata from the provider, for example:
