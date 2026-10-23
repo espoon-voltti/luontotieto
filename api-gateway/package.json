@@ -56,7 +56,7 @@
     "@types/source-map-support": "0.5.10",
     "concurrently": "10.0.6",
     "oxfmt": "0.74.0",
-    "oxlint": "1.88.0",
+    "oxlint": "1.89.0",
     "oxlint-tsgolint": "7.0.2004",
     "ts-node": "10.9.2",
     "typescript": "7.0.2"
