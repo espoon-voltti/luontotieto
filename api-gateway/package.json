@@ -13,7 +13,7 @@
     "dev": "tsc --build . && concurrently --prefix '[{name}]' --names 'tsc,node' 'tsc --build --preserveWatchOutput -w .' 'NODE_ENV=local node --watch-path=./dist dist/index.js'"
   },
   "dependencies": {
-    "@node-saml/node-saml": "5.1.0",
+    "@node-saml/node-saml": "5.2.0",
     "@node-saml/passport-saml": "5.1.1",
     "axios": "1.20.0",
     "connect-redis": "10.0.0",
