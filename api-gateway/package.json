@@ -55,7 +55,7 @@
     "@types/pino-std-serializers": "4.0.0",
     "@types/source-map-support": "0.5.10",
     "concurrently": "10.0.6",
-    "oxfmt": "0.74.0",
+    "oxfmt": "0.75.0",
     "oxlint": "1.89.0",
     "oxlint-tsgolint": "7.0.2004",
     "ts-node": "10.9.2",
