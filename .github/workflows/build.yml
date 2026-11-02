@@ -371,9 +371,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment:
-          - staging
-          - prod
+        # The prod GitHub environment accepts deployments from master only, so other
+        # refs deploy to staging alone.
+        environment: ${{ github.ref == 'refs/heads/master' && fromJSON('["staging","prod"]') || fromJSON('["staging"]') }}
     environment:
       name: ${{ matrix.environment }}
 
