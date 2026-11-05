@@ -306,8 +306,10 @@ jobs:
             compose/tests-all.log
           retention-days: 2
 
+  # Only master and deploy/* branches push images to ECR and deploy.
+  # See "Deployment" in README.md.
   ecr-push:
-    if: ${{ (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
+    if: ${{ (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/deploy/')) && (github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]') && !github.event.pull_request.head.repo.fork }}
     permissions:
       contents: read
       id-token: write
@@ -371,9 +373,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # The prod GitHub environment accepts deployments from master only, so other
-        # refs deploy to staging alone.
-        environment: ${{ github.ref == 'refs/heads/master' && fromJSON('["staging","prod"]') || fromJSON('["staging"]') }}
+        environment:
+          - staging
+          - prod
     environment:
       name: ${{ matrix.environment }}
 
