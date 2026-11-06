@@ -68,6 +68,18 @@ To lint and format code
 
 See [GeoServer README](geoserver/README.md)
 
+## Deployment
+
+Only `master` and `deploy/<topic>` branches push images to Amazon ECR and start the deploy jobs for staging and production. The deploy jobs wait for approval in the environments that require it; approve only the environment you mean to deploy to.
+
+To deploy a commit that is not the latest `master`, for example a pull request branch or an older version to roll production back to, push it to a `deploy/` branch:
+
+```sh
+git push --force origin <commit>:refs/heads/deploy/<topic>
+```
+
+`--force` lets an older or unrelated commit replace the one on the branch. The `prod` environment accepts deployments from `master` and `deploy/*` only, so a new branch pattern has to be added there too.
+
 ## License
 
 luontotieto is published under **LGPL-2.1-or-later** license. Please refer to
