@@ -224,13 +224,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/helper-plugin-utils@npm:^7.28.6":
-  version: 7.29.7
-  resolution: "@babel/helper-plugin-utils@npm:7.29.7"
-  checksum: 10/6d16929fe5c792bbc8e4d67e18d7c1be69d2f18992deaa3d94dc26541fec662e83cbeeaf7553c6867d068eb7aed4e0d5e3e137c1dd4d5bcfa286f8d772f1f457
-  languageName: node
-  linkType: hard
-
 "@babel/helper-plugin-utils@npm:^8.0.0, @babel/helper-plugin-utils@npm:^8.0.1":
   version: 8.0.1
   resolution: "@babel/helper-plugin-utils@npm:8.0.1"
@@ -420,17 +413,6 @@ __metadata:
   peerDependencies:
     "@babel/core": ^8.0.0
   checksum: 10/e9c183af59d756cf55a4265a6d0051c3ee73b6fd47e3e3e55e596a0310b836f440b00a99402dc3d2e3a413ba5f5ea494b18bd616cba0344999cbd60f48c701bd
-  languageName: node
-  linkType: hard
-
-"@babel/plugin-syntax-jsx@npm:^7.25.9":
-  version: 7.28.6
-  resolution: "@babel/plugin-syntax-jsx@npm:7.28.6"
-  dependencies:
-    "@babel/helper-plugin-utils": "npm:^7.28.6"
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-  checksum: 10/572e38f5c1bb4b8124300e7e3dd13e82ae84a21f90d3f0786c98cd05e63c78ca1f32d1cfe462dfbaf5e7d5102fa7cd8fd741dfe4f3afc2e01a3b2877dcc8c866
   languageName: node
   linkType: hard
 
@@ -3039,18 +3021,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-plugin-styled-components@npm:2.3.1":
-  version: 2.3.1
-  resolution: "babel-plugin-styled-components@npm:2.3.1"
+"babel-plugin-styled-components@npm:2.4.0":
+  version: 2.4.0
+  resolution: "babel-plugin-styled-components@npm:2.4.0"
   dependencies:
     "@babel/helper-annotate-as-pure": "npm:^7.25.9"
     "@babel/helper-module-imports": "npm:^7.25.9"
-    "@babel/plugin-syntax-jsx": "npm:^7.25.9"
     picomatch: "npm:^4.0.2"
   peerDependencies:
-    "@babel/core": ^7.0.0
+    "@babel/core": ^7.0.0 || ^8.0.0
     styled-components: ">= 2"
-  checksum: 10/d413ae4ef7a5280d316d06037389239ef443b0d66dcde2b12b3eda2a74ed0979cc28b96e81fdb1c7910b5b3c65f885b07dbcbec691fcf83a65149eef543965b1
+  checksum: 10/bb69439ac753b67435043948e4944128927680edf1f65df2a89fc9b3368bbcf846fac7c457bf09babfb83b1580fd163fa7aefb4b28d3996c45af2abad808f137
   languageName: node
   linkType: hard
 
@@ -4161,7 +4142,7 @@ __metadata:
     "@types/uuid": "npm:11.0.0"
     axios: "npm:1.21.0"
     babel-loader: "npm:10.1.1"
-    babel-plugin-styled-components: "npm:2.3.1"
+    babel-plugin-styled-components: "npm:2.4.0"
     classnames: "npm:2.5.1"
     concurrently: "npm:10.0.6"
     core-js: "npm:3.51.0"
