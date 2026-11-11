@@ -33,7 +33,9 @@ The e2e test starts its own Spring Boot service instance, so stop the pm2 `servi
 mise exec -- pm2 stop service
 ```
 
-The test talks to the already-running frontend + api-gateway.
+The test talks to the already-running frontend + api-gateway. The GeoServer WFS tests also
+use the compose GeoServer and write into the local `paikkatietodb` database it serves (the
+rows are removed afterwards), so the compose stack must be up.
 
 ```
 cd service

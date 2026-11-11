@@ -24,24 +24,17 @@ POSTGRES_DB: paikkatietodb                      # Database
 POSTGRES_USERNAME: paikkatietodb                # Username
 POSTGRES_PASSWORD: postgres                     # Password
 EXTRA_JAVA_OPTS: -DALLOW_ENV_PARAMETRIZATION=true -DGEOSERVER_CONSOLE_DISABLED=true -Xms256m -Xmx512m
-GEOSERVER_ADMIN_PASSWORD: plain:password        # In production please use hashed password, see section below
-GEOSERVER_WFS_PASSWORD: plain:wfs_password      # In production please use hashed password, see section below
+GEOSERVER_ADMIN_PASSWORD: password              # Plain password, hashed by update_credentials.sh on startup
+GEOSERVER_WFS_PASSWORD: wfs_password            # Plain password, hashed by update_credentials.sh on startup
 GEOSERVER_WFS_USER: wfs                         # Optional user name for the automated WFS login
 ```
 
-### Password hashing
+### Passwords
 
-GeoServer supports only a limited set of password hashing algorithms. Irreversible sha256 will be the
-best option in this service despite it's technical limitations.
-
-Execute in the running GeoServer container:
-
-```
-docker exec -it [CONTAINER_ID] bash
-echo "digest1:" && java -classpath $(find $CLASSPATH -regex ".*jasypt-[0-9]\.[0-9]\.[0-9].*jar") org.jasypt.intf.cli.JasyptStringDigestCLI digest.sh algorithm=SHA-256 saltSizeBytes=16 iterations=100000 input=PASSWORD_TO_HASH verbose=0
-```
-
-Copy the hash and provide it either in `GEOSERVER_ADMIN_PASSWORD` or `GEOSERVER_WFS_PASSWORD`
+`update_credentials.sh` hashes the password values exactly as given (SHA-256 digest), so pass the
+plain password without a `plain:` or `digest1:` prefix. A prefixed value would become part of the
+password. The e2e tests (`service/src/e2eTest/.../GeoserverWfsTest.kt`) log in with both users
+against the compose GeoServer.
 
 ### Layer configuration
 
