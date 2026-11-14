@@ -38,7 +38,7 @@ bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref 
 bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 bouncycastle-bcutil = { module = "org.bouncycastle:bcutil-jdk18on", version.ref = "bouncycastle" }
 commons-jxpath = { module = "commons-jxpath:commons-jxpath", version = "1.4.0" }
-commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.21.0" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.22.0" }
 eclipse-emf-ecore-xmi = { module = "org.eclipse.emf:org.eclipse.emf.ecore.xmi", version = "2.41.0" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
