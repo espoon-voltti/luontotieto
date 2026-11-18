@@ -73,8 +73,9 @@ services:
       POSTGRES_USERNAME: paikkatietodb
       POSTGRES_PASSWORD: postgres
       EXTRA_JAVA_OPTS: -DALLOW_ENV_PARAMETRIZATION=true -DGEOSERVER_CONSOLE_DISABLED=false -Xms256m -Xmx512m
-      GEOSERVER_ADMIN_PASSWORD: plain:password
-      GEOSERVER_WFS_PASSWORD: plain:wfs_password
+      # update_credentials.sh hashes these values as given, so no plain: prefix
+      GEOSERVER_ADMIN_PASSWORD: password
+      GEOSERVER_WFS_PASSWORD: wfs_password
 
 
 volumes:

@@ -58,9 +58,12 @@ services:
       EMAIL_AWS_REGION: fake
       EMAIL_SENDER_ADDRESS: fake
       EMAIL_SENDER_ARN: fake
-      GEOSERVER_URL: http://geoserver:8000
-      GEOSERVER_USERNAME: fake
-      GEOSERVER_PASSWORD: fake
+      # Credentials match the geoserver service in docker-compose.yml
+      GEOSERVER_URL: http://geoserver:8080/
+      GEOSERVER_USERNAME: admin
+      GEOSERVER_PASSWORD: password
+      GEOSERVER_WFS_USERNAME: wfs
+      GEOSERVER_WFS_PASSWORD: wfs_password
       E2E_ENV: docker
     entrypoint: ./e2e-test-entrypoint.sh
     depends_on:

@@ -38,7 +38,8 @@ To start service in http://localhost:8080
 To run unit/integration tests (requires DB running through compose)
 - `./gradlew test`
 
-To run E2E tests (requires DB, api-gateway and frontend running)
+To run E2E tests (requires the compose stack, api-gateway and frontend running; the WFS tests
+use the compose GeoServer and the local `paikkatietodb` database it serves)
 - `./gradlew e2eTest`
 
 To format code
