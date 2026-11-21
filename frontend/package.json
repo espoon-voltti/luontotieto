@@ -61,7 +61,7 @@
     "oxfmt": "0.79.0",
     "oxlint": "1.93.0",
     "oxlint-tsgolint": "7.0.2007",
-    "postcss": "8.5.32",
+    "postcss": "8.5.33",
     "postcss-loader": "8.2.1",
     "postcss-preset-env": "11.6.3",
     "style-loader": "4.0.0",
