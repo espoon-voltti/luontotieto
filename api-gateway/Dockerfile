@@ -5,8 +5,12 @@
 FROM node:26.13.1-bookworm-slim AS base
 
 ARG CACHE_BUST=none
+# Node 25+ no longer bundles corepack
+ARG COREPACK_VERSION=0.36.0
 
 WORKDIR /app
+
+RUN npm install -g corepack@${COREPACK_VERSION} && corepack enable
 
 FROM base AS builder
 
