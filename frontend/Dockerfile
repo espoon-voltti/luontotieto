@@ -5,11 +5,15 @@
 
 ARG NGINX_VERSION=1.31.9
 
-FROM node:24.22.3-bookworm-slim AS builder
+FROM node:26.13.1-bookworm-slim AS builder
 
 ARG CACHE_BUST=none
+# Node 25+ no longer bundles corepack
+ARG COREPACK_VERSION=0.36.0
 
 WORKDIR /project
+
+RUN npm install -g corepack@${COREPACK_VERSION} && corepack enable
 
 COPY ./.yarn ./.yarn
 COPY ./package.json ./yarn.lock ./.yarnrc.yml ./
