@@ -4182,7 +4182,7 @@ __metadata:
     oxlint-tsgolint: "npm:7.0.2007"
     polished: "npm:4.3.1"
     postcss: "npm:8.5.33"
-    postcss-loader: "npm:8.2.1"
+    postcss-loader: "npm:8.2.2"
     postcss-preset-env: "npm:11.6.3"
     react: "npm:19.3.1"
     react-csv: "npm:2.2.2"
@@ -4793,9 +4793,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss-loader@npm:8.2.1":
-  version: 8.2.1
-  resolution: "postcss-loader@npm:8.2.1"
+"postcss-loader@npm:8.2.2":
+  version: 8.2.2
+  resolution: "postcss-loader@npm:8.2.2"
   dependencies:
     cosmiconfig: "npm:^9.0.0"
     jiti: "npm:^2.5.1"
@@ -4809,7 +4809,7 @@ __metadata:
       optional: true
     webpack:
       optional: true
-  checksum: 10/e8fbae55198fc3baa859a1b504621fe01918510f6b21bd124f6d4467687e5efcbe2f5eaa530377c8fd68c8fda93823592e9d6f7295daa3a5ef4d124c012192e2
+  checksum: 10/8d0949df9e03ba1b6c3aa61acbb02366ebe2935a5ffcc75e61033a02c10e5bf6ccb0650aada143da77c7d60259e20fade980914fdc3975e5c7ce21d6918d3f57
   languageName: node
   linkType: hard
 

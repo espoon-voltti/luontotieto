@@ -62,7 +62,7 @@
     "oxlint": "1.94.0",
     "oxlint-tsgolint": "7.0.2007",
     "postcss": "8.5.33",
-    "postcss-loader": "8.2.1",
+    "postcss-loader": "8.2.2",
     "postcss-preset-env": "11.6.3",
     "style-loader": "4.0.0",
     "ts-loader": "9.6.2",
