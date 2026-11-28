@@ -2586,25 +2586,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-core@npm:5.108.0":
-  version: 5.108.0
-  resolution: "@tanstack/query-core@npm:5.108.0"
-  checksum: 10/8858618869d8aea59f4e862b980455069b8e83856af1851af4aaf296b9a334123ab57114de00ed4a79ab3a16c01fd532d8c8d96eccd72ac1859d2381d680ac72
+"@tanstack/query-core@npm:5.108.4":
+  version: 5.108.4
+  resolution: "@tanstack/query-core@npm:5.108.4"
+  checksum: 10/ddfef50c999f66e39e94cc93e4308526e2f39e5e9d4827531c22b6fa2480327a3662ba62a6e824b857b88a031c3faa3024c85c76e9c325a6533d0da2f3ebcfd2
   languageName: node
   linkType: hard
 
-"@tanstack/react-query@npm:5.108.0":
-  version: 5.108.0
-  resolution: "@tanstack/react-query@npm:5.108.0"
+"@tanstack/react-query@npm:5.108.4":
+  version: 5.108.4
+  resolution: "@tanstack/react-query@npm:5.108.4"
   dependencies:
-    "@tanstack/query-core": "npm:5.108.0"
+    "@tanstack/query-core": "npm:5.108.4"
   peerDependencies:
     "@types/react": ^18 || ^19
     react: ^18 || ^19
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10/5c775ccc0f6ca2c9af7a94f35934e212ae890b4bbab621befd3eb21640af7ca369a09d9ed7a6449da268be728c7e474af9d7b069e3819fa4bdcdebd777e55e70
+  checksum: 10/c39d13d6159b4b8eac66afc723d5a60ea1e580ef4f15ce8d856ce8630c43702046bfc67c7cca912833acd2dc82dd0759bb32534c7c582d37525b00c833af5290
   languageName: node
   linkType: hard
 
@@ -4145,7 +4145,7 @@ __metadata:
     "@fortawesome/free-solid-svg-icons": "npm:7.3.1"
     "@fortawesome/react-fontawesome": "npm:3.5.0"
     "@react-spring/web": "npm:10.1.2"
-    "@tanstack/react-query": "npm:5.108.0"
+    "@tanstack/react-query": "npm:5.108.4"
     "@types/file-saver": "npm:2.0.7"
     "@types/lodash": "npm:4.17.27"
     "@types/node": "npm:26.6.6"
